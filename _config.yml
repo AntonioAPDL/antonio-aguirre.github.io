@@ -2,29 +2,27 @@
 locale: "en-US"
 title: "Antonio Aguirre"
 title_separator: "-"
-name: &name "Antonio Aguirre"
-description: &description "PhD Candidate in Statistics at UC Santa Cruz, specializing in Bayesian modeling and time series analysis."
-url: https://antonio-aguirre.com
-baseurl: "" # The subpath of your site, e.g., "/blog"
+name: "Antonio Aguirre"
+description: "PhD Candidate in Statistics at UC Santa Cruz, specializing in Bayesian modeling and time series analysis."
+url: "https://antonio-aguirre.com"
+baseurl: "" # Leave blank unless your site is hosted in a subpath (e.g., "/blog").
 repository: "AntonioAPDL/antonio-aguirre.github.io"
 
 # Site Author - Sidebar Info
 author:
   avatar: "profile.png"
   name: "Antonio Aguirre"
-  pronouns: # e.g., "he/him"
+  pronouns: "he/him" # Add pronouns if desired
   bio: "Statistics PhD student with a passion for research, teaching, and exploring data-driven insights."
   location: "Santa Cruz, CA"
   employer: "UC Santa Cruz"
   uri: "https://antonio-aguirre.com"
-  email: 
-    - "jaguir26@ucsc.edu"
-    - "antonio.agprz@gmail.com"
+  email: "jaguir26@ucsc.edu" # Only include one primary email here
   
   # Academic websites
-  googlescholar: # Avoided as requested
-  arxiv: # Add if relevant
-  researchgate: # Add if relevant
+  googlescholar: "" # Left blank as per your request
+  arxiv: "" # Add URL if relevant
+  researchgate: "" # Add URL if relevant
   
   # Repositories and social media
   github: "AntonioAPDL"
@@ -40,7 +38,7 @@ palette:
   accent: "#D6CC99" # Almost mint
   dark: "#001524" # Almost black
   highlight: "#5E3023" # Espresso
-logo: # Keep empty for now; you can add a personal logo later
+logo: "" # Add a logo file here if available
 
 # Language Settings
 lang: "en"
