@@ -163,3 +163,20 @@ $box-shadow                 : 0 1px 1px rgba(0, 0, 0, 0.125);
 $navicon-width              : 28px;
 $navicon-height             : 4px;
 $global-transition          : all 0.2s ease-in-out;
+
+
+// _sass/minimal-mistakes/custom.scss
+
+$primary-color: #445D48; // Olive green
+$secondary-color: #FDE5D4; // Rosy creme
+$accent-color: #D6CC99; // Almost mint
+$dark-color: #001524; // Almost black
+$highlight-color: #5E3023; // Espresso
+
+// Optional: Override other color variables
+$body-color: $primary-color;
+$text-color: $dark-color;
+$link-color: $accent-color;
+$link-color-hover: darken($accent-color, 15%);
+$link-color-visited: lighten($accent-color, 15%);
+
