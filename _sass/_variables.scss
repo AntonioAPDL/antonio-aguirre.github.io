@@ -165,18 +165,22 @@ $navicon-height             : 4px;
 $global-transition          : all 0.2s ease-in-out;
 
 
-// _sass/minimal-mistakes/custom.scss
+/* ==========================================================================
+   Color Variables
+   ========================================================================== */
+$primary-color: #445D48;    // Olive green for primary elements
+$secondary: #FDE5D4;        // Light rosy background
+$accent: #D6CC99;           // Almost mint for accents
+$dark-color: #001524;       // Very dark color for text
+$highlight: #5E3023;        // Espresso for highlights
+$text-color: $dark-color;   // Alias for text color
+$body-color: #FFFFFF;       // White for general backgrounds
 
-$primary-color: #445D48; // Olive green
-$secondary-color: #FDE5D4; // Rosy creme
-$accent-color: #D6CC99; // Almost mint
-$dark-color: #001524; // Almost black
-$highlight-color: #5E3023; // Espresso
+$light-gray: #f0f0f0;       // Light gray for subtle backgrounds
+$lighter-gray: #e6e6e6;     // Even lighter gray
+$border-color: $lighter-gray; // Border color
+$link-color: $accent;       // Accent color for links
+$link-color-hover: darken($accent, 10%); // Slightly darker on hover
+$link-color-visited: lighten($accent, 10%); // Slightly lighter for visited links
 
-// Optional: Override other color variables
-$body-color: $primary-color;
-$text-color: $dark-color;
-$link-color: $accent-color;
-$link-color-hover: darken($accent-color, 15%);
-$link-color-visited: lighten($accent-color, 15%);
 
