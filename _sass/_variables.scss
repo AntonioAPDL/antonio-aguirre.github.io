@@ -49,7 +49,6 @@ $masthead-height            : 70px;
 $sidebar-screen-min-width   : 1024px;
 $sidebar-link-max-width     : 250px;
 
-
 /*
    Colors
    ========================================================================== */
@@ -59,6 +58,7 @@ $secondary                  : #FDE5D4;    // Light rosy background
 $accent                     : #D6CC99;    // Almost mint for accents
 $dark-color                 : #001524;    // Very dark color for text
 $highlight                  : #5E3023;    // Espresso for highlights
+$background-color           : $secondary; // Background color variable
 $text-color                 : $dark-color; // Alias for text color
 $body-color                 : #FFFFFF;    // White for general backgrounds
 
@@ -135,7 +135,6 @@ $susy: (
   output: float,
   gutter-position: after,
   container: $large,
-  global-box-sizing: border-box,
 );
 
 /*
