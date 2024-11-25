@@ -33,7 +33,7 @@ author:
   linkedin: "https://linkedin.com/in/AntonioAPDL"
 
 # Theme and Appearance
-theme: "minimal-mistakes"
+theme: "minimal-mistakes-jekyll"
 palette:
   primary: "#445D48" # Olive green
   secondary: "#FDE5D4" # Rosy creme
