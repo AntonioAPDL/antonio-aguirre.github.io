@@ -53,29 +53,33 @@ $sidebar-link-max-width     : 250px;
    Colors
    ========================================================================== */
 
-$primary-color              : #445D48;    // Olive green for primary elements
-$secondary                  : #FDE5D4;    // Light rosy background
-$accent                     : #D6CC99;    // Almost mint for accents
-$dark-color                 : #001524;    // Very dark color for text
-$highlight                  : #5E3023;    // Espresso for highlights
-$background-color           : $secondary; // Background color variable
-$text-color                 : $dark-color; // Alias for text color
-$body-color                 : #FFFFFF;    // White for general backgrounds
+$gray                       : #7a8288;
+$dark-gray                  : mix(#000, $gray, 40%);
+$darker-gray                : mix(#000, $gray, 60%);
+$light-gray                 : mix(#fff, $gray, 50%);
+$lighter-gray               : mix(#fff, $gray, 90%);
 
-$gray                       : mix($dark-color, $body-color, 50%);
-$light-gray                 : #f0f0f0;    // Light gray for subtle backgrounds
-$lighter-gray               : #e6e6e6;    // Even lighter gray
-$border-color               : $lighter-gray; // Border color
+$body-color                 : #fff;
+$background-color           : #FDE5D4; // Light rosy background
+$code-background-color      : #fafafa;
+$code-background-color-dark : $light-gray;
+$text-color                 : #001524; // Very dark for readability
+$border-color               : $lighter-gray;
 
-$link-color                 : $accent;       // Accent color for links
-$link-color-hover           : darken($accent, 10%); // Slightly darker on hover
-$link-color-visited         : lighten($accent, 10%); // Slightly lighter for visited links
+$primary-color              : #445D48; // Olive green for primary elements
+$accent                     : #D6CC99; // Almost mint for accents
+$highlight                  : #5E3023; // Espresso for highlights
+$success-color              : #62c462;
+$warning-color              : #f89406;
+$danger-color               : #ee5f5b;
+$info-color                 : #52adc8;
 
-/* Feedback and system colors */
-$success-color              : #62c462;    // Success feedback
-$warning-color              : #f89406;    // Warnings
-$danger-color               : #ee5f5b;    // Errors
-$info-color                 : #3498DB;    // Informational highlights
+/* links */
+$link-color                 : $accent;
+$link-color-hover           : darken($accent, 10%);
+$link-color-visited         : lighten($accent, 10%);
+$masthead-link-color        : $primary-color;
+$masthead-link-color-hover  : mix(#000, $primary-color, 25%);
 
 /* brands */
 $behance-color              : #1769FF;
@@ -102,10 +106,6 @@ $vimeo-color                : #1AB7EA;
 $vine-color                 : #00BF8F;
 $youtube-color              : #BB0000;
 $xing-color                 : #006567;
-
-/* links for masthead */
-$masthead-link-color        : $primary-color;
-$masthead-link-color-hover  : darken($primary-color, 15%);
 
 /*
    Breakpoints
