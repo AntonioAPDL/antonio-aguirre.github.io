@@ -3,34 +3,34 @@ layout: default
 title: Home
 ---
 
-<div class="plot-container" style="text-align:center; margin-top: 2rem;">
+<div class="plot-container">
     <h2>San Lorenzo River Discharge</h2>
     <div id="loading" style="font-style: italic; color: gray;">Loading plot...</div>
     <iframe
         src="https://8686-128-114-48-164.ngrok-free.app/plot"
-        style="border: 1px solid #ccc; width: 100%; height: 500px; max-width: 900px;"
+        style="width: 90%; height: 70vh; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"
         allowfullscreen
         onload="document.getElementById('loading').style.display='none';">
     </iframe>
 </div>
 
-<div class="home-intro" style="text-align: center; margin-top: 2rem;">
-  <div style="display: inline-block;">
+<div class="home-intro">
+  <div>
     <img src="/files/images/Me2.jpg" 
          alt="Antonio Aguirre" 
-         style="width: 150px; height: 150px; border-radius: 50%; margin-bottom: 1rem; display: block;">
-    <h1 style="margin: 0; font-size: 2rem;">Welcome</h1>
+         class="profile-pic">
+    <h1>Welcome</h1>
   </div>
-  <p style="margin-top: 1rem;">
+  <p>
     I’m Antonio Aguirre, a Ph.D. candidate specializing in Bayesian Statistics, 
     Machine Learning, and Spatio-Temporal Modeling. Explore my research, teaching, 
     and technical insights.
   </p>
 </div>
 
-<div class="home-content" style="margin-top: 2rem;">
+<div class="home-content">
   <h2>Research Interests</h2>
-  <ul style="text-align: left; display: inline-block; padding: 0 1rem;">
+  <ul>
     <li>Bayesian modeling for spatio-temporal processes</li>
     <li>Dynamic Quantile Linear Models (DQLMs)</li>
     <li>Hydrology and environmental statistics</li>
@@ -38,39 +38,52 @@ title: Home
 </div>
 
 <style>
-/* Style for the plot container */
+/* General container styling */
 .plot-container {
     text-align: center;
-    margin: 2rem 0;
+    margin: 2rem auto;
+    max-width: 1000px; /* Limit the width for larger screens */
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Adjust iframe dimensions */
 iframe {
-    max-width: 100%;
-    height: 500px;
-    border: 1px solid #ccc;
+    width: 100%;
+    height: 70vh; /* Use viewport height for better responsiveness */
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Style for the intro section */
-.home-intro img {
+.home-intro {
+    text-align: center;
+    margin-top: 2rem;
+}
+.home-intro .profile-pic {
     width: 150px;
     height: 150px;
     border-radius: 50%;
     margin-bottom: 1rem;
     display: block;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
 .home-intro h1 {
     margin: 0;
     font-size: 2rem;
+    font-weight: bold;
 }
 
-/* Style for research interests list */
+/* Style for research interests */
 .home-content ul {
     list-style-type: disc;
     margin: 0;
     padding: 0;
-    display: inline-block;
     text-align: left;
+    display: inline-block;
+    padding: 0 1rem;
 }
 .home-content li {
     margin-bottom: 0.5rem;
