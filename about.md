@@ -74,3 +74,15 @@ If you’re interested in collaborating, have questions about my work, or just w
 - **LinkedIn:** [Antonio Aguirre](https://www.linkedin.com/in/AntonioAPDL)  
 
 Thanks for stopping by!
+
+---
+
+## Support My Work ☕️
+
+Hi, I’m Antonio—a Ph.D. candidate in Statistics, which means I model chaos for fun and occasionally make sense of it. If I’ve helped you survive stats, buy me a coffee—it’s cheaper than therapy.  
+
+<a href="https://buymeacoffee.com/antonioaguirre" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px; width: auto;">
+</a>
+
+---
