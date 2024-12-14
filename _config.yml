@@ -18,12 +18,14 @@ author:
   url:               https://github.com/AntonioAPDL
   email:             jaguir26@ucsc.edu
 
-# Social Media Links
+# Social media
 social_media:
   github:            https://github.com/AntonioAPDL
   linkedin:          https://www.linkedin.com/in/AntonioAPDL
   twitter:           https://twitter.com/AntonioAPDL
+  bsky:              antonioaguirre.bsky.social
   email:             mailto:jaguir26@ucsc.edu
+
 
 # Plugins
 plugins:
