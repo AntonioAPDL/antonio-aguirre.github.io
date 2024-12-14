@@ -5,12 +5,12 @@ title: Teaching
 
 <h1>Teaching</h1>
 
-<p>Below are the courses I have taught, with their materials organized by course:</p>
+<p>Below are the courses I have taught, with materials organized by course:</p>
 
 <ul class="teaching-section">
-  {% assign courses = site.static_files | where: "path", "/files/teaching/" %}
-  {% assign teaching_files = courses | group_by_exp: "item", "item.path | split: '/' | slice: 3, 1" %}
-  {% for course in teaching_files %}
+  {% assign courses = site.static_files | where_exp: "file", "file.path contains '/files/teaching/'" %}
+  {% assign grouped_courses = courses | group_by_exp: "file", "file.path | split: '/' | slice: 3, 1" %}
+  {% for course in grouped_courses %}
     {% assign course_name = site.course_names[course.name] | default: course.name | capitalize %}
     <li>
       <h2>{{ course_name }}</h2>
@@ -24,5 +24,3 @@ title: Teaching
     </li>
   {% endfor %}
 </ul>
-
-
