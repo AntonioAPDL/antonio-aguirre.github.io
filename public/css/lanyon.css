@@ -36,36 +36,38 @@
   margin-bottom: 1rem;
   color: #333;
 }
-
 .social-links {
   list-style: none;
   padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .social-links li {
-  margin-bottom: 0.5rem;
-}
-
-.social-links a {
-  color: #333;
-  text-decoration: none;
-  font-size: 0.9rem;
   display: flex;
   align-items: center;
 }
 
-.social-links a i {
+.social-links a {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+}
+
+.social-links i,
+.social-links .social-icon {
   margin-right: 0.5rem;
-  color: #555;
+  width: 24px;
+  height: 24px;
 }
 
-.social-links a:hover {
-  color: #007acc;
+.social-links .social-icon {
+  display: inline-block;
+  vertical-align: middle;
 }
 
-.social-links a i:hover {
-  color: #007acc;
-}
 .teaching-section {
   list-style: none;
   padding: 0;
