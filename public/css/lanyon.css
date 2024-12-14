@@ -66,28 +66,38 @@
 .social-links a i:hover {
   color: #007acc;
 }
+.teaching-section {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.teaching-section li {
+  margin-bottom: 2rem;
+}
 
 .teaching-section h2 {
   font-size: 1.5rem;
   color: #0056b3;
-  margin-top: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .teaching-section ul {
   list-style: none;
+  margin: 0;
   padding: 0;
 }
 
-.teaching-section li {
+.teaching-section ul li {
   margin: 0.5rem 0;
 }
 
-.teaching-section a {
+.teaching-section ul li a {
   text-decoration: none;
   color: #007bff;
 }
 
-.teaching-section a:hover {
+.teaching-section ul li a:hover {
   text-decoration: underline;
 }
 
