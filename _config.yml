@@ -1,34 +1,34 @@
-# Setup
+# Website Setup
 title:               Antonio Aguirre
-tagline:             'Bayesian Statistics and Machine Learning'
-description:         'A professional site showcasing research and projects in Bayesian statistics, spatio-temporal modeling, and machine learning.'
-url:                 "https://antonio-aguirre.com"
-baseurl:             ""
-paginate:            5
-permalink:           pretty
+tagline:             "Bayesian Statistics and Machine Learning"
+description:         "Statistics and more."
+url:                 "https://antonio-aguirre.com" # Website URL
+baseurl:             ""                           # Leave empty for root deployment
+paginate:            5                             # Number of posts per page
+permalink:           pretty                        # Clean, user-friendly URLs
 
+# Teaching Information
 course_names:
   stat131: "STAT131: Probability Theory"
   stat132: "STAT132: Classical and Bayesian Inference"
-  
-# About/contact
+
+# Author Information
 author:
   name:              Antonio Aguirre
   url:               https://github.com/AntonioAPDL
   email:             jaguir26@ucsc.edu
 
-# Social media
+# Social Media Links
 social_media:
   github:            https://github.com/AntonioAPDL
   linkedin:          https://www.linkedin.com/in/AntonioAPDL
   twitter:           https://twitter.com/AntonioAPDL
   email:             mailto:jaguir26@ucsc.edu
 
-# Gems
+# Plugins
 plugins:
-  - jekyll-paginate
+  - jekyll-paginate  # Enable pagination for blog posts
 
-# Custom vars
+# Custom Variables
 version:             1.1.0
-google_analytics_id: #UA-XXXX-Y
-
+google_analytics_id: ""  # Add Google Analytics ID if applicable
