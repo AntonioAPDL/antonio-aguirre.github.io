@@ -2,6 +2,19 @@
 layout: default
 title: Home
 ---
+
+  <div class="plot-container">
+    <h2>San Lorenzo River Discharge</h2>
+    <div id="loading" style="font-style: italic; color: gray;">Loading plot...</div>
+    <iframe
+        src="https://8686-128-114-48-164.ngrok-free.app/plot"
+        style="width: 150%; height: 20vh; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"
+        allowfullscreen
+        onload="document.getElementById('loading').style.display='none';">
+    </iframe>
+</div>
+</style>
+
 <div class="home-intro">
   <div>
     <img src="/files/images/Me2.jpg" 
@@ -77,14 +90,3 @@ iframe {
     margin-bottom: 0.5rem;
 }
 
-  <div class="plot-container">
-    <h2>San Lorenzo River Discharge</h2>
-    <div id="loading" style="font-style: italic; color: gray;">Loading plot...</div>
-    <iframe
-        src="https://8686-128-114-48-164.ngrok-free.app/plot"
-        style="width: 150%; height: 20vh; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);"
-        allowfullscreen
-        onload="document.getElementById('loading').style.display='none';">
-    </iframe>
-</div>
-</style>
