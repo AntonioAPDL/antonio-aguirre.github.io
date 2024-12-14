@@ -436,6 +436,48 @@ a.pagination-item:hover {
  * Based on colors from Base16: http://chriskempson.github.io/base16/#default.
  */
 
+/* Custom Academic Theme */
+.theme-academic .sidebar,
+.theme-academic .sidebar-toggle:active,
+.theme-academic #sidebar-checkbox:checked ~ .sidebar-toggle {
+  background-color: #2b3e50; /* Sidebar background */
+  color: #ffffff; /* Sidebar text */
+}
+
+.theme-academic .container a,
+.theme-academic .sidebar-toggle,
+.theme-academic .related-posts li a:hover {
+  color: #0056b3; /* Link color */
+}
+
+.theme-academic .container {
+  background-color: #f8f9fa; /* Content background */
+  color: #333333; /* Content text */
+}
+
+.theme-academic .masthead-title a {
+  color: #0056b3; /* Title link */
+}
+
+.theme-academic .masthead-title small {
+  color: #6c757d; /* Subtitle text */
+}
+
+.theme-academic .sidebar a {
+  color: #ffffff; /* Sidebar link color */
+}
+
+.theme-academic .pagination-item {
+  background-color: #f8f9fa; /* Pagination button background */
+  border-color: #ddd; /* Pagination button border */
+  color: #333333; /* Pagination text */
+}
+.theme-academic .pagination-item:hover {
+  background-color: #e9ecef; /* Hover effect */
+  color: #0056b3; /* Hover text color */
+}
+
+
 /* Red */
 .theme-base-08 .sidebar,
 .theme-base-08 .sidebar-toggle:active,
