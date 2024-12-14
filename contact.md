@@ -5,17 +5,38 @@ title: Contact
 
 <div class="contact-section">
   <h1>Contact Me</h1>
-  <p>Connect with me on these platforms:</p>
-  <ul class="contact-links">
-    <li><a href="{{ site.social_media.github }}" target="_blank">GitHub</a></li>
-    <li><a href="{{ site.social_media.linkedin }}" target="_blank">LinkedIn</a></li>
-    <li><a href="{{ site.social_media.twitter }}" target="_blank">Twitter</a></li>
-    <li><a href="https://{{ site.social_media.bsky }}" target="_blank">Bluesky</a></li>
-    <li><a href="{{ site.social_media.email }}">Email</a></li>
-  </ul>
+  <p>Feel free to connect with me on any of the platforms below:</p>
+
+  <div class="contact-links">
+    <ul class="contact-list">
+      <li>
+        <a href="{{ site.social_media.github }}" target="_blank">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+      </li>
+      <li>
+        <a href="{{ site.social_media.linkedin }}" target="_blank">
+          <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+      </li>
+      <li>
+        <a href="{{ site.social_media.twitter }}" target="_blank">
+          <i class="fab fa-twitter"></i> Twitter
+        </a>
+      </li>
+      <li>
+        <a href="https://{{ site.social_media.bsky }}" target="_blank">
+          <i class="fab fa-bsky"></i> Bluesky Social
+        </a>
+      </li>
+      <li>
+        <a href="{{ site.social_media.email }}">
+          <i class="fas fa-envelope"></i> Email
+        </a>
+      </li>
+    </ul>
+  </div>
 </div>
-
-
 
 <style>
   .contact-section {
