@@ -1,17 +1,24 @@
 # Setup
-title:               Lanyon
-tagline:             'A Jekyll theme'
-description:         'A reserved <a href="https://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.'
-url: "https://antonio-aguirre.com"  # Your actual website URL
-baseurl: ""  # Leave empty if the site is deployed at the root
+title:               Antonio Aguirre
+tagline:             'Bayesian Statistics and Machine Learning'
+description:         'A professional site showcasing research and projects in Bayesian statistics, spatio-temporal modeling, and machine learning.'
+url:                 "https://antonio-aguirre.com"  # Your actual website URL
+baseurl:             ""  # Leave empty if the site is deployed at the root
 paginate:            5
 permalink:           pretty
 
 # About/contact
 author:
-  name:              Mark Otto
-  url:               https://twitter.com/mdo
-  email:             markdotto@gmail.com
+  name:              Antonio Aguirre
+  url:               https://github.com/AntonioAPDL
+  email:             jaguir26@ucsc.edu
+
+# Social media
+social_media:
+  github:            https://github.com/AntonioAPDL
+  linkedin:          https://www.linkedin.com/in/antonio-aguirre-statistics
+  twitter:           https://twitter.com/your_twitter_handle  # Replace with your handle
+  email:             mailto:jaguir26@ucsc.edu
 
 # Gems
 plugins:
@@ -19,4 +26,4 @@ plugins:
 
 # Custom vars
 version:             1.1.0
-google_analytics_id: #UA-XXXX-Y
+google_analytics_id: #UA-XXXX-Y  # Add your Google Analytics ID if applicable
