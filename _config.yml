@@ -2,8 +2,8 @@
 title:               Antonio Aguirre
 tagline:             'Bayesian Statistics and Machine Learning'
 description:         'A professional site showcasing research and projects in Bayesian statistics, spatio-temporal modeling, and machine learning.'
-url:                 "https://antonio-aguirre.com"  # Your actual website URL
-baseurl:             ""  # Leave empty if the site is deployed at the root
+url:                 "https://antonio-aguirre.com"
+baseurl:             ""
 paginate:            5
 permalink:           pretty
 
@@ -26,4 +26,4 @@ plugins:
 
 # Custom vars
 version:             1.1.0
-google_analytics_id: #UA-XXXX-Y  # Add your Google Analytics ID if applicable
+google_analytics_id: #UA-XXXX-Y
