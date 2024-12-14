@@ -68,6 +68,38 @@
 }
 
 
+.teaching-section {
+  margin: 2rem 0;
+}
+
+.teaching-section h1,
+.teaching-section h2 {
+  color: #007acc;
+}
+
+.teaching-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.teaching-section ul ul {
+  padding-left: 1.5rem;
+}
+
+.teaching-section ul li {
+  margin-bottom: 1rem;
+}
+
+.teaching-section ul li a {
+  color: #007acc;
+  text-decoration: none;
+}
+
+.teaching-section ul li a:hover {
+  text-decoration: underline;
+}
+
+
 /*
  * Global resets
  *
