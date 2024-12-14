@@ -1,0 +1,26 @@
+---
+layout: default
+title: Blog
+---
+
+<div class="blog-intro">
+  <h1>Welcome to My Blog</h1>
+  <p>Explore my thoughts and writings on topics ranging from mathematics and statistics to philosophy and random musings.</p>
+</div>
+
+<div class="posts">
+  {% for post in site.posts %}
+    <div class="post">
+      <h2 class="post-title">
+        <a href="{{ post.url | absolute_url }}">{{ post.title }}</a>
+      </h2>
+      <p class="post-meta">
+        Published on {{ post.date | date: "%B %d, %Y" }} | Theme: <strong>{{ post.theme }}</strong>
+      </p>
+      <p class="post-excerpt">
+        {{ post.excerpt }}
+      </p>
+      <a href="{{ post.url | absolute_url }}" class="read-more">Read more</a>
+    </div>
+  {% endfor %}
+</div>
