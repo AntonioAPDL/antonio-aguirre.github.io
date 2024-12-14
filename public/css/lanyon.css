@@ -26,47 +26,27 @@
  * Reverse layout
  * Themes
  */
-
-.sidebar-social {
-  margin-top: 2rem;
-}
-
-.sidebar-social h3 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  color: #333;
-}
-.social-links {
+.contact-links {
   list-style: none;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+  margin: 0;
 }
 
-.social-links li {
-  display: flex;
-  align-items: center;
+.contact-links li {
+  margin: 0.5rem 0;
 }
 
-.social-links a {
+.contact-links a {
   text-decoration: none;
-  color: inherit;
-  display: flex;
-  align-items: center;
+  font-weight: bold;
+  color: #268bd2; /* Adjust to match your theme's accent color */
+  transition: color 0.3s ease;
 }
 
-.social-links i,
-.social-links .social-icon {
-  margin-right: 0.5rem;
-  width: 24px;
-  height: 24px;
+.contact-links a:hover {
+  color: #005f99; /* Slightly darker shade for hover effect */
 }
 
-.social-links .social-icon {
-  display: inline-block;
-  vertical-align: middle;
-}
 
 .teaching-section {
   list-style: none;
