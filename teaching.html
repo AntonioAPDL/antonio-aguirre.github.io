@@ -11,8 +11,9 @@ title: Teaching
   {% assign courses = site.static_files | where: "path", "/files/teaching/" %}
   {% assign teaching_files = courses | group_by_exp: "item", "item.path | split: '/' | slice: 3, 1" %}
   {% for course in teaching_files %}
+    {% assign course_name = site.course_names[course.name] | default: course.name | capitalize %}
     <li>
-      <h2>{{ course.name | capitalize }}</h2>
+      <h2>{{ course_name }}</h2>
       <ul>
         {% for file in course.items %}
           <li>
@@ -23,3 +24,4 @@ title: Teaching
     </li>
   {% endfor %}
 </ul>
+
