@@ -1,35 +1,39 @@
-<!-- Sidebar Toggle -->
+<!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular styles, `#sidebar-checkbox` for behavior. -->
 <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
 
-<!-- Sidebar Content -->
+<!-- Toggleable sidebar -->
 <div class="sidebar" id="sidebar">
-
-  <!-- Introduction Section -->
-  <div class="sidebar-item">
-    <p>{{ site.description }}</p>
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <h1>Antonio Aguirre</h1>
+    <p>Bayesian Statistics · Machine Learning</p>
   </div>
 
-  <!-- Navigation Section -->
+  <!-- Navigation Links -->
   <nav class="sidebar-nav">
-    <a class="sidebar-nav-item{% if page.title == 'Home' %} active{% endif %}" href="{{ '/' | absolute_url }}">Home</a>
-    <a class="sidebar-nav-item{% if page.title == 'About' %} active{% endif %}" href="{{ '/about/' | absolute_url }}">About</a>
-    <a class="sidebar-nav-item{% if page.title == 'Blog' %} active{% endif %}" href="{{ '/blog/' | absolute_url }}">Blog</a>
-    <a class="sidebar-nav-item{% if page.title == 'Teaching' %} active{% endif %}" href="{{ '/teaching/' | absolute_url }}">Teaching</a>
-    <a class="sidebar-nav-item{% if page.title == 'Software' %} active{% endif %}" href="{{ '/software/' | absolute_url }}">Software</a>
-    <a class="sidebar-nav-item{% if page.title == 'Contact' %} active{% endif %}" href="{{ '/contact/' | absolute_url }}">Contact</a>
-    <a class="sidebar-nav-item{% if page.title == 'CV' %} active{% endif %}" href="{{ '/cv/' | absolute_url }}">CV</a>
+    <h3>Navigation</h3>
+    <ul>
+      <li><a class="sidebar-nav-item{% if page.title == 'Home' %} active{% endif %}" href="{{ '/' | absolute_url }}">Home</a></li>
+      <li><a class="sidebar-nav-item{% if page.title == 'About' %} active{% endif %}" href="{{ '/about/' | absolute_url }}">About</a></li>
+      <li><a class="sidebar-nav-item{% if page.title == 'Research' %} active{% endif %}" href="{{ '/research/' | absolute_url }}">Research</a></li>
+      <li><a class="sidebar-nav-item{% if page.title == 'Teaching' %} active{% endif %}" href="{{ '/teaching/' | absolute_url }}">Teaching</a></li>
+      <li><a class="sidebar-nav-item{% if page.title == 'Software' %} active{% endif %}" href="{{ '/software/' | absolute_url }}">Software</a></li>
+      <li><a class="sidebar-nav-item{% if page.title == 'Blog' %} active{% endif %}" href="{{ '/blog/' | absolute_url }}">Blog</a></li>
+      <li><a class="sidebar-nav-item{% if page.title == 'CV' %} active{% endif %}" href="{{ '/cv/' | absolute_url }}">CV</a></li>
+      <li><a class="sidebar-nav-item{% if page.title == 'Contact' %} active{% endif %}" href="{{ '/contact/' | absolute_url }}">Contact</a></li>
+    </ul>
   </nav>
 
-  <!-- Coffee Section -->
+  <!-- Sidebar Buy Me a Coffee -->
   <div class="sidebar-item">
-    <p>If I’ve helped you survive stats, buy me a coffee—it’s cheaper than therapy.</p>
+    <p>Hi, I’m Antonio—a Ph.D. candidate in Statistics. If I’ve helped you survive stats, buy me a coffee—it’s cheaper than therapy.</p>
     <a href="https://buymeacoffee.com/antonioaguirre" target="_blank">
       <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px; width: auto;">
     </a>
   </div>
 
-  <!-- Footer Section -->
-  <div class="sidebar-item">
+  <!-- Footer -->
+  <div class="sidebar-footer">
     <p>&copy; {{ site.time | date: '%Y' }} Antonio Aguirre. All rights reserved.</p>
   </div>
 </div>
