@@ -67,14 +67,10 @@
   color: #007acc;
 }
 
-
-.teaching-section {
-  margin: 2rem 0;
-}
-
-.teaching-section h1,
 .teaching-section h2 {
-  color: #007acc;
+  font-size: 1.5rem;
+  color: #0056b3;
+  margin-top: 1rem;
 }
 
 .teaching-section ul {
@@ -82,22 +78,19 @@
   padding: 0;
 }
 
-.teaching-section ul ul {
-  padding-left: 1.5rem;
+.teaching-section li {
+  margin: 0.5rem 0;
 }
 
-.teaching-section ul li {
-  margin-bottom: 1rem;
-}
-
-.teaching-section ul li a {
-  color: #007acc;
+.teaching-section a {
   text-decoration: none;
+  color: #007bff;
 }
 
-.teaching-section ul li a:hover {
+.teaching-section a:hover {
   text-decoration: underline;
 }
+
 
 .cv-section {
   margin: 2rem 0;
