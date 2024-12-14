@@ -2,13 +2,11 @@
 layout: default
 title: Contact
 ---
-
 <div class="contact-section">
   <h1>Contact Me</h1>
-  <p>Feel free to connect with me on any of the platforms below:</p>
-
+  <p>Connect with me on the following platforms:</p>
   <div class="contact-links">
-    <ul class="contact-list">
+    <ul class="social-links">
       <li>
         <a href="{{ site.social_media.github }}" target="_blank">
           <i class="fab fa-github"></i> GitHub
@@ -26,7 +24,7 @@ title: Contact
       </li>
       <li>
         <a href="https://{{ site.social_media.bsky }}" target="_blank">
-          <i class="fab fa-bsky"></i> Bluesky
+          <img src="/files/images/Bluesky_Social_Logo_Vector.svg" alt="Bluesky" class="social-icon"> Bluesky
         </a>
       </li>
       <li>
@@ -37,6 +35,7 @@ title: Contact
     </ul>
   </div>
 </div>
+
 
 <style>
   .contact-section {
