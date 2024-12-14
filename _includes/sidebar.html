@@ -1,33 +1,35 @@
-<!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
-     styles, `#sidebar-checkbox` for behavior. -->
+<!-- Sidebar Toggle -->
 <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
 
-<!-- Toggleable sidebar -->
+<!-- Sidebar Content -->
 <div class="sidebar" id="sidebar">
+
+  <!-- Introduction Section -->
   <div class="sidebar-item">
     <p>{{ site.description }}</p>
   </div>
 
-<nav class="sidebar-nav">
-  <a class="sidebar-nav-item{% if page.title == 'Home' %} active{% endif %}" href="{{ '/' | absolute_url }}">Home</a>
-  <a class="sidebar-nav-item{% if page.title == 'Blog' %} active{% endif %}" href="{{ '/blog/' | absolute_url }}">Blog</a>
-  <a class="sidebar-nav-item{% if page.title == 'About' %} active{% endif %}" href="{{ '/about/' | absolute_url }}">About</a>
-  <a class="sidebar-nav-item{% if page.title == 'Teaching' %} active{% endif %}" href="{{ '/teaching/' | absolute_url }}">Teaching</a>
-  <a class="sidebar-nav-item{% if page.title == 'CV' %} active{% endif %}" href="{{ '/cv/' | absolute_url }}">CV</a>
-</nav>
+  <!-- Navigation Section -->
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item{% if page.title == 'Home' %} active{% endif %}" href="{{ '/' | absolute_url }}">Home</a>
+    <a class="sidebar-nav-item{% if page.title == 'About' %} active{% endif %}" href="{{ '/about/' | absolute_url }}">About</a>
+    <a class="sidebar-nav-item{% if page.title == 'Blog' %} active{% endif %}" href="{{ '/blog/' | absolute_url }}">Blog</a>
+    <a class="sidebar-nav-item{% if page.title == 'Teaching' %} active{% endif %}" href="{{ '/teaching/' | absolute_url }}">Teaching</a>
+    <a class="sidebar-nav-item{% if page.title == 'Software' %} active{% endif %}" href="{{ '/software/' | absolute_url }}">Software</a>
+    <a class="sidebar-nav-item{% if page.title == 'Contact' %} active{% endif %}" href="{{ '/contact/' | absolute_url }}">Contact</a>
+    <a class="sidebar-nav-item{% if page.title == 'CV' %} active{% endif %}" href="{{ '/cv/' | absolute_url }}">CV</a>
+  </nav>
 
-<!-- Sidebar Content -->
-<div class="sidebar-item">
-  <p>If I’ve helped you survive stats, buy me a coffee—it’s cheaper than therapy.</p>
-  <a href="https://buymeacoffee.com/antonioaguirre" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px; width: auto;">
-  </a>
-</div>
-
-  
+  <!-- Coffee Section -->
   <div class="sidebar-item">
-    <p>
-      &copy; {{ site.time | date: '%Y' }}. All rights reserved.
-    </p>
+    <p>If I’ve helped you survive stats, buy me a coffee—it’s cheaper than therapy.</p>
+    <a href="https://buymeacoffee.com/antonioaguirre" target="_blank">
+      <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px; width: auto;">
+    </a>
+  </div>
+
+  <!-- Footer Section -->
+  <div class="sidebar-item">
+    <p>&copy; {{ site.time | date: '%Y' }} Antonio Aguirre. All rights reserved.</p>
   </div>
 </div>
