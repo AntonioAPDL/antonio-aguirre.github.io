@@ -1,48 +1,34 @@
-<!-- Sidebar toggling -->
+<!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
+     styles, `#sidebar-checkbox` for behavior. -->
 <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
 
-<!-- Sidebar -->
+<!-- Toggleable sidebar -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-item">
     <p>{{ site.description }}</p>
   </div>
 
-  <!-- Sidebar Navigation -->
   <nav class="sidebar-nav">
     <a class="sidebar-nav-item{% if page.title == 'Home' %} active{% endif %}" href="{{ '/' | absolute_url }}">Home</a>
-    <a class="sidebar-nav-item{% if page.title == 'Blog' %} active{% endif %}" href="{{ site.baseurl }}/blog/">Blog</a>
-
-    {% assign pages_list = site.pages | sort:"url" %}
-    {% for node in pages_list %}
-      {% if node.layout == "page" and node.title != "Home" %}
-        <a class="sidebar-nav-item{% if page.url == node.url %} active{% endif %}" href="{{ node.url | absolute_url }}">{{ node.title }}</a>
-      {% endif %}
-    {% endfor %}
-
-    <a class="sidebar-nav-item" href="{{ site.github.repo }}/archive/v{{ site.version }}.zip">Teaching</a>
+    <a class="sidebar-nav-item{% if page.title == 'Blog' %} active{% endif %}" href="{{ '/blog/' | absolute_url }}">Blog</a>
+    <a class="sidebar-nav-item{% if page.title == 'About' %} active{% endif %}" href="{{ '/about/' | absolute_url }}">About</a>
+    <a class="sidebar-nav-item{% if page.title == 'Teaching' %} active{% endif %}" href="{{ '/teaching/' | absolute_url }}">Teaching</a>
+    <span class="sidebar-nav-item">Currently v{{ site.version }}</span>
   </nav>
 
-  <!-- Social Media Links -->
   <div class="sidebar-item">
-    <h4>Connect</h4>
-    <ul class="social-media">
-      {% if site.social_media.github %}
+    <h4>Connect with Me</h4>
+    <ul>
       <li><a href="{{ site.social_media.github }}" target="_blank">GitHub</a></li>
-      {% endif %}
-      {% if site.social_media.linkedin %}
       <li><a href="{{ site.social_media.linkedin }}" target="_blank">LinkedIn</a></li>
-      {% endif %}
-      {% if site.social_media.twitter %}
       <li><a href="{{ site.social_media.twitter }}" target="_blank">Twitter</a></li>
-      {% endif %}
-      {% if site.social_media.email %}
       <li><a href="{{ site.social_media.email }}">Email</a></li>
-      {% endif %}
     </ul>
   </div>
 
-  <!-- Footer -->
   <div class="sidebar-item">
-    <p>&copy; {{ site.time | date: '%Y' }} {{ site.author.name }}. All rights reserved.</p>
+    <p>
+      &copy; {{ site.time | date: '%Y' }}. All rights reserved.
+    </p>
   </div>
 </div>
