@@ -1,7 +1,12 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
-gem "jekyll", "~> 4.0"
-gem "webrick" # Required for Jekyll server in Ruby 3.x
-gem "jekyll-feed" # Optional: For RSS feeds
-gem "jekyll-paginate" # Optional: For pagination
-gem "jekyll-sitemap" # Optional: For sitemap generation
+group :jekyll_plugins do
+  gem 'jekyll'
+  gem 'jekyll-feed'
+  gem 'jekyll-sitemap'
+  gem 'jemoji'
+  gem 'webrick', '~> 1.8'
+end
+
+gem 'github-pages'
+gem "minimal-mistakes-jekyll"
