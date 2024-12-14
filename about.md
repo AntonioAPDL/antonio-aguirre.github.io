@@ -4,39 +4,73 @@ title: About
 ---
 
 <p class="message">
-  Welcome to my academic website! Here, you’ll find information about my research, projects, and interests. Feel free to explore and reach out if you have questions.
+  Welcome to my academic corner—a space dedicated to my research, teaching, and exploration of Bayesian statistics, machine learning, and more.
 </p>
 
-I’m Antonio Aguirre, a 4th-year PhD candidate in Statistics at the University of California, Santa Cruz. My research is focused on developing scalable Bayesian models for phenomena that evolve over time and exhibit extreme behavior during certain periods. 
+I’m Antonio Aguirre, a 4th-year Ph.D. candidate in Statistics at the University of California, Santa Cruz. My work centers on creating scalable Bayesian models to analyze phenomena that evolve over time, with a focus on extreme behavior and uncertainty quantification. By blending statistical rigor with computational efficiency, I aim to tackle complex problems in environmental science, hydrology, and beyond.
 
-## Research Interests
+---
 
-I’m particularly interested in:
-- **Dynamic Quantile Linear Models (DQLMs):** Exploring real-time quantile-based forecasting methods for environmental and hydrological applications.
-- **Bayesian Statistics and Machine Learning:** Integrating probabilistic modeling with advanced computational techniques for forecasting and inference.
-- **Spatio-Temporal Processes:** Understanding complex data dynamics in space and time, with applications in environmental science, economics, and public health.
-- **Continual Statistical Post-Processing:** Developing adaptive methods to improve predictions over time.
+## Research Focus
 
-## Projects
+I strive to bridge theory and application through innovative statistical methods. My key research areas include:
 
-Some of my ongoing and past projects include:
-- **Forecast Correction and Synthesis:** Improving predictive accuracy by combining outputs from different climate models.
-- **GDPC Analysis of Climate Indices:** Analyzing dynamic relationships among meteorological indices using Generalized Dynamic Principal Components.
-- **TA Training Workshops:** Designing interactive workshops that emphasize accessibility, equity-minded teaching, and active learning.
+- **Bayesian Statistics & Machine Learning**  
+   Integrating probabilistic frameworks with machine learning to develop predictive models for high-dimensional and dynamic systems.  
 
-## Background
+- **Dynamic Quantile Linear Models (DQLMs)**  
+   Advancing real-time, quantile-based forecasting techniques, particularly in hydrology and environmental science.  
 
-Before starting my PhD, I earned:
-- **MSc in Economic Theory**  
-- **BSc in Applied Mathematics**
+- **Spatio-Temporal Modeling**  
+   Capturing and understanding data patterns across space and time to uncover meaningful insights for policy and decision-making.  
 
-These foundations have provided me with strong analytical skills and a passion for solving real-world problems through statistical modeling and data analysis.
+- **Continual Learning in Statistical Post-Processing**  
+   Designing adaptive methods to improve forecast accuracy over time through efficient model updates.
 
-## Fun Facts
+---
 
-- I’m originally from Mexico and enjoy exploring my cultural heritage.  
-- In my free time, I like learning German and working out.
+## Ongoing Projects
 
-Feel free to connect with me on [GitHub](https://github.com/AntonioAPDL) or email me at [jaguir26@ucsc.edu](mailto:jaguir26@ucsc.edu) if you’d like to collaborate or learn more about my work.
+Some of my recent and ongoing projects include:
 
-Thanks for visiting!
+- **Real-Time Forecast Synthesis**  
+   Combining outputs from diverse climate models to achieve robust and accurate predictions.  
+
+- **Dynamic Principal Components for Climate Indices**  
+   Analyzing interdependencies among meteorological indices to improve climate forecasts.  
+
+- **TA Professional Development**  
+   Creating active learning workshops to train TAs in accessibility-focused and equity-minded teaching techniques.  
+
+---
+
+## Academic Journey
+
+My academic foundations are rooted in a diverse quantitative background:  
+
+- **M.Sc. in Economic Theory**  
+- **B.Sc. in Applied Mathematics**  
+
+These experiences have honed my analytical skills and deepened my appreciation for solving real-world problems with data.
+
+---
+
+## Beyond Research
+
+When I’m not immersed in statistics, you’ll likely find me:
+
+- Reflecting on philosophical questions, particularly those surrounding epistemology and the nature of uncertainty.  
+- Experimenting with new tools and technologies to push the boundaries of what data-driven insights can achieve.  
+- Working out or learning German—my latest endeavor in personal growth.
+
+---
+
+## Let’s Connect
+
+If you’re interested in collaborating, have questions about my work, or just want to chat, feel free to reach out.  
+
+- **Email:** [jaguir26@ucsc.edu](mailto:jaguir26@ucsc.edu)  
+- **GitHub:** [AntonioAPDL](https://github.com/AntonioAPDL)  
+- **LinkedIn:** [Antonio Aguirre](https://www.linkedin.com/in/AntonioAPDL)  
+
+Thanks for stopping by!
