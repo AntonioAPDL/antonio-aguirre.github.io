@@ -26,7 +26,7 @@ title: Contact
       </li>
       <li>
         <a href="https://{{ site.social_media.bsky }}" target="_blank">
-          <i class="fab fa-bsky"></i> Bluesky Social
+          <i class="fab fa-bsky"></i> Bluesky
         </a>
       </li>
       <li>
