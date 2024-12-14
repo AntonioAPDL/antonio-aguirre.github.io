@@ -27,6 +27,46 @@
  * Themes
  */
 
+.sidebar-social {
+  margin-top: 2rem;
+}
+
+.sidebar-social h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.social-links {
+  list-style: none;
+  padding: 0;
+}
+
+.social-links li {
+  margin-bottom: 0.5rem;
+}
+
+.social-links a {
+  color: #333;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.social-links a i {
+  margin-right: 0.5rem;
+  color: #555;
+}
+
+.social-links a:hover {
+  color: #007acc;
+}
+
+.social-links a i:hover {
+  color: #007acc;
+}
+
 
 /*
  * Global resets
