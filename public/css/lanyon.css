@@ -99,6 +99,24 @@
   text-decoration: underline;
 }
 
+.cv-section {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.cv-download {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #007acc;
+  color: white;
+  text-decoration: none;
+  border-radius: 0.25rem;
+}
+
+.cv-download:hover {
+  background-color: #005f9e;
+}
+
 
 /*
  * Global resets
