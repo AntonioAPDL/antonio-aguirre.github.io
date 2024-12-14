@@ -2,17 +2,17 @@
 layout: default
 title: Home
 ---
-<div class="plot-container" style="text-align:center;">
+
+<div class="plot-container" style="text-align:center; margin-top: 2rem;">
     <h2>San Lorenzo River Discharge</h2>
+    <div id="loading" style="font-style: italic; color: gray;">Loading plot...</div>
     <iframe
         src="https://8686-128-114-48-164.ngrok-free.app/plot"
-        width="900"
-        height="500"
-        style="border: 1px solid #ccc;"
-        allowfullscreen>
+        style="border: 1px solid #ccc; width: 100%; height: 500px; max-width: 900px;"
+        allowfullscreen
+        onload="document.getElementById('loading').style.display='none';">
     </iframe>
 </div>
-
 
 <div class="home-intro" style="text-align: center; margin-top: 2rem;">
   <div style="display: inline-block;">
@@ -30,9 +30,49 @@ title: Home
 
 <div class="home-content" style="margin-top: 2rem;">
   <h2>Research Interests</h2>
-  <ul style="text-align: left; display: inline-block;">
+  <ul style="text-align: left; display: inline-block; padding: 0 1rem;">
     <li>Bayesian modeling for spatio-temporal processes</li>
     <li>Dynamic Quantile Linear Models (DQLMs)</li>
     <li>Hydrology and environmental statistics</li>
   </ul>
 </div>
+
+<style>
+/* Style for the plot container */
+.plot-container {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+iframe {
+    max-width: 100%;
+    height: 500px;
+    border: 1px solid #ccc;
+}
+
+/* Style for the intro section */
+.home-intro img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.home-intro h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+/* Style for research interests list */
+.home-content ul {
+    list-style-type: disc;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    text-align: left;
+}
+.home-content li {
+    margin-bottom: 0.5rem;
+}
+</style>
