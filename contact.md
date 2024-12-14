@@ -25,6 +25,11 @@ title: Contact
         </a>
       </li>
       <li>
+        <a href="https://{{ site.social_media.bsky }}" target="_blank">
+          <i class="fab fa-bsky"></i> Bluesky Social
+        </a>
+      </li>
+      <li>
         <a href="{{ site.social_media.email }}">
           <i class="fas fa-envelope"></i> Email
         </a>
