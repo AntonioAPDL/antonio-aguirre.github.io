@@ -8,23 +8,24 @@
     <p>{{ site.description }}</p>
   </div>
 
-  <nav class="sidebar-nav">
-    <a class="sidebar-nav-item{% if page.title == 'Home' %} active{% endif %}" href="{{ '/' | absolute_url }}">Home</a>
-    <a class="sidebar-nav-item{% if page.title == 'Blog' %} active{% endif %}" href="{{ '/blog/' | absolute_url }}">Blog</a>
-    <a class="sidebar-nav-item{% if page.title == 'About' %} active{% endif %}" href="{{ '/about/' | absolute_url }}">About</a>
-    <a class="sidebar-nav-item{% if page.title == 'Teaching' %} active{% endif %}" href="{{ '/teaching/' | absolute_url }}">Teaching</a>
-    <span class="sidebar-nav-item">Currently v{{ site.version }}</span>
-  </nav>
+<nav class="sidebar-nav">
+  <a class="sidebar-nav-item{% if page.title == 'Home' %} active{% endif %}" href="{{ '/' | absolute_url }}">Home</a>
+  <a class="sidebar-nav-item{% if page.title == 'Blog' %} active{% endif %}" href="{{ '/blog/' | absolute_url }}">Blog</a>
+  <a class="sidebar-nav-item{% if page.title == 'About' %} active{% endif %}" href="{{ '/about/' | absolute_url }}">About</a>
+  <a class="sidebar-nav-item{% if page.title == 'Teaching' %} active{% endif %}" href="{{ '/teaching/' | absolute_url }}">Teaching</a>
+  <a class="sidebar-nav-item{% if page.title == 'CV' %} active{% endif %}" href="{{ '/cv/' | absolute_url }}">CV</a>
+</nav>
 
-  <div class="sidebar-item">
-    <h4>Connect with Me</h4>
-    <ul>
-      <li><a href="{{ site.social_media.github }}" target="_blank">GitHub</a></li>
-      <li><a href="{{ site.social_media.linkedin }}" target="_blank">LinkedIn</a></li>
-      <li><a href="{{ site.social_media.twitter }}" target="_blank">Twitter</a></li>
-      <li><a href="{{ site.social_media.email }}">Email</a></li>
-    </ul>
-  </div>
+<div class="sidebar-social">
+  <h3>Connect with Me</h3>
+  <ul class="social-links">
+    <li><a href="{{ site.social_media.github }}" target="_blank"><i class="fab fa-github"></i> GitHub</a></li>
+    <li><a href="{{ site.social_media.linkedin }}" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+    <li><a href="{{ site.social_media.twitter }}" target="_blank"><i class="fab fa-twitter"></i> Twitter</a></li>
+    <li><a href="{{ site.social_media.email }}"><i class="fas fa-envelope"></i> Email</a></li>
+  </ul>
+</div>
+
 
   <div class="sidebar-item">
     <p>
