@@ -26,6 +26,62 @@
  * Reverse layout
  * Themes
  */
+
+/* General Section Styling */
+h1, h2, h3 {
+  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+ul li {
+  margin-bottom: 0.5rem;
+}
+
+/* Links */
+a {
+  color: #268bd2;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #005f99;
+}
+
+/* Software Section */
+.language-software h2 {
+  margin-top: 2rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.language-software ul {
+  list-style-type: square;
+}
+
+/* Research Section */
+.research-content h2 {
+  margin-top: 2rem;
+  font-size: 1.5rem;
+}
+
+.research-content ul {
+  list-style-type: circle;
+}
+
+
+
 .contact-links {
   list-style: none;
   padding: 0;
