@@ -3,16 +3,78 @@ layout: default
 title: CV
 ---
 
-<div class="cv-section" style="text-align:center; margin-top:2rem;">
-  <h1 style="margin-bottom:1rem;">Curriculum Vitae</h1>
-  <p style="font-size:1.1rem; margin-bottom:2rem;">
-    You can download my CV below. If you have questions about my research or would like to collaborate, feel free to reach out.
+<div class="cv-section" style="text-align: center; margin-top: 2rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+  <!-- Title -->
+  <h1 style="font-size: 2.5rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Curriculum Vitae</h1>
+  
+  <!-- Description -->
+  <p style="font-size: 1.2rem; line-height: 1.8; color: #555; margin-bottom: 2rem;">
+    Explore my academic and professional journey. If you have any questions about my research or are interested in collaboration opportunities, feel free to reach out to me.
   </p>
   
-  <a href="/files/cv'cv.pdf" 
-     class="cv-download" 
+  <!-- Download Button -->
+  <a href="/files/cv/cv.pdf" 
+     class="cv-download"
      target="_blank" 
-     style="display:inline-block; padding:0.75rem 1.5rem; font-size:1.1rem; color:white; background-color:#007ACC; text-decoration:none; border-radius:5px; transition:background-color 0.3s ease;">
-    Download CV
+     style="
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #fff;
+        background-color: #1b9e77;
+        text-decoration: none;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+     "
+     onmouseover="this.style.backgroundColor='#148a5d'; this.style.boxShadow='0 6px 8px rgba(0, 0, 0, 0.2)';"
+     onmouseout="this.style.backgroundColor='#1b9e77'; this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.1)';">
+    📄 Download CV
   </a>
 </div>
+
+<!-- Additional Styling -->
+<style>
+  /* Centralize and add spacing */
+  .cv-section {
+    text-align: center;
+    margin: 2rem auto;
+    max-width: 800px;
+  }
+
+  /* Title Styling */
+  .cv-section h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+
+  /* Description Styling */
+  .cv-section p {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 2rem;
+  }
+
+  /* Download Button Styling */
+  .cv-download {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #1b9e77;
+    text-decoration: none;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .cv-download:hover {
+    background-color: #148a5d;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+  }
+</style>
