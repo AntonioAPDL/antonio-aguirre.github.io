@@ -9,19 +9,33 @@ title: About
     Welcome to my academic corner—a space dedicated to my research, teaching, and exploration of Bayesian statistics, machine learning, and beyond.
   </p>
 
-  <!-- Introduction -->
-  <div class="intro" style="text-align: center; margin-top: 2rem;">
+<!-- Introduction -->
+<div class="intro" style="text-align: center; margin-top: 2rem;">
+  <div style="display: flex; flex-direction: column; align-items: center;">
     <img src="/files/images/Me2.jpg" 
          alt="Antonio Aguirre" 
-         style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
-    <h1 style="margin: 0; font-size: 2rem; font-weight: bold; color: #333;">Antonio Aguirre</h1>
-    <p style="font-size: 1.2rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
+         style="
+            width: 150px; 
+            height: 150px; 
+            border-radius: 50%; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+            margin-bottom: 1rem;">
+    <h1 style="margin: 0; font-size: 2.5rem; font-weight: bold; color: #333;">Antonio Aguirre</h1>
+    <p style="
+            font-size: 1.2rem; 
+            line-height: 1.8; 
+            max-width: 800px; 
+            text-align: center; 
+            margin: 1rem auto; 
+            color: #555;">
       I’m a 4th-year Ph.D. candidate in <strong>Statistics</strong> at the <strong>University of California, Santa Cruz</strong>. 
       My research revolves around creating scalable Bayesian models to analyze evolving phenomena, 
       with a focus on extreme behavior and uncertainty quantification. Through a blend of statistical 
       rigor and computational efficiency, I tackle complex challenges in environmental science, hydrology, and beyond.
     </p>
   </div>
+</div>
+
 
   <!-- Research Focus Section -->
   <div class="research-focus" style="margin-top: 3rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
