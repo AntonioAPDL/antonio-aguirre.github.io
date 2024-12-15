@@ -3,23 +3,84 @@ layout: page
 title: Teaching
 ---
 
-<p>Below are the courses I have taught, with materials organized by course:</p>
+<div class="teaching-section" style="margin: 2rem auto; max-width: 800px;">
+  <!-- Page Introduction -->
+  <h1 style="text-align: center; font-size: 2.5rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Teaching</h1>
+  <p style="font-size: 1.2rem; line-height: 1.8; color: #555; text-align: center; margin-bottom: 2rem;">
+    Below are the courses I have taught, with materials organized by course. Each course includes slides, worksheets, assignments, and other supporting materials.
+  </p>
 
-<ul class="teaching-section">
-  {% assign courses = site.static_files | where_exp: "file", "file.path contains '/files/teaching/'" %}
-  {% assign grouped_courses = courses | group_by_exp: "file", "file.path | split: '/' | slice: 3, 1" %}
-  {% for course in grouped_courses %}
-    {% assign course_folder = course.name | first %}
-    {% assign course_name = site.course_names[course_folder] | default: course_folder %}
-    <li>
-      <h2>{{ course_name }}</h2>
-      <ul>
-        {% for file in course.items %}
-          <li>
-            <a href="{{ file.path | relative_url }}">📄 {{ file.name }}</a>
-          </li>
-        {% endfor %}
-      </ul>
-    </li>
-  {% endfor %}
-</ul>
+  <!-- Teaching Materials -->
+  <ul style="list-style: none; padding: 0; margin: 0;">
+    {% assign courses = site.static_files | where_exp: "file", "file.path contains '/files/teaching/'" %}
+    {% assign grouped_courses = courses | group_by_exp: "file", "file.path | split: '/' | slice: 3, 1" %}
+    {% for course in grouped_courses %}
+      {% assign course_folder = course.name | first %}
+      {% assign course_name = site.course_names[course_folder] | default: course_folder %}
+      <li style="margin-bottom: 2rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <h2 style="font-size: 2rem; color: #333; margin-bottom: 1rem;">{{ course_name }}</h2>
+        <ul style="list-style: none; padding-left: 0;">
+          {% for file in course.items %}
+            <li style="margin-bottom: 0.5rem;">
+              <a href="{{ file.path | relative_url }}" style="font-size: 1.1rem; color: #1b9e77; text-decoration: none;">
+                📄 {{ file.name }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Additional Styling -->
+<style>
+  .teaching-section h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .teaching-section p {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #555;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .teaching-section ul li {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .teaching-section ul li h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+
+  .teaching-section ul li ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .teaching-section ul li ul li {
+    margin-bottom: 0.5rem;
+  }
+
+  .teaching-section ul li ul li a {
+    font-size: 1.1rem;
+    color: #1b9e77;
+    text-decoration: none;
+  }
+
+  .teaching-section ul li ul li a:hover {
+    text-decoration: underline;
+  }
+</style>
