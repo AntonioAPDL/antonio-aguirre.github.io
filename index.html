@@ -44,10 +44,9 @@ title: Home
   </div>
 </div>
 
-
-<div class="plot-container">
-    <h2>Real-Time Monitoring: San Lorenzo River Daily Discharge</h2>
-    <div id="loading" style="font-style: italic; color: gray;">Loading plot...</div>
+<div class="plot-container" style="margin: 2rem 0; padding: 1rem;">
+    <h2 style="margin-bottom: 1rem; font-size: 1.5rem; color: #333;">Real-Time Monitoring: San Lorenzo River Daily Discharge</h2>
+    <div id="loading" style="font-style: italic; color: gray; margin-bottom: 1rem;">Loading plot...</div>
     <iframe
         src="https://8686-128-114-48-164.ngrok-free.app/plot"
         style="
@@ -55,24 +54,33 @@ title: Home
             height: 65vh; 
             border: none; 
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
-            border-radius: 8px;">
+            border-radius: 8px; 
+            display: block; 
+            margin-left: 0;">
     </iframe>
 </div>
 
 <style>
-/* General container styling */
 .plot-container {
-    text-align: center;
+    text-align: left; /* Aligns the content to the left */
     margin: 2rem auto;
+    max-width: 1000px; /* Restricts the container width */
     padding: 1rem;
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden; /* Ensures no scrollbars appear inside the container */
-    width: 150%; /* Ensure the container matches the iframe's width */
-    height: 80vh;
-    max-width: none; /* Disable any restrictive max-width to fit the iframe */
 }
+iframe {
+    display: block;
+    margin: 0; /* Aligns iframe to the left */
+    width: 100%; /* Ensures the iframe takes up full container width */
+    height: 65vh; /* Adjusts height based on viewport height */
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+</style>
+
 
 /* Adjust iframe dimensions */
 iframe {
