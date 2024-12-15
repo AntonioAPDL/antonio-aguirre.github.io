@@ -48,3 +48,16 @@
   </script>
   {% endif %}
 </head>
+
+<!-- Header Section -->
+<header style="display: flex; align-items: center; margin: 20px;">
+  <!-- Logo -->
+  <img src="{{ '/files/images/logo.png' | absolute_url }}" alt="Logo" style="height: 40px; margin-right: 10px;">
+
+  <!-- Site Title -->
+  <h1 class="site-title" style="margin: 0;">
+    <a href="{{ '/' | absolute_url }}" style="text-decoration: none; color: inherit;">
+      {{ site.title }}
+    </a>
+  </h1>
+</header>
