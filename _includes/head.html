@@ -10,6 +10,14 @@
     {% endif %}
   </title>
 
+   <header>
+    <div class="site-title">
+      <img src="{{ site.logo | absolute_url }}" alt="Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;">
+      <a href="{{ '/' | absolute_url }}">{{ site.title }}</a>
+    </div>
+    <p class="site-tagline">{{ site.tagline }}</p>
+  </header>
+
   <!-- Canonical URL for SEO -->
   {% if page.url and site.baseurl %}
   <link rel="canonical" href="{{ page.url | absolute_url }}">
