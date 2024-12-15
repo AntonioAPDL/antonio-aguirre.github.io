@@ -6,7 +6,7 @@ title: About
 <div class="about-section">
   <!-- Welcome Message -->
   <p class="message" style="font-style: italic; color: #555; text-align: center; margin: 1rem auto; max-width: 800px;">
-    Welcome to my academic corner—a space dedicated to my research, teaching, and exploration of Bayesian statistics, machine learning, and beyond.
+    Aiming to innovate Bayesian Statistical Methodology for approaching Real-World Challenges.
   </p>
 
 <!-- Introduction -->
