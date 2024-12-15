@@ -7,6 +7,9 @@ baseurl:             ""                           # Leave empty for root deploym
 paginate:            5                             # Number of posts per page
 permalink:           pretty                        # Clean, user-friendly URLs
 
+# Logo Configuration
+logo:                "/files/images/logo.png"      # Path to the logo file
+
 # Teaching Information
 course_names:
   stat131: "STAT131: Probability Theory"
@@ -25,8 +28,6 @@ social_media:
   twitter: https://twitter.com/AntonioAPDL
   bsky: antonioaguirre.bsky.social
   email: mailto:jaguir26@ucsc.edu
-
-
 
 # Plugins
 plugins:
