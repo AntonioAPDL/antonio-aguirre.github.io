@@ -5,120 +5,138 @@ title: Home
 
 <div class="home-section">
   <!-- Intro Section -->
-  <div class="home-intro" style="text-align: center; margin-top: 2rem;">
-    <div style="display: inline-block; text-align: center;">
+  <div class="home-intro" style="text-align: center; margin-top: 3rem;">
+    <div style="text-align: center;">
       <img src="/files/images/Me2.jpg" 
            alt="Antonio Aguirre" 
-           style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
-      <h1 style="margin: 0; font-size: 2.5rem; font-weight: bold; color: #333;">Welcome</h1>
+           class="profile-pic">
+      <h1>Welcome</h1>
     </div>
-    <p style="font-size: 1.2rem; line-height: 1.8; max-width: 600px; margin: 1rem auto; color: #555;">
-      Hello! I’m <strong>Antonio Aguirre</strong>, a dedicated <strong>Ph.D. candidate</strong> 
-      specializing in <strong>Bayesian Statistics</strong>, <strong>Machine Learning</strong>, and 
-      <strong>Spatio-Temporal Modeling</strong>. My mission is to leverage statistical methods to solve 
-      real-world problems, ranging from environmental challenges to advanced forecasting models.
+    <p class="intro-text">
+      Hello! I’m <strong>Antonio Aguirre</strong>, a dedicated <strong>Ph.D. candidate</strong> specializing in 
+      <strong>Bayesian Statistics</strong>, <strong>Machine Learning</strong>, and <strong>Spatio-Temporal Modeling</strong>. 
+      My mission is to apply cutting-edge statistical techniques to solve real-world challenges, from 
+      environmental sciences to advanced forecasting models.
     </p>
-    <p style="font-size: 1.1rem; line-height: 1.6; max-width: 600px; margin: 1rem auto; color: #555;">
-      Take a journey through my research, teaching philosophy, and technical contributions. 
-      Let’s explore the intersection of data science, innovation, and impactful applications.
+    <p class="intro-text">
+      Take a moment to explore my research, teaching initiatives, and technical contributions. Let’s 
+      discover how data and innovation intersect to create meaningful solutions.
     </p>
   </div>
 
   <!-- Research Interests Section -->
-  <div class="home-content" style="text-align: center; margin-top: 2rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-    <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Research Interests</h2>
-    <ul style="list-style: none; padding: 0; margin: 0 auto; max-width: 600px; text-align: left;">
-      <li style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0.8rem;">
-        <strong>Bayesian Modeling for Spatio-Temporal Processes:</strong> Understanding complex systems
-        with high-dimensional dependencies across space and time.
-      </li>
-      <li style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0.8rem;">
-        <strong>Dynamic Quantile Linear Models (DQLMs):</strong> Innovating scalable, real-time forecasting 
-        methods for quantile estimation under uncertainty.
-      </li>
-      <li style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 0.8rem;">
-        <strong>Hydrology and Environmental Statistics:</strong> Developing predictive models to better 
-        understand and manage water resources and environmental phenomena.
-      </li>
+  <div class="home-content">
+    <h2>Research Interests</h2>
+    <ul>
+      <li><strong>Bayesian Modeling for Spatio-Temporal Processes:</strong> Developing models to understand 
+      high-dimensional data with spatial and temporal dependencies.</li>
+      <li><strong>Dynamic Quantile Linear Models (DQLMs):</strong> Advancing scalable, real-time forecasting methods 
+      for quantile-based analysis.</li>
+      <li><strong>Hydrology and Environmental Statistics:</strong> Creating predictive models to better manage 
+      water resources and analyze environmental phenomena.</li>
     </ul>
   </div>
 </div>
 
-<div class="plot-container" style="margin: 2rem 0; padding: 1rem;">
-    <h2 style="margin-bottom: 1rem; font-size: 1.5rem; color: #333;">Real-Time Monitoring: San Lorenzo River Daily Discharge</h2>
-    <div id="loading" style="font-style: italic; color: gray; margin-bottom: 1rem;">Loading plot...</div>
-    <iframe
-        src="https://8686-128-114-48-164.ngrok-free.app/plot"
-        style="
-            width: 90%; 
-            height: 65vh; 
-            border: none; 
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
-            border-radius: 8px; 
-            display: block; 
-            margin-left: 0;">
-    </iframe>
+<!-- Plot Section -->
+<div class="plot-container">
+  <h2>Real-Time Monitoring: San Lorenzo River Daily Discharge</h2>
+  <div id="loading" class="loading-text">Loading plot...</div>
+  <iframe
+      src="https://8686-128-114-48-164.ngrok-free.app/plot"
+      class="plot-iframe"
+      onload="document.getElementById('loading').style.display='none';">
+  </iframe>
 </div>
 
 <style>
-.plot-container {
-    text-align: left; /* Aligns the content to the left */
-    margin: 2rem auto;
-    max-width: 1000px; /* Restricts the container width */
+/* General Home Section Styling */
+.home-section {
+    margin: 0 auto;
+    padding: 2rem;
+    max-width: 1000px;
+}
+
+/* Intro Section Styling */
+.home-intro {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.profile-pic {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+.home-intro h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+}
+.intro-text {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    max-width: 700px;
+    margin: 0.5rem auto;
+    color: #555;
+}
+
+/* Research Interests Section */
+.home-content {
+    margin-top: 2rem;
     padding: 1rem;
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
 }
-iframe {
-    display: block;
-    margin: 0; /* Aligns iframe to the left */
-    width: 150%; /* Ensures the iframe takes up full container width */
-    height: 70vh; /* Adjusts height based on viewport height */
+.home-content h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+.home-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 700px;
+}
+.home-content li {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+    color: #444;
+}
+
+/* Plot Container */
+.plot-container {
+    text-align: center;
+    margin: 3rem auto;
+    max-width: 900px;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+.plot-container h2 {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+.loading-text {
+    font-style: italic;
+    color: gray;
+    margin-bottom: 1rem;
+}
+.plot-iframe {
+    width: 100%;
+    height: 65vh;
     border: none;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-}
-</style>
-
-
-/* Adjust iframe dimensions */
-iframe {
-    width: 105%; /* Matches your desired width */
-    height: 35vh; /* Matches your desired height */
-    border: none;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Style for the intro section */
-.home-intro {
-    text-align: center;
-    margin-top: 2rem;
-}
-.home-intro .profile-pic {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    margin-bottom: 1rem;
-    display: block;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-.home-intro h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: bold;
-}
-
-/* Style for research interests */
-.home-content ul {
-    list-style-type: disc;
-    margin: 0;
-    padding: 0;
-    text-align: left;
-    display: inline-block;
-    padding: 0 1rem;
-}
-.home-content li {
-    margin-bottom: 0.5rem;
 }
 </style>
