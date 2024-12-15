@@ -7,7 +7,7 @@ title: About
   Welcome to my academic corner—a space dedicated to my research, teaching, and exploration of Bayesian statistics, machine learning, and more.
 </p>
 
-I’m Antonio Aguirre, a 4th-year Ph.D. candidate in Statistics at the University of California, Santa Cruz. My work centers on creating scalable Bayesian models to analyze phenomena that evolve over time, with a focus on extreme behavior and uncertainty quantification. By blending statistical rigor with computational efficiency, I aim to tackle complex problems in environmental science, hydrology, and beyond.
+I’m Antonio Aguirre, a 4th-year Ph.D. candidate in Statistics at the University of California, Santa Cruz. My work centers on creating scalable Bayesian models to analyze evolving phenomena, focusing on extreme behavior and uncertainty quantification. I aim to tackle complex problems in environmental science, hydrology, and beyond by blending statistical rigor with computational efficiency.
 
 ---
 
@@ -63,15 +63,6 @@ When I’m not immersed in statistics, you’ll likely find me:
 - Experimenting with new tools and technologies to push the boundaries of what data-driven insights can achieve.  
 - Working out or learning German—my latest endeavor in personal growth.
 
----
-
-## Let’s Connect
-
-If you’re interested in collaborating, have questions about my work, or just want to chat, feel free to reach out.  
-
-- **Email:** [jaguir26@ucsc.edu](mailto:jaguir26@ucsc.edu)  
-- **GitHub:** [AntonioAPDL](https://github.com/AntonioAPDL)  
-- **LinkedIn:** [Antonio Aguirre](https://www.linkedin.com/in/AntonioAPDL)  
 
 Thanks for stopping by!
 
