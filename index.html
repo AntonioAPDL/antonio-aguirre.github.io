@@ -3,25 +3,19 @@ layout: default
 title: Home
 ---
 
-  <div class="plot-container">
+<div class="plot-container">
     <h2>San Lorenzo River Discharge</h2>
     <div id="loading" style="font-style: italic; color: gray;">Loading plot...</div>
-<iframe
-    src="https://8686-128-114-48-164.ngrok-free.app/plot"
-    style="
-        width: 155%; 
-        height: 50vh; /* Adjusted height for better visibility */
-        max-width: 1000px; /* Optional: Restrict the maximum width */
-        border: none; 
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* More pronounced shadow */
-        border-radius: 8px; /* Rounded corners for a polished look */
-    "
-    allowfullscreen
-    onload="document.getElementById('loading').style.display='none';">
-</iframe>
-
+    <iframe
+        src="https://8686-128-114-48-164.ngrok-free.app/plot"
+        style="
+            width: 155%; 
+            height: 50vh; 
+            border: none; 
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
+            border-radius: 8px;">
+    </iframe>
 </div>
-</style>
 
 <div class="home-intro">
   <div>
@@ -51,19 +45,21 @@ title: Home
 .plot-container {
     text-align: center;
     margin: 2rem auto;
-    max-width: 1000px; /* Limit the width for larger screens */
     padding: 1rem;
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Ensures no scrollbars appear inside the container */
+    width: 100%; /* Ensure the container matches the iframe's width */
+    max-width: none; /* Disable any restrictive max-width to fit the iframe */
 }
 
 /* Adjust iframe dimensions */
 iframe {
-    width: 150%;
-    height: 55vh; /* Use viewport height for better responsiveness */
+    width: 155%; /* Matches your desired width */
+    height: 50vh; /* Matches your desired height */
     border: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Style for the intro section */
@@ -97,4 +93,4 @@ iframe {
 .home-content li {
     margin-bottom: 0.5rem;
 }
-
+</style>
