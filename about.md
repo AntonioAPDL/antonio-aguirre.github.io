@@ -3,66 +3,89 @@ layout: page
 title: About
 ---
 
-<p class="message">
-  Welcome to my academic corner—a space dedicated to my research, teaching, and exploration of Bayesian statistics, machine learning, and more.
-</p>
+<div class="about-section">
+  <!-- Welcome Message -->
+  <p class="message" style="font-style: italic; color: #555; text-align: center; margin: 1rem auto; max-width: 800px;">
+    Welcome to my academic corner—a space dedicated to my research, teaching, and exploration of Bayesian statistics, machine learning, and beyond.
+  </p>
 
-I’m Antonio Aguirre, a 4th-year Ph.D. candidate in Statistics at the University of California, Santa Cruz. My work centers on creating scalable Bayesian models to analyze evolving phenomena, focusing on extreme behavior and uncertainty quantification. I aim to tackle complex problems in environmental science, hydrology, and beyond by blending statistical rigor with computational efficiency.
+  <!-- Introduction -->
+  <div class="intro" style="text-align: center; margin-top: 2rem;">
+    <img src="/files/images/Me2.jpg" 
+         alt="Antonio Aguirre" 
+         style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
+    <h1 style="margin: 0; font-size: 2rem; font-weight: bold; color: #333;">Antonio Aguirre</h1>
+    <p style="font-size: 1.2rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
+      I’m a 4th-year Ph.D. candidate in <strong>Statistics</strong> at the <strong>University of California, Santa Cruz</strong>. 
+      My research revolves around creating scalable Bayesian models to analyze evolving phenomena, 
+      with a focus on extreme behavior and uncertainty quantification. Through a blend of statistical 
+      rigor and computational efficiency, I tackle complex challenges in environmental science, hydrology, and beyond.
+    </p>
+  </div>
 
----
+  <!-- Research Focus Section -->
+  <div class="research-focus" style="margin-top: 3rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+    <h2 style="font-size: 2rem; font-weight: bold; color: #333; text-align: center;">Research Focus</h2>
+    <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
+      <li style="margin-bottom: 1rem;">
+        <strong>Bayesian Statistics & Machine Learning:</strong> Integrating probabilistic frameworks with machine learning to develop predictive models for high-dimensional and dynamic systems.
+      </li>
+      <li style="margin-bottom: 1rem;">
+        <strong>Dynamic Quantile Linear Models (DQLMs):</strong> Advancing real-time, quantile-based forecasting techniques, particularly in hydrology and environmental science.
+      </li>
+      <li style="margin-bottom: 1rem;">
+        <strong>Spatio-Temporal Modeling:</strong> Capturing and understanding data patterns across space and time to uncover meaningful insights for policy and decision-making.
+      </li>
+      <li style="margin-bottom: 1rem;">
+        <strong>Continual Learning in Statistical Post-Processing:</strong> Designing adaptive methods to improve forecast accuracy over time through efficient model updates.
+      </li>
+    </ul>
+  </div>
 
-## Research Focus
+  <!-- Ongoing Projects Section -->
+  <div class="projects-section" style="margin-top: 3rem; padding: 1rem; text-align: center;">
+    <h2 style="font-size: 2rem; font-weight: bold; color: #333;">Ongoing Projects</h2>
+    <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
+      <li style="margin-bottom: 1rem;">
+        <strong>Real-Time Forecast Synthesis:</strong> Combining outputs from diverse climate models to achieve robust and accurate predictions.
+      </li>
+      <li style="margin-bottom: 1rem;">
+        <strong>Dynamic Principal Components for Climate Indices:</strong> Analyzing interdependencies among meteorological indices to improve climate forecasts.
+      </li>
+      <li style="margin-bottom: 1rem;">
+        <strong>TA Professional Development:</strong> Creating active learning workshops to train TAs in accessibility-focused and equity-minded teaching techniques.
+      </li>
+    </ul>
+  </div>
 
-I strive to bridge theory and application through innovative statistical methods. My key research areas include:
+  <!-- Academic Journey Section -->
+  <div class="academic-journey" style="margin-top: 3rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+    <h2 style="font-size: 2rem; font-weight: bold; color: #333; text-align: center;">Academic Journey</h2>
+    <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
+      My academic foundations are rooted in a diverse quantitative background:  
+    </p>
+    <ul style="list-style: disc; padding-left: 1.5rem; max-width: 800px; margin: 1rem auto; text-align: left;">
+      <li style="margin-bottom: 0.8rem;"><strong>M.Sc. in Economic Theory:</strong> Deepened my understanding of advanced mathematical models in economics.</li>
+      <li style="margin-bottom: 0.8rem;"><strong>B.Sc. in Applied Mathematics:</strong> Built a strong foundation in analytical problem-solving and quantitative methods.</li>
+    </ul>
+  </div>
 
-- **Bayesian Statistics & Machine Learning**  
-   Integrating probabilistic frameworks with machine learning to develop predictive models for high-dimensional and dynamic systems.  
-
-- **Dynamic Quantile Linear Models (DQLMs)**  
-   Advancing real-time, quantile-based forecasting techniques, particularly in hydrology and environmental science.  
-
-- **Spatio-Temporal Modeling**  
-   Capturing and understanding data patterns across space and time to uncover meaningful insights for policy and decision-making.  
-
-- **Continual Learning in Statistical Post-Processing**  
-   Designing adaptive methods to improve forecast accuracy over time through efficient model updates.
-
----
-
-## Ongoing Projects
-
-Some of my recent and ongoing projects include:
-
-- **Real-Time Forecast Synthesis**  
-   Combining outputs from diverse climate models to achieve robust and accurate predictions.  
-
-- **Dynamic Principal Components for Climate Indices**  
-   Analyzing interdependencies among meteorological indices to improve climate forecasts.  
-
-- **TA Professional Development**  
-   Creating active learning workshops to train TAs in accessibility-focused and equity-minded teaching techniques.  
-
----
-
-## Academic Journey
-
-My academic foundations are rooted in a diverse quantitative background:  
-
-- **M.Sc. in Economic Theory**  
-- **B.Sc. in Applied Mathematics**  
-
-These experiences have honed my analytical skills and deepened my appreciation for solving real-world problems with data.
-
----
-
-## Beyond Research
-
-When I’m not immersed in statistics, you’ll likely find me:
-
-- Reflecting on philosophical questions, particularly those surrounding epistemology and the nature of uncertainty.  
-- Experimenting with new tools and technologies to push the boundaries of what data-driven insights can achieve.  
-- Working out or learning German—my latest endeavor in personal growth.
-
-
-Thanks for stopping by!
-
+  <!-- Beyond Research Section -->
+  <div class="beyond-research" style="margin-top: 3rem; padding: 1rem; text-align: center;">
+    <h2 style="font-size: 2rem; font-weight: bold; color: #333;">Beyond Research</h2>
+    <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
+      <li style="margin-bottom: 1rem;">
+        Reflecting on philosophical questions, particularly those surrounding epistemology and the nature of uncertainty.
+      </li>
+      <li style="margin-bottom: 1rem;">
+        Experimenting with new tools and technologies to push the boundaries of what data-driven insights can achieve.
+      </li>
+      <li style="margin-bottom: 1rem;">
+        Working out or learning German—my latest endeavor in personal growth.
+      </li>
+    </ul>
+    <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
+      Thanks for stopping by! Let’s connect and explore how we can tackle data-driven challenges together.
+    </p>
+  </div>
+</div>
