@@ -3,23 +3,26 @@ layout: page
 title: Teaching
 ---
 
-<div class="teaching-section" style="margin: 2rem auto; max-width: 800px;">
+<div class="teaching-section" style="margin: 2rem auto; max-width: 900px;">
   <!-- Page Introduction -->
   <h1 style="text-align: center; font-size: 2.5rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Teaching</h1>
   <p style="font-size: 1.2rem; line-height: 1.8; color: #555; text-align: center; margin-bottom: 2rem;">
-    Below are the courses I have taught, with materials organized by course. Each course includes slides, worksheets, assignments, and other supporting materials.
+    Below are the courses I have taught, with materials organized by course. Each section includes resources such as slides, worksheets, assignments, and supplementary teaching content. I am actively working to upload additional resources to provide a comprehensive repository for each course.
   </p>
 
   <!-- Teaching Materials -->
-  <ul style="list-style: none; padding: 0; margin: 0;">
-    {% assign courses = site.static_files | where_exp: "file", "file.path contains '/files/teaching/'" %}
-    {% assign grouped_courses = courses | group_by_exp: "file", "file.path | split: '/' | slice: 3, 1" %}
+  {% assign courses = site.static_files | where_exp: "file", "file.path contains '/files/teaching/'" %}
+  {% assign grouped_courses = courses | group_by_exp: "file", "file.path | split: '/' | slice: 3, 1" %}
+  <ul style="list-style: none; padding: 0;">
     {% for course in grouped_courses %}
       {% assign course_folder = course.name | first %}
       {% assign course_name = site.course_names[course_folder] | default: course_folder %}
-      <li style="margin-bottom: 2rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <li style="margin-bottom: 2rem; padding: 1.5rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
         <h2 style="font-size: 2rem; color: #333; margin-bottom: 1rem;">{{ course_name }}</h2>
-        <ul style="list-style: none; padding-left: 0;">
+        <p style="font-size: 1rem; color: #555; margin-bottom: 1rem;">
+          Explore the materials I have developed for <strong>{{ course_name }}</strong>, which include lecture slides, problem sets, and solutions designed to foster active learning and engagement.
+        </p>
+        <ul style="list-style: none; padding: 0;">
           {% for file in course.items %}
             <li style="margin-bottom: 0.5rem;">
               <a href="{{ file.path | relative_url }}" style="font-size: 1.1rem; color: #1b9e77; text-decoration: none;">
@@ -31,6 +34,14 @@ title: Teaching
       </li>
     {% endfor %}
   </ul>
+
+  <!-- Placeholder for Future Content -->
+  <div class="future-content" style="margin-top: 2rem; padding: 1rem; background-color: #fff3cd; border-left: 6px solid #ffeeba; border-radius: 8px; text-align: left;">
+    <h3 style="font-size: 1.5rem; color: #856404; margin-bottom: 1rem;">Work in Progress</h3>
+    <p style="font-size: 1.1rem; color: #856404; line-height: 1.8;">
+      I am currently in the process of uploading additional materials for each course, including interactive exercises, Shiny applications, and dynamic notebooks to enhance the teaching and learning experience. Stay tuned for updates!
+    </p>
+  </div>
 </div>
 
 <!-- Additional Styling -->
@@ -53,7 +64,7 @@ title: Teaching
 
   .teaching-section ul li {
     margin-bottom: 2rem;
-    padding: 1rem;
+    padding: 1.5rem;
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -65,13 +76,10 @@ title: Teaching
     margin-bottom: 1rem;
   }
 
-  .teaching-section ul li ul {
-    list-style: none;
-    padding-left: 0;
-  }
-
-  .teaching-section ul li ul li {
-    margin-bottom: 0.5rem;
+  .teaching-section ul li p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 1rem;
   }
 
   .teaching-section ul li ul li a {
@@ -82,5 +90,15 @@ title: Teaching
 
   .teaching-section ul li ul li a:hover {
     text-decoration: underline;
+  }
+
+  .future-content {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #fff3cd;
+    border-left: 6px solid #ffeeba;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    color: #856404;
   }
 </style>
