@@ -8,7 +8,7 @@ title: Research
   <h1 style="font-size: 2.5rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Research</h1>
   <p style="font-size: 1.2rem; line-height: 1.8; color: #555; margin-bottom: 2rem;">
     My research focuses on <strong>Bayesian statistics</strong>, <strong>spatio-temporal processes</strong>, and 
-    <strong>machine learning</strong>. Below, you'll find my ongoing projects, publications, and key research highlights.
+    <strong>machine learning</strong>. Below, you'll find my ongoing projects, publication, and key research highlights.
   </p>
 
   <!-- Content Sections -->
@@ -18,30 +18,22 @@ title: Research
     <h2 style="font-size: 2rem; color: #333; margin-bottom: 1rem;">Ongoing Projects</h2>
     <ul style="list-style-type: none; padding: 0; margin: 0;">
       <li style="margin-bottom: 1rem;">
-        <strong>Real-Time Forecast Correction:</strong> Developing Bayesian quantile-based methods for environmental predictions.
+        <strong>Real-Time Bayesian Forecast Synthesis:</strong> Developing operational methods for integrating and correcting diverse climate agency outputs in real time.
       </li>
       <li style="margin-bottom: 1rem;">
-        <strong>GDPC Analysis:</strong> Exploring dynamic principal components for climate index analysis.
+        <strong>Dynamic Quantile Linear Models (DQLMs):</strong> Modeling river discharge and hydrological processes using advanced Bayesian quantile-based methods.
       </li>
       <li style="margin-bottom: 1rem;">
-        <strong>Dynamic Quantile Linear Models:</strong> Modeling river flow and other hydrological processes using advanced Bayesian techniques.
+        <strong>Exploring Scalable Bayesian Inference:</strong> Innovating computational approaches, such as combining Sequential Monte Carlo and Variational Bayes, for state-space models.
       </li>
     </ul>
 
     <!-- Publications -->
-    <h2 style="font-size: 2rem; color: #333; margin: 2rem 0 1rem;">Publications</h2>
+    <h2 style="font-size: 2rem; color: #333; margin: 2rem 0 1rem;">Publication</h2>
     <ul style="list-style-type: none; padding: 0; margin: 0;">
       <li style="margin-bottom: 1rem;">
-        Aguirre, A. et al. (2024). <em>Dynamic Quantile Linear Models for Spatio-Temporal Processes</em>. 
-        Journal of Bayesian Statistics. <a href="#" style="color: #1b9e77; text-decoration: underline;">[DOI]</a>
-      </li>
-      <li style="margin-bottom: 1rem;">
-        Aguirre, A. & Mendes, B. (2023). <em>Hydrological Forecasting with Bayesian Methods</em>. 
-        Environmental Statistics Letters. <a href="#" style="color: #1b9e77; text-decoration: underline;">[DOI]</a>
-      </li>
-      <li style="margin-bottom: 1rem;">
-        Prado, R. et al. (2023). <em>Bayesian Dynamic Models for Environmental Applications</em>. 
-        Statistical Computing Journal. <a href="#" style="color: #1b9e77; text-decoration: underline;">[DOI]</a>
+        Aguirre, A., Lobato, I.N. (2024). <em>Evidence of Non-Fundamentalness in OECD Capital Stocks</em>. 
+        Empirical Economics. <a href="https://doi.org/10.1007/s00181-024-02564-5" style="color: #1b9e77; text-decoration: underline;">[DOI]</a>
       </li>
     </ul>
 
@@ -49,13 +41,10 @@ title: Research
     <h2 style="font-size: 2rem; color: #333; margin: 2rem 0 1rem;">Workshops & Conferences</h2>
     <ul style="list-style-type: none; padding: 0; margin: 0;">
       <li style="margin-bottom: 1rem;">
-        Invited Speaker, <strong>International Bayesian Conference (IBC)</strong>, 2024.
+        Presenter, <strong>Teaching Assistant Professional Development Workshops</strong>, UCSC, 2024. Developed active learning modules for graduate teaching assistants.
       </li>
       <li style="margin-bottom: 1rem;">
-        Organizer, <strong>Hydrology Forecast Workshop</strong>, UCSC, 2023.
-      </li>
-      <li style="margin-bottom: 1rem;">
-        Presenter, <strong>Spatio-Temporal Modeling in Climate Science</strong>, JSM 2023.
+        Contributor, <strong>Hydrological Forecast Modeling Sessions</strong>, UCSC, 2023. Shared insights on Bayesian quantile regression for hydrological applications.
       </li>
     </ul>
   </div>
