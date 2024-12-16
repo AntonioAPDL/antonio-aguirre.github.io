@@ -3,95 +3,132 @@ layout: default
 title: Blog
 ---
 
-<div class="blog-intro">
-  <h1>Welcome to My Blog</h1>
-  <p>
-    Explore my insights and reflections on mathematics, statistics, philosophy, and beyond. Stay curious!
+<div class="blog-section" style="max-width: 900px; margin: 0 auto; text-align: center; padding: 2rem;">
+  <!-- Blog Introduction -->
+  <h1 style="font-size: 2.5rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Welcome to My Blog</h1>
+  <p style="font-size: 1.2rem; line-height: 1.8; color: #555; margin-bottom: 2rem;">
+    Explore my reflections on <strong>statistics</strong>, <strong>mathematics</strong>, <strong>philosophy</strong>, and more. 
+    I aim to spark curiosity and share insights on a wide range of topics, including the interplay of data science, methodology, and practical applications.
   </p>
+
+  <!-- Placeholder for Blog Posts -->
+  <div class="posts">
+    {% if site.posts.size > 0 %}
+      {% for post in site.posts %}
+        <div class="post" style="border-bottom: 1px solid #ddd; padding: 1.5rem 0;">
+          <h2 class="post-title" style="font-size: 1.8rem; margin-bottom: 0.5rem;">
+            <a href="{{ post.url | absolute_url }}" style="color: #007ACC; text-decoration: none; transition: color 0.3s;">
+              {{ post.title }}
+            </a>
+          </h2>
+          <p class="post-meta" style="color: #888; font-size: 0.9rem; margin-bottom: 1rem;">
+            Published on {{ post.date | date: "%B %d, %Y" }}
+            {% if post.theme %}| Theme: <strong style="color: #555;">{{ post.theme }}</strong>{% endif %}
+          </p>
+          <p class="post-excerpt" style="font-size: 1rem; line-height: 1.6; color: #333; margin-bottom: 0.5rem;">
+            {{ post.excerpt }}
+          </p>
+          <a href="{{ post.url | absolute_url }}" class="read-more" style="font-size: 0.9rem; color: #007ACC; text-decoration: underline; transition: color 0.3s;">
+            Read more →
+          </a>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="no-posts" style="margin-top: 2rem; padding: 1rem; background-color: #fff3cd; border-left: 6px solid #ffeeba; border-radius: 8px;">
+        <h3 style="font-size: 1.5rem; color: #856404; margin-bottom: 1rem;">Stay Tuned</h3>
+        <p style="font-size: 1.1rem; color: #856404; line-height: 1.8;">
+          I’m currently working on uploading new content. Check back soon for my latest posts on <strong>statistics</strong>, 
+          <strong>philosophy of science</strong>, and <strong>environmental modeling</strong>.
+        </p>
+      </div>
+    {% endif %}
+  </div>
 </div>
 
-<div class="posts">
-  {% for post in site.posts %}
-    <div class="post">
-      <h2 class="post-title">
-        <a href="{{ post.url | absolute_url }}">
-          {{ post.title }}
-        </a>
-      </h2>
-      <p class="post-meta">
-        Published on {{ post.date | date: "%B %d, %Y" }}
-        {% if post.theme %}| Theme: <span>{{ post.theme }}</span>{% endif %}
-      </p>
-      <p class="post-excerpt">
-        {{ post.excerpt }}
-      </p>
-      <a href="{{ post.url | absolute_url }}" class="read-more">
-        Read more →
-      </a>
-    </div>
-  {% endfor %}
-</div>
-
+<!-- Additional Styling -->
 <style>
-/* Blog Introduction Section */
-.blog-intro {
-  text-align: center;
-  margin: 2rem 0;
-}
-.blog-intro h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-.blog-intro p {
-  font-size: 1.2rem;
-  color: #555;
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
+  /* Blog Section Styling */
+  .blog-section h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+  }
 
-/* Blog Posts Section */
-.posts {
-  max-width: 800px;
-  margin: 2rem auto;
-  font-family: 'Arial', sans-serif;
-}
-.post {
-  border-bottom: 1px solid #ddd;
-  padding: 1.5rem 0;
-}
-.post-title a {
-  font-size: 1.8rem;
-  color: #007ACC;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-.post-title a:hover {
-  color: #005b99;
-}
-.post-meta {
-  color: #888;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-.post-meta span {
-  font-weight: bold;
-  color: #555;
-}
-.post-excerpt {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-.read-more {
-  font-size: 0.9rem;
-  color: #007ACC;
-  text-decoration: underline;
-  transition: color 0.3s ease;
-}
-.read-more:hover {
-  color: #005b99;
-}
+  .blog-section p {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 2rem;
+  }
+
+  .posts {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .post {
+    border-bottom: 1px solid #ddd;
+    padding: 1.5rem 0;
+  }
+
+  .post-title a {
+    font-size: 1.8rem;
+    color: #007ACC;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .post-title a:hover {
+    color: #005b99;
+  }
+
+  .post-meta {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .post-meta strong {
+    color: #555;
+  }
+
+  .post-excerpt {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .read-more {
+    font-size: 0.9rem;
+    color: #007ACC;
+    text-decoration: underline;
+    transition: color 0.3s;
+  }
+
+  .read-more:hover {
+    color: #005b99;
+  }
+
+  .no-posts {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #fff3cd;
+    border-left: 6px solid #ffeeba;
+    border-radius: 8px;
+    text-align: left;
+  }
+
+  .no-posts h3 {
+    font-size: 1.5rem;
+    color: #856404;
+    margin-bottom: 1rem;
+  }
+
+  .no-posts p {
+    font-size: 1.1rem;
+    color: #856404;
+    line-height: 1.8;
+  }
 </style>
