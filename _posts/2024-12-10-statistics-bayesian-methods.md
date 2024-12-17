@@ -1,12 +1,11 @@
 ---
 layout: post
-title: "Bayesian Worklflow"
-date: 2024-12-20
+title: "Bayesian Workflow"
+date: 2024-12-10
 theme: Review
 tags: [statistics, bayesian, math, methodology]
 excerpt: "A review on the recently proposed Bayesian Workflow, and some commentary."
 ---
-# Bayesian Workflow Table of Contents
 
 ## Introduction
 
