@@ -112,71 +112,169 @@ models get large, hence the desire for faster approximations.
   - Generic diagnostic tools can be used to verify that a particular approximate algorithm reproduces the features of the
 posterior that you care about for a specific model.
   - An alternative view is to understand an approximate algorithm as an exact algorithm for an approximate model.
-    - Empirical Bayes approximations as replacing a model’s prior distributions with a particular data-dependent point-mass prior. 
+    - Empirical Bayes approximations replace a model’s prior distributions with a particular data-dependent point-mass prior. 
     - Laplace approximation can be viewed as a data-dependent linearization of the desired model
     - Nested Laplace approximation uses a linearized conditional posterior as the posited conditional posterior.
 
 - **2.4** Fit fast, fail fast
-  - Fail fast when fitting bad models, can be considered as a shortcut that avoids spending a lot of time for (near) perfect inference for a bad model.
-  - In a box: There is a large literature on approximate algorithms to fit the desired model fast, but little on algorithms designed to waste as little time as possible on the models that we will ultimately abandon.
+  - Fail fast when fitting bad models can be considered a shortcut that avoids spending much time for (near) perfect inference for a flawed model.
+  - In a box: There is a lot of literature on approximate algorithms to fit the desired model fast, but more on algorithms designed to save as little time as possible on the models we will ultimately abandon.
     
 ---
 
 ## 3. Using Constructed Data to Find and Understand Problems
 
-- **3.1** Fake-data simulation  
+- **3.1** Fake-data simulation
+  - The basic idea is to check whether our procedure recovers the correct parameter values when fitting fake data.
+  - Typically, we choose parameter values that seem reasonable a priori and then simulate a fake dataset of the same size, shape, and structure as the original data.
+    - a) Check to see if the observed data can provide additional information beyond the prior. The procedure is to simulate some fake data from the model with fixed, known parameters and then see whether our method comes close to reproducing the known truth. We can look at point estimates and also the coverage of posterior intervals.
+    - b) The second thing that we check is if the true parameters can be recovered to roughly within the uncertainty implied by the fitted posterior distribution. 
+    - c) The third thing that we can do is use fake data simulations to understand how the behavior of a model can change across different parts of the parameter space. In this sense, a statistical model can contain many stories of how the data get generated.
+  - All this implies that fake data simulation can be particularly relevant in the zone of the parameter space that is predictive of the data. This, in turn, suggests a two-step procedure in which we first fit the model to real data and then draw parameters from the resulting posterior distribution to use in fake-data checking.
+  -   In box: The statistical properties of such a procedure are unclear
+  -   To carry this idea further, we may break our method by creating fake data that cause our procedure to give bad answers. This sort of simulation-and-exploration can be the first step in a deeper understanding of an inference method.
+  -   If our goal is not merely prediction but estimating the latent variables, examining predictions only helps us so much. This is especially true of overparameterized models, where wildly different parameter values can yield comparable predictions
+  -   If a model can make good inference on fake-data generated from that very model, this provides no guarantee that its inference on real data will be sensible.But if a model cannot make good inference on such fake data, then it’s hopeless to expect the model to provide reasonable inference on real data.
+  -   A more comprehensive approach than what we present in Section 4.1 is simulation-based
+calibration (SBC). While in many ways superior to benchmarking against a truth point, simulation-based calibration requires fitting the model multiple times, which incurs a substantial computational cost. Simulation-based calibration and truth-point benchmarking are two ends of a spectrum.
+  - Box: It is an open research question to understand SBC with a small number of draws.
+  - A serious problem with SBC is that it clashes somewhat with most modelers’ tendency to specify their priors wider than they believe necessary. The slightly conservative nature of weakly informative priors can cause the data sets simulated during SBC to be extreme occasionally.
 
-- **3.2** Simulation-based calibration  
+- **3.2** Simulation-based calibration
+  - There is a formal, and at times practical, issue when comparing the result of Bayesian inference, a posterior distribution, to a single (true) point.
+  - Box in red:
+    - Using a single fake data simulation to test a model will not necessarily “work”, even if the computational algorithm is working correctly (there is a 5% chance that a random draw will be outside a 95% uncertainty interval) but also because Bayesian inference will in general only be calibrated when averaging over the prior.
+    - Furthermore, parameter recovery may fail not because the algorithm fails but because the observed data are not providing information
+that could update the uncertainty quantified by the prior for a particular parameter. 
 
-- **3.3** Experimentation using constructed data  
+- **3.3** Experimentation using constructed data
+  - A good way to understand a model is to fit it to data simulated from different scenarios.
+  - One interesting question here is, how bad will these inferences be?
+  - In the context of the present article, the point of this example is to demonstrate how simulation of a statistical system under different conditions can give us insight, not just about computational issues but also about data and inference more generally
 
 ---
 
 ## 4. Addressing Computational Problems
 
 - **4.1** The folk theorem of statistical computing  
+In a box: When you have computational problems, often there’s a problem with your model.M
+Many cases of poor convergence correspond to regions of parameter space that are not of substantive interest or even to a nonsensical model.
+Our first instinct when faced with a problematic model should not be to throw more computational resources on
+the model, but to check whether our model contains some substantive pathology.
 
 - **4.2** Starting at simple and complex models and meeting in the middle  
-
+The path toward diagnosing the problem is to move from two directions:
+  - to gradually simplify the poorly-performing model, stripping it down until you get something that works;
+  - and from the other direction, starting with a simple and well-understood model and gradually adding features until the problem appears.
 - **4.3** Getting a handle on models that take a long time to fit  
-
+  - Slow computation is often a sign of other problems, indicating a poorly performing HMC. However the very fact that the fit takes long means the model is harder to debug.
+  - The common theme in all these tips is to think of any particular model choice as provisional, and to recognize that data analysis requires many models to be fit in order to gain control over the process of computation and inference for a particular applied problem.
+    
 - **4.4** Monitoring intermediate quantities  
+  - Another useful approach to diagnosing model issues is to save intermediate quantities in our
+ computations and plot them.
 
 - **4.5** Stacking to reweight poorly mixing chains  
+  - It is also common to be in an intermediate situation where multiple chains are slow to mix but they are in a generally reasonable range. In this case we can use stacking to combine the simulations, using cross validation to assign weights to the dierent chains.
+  - Especially suitable during the model exploration phase.
 
 - **4.6** Posterior distributions with multimodality and other difficult geometry  
+  - Challenges associated to multimodality:
+    - Efectively disjoint posterior volumes, where all but one of the modes have near-zero mass.
+    - Efectively disjoint posterior volumes of high probability mass that are trivially symmetric, such as label switching in a mixture model.
+    - Efectively disjoint posterior volumes of high probability mass that are diferent
+    - A single posterior volume of high probability mass with an arithmetically unstable tail.
 
 - **4.7** Reparameterization  
+  - Generally, an HMC-based sampler will work best if its mass matrix is appropriately tuned and the geometry of the joint posterior distribution is relatively uninteresting, in that it has no sharp corners, cusps, or other irregularities.
+    - Easily satisfied for many classical models, where results like the Bernstein-von Mises theorem suggest that the posterior will become fairly simple when there is enough data.
+    - When not, behavior of HMC can be greatly improved by judiciously choosing a parameterization that makes the posterior geometry simpler.
 
 - **4.8** Marginalization  
+  - Challenging geometries in the posterior distribution are often due to interactions between parameters. And sometimes the marginals of each parameter behave better.
+  - Exploiting the structure of the problem, we can approximate these distributions using a Laplace approximation, notably for latent Gaussian models. 
 
 - **4.9** Adding prior information  
+  - Often the problems in computation can be fixed by including prior information that is already available but which had not yet been included in the model.
+  - Many fitting problems go away when reasonable prior information is added, which is not to say that the primary use of priors is to resolve fitting problems
+  - In classical statistics, models are sometimes classified as identifiable or nonidentifiable.
+  - Red box: “identification” is formally defined in statistics as an asymptotic property, but in Bayesian inference we care about inference with finite data.
+  - If the data are not informative on some aspects of the model, we may improve the situation by providing more information via priors.
+  - We often prefer to use a model with parameters that can be updated by the information in the data instead of a model that may be closer to the truth but where data are not able to provide sufficient information.
+  - Consider four steps on a ladder of abstraction:
+    1. Poor mixing of MCMC;
+    2. Dicult geometry as a mathematical explanation for the above;
+    3. Weakly informative data for some parts of the model as a statistical explanation for the above;
+    4. Substantive prior information as a solution to the above.
+    - Starting from the beginning of this ladder, we have computational troubleshooting; starting from the end, computational workflow. 
 
 - **4.10** Adding data  
+  - Similarly to adding prior information, one can constrain the model by adding new data sources that are handled within the model.
+  - In other cases, models that are well-behaved for larger datasets can have computational issues in small data regimes; 
 
 ---
 
 ## 5. Evaluating and Using a Fitted Model
 
+There are many different things that can be checked for a fitted model, and each of these checks can lead in many directions.
+Statistical models can be fit with multiple goals in mind, and statistical methods are developed for different groups of users. 
+The aspects of a model that need to be checked will depend on the application.
+
 - **5.1** Posterior predictive checking  
+  - This refers to simulations that come from the posterior distribution rather than the prior.
+  - There is no general way to choose which checks one should perform on a model, but running a few such direct checks is a good safeguard against gross misspecification.
+  - There is also no general way to decide when a check that fails requires adjustments to the model.
+  - Depending on the goals of the analysis and the costs and benefits specific to the circumstances.
+  - Box: In general, we try to find “severe tests”: checks that are likely to fail if the model gives misleading answers to the questions we care most about.
 
 - **5.2** Cross-validation and influence of individual data points and subsets of the data  
-
+  - Posterior predictive checking is often sufficient for revealing model misfits.
+  - CV improves predictive checking diagnostics, especially for flexible models.
+  - Three diagnostic approaches:
+    1. calibration checks using the cross-validation predictive distribution,
+    2. identifying which observations or groups of observations are most difficult to predict
+    3. identifying how influential particular observations are, that is, how much information they provide on top of other observations.
+  - Although perfect calibration of predictive distributions is not the ultimate goal of Bayesian inference, looking at how well calibrated leave-one-out cross-validation (LOO-CV) predictive distributions are can reveal opportunities to improve the model.
+  - Box: posterior predictive checking often compares the marginal distribution of the predictions to the data distribution, leave-one-out
+cross-validation predictive checking looks at the calibration of conditional predictive distributions.
+  - Under good calibration, the s probability integral transformations, PIT, given the left-out observations are uniform.
+  - We can also look at which observations are hard to predict and see if there is a pattern or explanation for why some are harder to predict than others.
+  - Cross-validation for multilevel (hierarchical) models requires more thought. Leave-one-out is still possible, but it only sometimes matches our inferential goals! 
+      
 - **5.3** Influence of prior information  
+  - Understanding how posterior inferences under a fitted model depend on the data and priors is relevant.
+  - Box: A statistical model can be understood in two ways:
+  - generatively; we want to understand how the parameters map to the data. We can perform prior predictive simulations to visualize possible data from the model.
+  - inferentially; we want to understand the path from inputs (data and prior distributions) to outputs (estimates and uncertainties).
+  - Sensitivity analysis:
+    - compute the shrinkage between prior and posterior (e.g. posterior standard deviations for each parameter or by comparing prior and posterior quantiles). 
+  - Importance sampling to approximate the posterior of the new model using the posterior of the old model and compare similarity.
+  - Static sensitivity analysis, which is a way to study sensitivity of posterior inferences to perturbations in the prior without requiring that the model be re-fit using alternative prior distributions.
 
 - **5.4** Summarizing inference and propagating uncertainty  
-
+  - The usual ways of displaying Bayesian inference do not fully capture the multiple levels of variation and uncertainty in our inferences.
+  -  A table or even a graph of parameter estimates, uncertainties, and standard errors is only showing one-dimensional margins.
+  -  Graphs of marginal posterior distributions are unwieldy for models with many parameters and also fail to capture the interplay between uncertainty and variation in a hierarchical model.
+  -  R package bayesplot.
+    
 ---
 
 ## 6. Modifying a Model
 
+
 - **6.1** Constructing a model for the data  
+  - Box: The model building is a language-like task in which the modeler puts together existing components in order to encompass new data
+and additional features of existing data, along with links to underlying processes of interest
+  - Box: Model expansion can come in response to new data, failures of models fit to existing data, or computational struggles with existing fitting procedures.
 
 - **7.2** Incorporating additional data  
+  - 
 
 - **7.3** Working with prior distributions  
+  - 
 
 - **7.4** A topology of models  
+  - 
 
 
 ---
@@ -184,21 +282,28 @@ posterior that you care about for a specific model.
 ## 7. Understanding and Comparing Multiple Models
 
 - **7.1** Visualizing models in relation to each other  
+  - 
 
 - **7.2** Cross-validation and model averaging  
+  - 
 
 - **7.3** Comparing a large number of models 
+  - 
 
 ---
 
 ## 8. Modeling as Software Development
 
 - **8.1** Version control smooths collaborations with others and with your past self  
+  - 
 
 - **8.2** Testing as you go  
+  - 
 
 - **8.3** Making it essentially reproducible  
+  - 
 
 - **8.4** Making it readable and maintainable  
+  - 
 
 ## Discussion
