@@ -7,6 +7,23 @@ tags: [statistics, bayesian, methodology]
 excerpt: "A review on the recently proposed Bayesian Workflow, and some commentary."
 ---
 
+<div class="red-box">
+  Content for the red box.
+</div>
+
+<div class="green-box">
+  Content for the green box.
+</div>
+
+{% raw %}
+Inline math: $E = mc^2$
+
+Display math:
+$$
+\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
+$$
+{% endraw %}
+
 
 # Bayesian Workflow: A Structured Review
 
