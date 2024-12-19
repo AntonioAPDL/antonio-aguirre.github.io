@@ -167,54 +167,74 @@ In applied Bayesian work, complexity often arises from incorporating multiple da
 
 ---
 
-## 2. Fitting a Model
+## Fitting a Model
 
-A little of history. Traditionally, Bayesian computation has been performed using a combination of analytic calculation
-and normal approximation. Then, in the 1990s, it became possible to perform Bayesian inference for a wide range of models using Gibbs and Metropolis algorithms, sequential Monte Carlo. 
-- Variational inference is a generalization of the expectation-maximization (EM) algorithm and can, in the Bayesian context, provide a fast but possibly inaccurate approximation to the posterior distribution.
-- Sequential Monte Carlo is a generalization of the Metropolis algorithm that can be applied to any
-Bayesian computation.
-- HMC is a different generalization of Metropolis that uses gradient computation to move efciently through continuous probability spaces
+### Historical Context
+Bayesian computation has evolved significantly over time. Early methods relied on analytic calculations and normal approximations. In the 1990s, the advent of advanced algorithms expanded the landscape:
+- **Gibbs and Metropolis Algorithms:** Enabled Bayesian inference for a wide range of models.
+- **Sequential Monte Carlo (SMC):** A generalization of Metropolis applicable to broader Bayesian computations.
+- **Variational Inference (VI):** A fast but potentially inaccurate approximation, building on the expectation-maximization (EM) algorithm.
+- **Hamiltonian Monte Carlo (HMC):** Uses gradient computations to navigate continuous probability spaces efficiently.
 
-To safely use an inference algorithm in Bayesian workflow, it is vital that the algorithm provides
-strong diagnostics to determine when the computation is unreliable.
+These innovations have revolutionized Bayesian workflow, but safe usage requires strong diagnostics to flag unreliable computations.
 
-- **2.1** Initial values, adaptation, and warmup.
-  - Initial values for algorithm procedure such as MC simulations and Variational Bayes are not supposed to matter in the asymptotic limit, but they can matter in practice, and a wrong choice can threaten the validity of the results.
-  - Te first state fo those algorithms is refer as to as the warmup phase which is intended to move the simulations from their possibly unrepresentative initial values to something closer to the region of parameter space where the log posterior density is close to its expected value, which is related to the concept of “typical set” in information theory.
-    -  (a) to run through a transient phase to reduce the bias due to dependence on the initial values
-    -  (b) to provide information about the target distribution to use in setting tuning parameters
-    -  (c) quickly flag computationally problematic models
-- **2.2** How long to run an iterative algorithm
-  - For MCMC algorithms
-    - Recommended standard practice is to run at least until \hat{R}, the measure of mixing of chains, is less than 1.01 for all parameters and quantities of interest.
-    - Also monitor the multivariate mixing statistic R^*
-  -  It might seem like a safe and conservative choice to run MCMC until the effective sample size is in the thousands or Monte Carlo standard error is tiny in comparison to the required precision for parameter interpretation—but if this takes a long time, it limits the number of models that can be fit in the exploration stage.
-  -  Another choice in computation is how to best make use of available parallelism, beyond the default of running 4 or 8 separate chains on multiple cores. Instead of increasing the number of iterations, effective variance reduction can also be obtained by increasing the number of parallel chains. 
-- **2.3** Approximate algorithms and approximate models
-  - Markov chain simulation is a form of approximation where the theoretical error approaches zero
-as the number of simulations increases. Unfortunately, running MCMC to convergence is not always a scalable solution as data and
-models get large, hence the desire for faster approximations.
-  - Techniques:
-    - Empirical Bayes
-    - Linearization
-    - Laplace approximation
-    - Nested approximations, like INLA
-    - Sometimes data-splitting methods, like expectation propagation,
-    - Mode-finding approximations, like variational inference
-    - Penalized maximum likelihood.
-  - There is no one-size-fits-all approximate inference algorithm
-  - Generic diagnostic tools can be used to verify that a particular approximate algorithm reproduces the features of the
-posterior that you care about for a specific model.
-  - An alternative view is to understand an approximate algorithm as an exact algorithm for an approximate model.
-    - Empirical Bayes approximations replace a model’s prior distributions with a particular data-dependent point-mass prior. 
-    - Laplace approximation can be viewed as a data-dependent linearization of the desired model
-    - Nested Laplace approximation uses a linearized conditional posterior as the posited conditional posterior.
+---
 
-- **2.4** Fit fast, fail fast
-  - Fail fast when fitting bad models can be considered a shortcut that avoids spending much time for (near) perfect inference for a flawed model.
-  - In a box: There is a lot of literature on approximate algorithms to fit the desired model fast, but more on algorithms designed to save as little time as possible on the models we will ultimately abandon.
-    
+### Initial Values, Adaptation, and Warmup
+The initial phase of inference algorithms is critical:
+- **Initial Values:** While theoretically irrelevant in the asymptotic limit, poor initial values can bias results.
+- **Warmup Phase:** Moves simulations from unrepresentative initial values toward the typical set, a concept in information theory. This phase serves three purposes:
+  1. Reduces bias from initial values.
+  2. Provides information to tune algorithm parameters.
+  3. Flags computational issues early.
+
+---
+
+### How Long to Run an Iterative Algorithm
+The duration of iterative algorithms like MCMC impacts result reliability and computational efficiency:
+- **Convergence Diagnostics:**  
+  - Standard practice: Run until \(\hat{R}\), a mixing measure, is below 1.01 for all parameters.  
+  - Monitor the multivariate mixing statistic \(R^*\).  
+- **Balancing Accuracy and Speed:**  
+  While increasing effective sample size or reducing Monte Carlo error improves accuracy, it limits model exploration if computation is too slow.
+- **Leveraging Parallelism:**  
+  Instead of increasing iterations, variance reduction can be achieved by increasing parallel chains.
+
+---
+
+### Approximate Algorithms and Models
+Markov chain simulation is an approximation where theoretical error reduces with more iterations. However, scalability challenges arise as models and datasets grow larger, necessitating faster alternatives:
+- **Techniques for Approximation:**  
+  - Empirical Bayes  
+  - Linearization  
+  - Laplace approximation  
+  - Nested approximations (e.g., INLA)  
+  - Data-splitting (e.g., expectation propagation)  
+  - Mode-finding (e.g., variational inference)  
+  - Penalized maximum likelihood  
+
+- **Diagnostics for Approximate Algorithms:**  
+  Use diagnostic tools to ensure the algorithm reproduces key posterior features for the specific model.
+
+> **Key Perspective**  
+> {: .green-box}  
+> Approximate algorithms can be viewed as exact algorithms for approximate models.  
+> - **Empirical Bayes:** Replaces prior distributions with data-dependent point-mass priors.  
+> - **Laplace Approximation:** Data-dependent linearization of the model.  
+> - **Nested Laplace Approximation:** Linearizes conditional posterior distributions.
+
+---
+
+### Fit Fast, Fail Fast
+Efficient Bayesian workflow emphasizes quickly identifying and discarding flawed models:
+- **Failing Fast:** Saves time by avoiding perfect inference for fundamentally flawed models.
+  
+<div class="red-box">
+  <strong>Fast Algorithms vs. Early Failure</strong>  
+  There is extensive literature on fast approximation algorithms to fit desired models, but less focus on algorithms designed to minimize time spent on models that will ultimately be abandoned.
+</div>
+
+
 ---
 
 ## 3. Using Constructed Data to Find and Understand Problems
