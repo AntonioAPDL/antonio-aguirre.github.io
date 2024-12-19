@@ -544,8 +544,8 @@ Each model has its internal structure, with parameters estimated from data, and 
 
 <div class="blue-box">
   <strong>Applications:</strong>  
-  - **Forecasting:** Using interconnected models to predict future outcomes.  
-  - **Causal Inference:** Exploring relationships between variables using networked model structures.
+  - <strong>Forecasting:</strong> Using interconnected models to predict future outcomes.  
+  - <strong>Causal Inference:</strong> Exploring relationships between variables using networked model structures.
 </div>
 
 
@@ -558,7 +558,7 @@ A key aspect of Bayesian Workflow (BW) is fitting multiple models for a single p
 
 <div class="red-box">
   <strong>Key Insight:</strong>  
-  Model comparison in this context is not about selecting or averaging but about exploring the **process** of fitting multiple models to understand them better.
+  Model comparison in this context is not about selecting or averaging but about exploring the <strong>process</strong> of fitting multiple models to understand them better.
 </div>
 
 **Considerations When Fitting Multiple Models:**
