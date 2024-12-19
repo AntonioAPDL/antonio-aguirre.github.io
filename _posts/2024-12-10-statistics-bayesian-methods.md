@@ -268,42 +268,64 @@ and additional features of existing data, along with links to underlying process
   - Box: Model expansion can come in response to new data, failures of models fit to existing data, or computational struggles with existing fitting procedures.
 
 - **7.2** Incorporating additional data  
-  - 
-
+  - It is sometimes said that the most important aspect of a statistical method is not what it does with the data, but what data are used.
+  - A key part of BW is expanding a model to make use of more data.
+    
 - **7.3** Working with prior distributions  
-  - 
-
+  - Traditionally, in Bayesian statistics, we speak of noninformative or fully informative priors, but neither of these generally exist.
+    - A uniform prior contains some information, as it depends on the parameterization of the model;
+    - A reference prior depends on an assumed asymptotic regime for collecting new, fictional data (Berger et al., 2009);
+    - Even an informative prior rarely includes all available knowledge.
+  - Rather, think of a ladder of possibilities:
+    - (improper) flat prior;
+    - super-vague but proper prior;
+    - very weakly informative prior;
+    - generic weakly informative prior;
+    - specific informative prior.
+  - Another way to view a prior distribution, or a statistical model more generally, is as a constraint.
+    - Prior distributions to shrink towards simpler models
+  - Box: Any clear distinction between model and prior is largely arbitrary and often depends mostly on the conceptual background of the one making the distinction.
+  - The amount of prior information needed to get reasonable inference depends strongly on
+    - the role of the parameter in the model 
+    - the depth of the parameter in the hierarchy
+  - Putting appropriate priors on our new parameters, we probably need to tighten up the priors on the overall mean and observation standard deviation, lest a lack of information lead to nonsense estimates. A related issue is the concentration of measure in higher-dimensional space.
+  - In red Box: Priors must be specified for each model within a workflow. An expanded model can require additional thought regarding parameterization. In general, we need to think in terms of the joint prior over all the parameters in a model, to be assessed in the context of the generative model for the data, lest unfortunate cancellations or resonances lead to less stabilizing or more informative priors than the modeler actually wants
+      
 - **7.4** A topology of models  
-  - 
-
+  - We would want the models considered within a framework to have their own topology or network structure as determined by the models in the class and their partial ordering.
+  - In red box: We speak of this as a topology of models rather than a probability space because we are not necessarily interested in assigning probabilities to the individual models. Our interest here is not in averaging over models but in navigating among them, and the topology refers to the connections between models and between parameters in neighboring models in the network
+    - Examples: Automatic Statistician (Hwang et al., 2016, Gharamani et al., 2019), which searches through models in specified but open-ended classes (for example, time series models and linear regression models), using inference and model criticism to explore the model and data space. Prophet (Taylor and Lethem, 2018) allows users to put together models (in this case, for time series forecasting) from some set of building blocks.
+  - However, unlike combining variables, where in many cases a simple and often automated additive model is enough, here, each model itself is a high-dimensional object.
+  - Box: The outputs from different models, as probabilistic random variables, can be added, multiplied, linearly mixed, loglinearly-mixed, pointwisely-mixed, etc, which is within the choice of model topology we need to specify. In addition, each model within a framework has its own internal structure involving parameters that can be estimated from data. And, importantly, the parameters within different models in the network can “talk with each other” in the sense of having a shared.
+    - Examples: forecasting and causal inference.
 
 ---
 
 ## 7. Understanding and Comparing Multiple Models
 
 - **7.1** Visualizing models in relation to each other  
-  - 
-
+  - BW key aspect is that we are fitting many models while working on a single problem.
+  - In red box: We are not talking here about model selection or model averaging but rather of the use of a series of fitted models to better understand each one.
+  - We seek to explore the **process** of model fitting, not just the end result.
+  - Given that we are fitting multiple models, we also have to be concerned with researcher degrees of freedom, most directly from overfitting if a single best model is picked, or more subtly that if we are not careful, we can consider our inferences from a set of fitted models to bracket some total uncertainty, without recognizing that there are other models we could have fit.
+  - Multiverse analyst: When multiple models pass all the checks.
+    
 - **7.2** Cross-validation and model averaging  
-  - 
-
+  - In red box: When performing model comparison, if there is non-negligible uncertainty in the comparison, we should not simply choose the single model with the best cross validation results, as this would discard all the uncertainty from the cross validation process.
+  - Instead, we can maintain this information and use stacking to combine inferences using a weighting that is set up to
+minimize cross validation error.
+  - In concept, stacking can sometimes be viewed as pointwise model selection.
+  - If we fit many models that we will not be interested in including in any average; such “scaolds” include models that are deliberately overly simple (included just for comparison to the models of interest) and models constructed for purely experimental purposes, as well as models that have major flaws or even coding errors.
+  -  But even after these mistakes or deliberate oversimplifications have been removed, there might be several models over which
+to average when making predictions. They prefer continuous model expansion over model averaging, but there will be settings where users will reasonably want to make predictions averaging over competing Bayesian models.
 - **7.3** Comparing a large number of models 
-  - 
+  - If the number of candidate models is large, we are often interested in finding a comparably smaller model that has the same predictive performance as our expanded model. This leads to the problem of predictor (variable) selection.
+  - In red Box: If we have many models making similar predictions, selecting one of these models based on minimizing cross validation error would lead to overfitting and suboptimal model choices.
+  - In contrast, projection predictive variable selection has been shown to be stable and reliable in finding smaller models
+with good predictive performance. The projection predictive approach avoids overfittin by examining only the projected submodels
+based on the expanded model’s predictions and not fitting each model independently to the data.
 
 ---
 
-## 8. Modeling as Software Development
-
-- **8.1** Version control smooths collaborations with others and with your past self  
-  - 
-
-- **8.2** Testing as you go  
-  - 
-
-- **8.3** Making it essentially reproducible  
-  - 
-
-- **8.4** Making it readable and maintainable  
-  - 
 
 ## Discussion
