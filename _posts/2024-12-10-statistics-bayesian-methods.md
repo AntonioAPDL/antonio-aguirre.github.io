@@ -327,5 +327,33 @@ based on the expanded model’s predictions and not fitting each model independe
 
 ---
 
-
 ## Discussion
+
+**Different perspectives on statistical modeling and prediction**
+  - Traditional statistical perspective. In textbooks, statistical inference is typically set up as a problem in which a model has been chosen ahead of time, and in the Bayesian context the goal is to accurately summarize the posterior distribution. Computation is supposed to be done as long as necessary to reach approximate convergence.
+  - Machine learning perspective. In machine learning, the usual goal is prediction, not parameter estimation, and computation can stop when cross validation prediction accuracy has plateaued.
+  - Model exploration perspective. In applied statistical work, much of our modeling effort is spent in exploration, trying out a series of models, many of which will have terrible fit to data, poor predictive performance, and slow convergence.
+- These three scenarios imply dierent inferential goals.
+  - In a traditional statistical modeling problem, it can make sense to run computation for a long time, using approximations only when absolutely necessary. The approximation might be in the choice of model rather than in the computation.
+  - In machine learning, we want to pick an algorithm that trades of predictive accuracy, generalizability, and scalability, so as to make use of as much data as possible within a fixed computational budget and predictive goal.
+  - In model exploration, we want to cycle through many models, which makes approximations attractive. But there is a caveat here: if we are to efficiently and accurately explore the model space rather than the algorithm space, we require any approximation to be suciently faithful as to reproduce the salient features of the posterior.
+- In red: The distinction here is not about inference vs. prediction, or exploratory vs. confirmatory analysis.
+- In box: distinction is how much we trust a given model and allow the computation to approximate.
+- This is one reason that subfields in applied statistics advance from application to application, as new wrinkles become apparent in existing models.
+  
+**Justification of iterative model building**
+- Model navigation as the next transformative step in data science.
+  - The first big step of data science, up to 1900 or so, was data summarization.
+  - The next big step, beginning with Gauss and Laplace and continuing to the present day, was modeling.
+  - Currently in the midst of another big step, computation.
+- In the real world, we need to take into account the limitations of humans and computers. One goal of BW is to make the process 
+ easier for humans even in the idealized setting where exact computation can be performed automatically.
+- There is no fully automated computation that yields perfect results.
+- It is easier to understand computational challenges when there are fewer moving parts
+
+**Model selection and overfitting**
+- A potential issue with the proposed iterative workflow is that model improvement is conditioned on discrepancy between the currently considered model and the data, and thus at least some aspects of the data are used more than once.
+  - In red box: This “double dipping” can in principle threaten the frequency properties of our inferences, and it is important to be aware of the possibility of overfitting arising from model selection.
+
+- A related issue is the garden of forking paths, the idea that different models would have been fit had the data come out differently. We do not advocate selecting the best fit among some such set of models. Instead, we describe a process of building to a more complex model taking the time to understand and justify each decision.
+
