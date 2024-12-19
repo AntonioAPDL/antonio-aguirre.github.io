@@ -37,3 +37,12 @@
   padding: 10px;
   margin: 10px 0;
 }
+
+/* Blue box */
+.blue-box {
+  background-color: #e6f7ff;
+  border-left: 5px solid #4da6ff;
+  padding: 10px;
+  margin: 10px 0;
+}
+
