@@ -193,8 +193,8 @@ The initial phase of inference algorithms is critical:
 ### How Long to Run an Iterative Algorithm
 The duration of iterative algorithms like MCMC impacts result reliability and computational efficiency:
 - **Convergence Diagnostics:**  
-  - Standard practice: Run until \(\hat{R}\), a mixing measure, is below 1.01 for all parameters.  
-  - Monitor the multivariate mixing statistic \(R^*\).  
+  - Standard practice: Run until \( \hat{R} \), a mixing measure, is below 1.01 for all parameters.  
+  - Monitor the multivariate mixing statistic \( R^* \).  
 - **Balancing Accuracy and Speed:**  
   While increasing effective sample size or reducing Monte Carlo error improves accuracy, it limits model exploration if computation is too slow.
 - **Leveraging Parallelism:**  
