@@ -354,6 +354,37 @@ based on the expanded model’s predictions and not fitting each model independe
 **Model selection and overfitting**
 - A potential issue with the proposed iterative workflow is that model improvement is conditioned on discrepancy between the currently considered model and the data, and thus at least some aspects of the data are used more than once.
   - In red box: This “double dipping” can in principle threaten the frequency properties of our inferences, and it is important to be aware of the possibility of overfitting arising from model selection.
-
 - A related issue is the garden of forking paths, the idea that different models would have been fit had the data come out differently. We do not advocate selecting the best fit among some such set of models. Instead, we describe a process of building to a more complex model taking the time to understand and justify each decision.
+- In box:  Suppose we fit model M1, then a posterior predictive check reveals problems with its fit to data, so we move to an improved M2 that, we hope, includes more prior information and makes more sense with respect to the data and the applied problem under study. But had the data been different, we would have been satisfied with M1. The steps of model checking and improvement, while absolutely necessary, represent an aspect of fitting to data that is not captured in the likelihood or the prior.
+- This is an example of the problem of post-selection inference.
+-  There is a problem of inference conditional on having “searched for the strongest associations.” BW does not involve searching for optimally fitting models or making hard model selection under uncertainty.
+- Their main message on the concerns about post-selection inference is that the final model should account for as much information as possible, and when we might be selecting among a large set of possible models, we instead embed these in a larger model, perform predictive model averaging, or use all of the models simultaneously
+- Perform severe tests of many of the assumptions that underlie the models being examined.
+
+**Bigger datasets demand bigger models**
+- Hierarchical Bayesian modeling, deep learning, and other regularization-based approaches are allowing researchers to fit larger, more complex models to real-world data, enabling information aggregation and partial pooling of inferences from different sources of data.
+- Statistical extrapolation should be more effective if we adjust for more factors, that is, include more information—but we quickly reach a technical barrier.
+- Models that adjust for many factors can become hard to estimate, and effective modeling requires
+  - (a) Regularization to get more stable estimates.
+  - (b) Modeling of latent variables, missingness, and measurement error.
+- In a box: The model does not exist in isolation and is not specified from the outside; it emerges from engagement with the application and the available data.
+
+**Prediction, generalization, and poststratification**
+- The three core tasks of statistics are
+    1. generalizing from sample to population,
+    2. generalizing from control to treatment group,
+    3. and generalizing from observed data to underlying constructs of interest.
+- Bayesian methods use
+  - Hierarchical modeling or partial pooling to appropriately generalize across similar but not identical settings,
+  - Regularization to facilitate the use of large nonparametric models
+  - Multilevel modeling for latent variables
+  - Connections between transportability and Bayesian graph models
+- Box: Just as the prior can often only be understood in the context of the likelihood so should the model be understood in light of how it will be used.
+
+
+
+
+
+
+
 
