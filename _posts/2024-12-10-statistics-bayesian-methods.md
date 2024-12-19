@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Bayesian Workflow"
+title: "A review on 'Bayesian Workflow'"
 date: 2024-12-10
 theme: Review
 tags: [statistics, bayesian, methodology]
