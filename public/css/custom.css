@@ -13,3 +13,27 @@
   padding: 10px;
   margin: 10px 0;
 }
+
+/* Yellow box */
+.yellow-box {
+  background-color: #ffffe6;
+  border-left: 5px solid #ffd700;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+/* Gray box */
+.gray-box {
+  background-color: #f0f0f0;
+  border-left: 5px solid #a0a0a0;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+/* Purple box */
+.purple-box {
+  background-color: #f9f0ff;
+  border-left: 5px solid #a64dff;
+  padding: 10px;
+  margin: 10px 0;
+}
