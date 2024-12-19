@@ -104,65 +104,61 @@ The Bayesian Workflow provides a comprehensive framework for organizing applied 
 For those interested in exploring this further, I recommend reviewing Gelman et al. (2020) and considering how these principles can be applied in your own work. 
 
 ---
-## 1. Before Fitting a Model
+## Before Fitting a Model
 
-### 1.1 Choosing an Initial Model
-- The starting point of almost all analyses is to adapt what has been done before.
-
----
-
-### 1.2 Modular Construction
-- A Bayesian model is built from **modules** rather than whole models, making it easier to:
-  - See connections between seemingly different models.
-  - Adapt models to specific analysis project requirements.
-- These modules often serve as placeholders that can be replaced as necessary.
+**Choosing an Initial Model**  
+The starting point of almost all analyses is to adapt what has been done before. Drawing from existing methods provides a foundation for further refinement.
 
 ---
 
-### 1.3 Scaling and Transforming the Parameters
-- **Interpretability:** Parameters should be interpretable for both practical and ethical reasons.  
-- **Transformations:** Complicated transformations can make parameters more interpretable and facilitate the use of prior information.
+**Modular Construction**  
+A Bayesian model is built from **modules** rather than whole models. Naming and constructing models in modular fashion makes it easier to:
+- Identify connections between seemingly different models.
+- Adapt models to the specific requirements of an analysis project.  
+
+Modules often act as placeholders, which can be replaced or expanded as necessary.
 
 ---
 
-### 1.4 Prior Predictive Checking
-- **Purpose:**  
-  Prior predictive checks are useful for understanding the implications of prior distributions in a generative model context.  
-- **Approach:**  
-  - Consider priors on outcomes, then derive a corresponding joint prior on parameters.
-  - Prior predictive simulations help elicit expert knowledge on measurable quantities, which is often easier than interpreting unobservable model parameters.
+**Scaling and Transforming the Parameters**  
+Parameters should be interpretable for both practical and ethical reasons. Transformations can make parameters more meaningful, aiding in:
+- Clear communication of results.
+- Effective use of prior information.
 
 ---
 
-### 1.5 Generative and Partially Generative Models
-- **Definition:**  
-  Fully Bayesian data analysis requires a **generative model**—a joint probability distribution for all data and parameters.
+**Prior Predictive Checking**  
+Prior predictive checks are invaluable for understanding the implications of prior distributions within generative models.  
+Key approaches include:
+- Considering priors on outcomes and deriving corresponding joint priors on parameters.
+- Using simulations to elicit expert knowledge on measurable quantities, which is often easier than soliciting opinions on unobservable model parameters.
 
 ---
 
-### In a Red Box:
+**Generative and Partially Generative Models**  
+Fully Bayesian data analysis typically requires a **generative model**, which is a joint probability distribution for all data and parameters.
+
 > **Key Insights About Bayesian Inference and Generative Models**  
-> - Bayesian inference does not require a generative model; it only needs the likelihood derived from the data.  
-> - Bayesian data analysis relies on generative models for predictive simulation and model checking.  
-> - The Bayesian workflow involves a series of generative models to enhance understanding.  
+> {: .red-box}  
+> - Bayesian inference does not require the generative model. It only needs the likelihood derived from the data, and different generative models can share the same likelihood.  
+> - Bayesian data analysis, however, depends on the generative model to enable predictive simulation and model checking.  
+> - The Bayesian workflow evaluates a series of generative models to improve understanding and predictions.
 
 ---
 
-- **Applications of Generative Models:**  
-  - Prior and posterior predictive checks may differ across generative models while satisfying the likelihood principle.
-  - Regression and survival analysis often use models that are not fully generative, such as when handling censoring.  
-  - Bayesian models using **improper priors** are not fully generative since they lack a joint distribution for data and parameters. These priors act as placeholders on the way to a fully Bayesian model.  
-  - Complexity in applied Bayesian analysis often arises when integrating data from multiple sources.
+Prior and posterior predictive checks can vary under different generative models while still satisfying the likelihood principle.  
+Some models commonly used in Bayesian analysis are not fully generative:
+- Regression models and survival data with censoring.
+- Models with improper priors, which lack a joint distribution for data and parameters and cannot sample from the prior predictive distribution. Improper priors often serve as placeholders on the path to a fully Bayesian model.
 
----
+In applied Bayesian work, complexity often arises from incorporating multiple data sources. This necessitates balancing simplicity with flexibility in modeling.
 
-### In a Box:
 > **Progression of Generative Models**  
-> - **Non-generative methods:** Defined as data summaries with no model for the data.  
-> - **Classical statistical models:** Characterized by probability distributions \( p(y; \theta) \) for data \( y \) given parameters \( \theta \), but no probability distribution for \( \theta \).  
-> - **Partially generative Bayesian models:** Generative on \( y \) and \( \theta \) but include additional unmodeled data \( x \) (e.g., sample sizes, design settings, and hyperparameters), represented as \( p(y, \theta \mid x) \).  
-> - **Fully generative models:** Completely generative, represented as \( p(y, \theta, x) \), with no "left out" data.  
-.
+> {: .green-box}  
+> - At one extreme, non-generative methods consist solely of data summaries with no model for the data.  
+> - Classical statistical models provide probability distributions \( p(y; \theta) \) for data \( y \) given parameters \( \theta \), but no distribution for \( \theta \).  
+> - Partially generative Bayesian models include unmodeled data \( x \), such as sample sizes, design settings, or hyperparameters, represented as \( p(y, \theta \mid x) \).  
+> - Fully generative models encompass everything, represented as \( p(y, \theta, x) \), leaving no data “left out.”  
 
 ---
 
