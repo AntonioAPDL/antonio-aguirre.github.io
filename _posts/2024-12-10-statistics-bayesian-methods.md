@@ -216,13 +216,12 @@ Markov chain simulation is an approximation where theoretical error reduces with
 - **Diagnostics for Approximate Algorithms:**  
   Use diagnostic tools to ensure the algorithm reproduces key posterior features for the specific model.
 
-> **Key Perspective**  
-> {: .green-box}  
-> Approximate algorithms can be viewed as exact algorithms for approximate models.  
-> - **Empirical Bayes:** Replaces prior distributions with data-dependent point-mass priors.  
-> - **Laplace Approximation:** Data-dependent linearization of the model.  
-> - **Nested Laplace Approximation:** Linearizes conditional posterior distributions.
-
+<div class="green-box">
+ Approximate algorithms can be viewed as exact algorithms for approximate models.  
+ - <strong>Empirical Bayes:</strong>   Replaces prior distributions with data-dependent point-mass priors.  
+ - <strong>Laplace Approximation:</strong>   Data-dependent linearization of the model.  
+ - <strong>Nested Laplace Approximation:</strong>   Linearizes conditional posterior distributions.
+</div>
 ---
 
 ### Fit Fast, Fail Fast
