@@ -1,15 +1,15 @@
 ---
 layout: post
-title: "A review on 'Bayesian Workflow'"
+title: "A review on Bayesian Methodology"
 date: 2024-12-10
 theme: Review
 tags: [statistics, bayesian, methodology]
-excerpt: "A review on the recently proposed Bayesian Workflow, and some commentary."
+excerpt: "A review on the modern Bayesian Methodology, and some commentary."
 ---
 
-# Bayesian Workflow: A Structured Review
+# Bayesian Methodology: Bayesian Workflow, as a structured framework. 
 
-The **Bayesian Workflow (BW)** is a critical framework for applied Bayesian Statistics, designed to detangle and organize the complex processes involved. This review builds upon the ideas presented in Gelman et al. (2020) and offers additional insights.
+Now more than ever, we need a critical framework for applied Bayesian Statistics to detangle and organize the complex processes involved. This review builds upon the ideas presented by Gelman et al. (2020) and offers additional personal insights.
 
 ---
 
