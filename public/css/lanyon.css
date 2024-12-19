@@ -27,11 +27,8 @@
  * Themes
  */
 
-blockquote {
-  max-width: 800px;
-  margin: auto;
-}
 
+/* Red Box */
 blockquote.red-box {
   background-color: #ffe6e6;
   border-left: 5px solid #ff4d4d;
@@ -40,19 +37,19 @@ blockquote.red-box {
   border-radius: 5px;
 }
 
-
-/* Blue Box */
-blockquote.blue-box {
-  background-color: #e6f7ff; /* Light blue background */
-  border-left: 5px solid #1e90ff; /* Bold blue border */
+/* Green Box */
+blockquote.green-box {
+  background-color: #e6ffe6;
+  border-left: 5px solid #32cd32;
   padding: 10px;
   margin: 15px 0;
   border-radius: 5px;
 }
 
-blockquote.green-box {
-  background-color: #e6ffe6;
-  border-left: 5px solid #32cd32;
+/* Blue Box (Optional) */
+blockquote.blue-box {
+  background-color: #e6f7ff;
+  border-left: 5px solid #1e90ff;
   padding: 10px;
   margin: 15px 0;
   border-radius: 5px;
