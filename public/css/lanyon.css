@@ -28,11 +28,36 @@
  */
 
 blockquote {
-  background-color: #ffe6e6;
-  border-left: 5px solid #ff4d4d;
-  padding: 10px;
+  max-width: 800px;
+  margin: auto;
 }
 
+/* Red Box */
+blockquote.red-box {
+  background-color: #ffe6e6; /* Light red background */
+  border-left: 5px solid #ff4d4d; /* Bold red border */
+  padding: 10px;
+  margin: 15px 0;
+  border-radius: 5px; /* Optional rounded corners */
+}
+
+/* Blue Box */
+blockquote.blue-box {
+  background-color: #e6f7ff; /* Light blue background */
+  border-left: 5px solid #1e90ff; /* Bold blue border */
+  padding: 10px;
+  margin: 15px 0;
+  border-radius: 5px;
+}
+
+/* Green Box */
+blockquote.green-box {
+  background-color: #e6ffe6; /* Light green background */
+  border-left: 5px solid #32cd32; /* Bold green border */
+  padding: 10px;
+  margin: 15px 0;
+  border-radius: 5px;
+}
 
 /* General Section Styling */
 h1, h2, h3 {
