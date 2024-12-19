@@ -253,7 +253,7 @@ The core idea of fake-data simulation is to test whether a procedure can recover
    Fit the model to real data, draw parameters from the resulting posterior distribution, and use these parameters for fake-data checking.
 
 <div class="red-box">
-  **Key Insight:**  
+  <strong>Key Insight:</strong>  
   If a model cannot make reliable inferences on fake data generated from itself, it’s unlikely to provide reasonable inferences on real data.
 </div>
 
@@ -271,7 +271,7 @@ SBC provides a more comprehensive approach than truth-point benchmarking by fitt
   - This mismatch can obscure insights about calibration and posterior behavior.
 
 <div class="green-box">
-  **Open Research Question:**  
+  <strong>Open Research Question:</strong>    
   How effective is SBC with a limited number of simulations?  
 </div>
 
@@ -286,7 +286,7 @@ Simulating data from different scenarios provides valuable insights into models 
 - Gain a deeper understanding of both computational issues and the underlying data.
 
 <div class="red-box">
-  **Important Consideration:**  
+  <strong>Important Consideration:</strong>    
   Testing a model with a single fake dataset is not sufficient.  
   - Even if the computational algorithm works, there’s a 5% chance that a random draw will fall outside a 95% uncertainty interval.  
   - Bayesian inference is calibrated only when averaging over the prior.  
@@ -301,7 +301,7 @@ Simulation of statistical systems under diverse conditions not only addresses co
 
 ### The Folk Theorem of Statistical Computing
 <div class="red-box">
-  **Key Insight:**  
+  <strong>Key Insight:</strong>   
   When computational problems arise, they often indicate an issue with the model itself.  
   Many cases of poor convergence are tied to regions of parameter space that are either irrelevant or nonsensical. Instead of throwing more computational resources at the problem, the first step should be to identify and address potential model pathologies.
 </div>
@@ -372,7 +372,7 @@ Many computational issues can be mitigated by incorporating prior information:
 - While the primary purpose of priors is not to fix fitting problems, their inclusion often resolves computational challenges.  
 
 <div class="red-box">
-  **Key Note on Identifiability:**  
+  <strong>Key Note on Identifiability:</strong>  
   “Identification” is an asymptotic property in classical statistics, but Bayesian inference prioritizes inference with finite data.  
   If data are insufficient for certain aspects of the model, priors can supply the necessary information.
 </div>
@@ -413,7 +413,7 @@ Posterior predictive checking involves simulations from the posterior distributi
 - The choice of checks depends on the analysis goals and the costs and benefits of adjustments.
 
 <div class="green-box">
-  **Key Principle:**  
+   <strong>Key Principle:</strong>   
   Seek “severe tests”—checks likely to fail if the model produces misleading answers to critical questions.
 </div>
 
@@ -450,7 +450,7 @@ Understanding how prior information affects posterior inferences is essential fo
   - Conduct static sensitivity analysis to study posterior sensitivity to prior perturbations without re-fitting the model.
 
 <div class="green-box">
-  **Practical Insight:**  
+  <strong>Practical Insight:</strong>   
   Sensitivity analysis highlights the balance between prior information and data, offering valuable diagnostic insights without excessive computation.
 </div>
 
@@ -478,12 +478,12 @@ Evaluating a fitted model is a multifaceted process. It involves a combination o
 Model construction is a creative process where the modeler combines existing components to account for new data, enhance features of existing data, or establish links to underlying processes.
 
 <div class="green-box">
-  **Model Building as a Task:**  
+  <strong>Model Building as a Task:</strong>  
   Model construction is akin to a language-like task, where components are assembled to encompass new data, existing data features, and links to underlying processes.
 </div>
 
 <div class="blue-box">
-  **Reasons for Model Expansion:**  
+  <strong>Reasons for Model Expansion:</strong>  
   - Response to new data.  
   - Failures of models fit to existing data.  
   - Computational challenges with current fitting procedures.
@@ -516,7 +516,7 @@ Priors also act as constraints, shrinking estimates toward simpler models. Howev
 - The parameter’s position in the hierarchy.  
 
 <div class="red-box">
-  **Critical Insight:**  
+  <strong>Critical Insight:</strong>   
   Priors must be specified for each model in the workflow. Expanded models often require additional thought regarding parameterization and joint priors to avoid unintended effects like cancellations or overly stabilizing priors.
 </div>
 
@@ -530,7 +530,7 @@ When introducing new parameters:
 Models within a framework can be thought of as forming a topology or network structure. This structure reflects connections and partial orderings rather than probabilities assigned to individual models.
 
 <div class="red-box">
-  **Key Insight:**  
+  <strong>Key Insight:</strong>    
   A topology of models refers to their connections and relationships, not a probability space. The goal is not to average over models but to navigate among them effectively.
 </div>
 
@@ -544,7 +544,7 @@ Models, treated as probabilistic random variables, can be combined in multiple w
 Each model has its internal structure, with parameters estimated from data, and parameters across models can interact (e.g., shared parameters).
 
 <div class="blue-box">
-  **Applications:**  
+  <strong>Applications:</strong>  
   - **Forecasting:** Using interconnected models to predict future outcomes.  
   - **Causal Inference:** Exploring relationships between variables using networked model structures.
 </div>
@@ -558,7 +558,7 @@ Each model has its internal structure, with parameters estimated from data, and 
 A key aspect of Bayesian Workflow (BW) is fitting multiple models for a single problem. This process is not about selecting the best model or averaging models, but rather using a series of fitted models to gain a deeper understanding of each one.
 
 <div class="red-box">
-  **Key Insight:**  
+  <strong>Key Insight:</strong>  
   Model comparison in this context is not about selecting or averaging but about exploring the **process** of fitting multiple models to understand them better.
 </div>
 
@@ -574,7 +574,7 @@ A key aspect of Bayesian Workflow (BW) is fitting multiple models for a single p
 Cross-validation (CV) is a powerful tool for evaluating models, but it requires careful interpretation:
 
 <div class="red-box">
-  **Key Principle:**  
+  <strong>Key Principle:</strong>  
   If there is significant uncertainty in model comparisons, avoid selecting the single model with the best cross-validation result. This discards the uncertainty from the CV process.
 </div>
 
@@ -592,7 +592,7 @@ While BW emphasizes continuous model expansion over averaging, there are cases w
 When faced with many candidate models, the goal is often to find a simpler model with comparable predictive performance to a more complex, expanded model.
 
 <div class="red-box">
-  **Key Warning:**  
+  <strong>Key Warning:</strong>  
   Selecting one model based solely on minimizing cross-validation error risks overfitting and suboptimal choices.
 </div>
 
@@ -629,12 +629,12 @@ Statistical modeling and prediction can be approached from several perspectives,
    - Approximations are more acceptable here but must faithfully reproduce key posterior features.
 
 <div class="red-box">
-  **Key Insight:**  
+  <strong>Key Insight:</strong>  
   The distinction here is not between inference vs. prediction or exploratory vs. confirmatory analysis, but rather how much trust is placed in a model and how computation approximates it.
 </div>
 
 <div class="blue-box">
-  **Model Trust:**  
+  <strong>Model Trust:</strong>  
   The process of iterative model building highlights how much computation and model development rely on trust in individual models and their approximations.
 </div>
 
@@ -655,7 +655,7 @@ The iterative model-building process is central to modern Bayesian Workflow (BW)
   - Fully automated computation yielding perfect results remains unattainable.
 
 <div class="green-box">
-  **Simplifying Challenges:**  
+  <strong>Simplifying Challenges:</strong>   
   Computational challenges are easier to address when fewer "moving parts" exist in the modeling process.
 </div>
 
@@ -666,7 +666,7 @@ An iterative workflow risks overfitting, as model improvement often involves con
 - **Double Dipping:** Using data multiple times during model iteration can compromise the frequency properties of inferences.
 
 <div class="red-box">
-  **Key Warning:**  
+<strong>Key Warning:</strong>  
   Double dipping and post-selection inference can lead to overfitting. Model improvement conditioned on discrepancies must be carefully managed.
 </div>
 
@@ -675,7 +675,7 @@ An iterative workflow risks overfitting, as model improvement often involves con
 - Instead of selecting the best-fitting model, BW emphasizes iterative improvements, ensuring each step is justified.
 
 <div class="blue-box">
-  **Example:**  
+<strong>Example:</strong>  
   Suppose model \(M_1\) fails a posterior predictive check, leading to the development of \(M_2\), which incorporates more prior information and better fits the data. Had the data differed, \(M_1\) might have sufficed. This highlights the iterative nature of BW.
 </div>
 
@@ -694,7 +694,7 @@ Larger datasets enable the fitting of complex models, such as hierarchical Bayes
   2. **Latent Variable Modeling:** To address missingness and measurement errors.
 
 <div class="green-box">
-  **Insight:**  
+<strong>Insight:</strong>  
   A model does not exist in isolation; it emerges from engagement with the application and available data.
 </div>
 
@@ -707,7 +707,7 @@ Statistical tasks often involve generalization, which Bayesian methods address e
 3. **Generalizing from Observed Data to Underlying Constructs:** Applying multilevel modeling for latent variables.
 
 <div class="blue-box">
-  **Key Insight:**  
+<strong>Key Insight:</strong>  
   Just as priors are understood in the context of the likelihood, models should be understood in light of their intended use.
 </div>
 
