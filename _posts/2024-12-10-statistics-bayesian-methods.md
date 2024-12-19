@@ -7,24 +7,6 @@ tags: [statistics, bayesian, methodology]
 excerpt: "A review on the recently proposed Bayesian Workflow, and some commentary."
 ---
 
-<div class="red-box">
-  Content for the red box.
-</div>
-
-<div class="green-box">
-  Content for the green box.
-</div>
-
-{% raw %}
-Inline math: $E = mc^2$
-
-Display math:
-$$
-\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
-$$
-{% endraw %}
-
-
 # Bayesian Workflow: A Structured Review
 
 The **Bayesian Workflow (BW)** is a critical framework for applied Bayesian Statistics, designed to detangle and organize the complex processes involved. This review builds upon the ideas presented in Gelman et al. (2020) and offers additional insights.
@@ -114,13 +96,12 @@ Workflows often become disorderly when moving beyond predefined designs and anal
 
 ---
 
-## Conclusion
-
 The Bayesian Workflow provides a comprehensive framework for organizing applied Bayesian Statistics. It embraces the iterative nature of statistical modeling, acknowledges the importance of learning from flawed models, and prioritizes the exploration of uncertainty. By following these structured principles, practitioners can make informed, defensible decisions while navigating the complexities of statistical analysis.
 
 For those interested in exploring this further, I recommend reviewing Gelman et al. (2020) and considering how these principles can be applied in your own work. 
 
 ---
+
 ## Before Fitting a Model
 
 **Choosing an Initial Model**  
@@ -129,7 +110,7 @@ The starting point of almost all analyses is to adapt what has been done before.
 ---
 
 **Modular Construction**  
-A Bayesian model is built from **modules** rather than whole models. Naming and constructing models in modular fashion makes it easier to:
+A Bayesian model is built from **modules** rather than whole models. Naming and constructing models in a modular fashion makes it easier to:
 - Identify connections between seemingly different models.
 - Adapt models to the specific requirements of an analysis project.  
 
@@ -155,11 +136,14 @@ Key approaches include:
 **Generative and Partially Generative Models**  
 Fully Bayesian data analysis typically requires a **generative model**, which is a joint probability distribution for all data and parameters.
 
-> **Key Insights About Bayesian Inference and Generative Models**  
-> {: .red-box}  
-> - Bayesian inference does not require the generative model. It only needs the likelihood derived from the data, and different generative models can share the same likelihood.  
-> - Bayesian data analysis, however, depends on the generative model to enable predictive simulation and model checking.  
-> - The Bayesian workflow evaluates a series of generative models to improve understanding and predictions.
+<div class="red-box">
+  <strong>Key Insights About Bayesian Inference and Generative Models</strong>  
+  <ul>
+    <li>Bayesian inference does not require the generative model. It only needs the likelihood derived from the data, and different generative models can share the same likelihood.</li>
+    <li>Bayesian data analysis, however, depends on the generative model to enable predictive simulation and model checking.</li>
+    <li>The Bayesian workflow evaluates a series of generative models to improve understanding and predictions.</li>
+  </ul>
+</div>
 
 ---
 
@@ -170,12 +154,16 @@ Some models commonly used in Bayesian analysis are not fully generative:
 
 In applied Bayesian work, complexity often arises from incorporating multiple data sources. This necessitates balancing simplicity with flexibility in modeling.
 
-> **Progression of Generative Models**  
-> {: .green-box}  
-> - At one extreme, non-generative methods consist solely of data summaries with no model for the data.  
-> - Classical statistical models provide probability distributions \( p(y; \theta) \) for data \( y \) given parameters \( \theta \), but no distribution for \( \theta \).  
-> - Partially generative Bayesian models include unmodeled data \( x \), such as sample sizes, design settings, or hyperparameters, represented as \( p(y, \theta \mid x) \).  
-> - Fully generative models encompass everything, represented as \( p(y, \theta, x) \), leaving no data “left out.”  
+<div class="green-box">
+  <strong>Progression of Generative Models</strong>  
+  <ul>
+    <li>At one extreme, non-generative methods consist solely of data summaries with no model for the data.</li>
+    <li>Classical statistical models provide probability distributions \( p(y; \theta) \) for data \( y \) given parameters \( \theta \), but no distribution for \( \theta \).</li>
+    <li>Partially generative Bayesian models include unmodeled data \( x \), such as sample sizes, design settings, or hyperparameters, represented as \( p(y, \theta \mid x) \).</li>
+    <li>Fully generative models encompass everything, represented as \( p(y, \theta, x) \), leaving no data “left out.”</li>
+  </ul>
+</div>
+
 
 ---
 
