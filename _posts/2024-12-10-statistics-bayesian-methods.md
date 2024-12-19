@@ -1,4 +1,4 @@
----
+----
 layout: post
 title: "Bayesian Workflow"
 date: 2024-12-10
@@ -7,34 +7,104 @@ tags: [statistics, bayesian, methodology]
 excerpt: "A review on the recently proposed Bayesian Workflow, and some commentary."
 ---
 
-## Introduction
+# Bayesian Workflow: A Structured Review
 
-- Gelman et al. (2020)
-- The purpose is to detangle and structure the complex and dynamic workflow of applied Bayesian Statistics.
-- We must distinguish between Bayesian Inference, Bayesian Data analysis, and Bayesian Workflow (BW).
-- Bayesian inference is just the formulation and computation of conditional probabilities or posteriors.
-- BW includes model building, inference, model checking/improvement, and model comparison (not only for model selection or model averaging) for the better undertaking of these models. This includes fitting and analysis models that, in retrospect, are poor choices, useful but flawed, and worth reporting. 
+Understanding and structuring the **Bayesian Workflow (BW)** is critical for applied Bayesian Statistics. This review builds upon the framework proposed by Gelman et al. (2020), offering insights and commentary.
 
-- Why?
-  - Alleviate computational burden through organized and iterative steps for model understanding.
-  - Typically, we need to know which model to fit, which assumptions are worth relaxing, and which are not.
-  - We want to understand model fitting and its relationship with data for those poor and old choices.
-  - Different models yield different conclusions. 
+---
 
-Share diagram in paper or improve it*
+## 📌 **Introduction**
 
-Essential ideas in statistics that started as hacks and have been brought into the core of statistics: 
-- Multilevel modeling is a formalization of what has been called Empirical Bayes Estimation of priors, expanding the model to fold inference about prior into a fully Bayesian framework.
-- Exploratory Data Analysis, a form of predictive model checking.
-- Regularization Methods, which have replaced ad hoc variable selection tools in regression.
-- Non-parametric models can be considered Bayesian Replacements for procedures such as kernel smoothing.
+Bayesian Workflow (BW) aims to detangle and structure the complex and dynamic processes involved in applied Bayesian Statistics. To better understand its scope, it’s important to distinguish among:
 
-In each of these cases and many others, a framework of statistical methodology has been expanded to include existing methods, along the way making the methods more modular and potentially useful. 
+1. **Bayesian Inference:**  
+   The computation of conditional probabilities (posteriors) based on models.
+   
+2. **Bayesian Data Analysis:**  
+   Application of Bayesian inference to analyze datasets.
 
-Statistics is all about uncertainty. In addition to the usual uncertainties in the data and model parameters, we are often uncertain whether we are fitting our models correctly, uncertain about how best to set up and expand our models, and uncertain in their interpretation. 
+3. **Bayesian Workflow (BW):**  
+   A broader concept encompassing:
+   - **Model building**
+   - **Inference**
+   - **Model checking and improvement**
+   - **Model comparison** (not limited to selection or averaging)  
+   BW involves understanding the data and fitting models, even flawed ones, to learn from them. It acknowledges that even "poor choices" are often useful and worth reporting.
 
-Once we go beyond simple preassigned designs and analysis, our workflow can be disorderly.
-Moreover, practical considerations—especially available time, computational resources, and the severity of the penalty for being wrong—can compel a practitioner to take shortcuts. 
+---
+
+## 🧠 **Why Do We Need Bayesian Workflow?**
+
+- **Alleviate Computational Burden:**  
+  Organized, iterative steps lead to efficient model understanding and evaluation.
+
+- **Guide Model Choices:**  
+  Helps identify which assumptions to relax and which to retain.
+
+- **Understand Model-Data Relationships:**  
+  Encourages exploration of how models fit data, especially in cases where the fit is suboptimal.
+
+- **Appreciate Model Diversity:**  
+  Different models can yield different conclusions; understanding these differences is critical.
+
+---
+
+## 🖼️ **Core Concepts in Bayesian Workflow**
+
+### **Diagram Reference**
+📍 Refer to the diagram in Gelman et al. (2020) for a visual overview of the workflow.  
+*(Alternatively, enhance or improve this diagram to provide more clarity.)*
+
+### **Innovations That Reshaped Statistics**
+
+Several statistical methodologies, once considered "hacks," have been formalized and integrated into the Bayesian framework. These include:
+
+- **Multilevel Modeling:**  
+  Formalizes **Empirical Bayes Estimation**, embedding prior inference within a fully Bayesian context.
+  
+- **Exploratory Data Analysis (EDA):**  
+  A cornerstone of **predictive model checking**.
+
+- **Regularization Methods:**  
+  Replace ad hoc variable selection tools in regression, improving model robustness.
+
+- **Non-parametric Models:**  
+  Serve as Bayesian alternatives to procedures like kernel smoothing.
+
+These advancements have modularized methodologies, expanding their utility and adaptability.
+
+---
+
+## 🌐 **Uncertainty in Statistics**
+
+Statistics is fundamentally about **quantifying uncertainty**. This uncertainty spans multiple dimensions:
+
+- **Data and Model Parameters:**  
+  Inherent variability in datasets and parameters.
+
+- **Model Fitting:**  
+  Uncertainty about whether the model is appropriately specified.
+
+- **Model Setup and Expansion:**  
+  Challenges in determining how best to structure and extend models.
+
+- **Interpretation:**  
+  Ambiguity in drawing meaningful conclusions from results.
+
+When moving beyond preassigned designs and analyses, workflows often become **disorderly**, influenced by practical constraints such as:
+- Limited time
+- Computational resources
+- The penalty for being wrong
+
+These challenges necessitate a structured Bayesian Workflow to guide practitioners through systematic and defensible decision-making processes.
+
+---
+
+## 📝 **Conclusion**
+The Bayesian Workflow offers a comprehensive, organized approach to applied Bayesian Statistics, embracing both theoretical rigor and practical adaptability. By recognizing uncertainty at all stages and learning from even flawed models, it provides a pathway to robust statistical insights. 
+
+Stay tuned for further explorations and enhancements of the framework!
+
 
 
 
