@@ -32,14 +32,14 @@ blockquote {
   margin: auto;
 }
 
-/* Red Box */
 blockquote.red-box {
-  background-color: #ffe6e6; /* Light red background */
-  border-left: 5px solid #ff4d4d; /* Bold red border */
+  background-color: #ffe6e6;
+  border-left: 5px solid #ff4d4d;
   padding: 10px;
   margin: 15px 0;
-  border-radius: 5px; /* Optional rounded corners */
+  border-radius: 5px;
 }
+
 
 /* Blue Box */
 blockquote.blue-box {
@@ -50,14 +50,14 @@ blockquote.blue-box {
   border-radius: 5px;
 }
 
-/* Green Box */
 blockquote.green-box {
-  background-color: #e6ffe6; /* Light green background */
-  border-left: 5px solid #32cd32; /* Bold green border */
+  background-color: #e6ffe6;
+  border-left: 5px solid #32cd32;
   padding: 10px;
   margin: 15px 0;
   border-radius: 5px;
 }
+
 
 /* General Section Styling */
 h1, h2, h3 {
