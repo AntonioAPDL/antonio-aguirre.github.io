@@ -36,3 +36,17 @@ plugins:
 # Custom Variables
 version:             1.1.0
 google_analytics_id: ""  # Add Google Analytics ID if applicable
+
+# Example configuration for custom CSS
+markdown: kramdown
+theme: minima
+highlighter: rouge
+
+# Add this if you haven't already
+sass:
+  style: compressed
+
+# Ensure custom CSS is referenced correctly
+include:
+  - public/css/
+
