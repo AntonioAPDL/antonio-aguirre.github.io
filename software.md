@@ -11,7 +11,7 @@ title: Software
   <p style="font-size: 1.2rem; line-height: 1.8; color: #555; margin-bottom: 2rem;">
     I am currently organizing and preparing my software projects for upload. Please check back soon to explore 
     my contributions in <strong>R</strong>, <strong>MATLAB</strong>, <strong>Python</strong>, <strong>C++</strong>, and <strong>Julia</strong>.
-    These tools and packages are designed for <em>statistical modeling</em>, <em>machine learning</em>, and <em>scientific computing</em>.
+    These tools and packages are designed for <em>statistical modeling</em>, <em>machine learning</em>, and <em>scientific computing</em>. Dec/20/2024
   </p>
 
   <!-- Placeholder Sections -->
