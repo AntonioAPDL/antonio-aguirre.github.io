@@ -69,11 +69,11 @@ title: About
       <li style="margin-bottom: 1rem;">
         When I'm not immersed in my PhD work, I enjoy baking bread, cooking Mexican dishes, exploring history, diving into the philosophy of science, and learning German.
       </li>
-    </ul>
     <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
        <li style="margin-bottom: 1rem;"> Thanks for stopping by! </li>
       <li style="margin-bottom: 1rem;"> Feel free to reach out if you’d like to connect or discuss ideas.</li>
     </p>
+    </ul>
   </div>
 </div>
 
