@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "A review on Bayesian Methodology. Part V"
+title: "A review on Bayesian Methodology. 5/6"
 date: 2024-12-15
 theme: Review
 tags: [statistics, bayesian, methodology]
