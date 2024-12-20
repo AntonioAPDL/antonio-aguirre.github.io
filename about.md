@@ -67,11 +67,12 @@ title: About
     <h2 style="font-size: 2rem; font-weight: bold; color: #333;">Beyond Research</h2>
     <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
       <li style="margin-bottom: 1rem;">
-        When not PhDing., I delve into baking bread, cooking Mexican food, reading history and philosophy of science, and learning German.
+        When not PhDing, I delve into baking bread, cooking Mexican food, learning history and reading philosophy of science, and learning German.
       </li>
     </ul>
     <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
-      Thanks for stopping by! Feel free to reach out if you’d like to connect or discuss ideas.
+       <li> Thanks for stopping by! </li>
+      <li> Feel free to reach out if you’d like to connect or discuss ideas.</li>
     </p>
   </div>
 </div>
