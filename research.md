@@ -1,6 +1,5 @@
 ---
 layout: default
-title: Research
 ---
 
 <div class="research-section" style="margin: 2rem auto; max-width: 800px; text-align: center;">
