@@ -1,6 +1,5 @@
 ---
 layout: default
-title: Software
 ---
 
 <div class="software-section" style="max-width: 900px; margin: 0 auto; text-align: center; padding: 2rem;">
