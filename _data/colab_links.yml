@@ -1,0 +1,8 @@
+stat131:
+  - title: "Interactive Regression Analysis"
+    url: "https://colab.research.google.com/example1"
+  - title: "Time Series Notebook"
+    url: "https://colab.research.google.com/example2"
+stat132:
+  - title: "Dynamic Programming Exercises"
+    url: "https://colab.research.google.com/example3"
