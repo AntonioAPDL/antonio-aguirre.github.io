@@ -1,12 +1,12 @@
 stat132:
-  - title: "Introduction to Regression Models"
+  - title: "Priors and Posteriors"
     url: "https://colab.research.google.com/drive/1wLfCQC1TydXUyhY1mDw5cGRtl9vW8LPa?usp=sharing"
-  - title: "Exploratory Data Analysis with Colab"
+  - title: "Maximum Likelihood Estimation"
     url: "https://colab.research.google.com/drive/1jQwDOm_56VOFXPpj2t_eoQZxZXWa-qZe?usp=sharing"
-  - title: "Dynamic Linear Models"
+  - title: "Estimation, Variance, Bias and Classical Hypothesis Testing"
     url: "https://colab.research.google.com/drive/1ey5H5Yp_Ry9JvZpRARxX3m6eOK7Ds2bS?usp=sharing"
-  - title: "Forecasting Techniques Overview"
+  - title: "More on Classical Hypothesis Testing"
     url: "https://colab.research.google.com/drive/1FRkZBCpb7AD2uSTgDJydC8PTZTsv2o0H?usp=drive_link"
-  - title: "Advanced Bayesian Methods"
+  - title: "Bayesian Hypothesis Testing"
     url: "https://colab.research.google.com/drive/1za5ERI2GO6QcCPeRCrfCb2UAWBex9Irq?usp=sharing"
 
