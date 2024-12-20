@@ -339,7 +339,7 @@ Many computational issues can be mitigated by incorporating prior information:
   <strong>Identifiability?</strong>  
   <li> “Identification” is an asymptotic property in classical statistics </li>
   <li> Bayesian inference prioritizes inference with finite data. </li>
-  <li> If data are insufficient for certain aspects of the model, priors can supply the necessary information. <li>
+  <li> If data are insufficient for certain aspects of the model, priors can supply the necessary information. </li>
 </div>
 
 **Ladder of Abstraction:**  
