@@ -56,7 +56,7 @@ title: About
     <h2 style="font-size: 2rem; font-weight: bold; color: #333; text-align: center;">Academic Journey</h2>
     <ul style="list-style: disc; padding-left: 1.5rem; max-width: 800px; margin: 1rem auto; text-align: left;">
       <li style="margin-bottom: 0.8rem;">
-        <strong>Ph.D. in Statistics:</strong> University of California, Santa Cruz (2021-Present)
+        <strong>Ph.D. in Statistics:</strong> <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank">University of California, Santa Cruz</a> (2021-Present)
       </li>
       <li style="margin-bottom: 0.8rem;">
         <strong>M.Sc. in Economic Theory:</strong> <a href="https://mteoriaeconomica.itam.mx/en/conoce-el-posgrado-teoriaeconomica" target="_blank">Instituto Tecnológico Autónomo de México (ITAM)</a> (2018-2020)
