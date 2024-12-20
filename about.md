@@ -62,18 +62,16 @@ title: About
     </ul>
   </div>
 
+<div class="about-section">
   <!-- Beyond Research Section -->
   <div class="beyond-research" style="margin-top: 3rem; padding: 1rem; text-align: center;">
     <h2 style="font-size: 2rem; font-weight: bold; color: #333;">Beyond Research</h2>
-    <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
-      <li style="margin-bottom: 1rem;">
-        When I'm not immersed in my PhD work, I enjoy baking bread, cooking Mexican dishes, exploring history, diving into the philosophy of science, and learning German.
-      </li>
     <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
-       <li style="margin-bottom: 1rem;"> Thanks for stopping by! </li>
-      <li style="margin-bottom: 1rem;"> Feel free to reach out if you’d like to connect or discuss ideas.</li>
+      When I'm not immersed in my PhD work, I enjoy baking bread, cooking Mexican dishes, exploring history, diving into the philosophy of science, and learning German.
     </p>
-    </ul>
+    <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
+      Thanks for stopping by! Feel free to reach out if you’d like to connect or discuss ideas.
+    </p>
   </div>
 </div>
 
