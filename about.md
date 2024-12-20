@@ -4,10 +4,7 @@ title: About
 ---
 
 <div class="about-section">
-  <!-- Welcome Message -->
-  <p class="message" style="font-style: italic; color: #555; text-align: center; margin: 1rem auto; max-width: 800px;">
-    Hi there! Welcome to my corner of the internet where data, research, and curiosity come together.
-  </p>
+
 
   <!-- Introduction -->
   <div class="intro" style="text-align: center; margin-top: 2rem;">
