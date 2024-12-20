@@ -1,6 +1,5 @@
 ---
 layout: page
-title: About
 ---
 
 <div class="about-section">
