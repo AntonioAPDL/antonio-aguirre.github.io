@@ -1,8 +1,12 @@
-stat131:
-  - title: "Interactive Regression Analysis"
-    url: "https://colab.research.google.com/example1"
-  - title: "Time Series Notebook"
-    url: "https://colab.research.google.com/example2"
 stat132:
-  - title: "Dynamic Programming Exercises"
-    url: "https://colab.research.google.com/example3"
+  - title: "Introduction to Regression Models"
+    url: "https://colab.research.google.com/drive/1wLfCQC1TydXUyhY1mDw5cGRtl9vW8LPa?usp=sharing"
+  - title: "Exploratory Data Analysis with Colab"
+    url: "https://colab.research.google.com/drive/1jQwDOm_56VOFXPpj2t_eoQZxZXWa-qZe?usp=sharing"
+  - title: "Dynamic Linear Models"
+    url: "https://colab.research.google.com/drive/1ey5H5Yp_Ry9JvZpRARxX3m6eOK7Ds2bS?usp=sharing"
+  - title: "Forecasting Techniques Overview"
+    url: "https://colab.research.google.com/drive/1FRkZBCpb7AD2uSTgDJydC8PTZTsv2o0H?usp=drive_link"
+  - title: "Advanced Bayesian Methods"
+    url: "https://colab.research.google.com/drive/1za5ERI2GO6QcCPeRCrfCb2UAWBex9Irq?usp=sharing"
+
