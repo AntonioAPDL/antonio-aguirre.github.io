@@ -4,7 +4,7 @@ title: "On Bayesian Methodology. Part 3/6"
 date: 2024-12-12
 theme: Review
 tags: [statistics, bayesian, methodology]
-excerpt: "A review on the modern Bayesian Methodology: Simulations"
+excerpt: "Simulations"
 ---
 
 ## III. Using Constructed Data to Find and Understand Problems
