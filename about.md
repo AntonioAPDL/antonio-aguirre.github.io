@@ -70,7 +70,7 @@ title: About
   <div class="beyond-research" style="margin-top: 3rem; padding: 1rem; text-align: center;">
     <h2 style="font-size: 2rem; font-weight: bold; color: #333;">Beyond Research</h2>
     <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
-      When I'm not immersed in my PhD work, I enjoy baking bread, cooking Mexican dishes, exploring history, diving into the philosophy of science, and learning German.
+      When I'm not PhDing, I enjoy baking bread, cooking Mexican dishes, exploring history, diving into the philosophy of science, and learning German.
     </p>
     <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
       Thanks for stopping by! Feel free to reach out if you’d like to connect or discuss ideas.
