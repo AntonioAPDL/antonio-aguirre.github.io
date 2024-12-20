@@ -4,7 +4,7 @@ title: "On Bayesian Methodology Part. 2/6"
 date: 2024-12-11
 theme: Review
 tags: [statistics, bayesian, methodology]
-excerpt: "Modern Bayesian Methodology: Before and While Fitting a Model "
+excerpt: "Before and While Fitting a Model "
 ---
 
 
