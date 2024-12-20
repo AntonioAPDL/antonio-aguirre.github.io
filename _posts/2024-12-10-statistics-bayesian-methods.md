@@ -4,7 +4,7 @@ title: "On Bayesian Methodology. Part 1/6"
 date: 2024-12-10
 theme: Review
 tags: [statistics, bayesian, methodology]
-excerpt: "A review on the modern Bayesian Methodology, and some commentary."
+excerpt: "A review on the modern Bayesian Methodology."
 ---
 
 # A Bayesian Methodology Workflow. Towards an all-encompassing framework. 
