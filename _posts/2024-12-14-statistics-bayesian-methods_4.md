@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "On Bayesian Methodology. Part 4/6"
-date: 2024-12-14
+date: 2024-12-03
 theme: Review
 tags: [statistics, bayesian, methodology]
 excerpt: "Computational Challenges and Model Validation"
