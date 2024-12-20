@@ -6,7 +6,7 @@ title: About
 <div class="about-section">
   <!-- Welcome Message -->
   <p class="message" style="font-style: italic; color: #555; text-align: center; margin: 1rem auto; max-width: 800px;">
-    Exploring data to address real-world challenges with Bayesian insights.
+    Hi there! Welcome to my corner of the internet where data, research, and curiosity come together.
   </p>
 
   <!-- Introduction -->
@@ -28,30 +28,11 @@ title: About
               text-align: center; 
               margin: 1rem auto; 
               color: #555;">
-        Hi! I’m a Ph.D. candidate in <strong>Statistics</strong> at the <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank">University of California, Santa Cruz</a>. 
+        I’m a Ph.D. candidate in <strong>Statistics</strong> at the <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank">University of California, Santa Cruz</a>. 
         Working with <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank">Bruno Sanso</a> and <a href="https://raquel.soe.ucsc.edu/" target="_blank">Raquel Prado</a>, my research focuses on improving statistical methods to make them practical and effective for solving real-world problems. 
         My work emphasizes uncertainty quantification, forecasting, and scalable Bayesian techniques, especially in environmental and hydrological contexts.
       </p>
     </div>
-  </div>
-
-  <!-- Research Focus Section -->
-  <div class="research-focus" style="margin-top: 3rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-    <h2 style="font-size: 2rem; font-weight: bold; color: #333; text-align: center;">Research Focus</h2>
-    <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
-      <li style="margin-bottom: 1rem;">
-        <strong>Bayesian Methods:</strong> Integrating Bayesian principles into scalable tools for analyzing complex data.
-      </li>
-      <li style="margin-bottom: 1rem;">
-        <strong>Dynamic Models:</strong> Developing real-time forecasting methods for processes like river flow and climate variability.
-      </li>
-      <li style="margin-bottom: 1rem;">
-        <strong>Spatio-Temporal Analysis:</strong> Understanding patterns across space and time to inform actionable decisions.
-      </li>
-      <li style="margin-bottom: 1rem;">
-        <strong>Data-Driven Learning:</strong> Creating workflows that continuously improve predictions by incorporating new data.
-      </li>
-    </ul>
   </div>
 
   <!-- Ongoing Projects Section -->
@@ -105,3 +86,4 @@ title: About
     </p>
   </div>
 </div>
+
