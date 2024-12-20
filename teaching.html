@@ -6,7 +6,7 @@ layout: page
   <!-- Page Introduction -->
   <h1 style="text-align: center; font-size: 2.5rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Teaching</h1>
   <p style="font-size: 1.2rem; line-height: 1.8; color: #555; text-align: center; margin-bottom: 2rem;">
-    Below are the courses I have taught, with materials organized by course. Each section includes resources such as slides, worksheets, assignments, and supplementary teaching content. I am actively working to upload additional resources to provide a comprehensive repository for each course.
+    Below are the courses I have taught, including lecture materials and interactive notebooks. Each course includes slides, problem sets, and dynamic exercises to support learning.
   </p>
 
   <!-- Teaching Materials -->
@@ -19,7 +19,7 @@ layout: page
       <li style="margin-bottom: 2rem; padding: 1.5rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
         <h2 style="font-size: 2rem; color: #333; margin-bottom: 1rem;">{{ course_name }}</h2>
         <p style="font-size: 1rem; color: #555; margin-bottom: 1rem;">
-          Explore the materials I have developed for <strong>{{ course_name }}</strong>, which include lecture slides, problem sets, and solutions.
+          Explore resources for <strong>{{ course_name }}</strong>, including lecture slides, assignments, and Colab notebooks.
         </p>
         <ul style="list-style: none; padding: 0;">
           {% for file in course.items %}
@@ -30,6 +30,21 @@ layout: page
             </li>
           {% endfor %}
         </ul>
+        <!-- Colab Notebooks Section -->
+        {% if site.data.colab_links[course_folder] %}
+          <div style="margin-top: 1rem;">
+            <h3 style="font-size: 1.2rem; color: #333; margin-bottom: 0.5rem;">Interactive Colab Notebooks</h3>
+            <ul style="list-style: none; padding: 0;">
+              {% for link in site.data.colab_links[course_folder] %}
+                <li style="margin-bottom: 0.5rem;">
+                  <a href="{{ link.url }}" target="_blank" style="font-size: 1.1rem; color: #1b9e77; text-decoration: none;">
+                    🚀 {{ link.title }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
       </li>
     {% endfor %}
   </ul>
@@ -38,7 +53,7 @@ layout: page
   <div class="future-content" style="margin-top: 2rem; padding: 1rem; background-color: #fff3cd; border-left: 6px solid #ffeeba; border-radius: 8px; text-align: left;">
     <h3 style="font-size: 1.5rem; color: #856404; margin-bottom: 1rem;">Work in Progress</h3>
     <p style="font-size: 1.1rem; color: #856404; line-height: 1.8;">
-      I am currently in the process of uploading additional and existing materials for each course, including exercises, notes, Shiny apps, and dynamic notebooks. Stay tuned for updates! If you are a student, email me so I can share my Google Drive.
+      I am currently uploading additional course materials and interactive notebooks. Stay tuned for updates!
     </p>
   </div>
 </div>
