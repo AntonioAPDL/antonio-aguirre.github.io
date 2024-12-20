@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "On Bayesian Methodology. Part 5/6"
-date: 2024-12-15
+date: 2024-12-02
 theme: Review
 tags: [statistics, bayesian, methodology]
 excerpt: "Model Comparison"
