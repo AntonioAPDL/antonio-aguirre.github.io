@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "On Bayesian Methodology Part. 2/6"
-date: 2024-12-11
+date: 2024-10-11
 theme: Review
 tags: [statistics, bayesian, methodology]
 excerpt: "Before and While Fitting a Model "
