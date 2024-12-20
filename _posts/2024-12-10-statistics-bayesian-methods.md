@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "On Bayesian Methodology. Part 1/6"
-date: 2024-12-10
+date: 2024-09-29
 theme: Review
 tags: [statistics, bayesian, methodology]
 excerpt: "A review on the modern Bayesian Methodology."
