@@ -4,8 +4,6 @@ title: About
 ---
 
 <div class="about-section">
-
-
   <!-- Introduction -->
   <div class="intro" style="text-align: center; margin-top: 2rem;">
     <div style="display: flex; flex-direction: column; align-items: center;">
@@ -49,7 +47,7 @@ title: About
   </div>
 
   <!-- Academic Journey Section -->
-  <div class="academic-journey" style="margin-top: 3rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+  <div class="Education" style="margin-top: 3rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
     <h2 style="font-size: 2rem; font-weight: bold; color: #333; text-align: center;">Academic Journey</h2>
     <ul style="list-style: disc; padding-left: 1.5rem; max-width: 800px; margin: 1rem auto; text-align: left;">
       <li style="margin-bottom: 0.8rem;">
@@ -69,13 +67,7 @@ title: About
     <h2 style="font-size: 2rem; font-weight: bold; color: #333;">Beyond Research</h2>
     <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
       <li style="margin-bottom: 1rem;">
-        Delving into philosophy, especially questions about knowledge and uncertainty.
-      </li>
-      <li style="margin-bottom: 1rem;">
-        Exploring cutting-edge tools for data science and learning German in my free time.
-      </li>
-      <li style="margin-bottom: 1rem;">
-        Hitting the gym for strength training and staying active.
+        When not PhDing., I delve into baking bread, cooking Mexican food, reading history and philosophy of science, and learning German.
       </li>
     </ul>
     <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
