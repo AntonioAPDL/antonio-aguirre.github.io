@@ -568,12 +568,12 @@ Statistical modeling and prediction can be approached from several perspectives,
 
 <div class="green-box">
   <strong>Key Insight:</strong>  
-  The distinction here is not between inference vs. prediction or exploratory vs. confirmatory analysis, but rather how much trust is placed in a model and how computation approximates it.
+ <li> The distinction here is not between inference vs. prediction or exploratory vs. confirmatory analysis, but rather how much trust is placed in a model and how computation approximates it. </li>
 </div>
 
 <div class="yellow-box">
   <strong>Model Trust:</strong>  
-  The process of iterative model building highlights how much computation and model development rely on trust in individual models and their approximations.
+ <li>  The process of iterative model building highlights how much computation and model development rely on trust in individual models and their approximations. </li>
 </div>
 
 These differing perspectives influence how statistical methods evolve as new challenges emerge in applied settings.
@@ -612,7 +612,7 @@ An iterative workflow risks overfitting, as model improvement often involves con
 
 <div class="blue-box">
 <strong>Example:</strong>  
- </li>  Suppose model \(M_1\) fails a posterior predictive check, leading to the development of \(M_2\), which incorporates more prior information and better fits the data. Had the data differed, \(M_1\) might have sufficed. This highlights the iterative nature of **BW**. </li>
+ <li>  Suppose model \(M_1\) fails a posterior predictive check, leading to the development of \(M_2\), which incorporates more prior information and better fits the data. Had the data differed, \(M_1\) might have sufficed. This highlights the iterative nature of **BW**. </li>
 </div>
 
 To mitigate post-selection inference issues:
