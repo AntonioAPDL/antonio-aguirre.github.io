@@ -1,6 +1,6 @@
 # Website Setup
 title:               Antonio Aguirre
-tagline:             "Bayesian Statistics and Machine Learning"
+tagline:             "Bayesian Statistics·Machine Learning"
 description:         "Statistics and more."
 url:                 "https://antonio-aguirre.com" # Website URL
 baseurl:             ""                           # Leave empty for root deployment
