@@ -9,19 +9,19 @@ excerpt: "A review on the modern Bayesian Methodology, and some commentary."
 
 # Bayesian Methodology: Bayesian Workflow, as a structured framework. 
 
-Now more than ever, we need a critical framework for applied Bayesian Statistics to detangle and organize the complex processes involved. This review builds upon the ideas presented by Gelman et al. (2020) and offers additional personal insights.
+Now more than ever, we need a critical framework for applied Bayesian Statistics to detangle and organize the complex processes involved. This review builds upon the framework Gelman et al. (2020) presented, called Bayesian Workflow, and offers additional personal insights.
 
 ---
 
-## Introduction
+## What is Bayesian Workflow?
 
-Bayesian Workflow (BW) provides a structured approach to managing the dynamic and iterative nature of applied Bayesian Statistics. It’s helpful to differentiate three closely related concepts:
+Bayesian Workflow (BW) provides a structured approach to managing the dynamic and iterative nature of applied Bayesian Statistics. To better understand it, it's helpful to differentiate three closely related concepts:
 
 1. **Bayesian Inference:**  
-   The computation of conditional probabilities or posterior distributions.
+   Whose primary goal is to compute the conditional probabilities or posterior distributions.
 
 2. **Bayesian Data Analysis:**  
-   The application of Bayesian inference to specific datasets.
+   Which refers to the application of Bayesian inference to specific datasets as described in Gelman et al. (2017)
 
 3. **Bayesian Workflow (BW):**  
    A broader framework that includes:
@@ -30,7 +30,7 @@ Bayesian Workflow (BW) provides a structured approach to managing the dynamic an
    - Model checking and improvement
    - Model comparison (not limited to selection or averaging)
 
-The workflow emphasizes the value of analyzing models that may initially seem flawed or suboptimal, as they often provide important insights.
+The workflow emphasizes the value of analyzing models that may initially seem flawed or suboptimal, as they often provide important insights to understand the model and potential extensions. 
 
 ---
 
@@ -45,20 +45,19 @@ A well-defined Bayesian Workflow addresses several challenges in statistical mod
   It helps practitioners identify which assumptions to relax and which to retain, enabling more thoughtful model selection.
 
 - **Model-Data Relationships:**  
-  Understanding how models fit the data, even when models are poor choices, can provide useful insights.
+  Understanding how models fit the data, even when models reflect poor performance, can provide useful insights.
 
 - **Diverse Conclusions:**  
-  Different models often lead to different conclusions; BW encourages practitioners to explore and understand these variations.
+  Different models often lead to different conclusions; **BW** encourages practitioners to explore and understand these variations.
 
 ---
 
-## Key Ideas in Bayesian Workflow
+## The Big Picture
 
-### Referencing the Diagram  
-The paper by Gelman et al. (2020) provides a useful diagram summarizing the Bayesian Workflow. Enhancing this diagram could offer even more clarity on the process.
+### ToDo: Include Diagram  
 
 ### Integrating Statistical Innovations  
-Many statistical methodologies began as informal techniques or "hacks" and have since been formalized within Bayesian frameworks. Key examples include:
+Many statistical methodologies began as informal techniques or "hacks" and have since been formalized within Bayesian frameworks in recent years. Key examples include:
 
 - **Multilevel Modeling:**  
   Extends empirical Bayes methods by incorporating prior inference directly into Bayesian models.
@@ -70,7 +69,7 @@ Many statistical methodologies began as informal techniques or "hacks" and have 
   Replace ad hoc variable selection methods in regression, offering more robust solutions.
 
 - **Non-parametric Models:**  
-  Serve as Bayesian replacements for techniques like kernel smoothing, broadening their application.
+  They serve as Bayesian replacements for techniques like kernel smoothing and broadening their application.
 
 These methods have expanded statistical frameworks, making them more modular and adaptable while retaining their core principles.
 
@@ -78,10 +77,10 @@ These methods have expanded statistical frameworks, making them more modular and
 
 ## Statistics and Uncertainty
 
-At its heart, statistics is about managing uncertainty. Bayesian Workflow recognizes and addresses uncertainty in several forms:
+At its heart, statistics is about *managing uncertainty*. **BW** recognizes and aims to address uncertainty in several forms:
 
 - **Data and Model Parameters:**  
-  Variability and imprecision inherent in the data and parameters.
+  Variability and imprecision are inherent in the data and parameters.
 
 - **Model Fitting:**  
   Challenges in determining whether a model is appropriately specified.
@@ -92,22 +91,18 @@ At its heart, statistics is about managing uncertainty. Bayesian Workflow recogn
 - **Interpretation:**  
   Ambiguity in translating statistical results into meaningful conclusions.
 
-Workflows often become disorderly when moving beyond predefined designs and analyses. Practical constraints—such as limited time, computational resources, and the consequences of incorrect decisions—frequently necessitate shortcuts. A structured Bayesian Workflow mitigates these challenges by offering a systematic approach to balancing rigor with practicality.
+Workflows often become disorderly when moving beyond predefined designs and analyses. Practical constraints—such as limited time, computational resources, and the consequences of incorrect decisions—frequently necessitate shortcuts. A structured workflow mitigates these challenges by offering a systematic approach to balancing rigor with practicality.
+
+The **Bw** provides a comprehensive framework for organizing applied Bayesian Statistics. It embraces the iterative nature of statistical modeling, acknowledges the importance of learning from flawed models, and prioritizes the exploration of uncertainty. By following these structured principles, practitioners can make informed, defensible decisions while navigating the complexities of statistical analysis.
+
+For those interested in exploring this further, I would recommend you review Gelman et al. (2020) and consider how these principles can be applied in your work. 
 
 ---
 
-The Bayesian Workflow provides a comprehensive framework for organizing applied Bayesian Statistics. It embraces the iterative nature of statistical modeling, acknowledges the importance of learning from flawed models, and prioritizes the exploration of uncertainty. By following these structured principles, practitioners can make informed, defensible decisions while navigating the complexities of statistical analysis.
-
-For those interested in exploring this further, I recommend reviewing Gelman et al. (2020) and considering how these principles can be applied in your own work. 
-
----
-
-## Before Fitting a Model
+## I. Before Fitting a Model
 
 **Choosing an Initial Model**  
 The starting point of almost all analyses is to adapt what has been done before. Drawing from existing methods provides a foundation for further refinement.
-
----
 
 **Modular Construction**  
 A Bayesian model is built from **modules** rather than whole models. Naming and constructing models in a modular fashion makes it easier to:
@@ -116,28 +111,27 @@ A Bayesian model is built from **modules** rather than whole models. Naming and 
 
 Modules often act as placeholders, which can be replaced or expanded as necessary.
 
----
-
 **Scaling and Transforming the Parameters**  
 Parameters should be interpretable for both practical and ethical reasons. Transformations can make parameters more meaningful, aiding in:
 - Clear communication of results.
 - Effective use of prior information.
 
----
-
 **Prior Predictive Checking**  
 Prior predictive checks are invaluable for understanding the implications of prior distributions within generative models.  
-Key approaches include:
-- Considering priors on outcomes and deriving corresponding joint priors on parameters.
-- Using simulations to elicit expert knowledge on measurable quantities, which is often easier than soliciting opinions on unobservable model parameters.
 
----
+<div class="green-box">
+  <strong>Key Approaches</strong>  
+  <ul>
+    <li>Considering priors on outcomes and deriving corresponding joint priors on parameters.</li>
+    <li>Using simulations to elicit expert knowledge on measurable quantities, which is often easier than soliciting opinions on unobservable model parameters.</li>
+  </ul>
+</div>
 
 **Generative and Partially Generative Models**  
-Fully Bayesian data analysis typically requires a **generative model**, which is a joint probability distribution for all data and parameters.
+Fully Bayesian data analysis typically requires a **generative model**, a joint probability distribution for all data and parameters.
 
-<div class="red-box">
-  <strong>Key Insights About Bayesian Inference and Generative Models</strong>  
+<div class="yellow-box">
+  <strong>Insights</strong>  
   <ul>
     <li>Bayesian inference does not require the generative model. It only needs the likelihood derived from the data, and different generative models can share the same likelihood.</li>
     <li>Bayesian data analysis, however, depends on the generative model to enable predictive simulation and model checking.</li>
@@ -145,9 +139,7 @@ Fully Bayesian data analysis typically requires a **generative model**, which is
   </ul>
 </div>
 
----
-
-Prior and posterior predictive checks can vary under different generative models while still satisfying the likelihood principle.  
+Prior and posterior predictive checks can vary under different generative models while satisfying the likelihood principle.  
 Some models commonly used in Bayesian analysis are not fully generative:
 - Regression models and survival data with censoring.
 - Models with improper priors, which lack a joint distribution for data and parameters and cannot sample from the prior predictive distribution. Improper priors often serve as placeholders on the path to a fully Bayesian model.
@@ -167,11 +159,10 @@ In applied Bayesian work, complexity often arises from incorporating multiple da
 
 ---
 
-## Fitting a Model
+## II. Fitting a Model
 
-### Historical Context
-Bayesian computation has evolved significantly over time. Early methods relied on analytic calculations and normal approximations. In the 1990s, the advent of advanced algorithms expanded the landscape:
-- **Gibbs and Metropolis Algorithms:** Enabled Bayesian inference for a wide range of models.
+Bayesian computation has evolved significantly over time. Early methods relied on analytic calculations and normal approximations. In the 1990s, the advent of advanced algorithms expanded the landscape for exploring posterior distributions:
+- **Gibbs and Metropolis Algorithms:** Enabled Bayesian inference for many models.
 - **Sequential Monte Carlo (SMC):** A generalization of Metropolis applicable to broader Bayesian computations.
 - **Variational Inference (VI):** A fast but potentially inaccurate approximation, building on the expectation-maximization (EM) algorithm.
 - **Hamiltonian Monte Carlo (HMC):** Uses gradient computations to navigate continuous probability spaces efficiently.
@@ -235,7 +226,7 @@ Efficient Bayesian workflow emphasizes quickly identifying and discarding flawed
 
 
 ---
-## Using Constructed Data to Find and Understand Problems
+## III. Using Constructed Data to Find and Understand Problems
 
 ### Fake-Data Simulation
 The core idea of fake-data simulation is to test whether a procedure can recover correct parameter values when applied to simulated data. This involves the following steps:
@@ -296,7 +287,7 @@ Simulation of statistical systems under diverse conditions not only addresses co
 
 ---
 
-## Addressing Computational Problems
+## IV. Addressing Computational Problems
 
 ### The Folk Theorem of Statistical Computing
 <div class="red-box">
@@ -399,7 +390,7 @@ Addressing computational problems in Bayesian modeling involves a combination of
 
 ---
 
-## Evaluating and Using a Fitted Model
+## V. Evaluating and Using a Fitted Model
 
 Evaluating a fitted model involves multiple checks, each tailored to the specific goals of the analysis. The aspects of the model that require evaluation depend on the application and the intended users of the statistical methods.
 
@@ -471,7 +462,7 @@ Evaluating a fitted model is a multifaceted process. It involves a combination o
 
 ---
 
-## Modifying a Model
+## VI. Modifying a Model
 
 ### Constructing a Model for the Data
 Model construction is a creative process where the modeler combines existing components to account for new data, enhance features of existing data, or establish links to underlying processes.
@@ -551,7 +542,7 @@ Each model has its internal structure, with parameters estimated from data, and 
 
 ---
 
-## Understanding and Comparing Multiple Models
+## VII. Understanding and Comparing Multiple Models
 
 ### Visualizing Models in Relation to Each Other
 A key aspect of Bayesian Workflow (BW) is fitting multiple models for a single problem. This process is not about selecting the best model or averaging models, but rather using a series of fitted models to gain a deeper understanding of each one.
