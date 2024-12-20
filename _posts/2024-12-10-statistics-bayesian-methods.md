@@ -169,8 +169,6 @@ Bayesian computation has evolved significantly over time. Early methods relied o
 
 These innovations have revolutionized Bayesian workflow, but safe usage requires strong diagnostics to flag unreliable computations.
 
----
-
 ### Initial Values, Adaptation, and Warmup
 The initial phase of inference algorithms is critical:
 - **Initial Values:** While theoretically irrelevant in the asymptotic limit, poor initial values can bias results.
@@ -179,19 +177,15 @@ The initial phase of inference algorithms is critical:
   2. Provides information to tune algorithm parameters.
   3. Flags computational issues early.
 
----
-
 ### How Long to Run an Iterative Algorithm
 The duration of iterative algorithms like MCMC impacts result reliability and computational efficiency:
 - **Convergence Diagnostics:**  
-  - Standard practice: Run until \( \hat{R} \), a mixing measure, is below 1.01 for all parameters.  
-  - Monitor the multivariate mixing statistic \( R^* \).  
+  - Standard practice: Run until a mixing measure, Vehtari et al. (2020), is below 1.01 for all parameters.  
+  - Monitor the multivariate mixing statistic, Lambert and Vehtari (2020).  
 - **Balancing Accuracy and Speed:**  
-  While increasing effective sample size or reducing Monte Carlo error improves accuracy, it limits model exploration if computation is too slow.
+  While increasing adequate sample size or reducing Monte Carlo error improves accuracy, it limits model exploration if computation is too slow.
 - **Leveraging Parallelism:**  
   Instead of increasing iterations, variance reduction can be achieved by increasing parallel chains.
-
----
 
 ### Approximate Algorithms and Models
 Markov chain simulation is an approximation where theoretical error reduces with more iterations. However, scalability challenges arise as models and datasets grow larger, necessitating faster alternatives:
@@ -207,13 +201,14 @@ Markov chain simulation is an approximation where theoretical error reduces with
 - **Diagnostics for Approximate Algorithms:**  
   Use diagnostic tools to ensure the algorithm reproduces key posterior features for the specific model.
 
-<div class="green-box">
- Approximate algorithms can be viewed as exact algorithms for approximate models.  
- - <strong>Empirical Bayes:</strong>   Replaces prior distributions with data-dependent point-mass priors.  
- - <strong>Laplace Approximation:</strong>   Data-dependent linearization of the model.  
- - <strong>Nested Laplace Approximation:</strong>   Linearizes conditional posterior distributions.
+<div class="yellow-box">
+  <strong>Insights</strong>: Approximate algorithms can be viewed as exact algorithms for approximate models.  
+  <ul>
+    <li> <strong>Empirical Bayes:</strong>   Replaces prior distributions with data-dependent point-mass priors. </li>
+    <li> strong>Laplace Approximation:</strong>   Data-dependent linearization of the model.   </li>
+    <li> <strong>Nested Laplace Approximation:</strong>   Linearizes conditional posterior distributions.</li>
+  </ul>
 </div>
----
 
 ### Fit Fast, Fail Fast
 Efficient Bayesian workflow emphasizes quickly identifying and discarding flawed models:
@@ -244,14 +239,12 @@ The core idea of fake-data simulation is to test whether a procedure can recover
 
 <div class="red-box">
   <strong>Key Insight:</strong>  
-  If a model cannot make reliable inferences on fake data generated from itself, it’s unlikely to provide reasonable inferences on real data.
+   <li> If a model cannot make reliable inferences on fake data generated from itself, it’s unlikely to provide reasonable inferences on real data.  </li>
 </div>
 
 While fake-data simulations help evaluate a model’s ability to recover parameters, they also highlight potential weaknesses. For example:
 - Creating fake data that causes the procedure to fail can deepen understanding of an inference method.
 - Overparameterized models may yield comparable predictions despite wildly different parameter estimates, limiting the usefulness of predictive checks.
-
----
 
 ### Simulation-Based Calibration (SBC)
 SBC provides a more comprehensive approach than truth-point benchmarking by fitting the model multiple times and comparing posterior distributions to simulated data. However, SBC has its challenges:
@@ -260,14 +253,12 @@ SBC provides a more comprehensive approach than truth-point benchmarking by fitt
   - Weakly informative priors, often chosen conservatively, can lead to extreme datasets during SBC.  
   - This mismatch can obscure insights about calibration and posterior behavior.
 
-<div class="green-box">
+<div class="purple-box">
   <strong>Open Research Question:</strong>    
   How effective is SBC with a limited number of simulations?  
 </div>
 
 Simulation-based calibration and truth-point benchmarking are complementary, with SBC offering broader insights but at a higher computational expense.
-
----
 
 ### Experimentation Using Constructed Data
 Simulating data from different scenarios provides valuable insights into models and inference methods. This experimentation allows practitioners to:
@@ -276,11 +267,10 @@ Simulating data from different scenarios provides valuable insights into models 
 - Gain a deeper understanding of both computational issues and the underlying data.
 
 <div class="red-box">
-  <strong>Important Consideration:</strong>    
-  Testing a model with a single fake dataset is not sufficient.  
-  - Even if the computational algorithm works, there’s a 5% chance that a random draw will fall outside a 95% uncertainty interval.  
-  - Bayesian inference is calibrated only when averaging over the prior.  
-  - Parameter recovery can fail not because of algorithmic errors but due to insufficient information in the observed data.
+  <strong>Important Consideration:</strong> Testing a model with a single fake dataset is not sufficient.  
+   <li> Even if the computational algorithm works, there’s a 5% chance that a random draw will fall outside a 95% uncertainty interval. </li>  
+   <li> Bayesian inference is calibrated only when averaging over the prior.   </li>
+   <li> Parameter recovery can fail not because of algorithmic errors but due to insufficient information in the observed data.  </li>
 </div>
 
 Simulation of statistical systems under diverse conditions not only addresses computational challenges but also enhances our understanding of data and inference.
@@ -289,14 +279,12 @@ Simulation of statistical systems under diverse conditions not only addresses co
 
 ## IV. Addressing Computational Problems
 
-### The Folk Theorem of Statistical Computing
 <div class="red-box">
-  <strong>Key Insight:</strong>   
-  When computational problems arise, they often indicate an issue with the model itself.  
-  Many cases of poor convergence are tied to regions of parameter space that are either irrelevant or nonsensical. Instead of throwing more computational resources at the problem, the first step should be to identify and address potential model pathologies.
+  <strong>The Folk Theorem of Statistical Computing: </strong>   
+ <li> When computational problems arise, they often indicate an issue with the model itself.  </li>
+ <li> Many cases of poor convergence are tied to regions of parameter space that are either irrelevant or nonsensical. </li>
+  <li> Instead of throwing more computational resources at the problem, the first step should be to identify and address potential model pathologies. </li>
 </div>
-
----
 
 ### Starting at Simple and Complex Models and Meeting in the Middle
 Diagnosing computational problems often requires a two-pronged approach:
@@ -305,27 +293,19 @@ Diagnosing computational problems often requires a two-pronged approach:
 
 This process helps isolate the root cause of the problem.
 
----
-
 ### Getting a Handle on Models That Take a Long Time to Fit
 Slow computation is often symptomatic of deeper issues, such as poorly performing Hamiltonian Monte Carlo (HMC). However, debugging becomes harder as computation times increase.  
 Key strategies include:
 - Viewing model choices as provisional.
 - Fitting multiple models to understand computational and inferential behavior in the applied problem.
 
----
-
 ### Monitoring Intermediate Quantities
 Saving and plotting intermediate quantities during computation can reveal hidden issues with the model or algorithm. These visualizations often provide valuable clues for debugging.
-
----
 
 ### Stacking to Reweight Poorly Mixing Chains
 In situations where multiple chains mix slowly but remain within reasonable ranges, stacking can be used:
 - Combine simulations by assigning weights to chains through cross-validation.
 - Particularly useful during model exploration when diagnostics suggest some progress but full convergence remains elusive.
-
----
 
 ### Posterior Distributions with Multimodality and Difficult Geometry
 Multimodality and complex posterior geometries pose significant challenges:
@@ -338,8 +318,6 @@ Multimodality and complex posterior geometries pose significant challenges:
 
 Each scenario requires tailored strategies for efficient computation.
 
----
-
 ### Reparameterization
 HMC-based samplers perform best when:
 - The mass matrix is well-tuned.
@@ -347,14 +325,10 @@ HMC-based samplers perform best when:
 
 For many classical models, results like the Bernstein-von Mises theorem simplify posterior geometry with sufficient data. When this is not the case, reparameterization can significantly improve computational performance by simplifying posterior geometry.
 
----
-
 ### Marginalization
 Challenging geometries in posterior distributions often stem from parameter interactions. Marginalizing over certain parameters can simplify computations:
 - Approximations like the Laplace method can be particularly effective for latent Gaussian models.
 - Exploiting the structure of the problem can lead to substantial improvements.
-
----
 
 ### Adding Prior Information
 Many computational issues can be mitigated by incorporating prior information:
@@ -362,9 +336,10 @@ Many computational issues can be mitigated by incorporating prior information:
 - While the primary purpose of priors is not to fix fitting problems, their inclusion often resolves computational challenges.  
 
 <div class="red-box">
-  <strong>Key Note on Identifiability:</strong>  
-  “Identification” is an asymptotic property in classical statistics, but Bayesian inference prioritizes inference with finite data.  
-  If data are insufficient for certain aspects of the model, priors can supply the necessary information.
+  <strong>Identifiability?</strong>  
+  <li> “Identification” is an asymptotic property in classical statistics </li>
+  <li> Bayesian inference prioritizes inference with finite data. </li>
+  <li> If data are insufficient for certain aspects of the model, priors can supply the necessary information. <li>
 </div>
 
 **Ladder of Abstraction:**  
@@ -375,26 +350,18 @@ Many computational issues can be mitigated by incorporating prior information:
 
 Addressing computational issues can start at either end of this ladder, transitioning from troubleshooting to workflow optimization.
 
----
-
 ### Adding Data
 Similar to priors, additional data can constrain models and resolve computational problems:
 - Incorporate new data sources into the model.
 - Models that work well with larger datasets may struggle in small data regimes; expanding the dataset can improve performance.
 
----
-
-### Final Thoughts
 Addressing computational problems in Bayesian modeling involves a combination of simplifying models, leveraging prior information, and refining computational techniques. A systematic approach, starting with diagnostics and iterative improvements, ensures both model reliability and computational efficiency.
-
 
 ---
 
 ## V. Evaluating and Using a Fitted Model
 
 Evaluating a fitted model involves multiple checks, each tailored to the specific goals of the analysis. The aspects of the model that require evaluation depend on the application and the intended users of the statistical methods.
-
----
 
 ### Posterior Predictive Checking
 Posterior predictive checking involves simulations from the posterior distribution to evaluate model performance:
@@ -404,10 +371,8 @@ Posterior predictive checking involves simulations from the posterior distributi
 
 <div class="green-box">
    <strong>Key Principle:</strong>   
-  Seek “severe tests”—checks likely to fail if the model produces misleading answers to critical questions.
+  <li> Seek “severe tests”—checks likely to fail if the model produces misleading answers to critical questions. </li>
 </div>
-
----
 
 ### Cross-Validation and Influence of Individual Data Points
 Cross-validation (CV) enhances predictive diagnostics, especially for flexible models, by providing insights into model fit and data influence:
@@ -422,11 +387,9 @@ Cross-validation (CV) enhances predictive diagnostics, especially for flexible m
   - Probability integral transformations (PIT) under good calibration are uniform.
 
 <div class="blue-box">
-  **Practical Tip:**  
-  Cross-validation for multilevel models requires thoughtful implementation to ensure alignment with inferential goals.
+  <strong>  Practical Tip:</strong>   
+  <li> Cross-validation for multilevel models requires thoughtful implementation to ensure alignment with inferential goals. </li>
 </div>
-
----
 
 ### Influence of Prior Information
 Understanding how prior information affects posterior inferences is essential for a robust evaluation:
@@ -441,10 +404,8 @@ Understanding how prior information affects posterior inferences is essential fo
 
 <div class="green-box">
   <strong>Practical Insight:</strong>   
-  Sensitivity analysis highlights the balance between prior information and data, offering valuable diagnostic insights without excessive computation.
+  <li> Sensitivity analysis highlights the balance between prior information and data, offering valuable diagnostic insights without excessive computation. </li>
 </div>
-
----
 
 ### Summarizing Inference and Propagating Uncertainty
 Traditional methods of summarizing Bayesian inference often fail to fully represent the complexity of variation and uncertainty:
@@ -454,9 +415,6 @@ Traditional methods of summarizing Bayesian inference often fail to fully repres
 **Tools for Advanced Summaries:**
 - Use visualization tools like the `bayesplot` R package to effectively summarize and explore Bayesian inference results.
 
----
-
-### Final Thoughts
 Evaluating a fitted model is a multifaceted process. It involves a combination of diagnostic checks, sensitivity analyses, and advanced visualization techniques. The goal is not just to identify potential misfits but to refine the model for better inference and predictive accuracy.
 
 
@@ -469,23 +427,19 @@ Model construction is a creative process where the modeler combines existing com
 
 <div class="green-box">
   <strong>Model Building as a Task:</strong>  
-  Model construction is akin to a language-like task, where components are assembled to encompass new data, existing data features, and links to underlying processes.
+  <li> Model construction is akin to a language-like task, where components are assembled to encompass new data, existing data features, and links to underlying processes. </li>
 </div>
 
-<div class="blue-box">
+<div class="yellow-box">
   <strong>Reasons for Model Expansion:</strong>  
-  - Response to new data.  
-  - Failures of models fit to existing data.  
-  - Computational challenges with current fitting procedures.
+  <li> Response to new data.  </li>
+  <li> Failures of models fit to existing data.   </li>
+  <li> Computational challenges with current fitting procedures. </li>
 </div>
-
----
 
 ### Incorporating Additional Data
 Expanding a model to include more data is a critical step in Bayesian Workflow (BW).  
 It’s often said that the value of a statistical method lies not just in how it handles data but in the choice of what data to use.
-
----
 
 ### Working with Prior Distributions
 Traditionally, Bayesian statistics refers to noninformative or fully informative priors, but in practice, these rarely exist:
@@ -519,9 +473,9 @@ When introducing new parameters:
 ### A Topology of Models
 Models within a framework can be thought of as forming a topology or network structure. This structure reflects connections and partial orderings rather than probabilities assigned to individual models.
 
-<div class="red-box">
-  <strong>Key Insight:</strong>    
-  A topology of models refers to their connections and relationships, not a probability space. The goal is not to average over models but to navigate among them effectively.
+<div class="yellow-box">
+  <strong> Model Topology?:</strong>    
+  <li> A topology of models refers to their connections and relationships, not a probability space. The goal is not to average over models but to navigate among them effectively.</li>
 </div>
 
 **Examples of Model Navigation Tools:**
@@ -535,8 +489,8 @@ Each model has its internal structure, with parameters estimated from data, and 
 
 <div class="blue-box">
   <strong>Applications:</strong>  
-  - <strong>Forecasting:</strong> Using interconnected models to predict future outcomes.  
-  - <strong>Causal Inference:</strong> Exploring relationships between variables using networked model structures.
+  <li> <strong>Forecasting:</strong> Using interconnected models to predict future outcomes. </li> 
+  <li> <strong>Causal Inference:</strong> Exploring relationships between variables using networked model structures. </li>
 </div>
 
 
@@ -548,8 +502,8 @@ Each model has its internal structure, with parameters estimated from data, and 
 A key aspect of Bayesian Workflow (BW) is fitting multiple models for a single problem. This process is not about selecting the best model or averaging models, but rather using a series of fitted models to gain a deeper understanding of each one.
 
 <div class="red-box">
-  <strong>Key Insight:</strong>  
-  Model comparison in this context is not about selecting or averaging but about exploring the <strong>process</strong> of fitting multiple models to understand them better.
+  <strong>Remark:</strong>  
+  <li> Model comparison in this context is not about selecting or averaging but about exploring the <strong>process</strong> of fitting multiple models to understand them better. </li>
 </div>
 
 **Considerations When Fitting Multiple Models:**
@@ -558,14 +512,12 @@ A key aspect of Bayesian Workflow (BW) is fitting multiple models for a single p
   - A set of fitted models might appear to bracket total uncertainty, but other unconsidered models could still contribute.
 - Multiverse analysis: Evaluate situations where multiple models pass all checks to ensure robustness.
 
----
-
-### Cross-Validation and Model Averaging
+### Cross-validation and Model Averaging
 Cross-validation (CV) is a powerful tool for evaluating models, but it requires careful interpretation:
 
 <div class="red-box">
   <strong>Key Principle:</strong>  
-  If there is significant uncertainty in model comparisons, avoid selecting the single model with the best cross-validation result. This discards the uncertainty from the CV process.
+  <li> If there is significant uncertainty in model comparisons, avoid selecting the single model with the best cross-validation result. This discards the uncertainty from the CV process. </li>
 </div>
 
 **Alternative Approaches:**
@@ -576,14 +528,12 @@ Cross-validation (CV) is a powerful tool for evaluating models, but it requires 
 
 While BW emphasizes continuous model expansion over averaging, there are cases where averaging predictions over competing Bayesian models is reasonable.
 
----
-
 ### Comparing a Large Number of Models
 When faced with many candidate models, the goal is often to find a simpler model with comparable predictive performance to a more complex, expanded model.
 
 <div class="red-box">
-  <strong>Key Warning:</strong>  
-  Selecting one model based solely on minimizing cross-validation error risks overfitting and suboptimal choices.
+  <strong>Warning:</strong>  
+  <li> Selecting one model based solely on minimizing cross-validation error risks overfitting and suboptimal choices. </li>
 </div>
 
 **Projection Predictive Variable Selection:**
@@ -594,13 +544,12 @@ When faced with many candidate models, the goal is often to find a simpler model
 
 This approach enables efficient comparison of a large number of models while maintaining robust predictive performance.
 
----
-
 ### Final Thoughts
 Understanding and comparing multiple models is an integral part of Bayesian Workflow. By focusing on the process of model fitting rather than rigid selection or averaging, practitioners can better navigate uncertainty and extract meaningful insights from their analyses. Tools like stacking and projection predictive variable selection ensure that model comparison remains both rigorous and practical.
 
 
 ---
+
 ## Discussion
 
 ### Different Perspectives on Statistical Modeling and Prediction
@@ -618,19 +567,17 @@ Statistical modeling and prediction can be approached from several perspectives,
    - Applied statistical work often involves trying out many models, some of which may exhibit poor data fit, low predictive performance, or slow convergence.  
    - Approximations are more acceptable here but must faithfully reproduce key posterior features.
 
-<div class="red-box">
+<div class="green-box">
   <strong>Key Insight:</strong>  
   The distinction here is not between inference vs. prediction or exploratory vs. confirmatory analysis, but rather how much trust is placed in a model and how computation approximates it.
 </div>
 
-<div class="blue-box">
+<div class="yellow-box">
   <strong>Model Trust:</strong>  
   The process of iterative model building highlights how much computation and model development rely on trust in individual models and their approximations.
 </div>
 
 These differing perspectives influence how statistical methods evolve as new challenges emerge in applied settings.
-
----
 
 ### Justification of Iterative Model Building
 The iterative model-building process is central to modern Bayesian Workflow (BW) and represents the next transformative step in data science:
@@ -646,7 +593,7 @@ The iterative model-building process is central to modern Bayesian Workflow (BW)
 
 <div class="green-box">
   <strong>Simplifying Challenges:</strong>   
-  Computational challenges are easier to address when fewer "moving parts" exist in the modeling process.
+  <li> Computational challenges are easier to address when fewer "moving parts" exist in the modeling process. </li>
 </div>
 
 ---
@@ -656,8 +603,8 @@ An iterative workflow risks overfitting, as model improvement often involves con
 - **Double Dipping:** Using data multiple times during model iteration can compromise the frequency properties of inferences.
 
 <div class="red-box">
-<strong>Key Warning:</strong>  
-  Double dipping and post-selection inference can lead to overfitting. Model improvement conditioned on discrepancies must be carefully managed.
+<strong>Warning:</strong>  
+  <li> Double dipping and post-selection inference can lead to overfitting. Model improvement conditioned on discrepancies must be carefully managed. </li>
 </div>
 
 **Garden of Forking Paths:**  
@@ -666,15 +613,13 @@ An iterative workflow risks overfitting, as model improvement often involves con
 
 <div class="blue-box">
 <strong>Example:</strong>  
-  Suppose model \(M_1\) fails a posterior predictive check, leading to the development of \(M_2\), which incorporates more prior information and better fits the data. Had the data differed, \(M_1\) might have sufficed. This highlights the iterative nature of BW.
+ </li>  Suppose model \(M_1\) fails a posterior predictive check, leading to the development of \(M_2\), which incorporates more prior information and better fits the data. Had the data differed, \(M_1\) might have sufficed. This highlights the iterative nature of **BW**. </li>
 </div>
 
 To mitigate post-selection inference issues:
 - Embed multiple models in a larger framework.
 - Use predictive model averaging or incorporate all models simultaneously.
 - Perform severe tests of the assumptions underlying each model.
-
----
 
 ### Bigger Datasets Demand Bigger Models
 Larger datasets enable the fitting of complex models, such as hierarchical Bayesian models and deep learning approaches:
@@ -683,12 +628,10 @@ Larger datasets enable the fitting of complex models, such as hierarchical Bayes
   1. **Regularization:** To stabilize estimates.  
   2. **Latent Variable Modeling:** To address missingness and measurement errors.
 
-<div class="green-box">
+<div class="yellow-box">
 <strong>Insight:</strong>  
-  A model does not exist in isolation; it emerges from engagement with the application and available data.
+  <li> A model does not exist in isolation; it emerges from engagement with the application and available data. </li>
 </div>
-
----
 
 ### Prediction, Generalization, and Poststratification
 Statistical tasks often involve generalization, which Bayesian methods address effectively:
@@ -696,8 +639,8 @@ Statistical tasks often involve generalization, which Bayesian methods address e
 2. **Generalizing from Control to Treatment Groups:** Leveraging regularization to handle large nonparametric models.  
 3. **Generalizing from Observed Data to Underlying Constructs:** Applying multilevel modeling for latent variables.
 
-<div class="blue-box">
-<strong>Key Insight:</strong>  
+<div class="green-box">
+<strong>Key Principle:</strong>  
   Just as priors are understood in the context of the likelihood, models should be understood in light of their intended use.
 </div>
 
@@ -705,9 +648,6 @@ Statistical tasks often involve generalization, which Bayesian methods address e
 - Hierarchical modeling and transportability via Bayesian graph models.
 - Regularization to handle complex, large-scale models.
 
----
-
-### Final Thoughts
 The iterative nature of Bayesian Workflow, with its emphasis on model trust, computational efficiency, and careful navigation of overfitting risks, reflects the dynamic and evolving nature of modern statistical practice. By embedding models within a larger framework and embracing the iterative process, BW ensures robust and insightful statistical analyses.
 
 
