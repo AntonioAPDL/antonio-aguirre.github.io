@@ -6,7 +6,7 @@ title: About
 <div class="about-section">
   <!-- Welcome Message -->
   <p class="message" style="font-style: italic; color: #555; text-align: center; margin: 1rem auto; max-width: 800px;">
-    Aiming to innovate Bayesian statistical methodology for tackling real-world challenges.
+    Exploring data to address real-world challenges with Bayesian insights.
   </p>
 
   <!-- Introduction -->
@@ -28,9 +28,9 @@ title: About
               text-align: center; 
               margin: 1rem auto; 
               color: #555;">
-        I’m a 4th-year Ph.D. candidate in <strong>Statistics</strong> at the <strong>University of California, Santa Cruz</strong>, 
-        under the guidance of <strong>Bruno Sanso</strong> and <strong>Raquel Prado</strong>. My research focuses on scalable Bayesian methods 
-        for real-time inference, emphasizing extreme behavior and uncertainty quantification in environmental and hydrological processes.
+        Hi! I’m a Ph.D. candidate in <strong>Statistics</strong> at the <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank">University of California, Santa Cruz</a>. 
+        Working with <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank">Bruno Sanso</a> and <a href="https://raquel.soe.ucsc.edu/" target="_blank">Raquel Prado</a>, my research focuses on improving statistical methods to make them practical and effective for solving real-world problems. 
+        My work emphasizes uncertainty quantification, forecasting, and scalable Bayesian techniques, especially in environmental and hydrological contexts.
       </p>
     </div>
   </div>
@@ -40,16 +40,16 @@ title: About
     <h2 style="font-size: 2rem; font-weight: bold; color: #333; text-align: center;">Research Focus</h2>
     <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
       <li style="margin-bottom: 1rem;">
-        <strong>Bayesian Statistics & Machine Learning:</strong> Blending probabilistic models with machine learning techniques for scalable inference and prediction in high-dimensional systems.
+        <strong>Bayesian Methods:</strong> Integrating Bayesian principles into scalable tools for analyzing complex data.
       </li>
       <li style="margin-bottom: 1rem;">
-        <strong>Dynamic Quantile Linear Models (DQLMs):</strong> Innovating real-time quantile-based forecasting tools for hydrological and environmental applications.
+        <strong>Dynamic Models:</strong> Developing real-time forecasting methods for processes like river flow and climate variability.
       </li>
       <li style="margin-bottom: 1rem;">
-        <strong>Spatio-Temporal Modeling:</strong> Unraveling complex dependencies across space and time to provide actionable insights for policy and decision-making.
+        <strong>Spatio-Temporal Analysis:</strong> Understanding patterns across space and time to inform actionable decisions.
       </li>
       <li style="margin-bottom: 1rem;">
-        <strong>Continual Learning in Statistical Post-Processing:</strong> Developing adaptive methods to integrate diverse model outputs and improve forecast accuracy through efficient updating.
+        <strong>Data-Driven Learning:</strong> Creating workflows that continuously improve predictions by incorporating new data.
       </li>
     </ul>
   </div>
@@ -59,13 +59,13 @@ title: About
     <h2 style="font-size: 2rem; font-weight: bold; color: #333;">Ongoing Projects</h2>
     <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
       <li style="margin-bottom: 1rem;">
-        <strong>Real-Time Forecast Synthesis:</strong> Integrating and correcting outputs from multiple climate models for improved prediction accuracy.
+        <strong>Real-Time Forecasting:</strong> Merging outputs from multiple models to improve predictions in climate science.
       </li>
       <li style="margin-bottom: 1rem;">
-        <strong>Dynamic Principal Components for Climate Indices:</strong> Analyzing relationships between meteorological indices to refine climate forecasts.
+        <strong>Dynamic Principal Components:</strong> Exploring relationships between climate indices for better environmental insights.
       </li>
       <li style="margin-bottom: 1rem;">
-        <strong>TA Professional Development:</strong> Designing workshops to train teaching assistants in equity-centered, active learning techniques.
+        <strong>TA Training:</strong> Creating workshops that emphasize equity and active learning in teaching practices.
       </li>
     </ul>
   </div>
@@ -78,10 +78,10 @@ title: About
         <strong>Ph.D. in Statistics:</strong> University of California, Santa Cruz (2021-Present)
       </li>
       <li style="margin-bottom: 0.8rem;">
-        <strong>M.Sc. in Economic Theory:</strong> Instituto Tecnológico Autónomo de México (ITAM) (2018-2020)
+        <strong>M.Sc. in Economic Theory:</strong> <a href="https://www.itam.mx/" target="_blank">Instituto Tecnológico Autónomo de México (ITAM)</a> (2018-2020)
       </li>
       <li style="margin-bottom: 0.8rem;">
-        <strong>B.Sc. in Applied Mathematics:</strong> Instituto Tecnológico Autónomo de México (ITAM) (2014-2018)
+        <strong>B.Sc. in Applied Mathematics:</strong> <a href="https://www.itam.mx/" target="_blank">Instituto Tecnológico Autónomo de México (ITAM)</a> (2014-2018)
       </li>
     </ul>
   </div>
@@ -91,17 +91,17 @@ title: About
     <h2 style="font-size: 2rem; font-weight: bold; color: #333;">Beyond Research</h2>
     <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
       <li style="margin-bottom: 1rem;">
-        Exploring philosophical questions, especially on epistemology and the nature of uncertainty.
+        Delving into philosophy, especially questions about knowledge and uncertainty.
       </li>
       <li style="margin-bottom: 1rem;">
-        Experimenting with emerging tools to advance data-driven insights.
+        Exploring cutting-edge tools for data science and learning German in my free time.
       </li>
       <li style="margin-bottom: 1rem;">
-        Strength training and learning German as part of personal growth.
+        Hitting the gym for strength training and staying active.
       </li>
     </ul>
     <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
-      Thanks for visiting! I look forward to connecting and exploring ways to tackle data and statistical challenges together.
+      Thanks for stopping by! Feel free to reach out if you’d like to connect or discuss ideas.
     </p>
   </div>
 </div>
