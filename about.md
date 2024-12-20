@@ -78,10 +78,10 @@ title: About
         <strong>Ph.D. in Statistics:</strong> University of California, Santa Cruz (2021-Present)
       </li>
       <li style="margin-bottom: 0.8rem;">
-        <strong>M.Sc. in Economic Theory:</strong> <a href="https://www.itam.mx/" target="_blank">Instituto Tecnológico Autónomo de México (ITAM)</a> (2018-2020)
+        <strong>M.Sc. in Economic Theory:</strong> <a href="https://mteoriaeconomica.itam.mx/en/conoce-el-posgrado-teoriaeconomica" target="_blank">Instituto Tecnológico Autónomo de México (ITAM)</a> (2018-2020)
       </li>
       <li style="margin-bottom: 0.8rem;">
-        <strong>B.Sc. in Applied Mathematics:</strong> <a href="https://www.itam.mx/" target="_blank">Instituto Tecnológico Autónomo de México (ITAM)</a> (2014-2018)
+        <strong>B.Sc. in Applied Mathematics:</strong> <a href="https://departamentodematematicas.itam.mx/" target="_blank">Instituto Tecnológico Autónomo de México (ITAM)</a> (2014-2018)
       </li>
     </ul>
   </div>
