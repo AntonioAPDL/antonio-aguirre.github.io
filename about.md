@@ -35,16 +35,16 @@ title: About
     <h2 style="font-size: 2rem; font-weight: bold; color: #333;">Ongoing Projects</h2>
     <div style="max-width: 800px; margin: 1rem auto; text-align: left; font-size: 1.2rem; line-height: 1.8; color: #555;">
       <p>
-        <strong>Forecast Correction of Climate Agencies' Products:</strong> Leveraging advanced methods such as Markovian Processes, Quantile Regression, and Variational Inference to improve hydrological system predictions and ensemble forecasts.
+        <strong>Retrospective and Forecast Correction of Climate Agencies' Products:</strong> Integrating advanced methods such as Markovian Processes, Quantile Regression, and Variational Inference to improve hydrological system historical estimates, predictions, and ensemble forecasts.
       </p>
       <p>
-        <strong>Forecast Synthesis of Climate Agencies' Products:</strong> Applying Generalized Bayesian Updating and Forecast Scoring to combine and refine multiple forecast outputs for greater accuracy and reliability.
+        <strong>Retrospective and  Forecast Synthesis of Climate Agencies' Products:</strong> Applying Generalized Bayesian Updating and Forecast Scoring to combine and refine multiple forecast outputs and historical analysis for improved accuracy and reliability.
       </p>
       <p>
-        <strong>Scalable and Real-Time Forecast Correction and Synthesis:</strong> Developing techniques such as Variational Inference, Sequential Monte Carlo, and Particle Filtering to enable fast, real-time updates for dynamic forecasting systems.
+        <strong>Operational Real-Time Forecast Correction and Synthesis:</strong> Developing inference algorithms such as Variational Inference, Sequential Monte Carlo, and Particle Filtering to enable fast, scalable, real-time updates for dynamic forecasting systems.
       </p>
       <p>
-        <strong>Teaching Assistant Training:</strong> Designing and conducting workshops that promote equity and active learning, while also contributing to the creation and maintenance of the department's TA-Wiki to support professional development.
+        <strong>Teaching Assistant Training:</strong> Designing and conducting workshops that promote equity and active learning for incoming TAs and maintaining the department's recently created TA-Wiki to support professional development.
       </p>
     </div>
   </div>
