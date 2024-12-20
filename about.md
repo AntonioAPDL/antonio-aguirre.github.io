@@ -29,24 +29,27 @@ title: About
       </p>
     </div>
   </div>
-
+  
   <!-- Ongoing Projects Section -->
   <div class="projects-section" style="margin-top: 3rem; padding: 1rem; text-align: center;">
     <h2 style="font-size: 2rem; font-weight: bold; color: #333;">Ongoing Projects</h2>
-    <ul style="list-style: none; padding: 0; max-width: 800px; margin: 1rem auto; text-align: left;">
-      <li style="margin-bottom: 1rem;">
-        <strong>Real-Time Forecasting:</strong> Merging outputs from multiple models to improve predictions in climate science.
-      </li>
-      <li style="margin-bottom: 1rem;">
-        <strong>Dynamic Principal Components:</strong> Exploring relationships between climate indices for better environmental insights.
-      </li>
-      <li style="margin-bottom: 1rem;">
-        <strong>TA Training:</strong> Creating workshops that emphasize equity and active learning in teaching practices.
-      </li>
-    </ul>
+    <div style="max-width: 800px; margin: 1rem auto; text-align: left; font-size: 1.2rem; line-height: 1.8; color: #555;">
+      <p>
+        <strong>Forecast Correction of Climate Agencies' Products:</strong> Leveraging advanced methods such as Markovian Processes, Quantile Regression, and Variational Inference to improve hydrological system predictions and ensemble forecasts.
+      </p>
+      <p>
+        <strong>Forecast Synthesis of Climate Agencies' Products:</strong> Applying Generalized Bayesian Updating and Forecast Scoring to combine and refine multiple forecast outputs for greater accuracy and reliability.
+      </p>
+      <p>
+        <strong>Scalable and Real-Time Forecast Correction and Synthesis:</strong> Developing techniques such as Variational Inference, Sequential Monte Carlo, and Particle Filtering to enable fast, real-time updates for dynamic forecasting systems.
+      </p>
+      <p>
+        <strong>Teaching Assistant Training:</strong> Designing and conducting workshops that promote equity and active learning, while also contributing to the creation and maintenance of the department's TA-Wiki to support professional development.
+      </p>
+    </div>
   </div>
 
-  <!-- Academic Journey Section -->
+  <!-- Education -->
   <div class="Education" style="margin-top: 3rem; padding: 1rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
     <h2 style="font-size: 2rem; font-weight: bold; color: #333; text-align: center;">Academic Journey</h2>
     <ul style="list-style: disc; padding-left: 1.5rem; max-width: 800px; margin: 1rem auto; text-align: left;">
