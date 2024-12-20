@@ -641,7 +641,7 @@ Statistical tasks often involve generalization, which Bayesian methods address e
 
 <div class="green-box">
 <strong>Key Principle:</strong>  
-  Just as priors are understood in the context of the likelihood, models should be understood in light of their intended use.
+  <li> Just as priors are understood in the context of the likelihood, models should be understood in light of their intended use. </li>
 </div>
 
 **Methods in Bayesian Framework:**
