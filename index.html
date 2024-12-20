@@ -9,41 +9,31 @@ title: Home
     <div style="display: flex; flex-direction: column; align-items: center;">
       <img src="/files/images/Me2.jpg" 
            alt="Antonio Aguirre" 
-           style="
-             width: 150px; 
-             height: 150px; 
-             border-radius: 50%; 
-             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-             margin-bottom: 1rem;">
-      <h1 style="margin: 0; font-size: 2.5rem; font-weight: bold; color: #333;">Welcome</h1>
+           class="profile-pic">
+      <h1 class="intro-heading">Welcome</h1>
     </div>
-    <p style="
-         font-size: 1.2rem; 
-         line-height: 1.8; 
-         max-width: 800px; 
-         text-align: center; 
-         margin: 1rem auto; 
-         color: #555;">
-      Hello! I’m <strong>Antonio Aguirre</strong>, a dedicated <strong>Ph.D. candidate</strong> at the <strong>University of California, Santa Cruz</strong>. 
-      Under the mentorship of <strong>Bruno Sanso</strong> and <strong>Raquel Prado</strong>, I specialize in <strong>Bayesian Statistics</strong>, <strong>Machine Learning</strong>, and <strong>Spatio-Temporal Modeling</strong>. 
-      My work focuses on scalable methods for inference and forecasting, emphasizing interpretable models for real-world applications.
+    <p class="intro-text">
+      Hello! I’m <strong>Antonio Aguirre</strong>, a dedicated <strong>Ph.D. candidate</strong> at the 
+      <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank">University of California, Santa Cruz</a>. 
+      Under the mentorship of <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank">Dr. Bruno Sansó</a> and 
+      <a href="https://raquel.soe.ucsc.edu/" target="_blank">Dr. Raquel Prado</a>, I specialize in <strong>Bayesian Statistics</strong>, <strong>Machine Learning</strong>, 
+      and <strong>Spatio-Temporal Modeling</strong>. My research focuses on developing scalable methods for inference and forecasting, emphasizing interpretable models for real-world applications.
     </p>
-    <p style="
-         font-size: 1.2rem; 
-         line-height: 1.8; 
-         max-width: 800px; 
-         text-align: center; 
-         margin: 1rem auto; 
-         color: #555;">
-      Dive into my research and technical contributions, and explore how data-driven methods can solve complex environmental and computational challenges.
+    <p class="intro-text">
+      I completed my <strong>Bachelor’s</strong> and <strong>Master’s degrees</strong> at the prestigious 
+      <a href="https://www.itam.mx/" target="_blank">Instituto Tecnológico Autónomo de México (ITAM)</a>. My undergraduate work in Applied Mathematics emphasized 
+      <strong>Numerical Analysis</strong>, while my graduate studies in Economics focused on <strong>Econometrics</strong>.
+    </p>
+    <p class="intro-text">
+      Dive into my research and technical contributions to discover how data-driven methods can address complex environmental and computational challenges.
     </p>
   </div>
 </div>
 
 <!-- Research Interests Section -->
 <div class="home-content">
-  <h2>Research Interests</h2>
-  <ul>
+  <h2 class="section-heading">Research Interests</h2>
+  <ul class="research-list">
     <li><strong>Bayesian Spatio-Temporal Modeling:</strong> Developing interpretable models for high-dimensional spatio-temporal data with applications in climate and environmental science.</li>
     <li><strong>Dynamic Quantile Linear Models (DQLMs):</strong> Innovating scalable, real-time quantile-based forecasting for hydrology and other environmental processes.</li>
     <li><strong>Continual Learning:</strong> Exploring sequential Monte Carlo methods and variational approaches for real-time model updating and inference.</li>
@@ -53,7 +43,7 @@ title: Home
 
 <!-- Plot Section -->
 <div class="plot-container">
-  <h2>Real-Time Monitoring: San Lorenzo River Daily Discharge</h2>
+  <h2 class="section-heading">Real-Time Monitoring: San Lorenzo River Daily Discharge</h2>
   <div id="loading" class="loading-text">Loading plot...</div>
   <iframe
       src="https://8686-128-114-48-164.ngrok-free.app/plot"
@@ -71,10 +61,6 @@ title: Home
 }
 
 /* Intro Section Styling */
-.home-intro {
-    text-align: center;
-    margin-bottom: 2rem;
-}
 .profile-pic {
     width: 150px;
     height: 150px;
@@ -82,7 +68,7 @@ title: Home
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 1rem;
 }
-.home-intro h1 {
+.intro-heading {
     font-size: 2.5rem;
     font-weight: bold;
     color: #333;
@@ -99,26 +85,25 @@ title: Home
 /* Research Interests Section */
 .home-content {
     margin-top: 2rem;
-    padding: 1rem;
+    padding: 1.5rem;
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: left;
 }
-.home-content h2 {
+.section-heading {
     font-size: 2rem;
     font-weight: bold;
     color: #333;
     margin-bottom: 1rem;
     text-align: center;
 }
-.home-content ul {
+.research-list {
     list-style: none;
     padding: 0;
     margin: 0 auto;
     max-width: 700px;
 }
-.home-content li {
+.research-list li {
     font-size: 1.1rem;
     line-height: 1.8;
     margin-bottom: 1rem;
@@ -134,11 +119,6 @@ title: Home
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-.plot-container h2 {
-    font-size: 1.8rem;
-    color: #333;
-    margin-bottom: 1rem;
 }
 .loading-text {
     font-style: italic;
