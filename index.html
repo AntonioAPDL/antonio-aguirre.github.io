@@ -43,15 +43,71 @@ title: Home
 </div>
 
 <!-- Plot Section -->
-<div class="plot-container">
-  <h2 class="section-heading">Real-Time Monitoring: San Lorenzo River Daily Discharge</h2>
-  <div id="loading" class="loading-text">Loading plot...</div>
+<div class="plot-container" style="margin: 2rem auto; max-width: 900px; text-align: center; padding: 1.5rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+  <!-- Title -->
+  <h2 style="font-size: 1.8rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 2px solid #ffcc00; display: inline-block; padding-bottom: 0.3rem;">
+    Real-Time Monitoring: San Lorenzo River Discharge Flow
+  </h2>
+  
+  <!-- Note Section -->
+  <div class="note-box" style="margin: 1rem auto; max-width: 800px; text-align: left; padding: 1rem; background-color: #fff9db; border-left: 6px solid #ffcc00; border-radius: 8px; font-size: 1rem; line-height: 1.6; color: #856404;">
+    <strong>Note:</strong> This plot provides real-time monitoring of the San Lorenzo River's daily discharge flow at Big Trees. The data updates automatically every day. Stay tuned as I plan to add more features and insights to this visualization, reflecting my ongoing research.
+  </div>
+
+  <!-- Loading and Plot -->
+  <div id="loading" style="font-style: italic; color: gray; margin-bottom: 1rem;">Loading plot...</div>
   <iframe
       src="https://6abe-128-114-48-164.ngrok-free.app/plot"
       class="plot-iframe"
+      style="width: 100%; height: 65vh; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px;"
       onload="document.getElementById('loading').style.display='none';">
   </iframe>
 </div>
+
+<!-- Additional Styling -->
+<style>
+  .plot-container {
+    margin: 2rem auto;
+    max-width: 900px;
+    text-align: center;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .plot-container h2 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #ffcc00;
+    display: inline-block;
+    padding-bottom: 0.3rem;
+  }
+
+  .note-box {
+    margin: 1rem auto;
+    max-width: 800px;
+    text-align: left;
+    padding: 1rem;
+    background-color: #fff9db;
+    border-left: 6px solid #ffcc00;
+    border-radius: 8px;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #856404;
+  }
+
+  .plot-iframe {
+    width: 100%;
+    height: 65vh;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+</style>
+
 
 <style>
 /* General Home Section Styling */
@@ -111,26 +167,8 @@ title: Home
     color: #444;
 }
 
-/* Plot Container */
-.plot-container {
-    text-align: center;
-    margin: 3rem auto;
-    max-width: 900px;
-    padding: 1.5rem;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
 .loading-text {
     font-style: italic;
     color: gray;
     margin-bottom: 1rem;
 }
-.plot-iframe {
-    width: 100%;
-    height: 65vh;
-    border: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
-</style>
