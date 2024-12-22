@@ -64,7 +64,10 @@ layout: page
       When I'm not PhDing, I enjoy baking bread, cooking Mexican dishes, exploring history, diving into the philosophy of science, and learning German.
     </p>
     <p style="font-size: 1.2rem; line-height: 1.8; max-width: 800px; margin: 0 auto; color: #555;">
-      Thanks for stopping by! Feel free to reach out if you’d like to connect or discuss ideas.
+      Thanks for stopping by! 
+    </p>
+    <p style="font-size: 1.2rem; line-height: 1.8; max-width: 800px; margin: 0 auto; color: #555;">
+      Feel free to reach out if you’d like to connect or discuss ideas.
     </p>
   </div>
 </div>
