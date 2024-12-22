@@ -10,7 +10,7 @@ layout: default
   
   <!-- Notice -->
   <div style="background-color: #fff3cd; border-left: 6px solid #ffeeba; border-radius: 8px; padding: 1rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: left;">
-    <h2 style="font-size: 1.2rem; color: #856404; margin-bottom: 0.5rem;">Notice</h2>
+    <h2 style="font-size: 1.2rem; color: #856404; margin-bottom: 0.5rem;"><strong>Notice</strong></h2>
     <p style="font-size: 1.1rem; color: #856404; line-height: 1.8; margin: 0;">
       I am currently organizing and preparing my software projects for upload. Please check back soon to explore 
       my contributions in <strong>R</strong>, <strong>MATLAB</strong>, <strong>Python</strong>, <strong>C++</strong>, and <strong>Julia</strong>. 
