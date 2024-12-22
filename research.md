@@ -24,7 +24,7 @@ title: Research
 
   <!-- Recent Publications -->
   <div class="publication-section" style="margin-top: 3rem; padding: 1.5rem; text-align: left; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-    <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Key Publication</h2>
+    <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Recent Publications</h2>
     <ul style="list-style: none; padding: 0;">
       <li style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem; color: #555;">
         Aguirre, A., Lobato, I.N. (2024). <em>Evidence of Non-Fundamentalness in OECD Capital Stocks</em>. 
