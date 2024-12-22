@@ -2,9 +2,10 @@
 layout: page
 ---
 
-<div class="about-section" style="margin: 2rem auto; max-width: 900px; text-align: center;">
+<div class="about-section" style="margin: 2rem auto; max-width: 900px;">
+
   <!-- Introduction Section -->
-  <div class="intro-section" style="padding: 2rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+  <div class="intro-section" style="text-align: center; padding: 2rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
     <img src="/files/images/Me2.jpg" 
          alt="Antonio Aguirre" 
          style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
@@ -21,7 +22,7 @@ layout: page
   <!-- Ongoing Projects Section -->
   <div class="projects-section" style="margin-top: 2rem; padding: 2rem; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
     <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.5rem;">Ongoing Projects</h2>
-    <ul style="list-style: none; padding: 0; max-width: 800px; margin: 0 auto; color: #555;">
+    <ul style="list-style: none; padding: 0; max-width: 800px; margin: 0 auto; text-align: left; color: #555;">
       <li style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem;">
         <strong>Improving Climate Data Accuracy:</strong> Integrating advanced methods such as Markovian Processes, Quantile Regression, and Variational Inference to improve hydrological system historical estimates, predictions, and ensemble forecasts.
       </li>
@@ -37,10 +38,10 @@ layout: page
     </ul>
   </div>
 
-  <!-- Academic Journey Section -->
+  <!-- Education Section -->
   <div class="education-section" style="margin-top: 2rem; padding: 2rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-    <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.5rem;">Academic Journey</h2>
-    <ul style="list-style: disc; padding-left: 1.5rem; max-width: 800px; margin: 0 auto; color: #555;">
+    <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.5rem;">Education</h2>
+    <ul style="list-style: disc; padding-left: 1.5rem; max-width: 800px; margin: 0 auto; text-align: left; color: #555;">
       <li style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 0.8rem;">
         <strong>Ph.D. in Statistics:</strong> 
         <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank">University of California, Santa Cruz</a> (2021-Present)
