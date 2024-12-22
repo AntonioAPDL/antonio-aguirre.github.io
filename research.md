@@ -12,12 +12,12 @@ title: Research
     I am currently a Ph.D. candidate in the Department of Statistics at the University of California, Santa Cruz, under the guidance of <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank">Bruno Sanso</a> and <a href="https://raquel.soe.ucsc.edu/" target="_blank">Raquel Prado</a>. My research is focused on advancing Bayesian methods to address challenges in spatio-temporal modeling and real-time forecasting. I am particularly interested in developing interpretable and operational models for hydrology and environmental sciences, as well as integrating modern computational approaches for scalable Bayesian inference.
   </p>
 
-  <!-- Current Projects Overview-->
+  <!-- Ongoing Projects -->
   <div class="research-categories" style="text-align: left; padding: 1.5rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-    <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Current Projects</h2>
+    <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Ongoing Projects</h2>
     <ul style="list-style-type: disc; padding-left: 2rem; color: #555; font-size: 1.1rem; line-height: 1.8;">
-      <li><strong>Real-Time Forecast Synthesis:</strong> Developing methods to integrate and correct diverse climate models for robust hydrological predictions.</li>
-      <li><strong>Dynamic Quantile Linear Models:</strong> Advancing Bayesian quantile-based methods for river discharge modeling and other environmental applications.</li>
+      <li><strong>Real-Time Forecast Synthesis:</strong> Developing methods to integrate and correct diverse climate models for robust hydrological predictions and uncertainty quantification.</li>
+      <li><strong>Quantile State-Space Modelling:</strong> Advancing Fast and Flexible Bayesian quantile-based methods for river discharge modeling and other environmental applications.</li>
       <li><strong>Scalable Bayesian Inference:</strong> Combining Sequential Monte Carlo techniques with Variational Bayes for efficient modeling of dynamic systems.</li>
     </ul>
   </div>
