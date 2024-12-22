@@ -6,7 +6,7 @@ layout: page
 
   <!-- Introduction Section -->
   <div class="intro-section" style="text-align: center; padding: 2rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-    <img src="/files/images/Me2.jpg" 
+    <img src="/files/images/Me.jpg" 
          alt="Antonio Aguirre" 
          style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
     <h1 style="font-size: 2.3rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.5rem;">Antonio Aguirre</h1>
