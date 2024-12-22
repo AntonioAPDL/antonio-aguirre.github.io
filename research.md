@@ -9,23 +9,20 @@ title: Research
     Research Overview
   </h1>
   <p style="font-size: 1.2rem; line-height: 1.8; color: #555; margin-bottom: 2rem; max-width: 700px; margin-left: auto; margin-right: auto;">
-    My research focuses on advancing <strong>Bayesian Statistics</strong>, <strong>spatio-temporal modeling</strong>, 
-    and <strong>machine learning techniques</strong> to address real-world problems, particularly in hydrology 
-    and environmental science. I prioritize methods that balance interpretability and operational scalability 
-    for forecasting and decision-making.
+    I am currently a Ph.D. candidate in the Department of Statistics at the University of California, Santa Cruz, under the guidance of Dr. Bruno Sansó and Dr. Raquel Prado. My research is focused on advancing Bayesian methods to address challenges in spatio-temporal modeling and real-time forecasting. I am particularly interested in developing interpretable and operational models for hydrology and environmental sciences, as well as integrating modern computational approaches for scalable Bayesian inference.
   </p>
 
-  <!-- Categorized Research -->
+  <!-- Current Projects -->
   <div class="research-categories" style="text-align: left; padding: 1.5rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
     <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Current Projects</h2>
     <ul style="list-style-type: disc; padding-left: 2rem; color: #555; font-size: 1.1rem; line-height: 1.8;">
-      <li><strong>Real-Time Forecast Synthesis:</strong> Integrating and refining diverse climate models for robust and accurate hydrological predictions.</li>
-      <li><strong>Dynamic Quantile Linear Models:</strong> Developing scalable Bayesian models for river discharge forecasting and environmental data analysis.</li>
-      <li><strong>Scalable Bayesian Inference:</strong> Innovating hybrid algorithms, combining Sequential Monte Carlo (SMC) with Variational Bayes for efficient state-space modeling.</li>
+      <li><strong>Real-Time Forecast Synthesis:</strong> Developing methods to integrate and correct diverse climate models for robust hydrological predictions.</li>
+      <li><strong>Dynamic Quantile Linear Models:</strong> Advancing Bayesian quantile-based methods for river discharge modeling and other environmental applications.</li>
+      <li><strong>Scalable Bayesian Inference:</strong> Combining Sequential Monte Carlo techniques with Variational Bayes for efficient modeling of dynamic systems.</li>
     </ul>
   </div>
 
-  <!-- Publication Section -->
+  <!-- Key Publication -->
   <div class="publication-section" style="margin-top: 3rem; padding: 1.5rem; text-align: left; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
     <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Key Publication</h2>
     <ul style="list-style: none; padding: 0;">
@@ -36,12 +33,12 @@ title: Research
     </ul>
   </div>
 
-  <!-- Workshops and Contributions Section -->
+  <!-- Workshops & Contributions -->
   <div class="workshops-section" style="margin-top: 3rem; padding: 1.5rem; text-align: left; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
     <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem;">Workshops & Contributions</h2>
     <ul style="list-style-type: disc; padding-left: 2rem; color: #555; font-size: 1.1rem; line-height: 1.8;">
-      <li><strong>TA Training Workshops (2024):</strong> Designed active learning modules and equity-focused teaching strategies for graduate teaching assistants.</li>
-      <li><strong>Hydrological Forecast Modeling (2023):</strong> Presented Bayesian quantile regression techniques for environmental applications during departmental sessions.</li>
+      <li><strong>TA Training Workshops (2024):</strong> Designed equity-focused active learning modules to support graduate teaching assistants in their professional development.</li>
+      <li><strong>Hydrological Forecast Modeling (2023):</strong> Presented Bayesian quantile regression techniques during departmental modeling sessions.</li>
     </ul>
   </div>
 </div>
