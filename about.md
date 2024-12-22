@@ -4,20 +4,21 @@ layout: page
 
 <div class="about-section" style="margin: 2rem auto; max-width: 900px;">
 
-  <!-- Introduction Section -->
-  <div class="intro-section" style="text-align: center; padding: 2rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-    <img src="/files/images/Me.jpg" 
-         alt="Antonio Aguirre" 
-         style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
-    <h1 style="font-size: 2.3rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.5rem;">Antonio Aguirre</h1>
-    <p style="font-size: 1.2rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555;">
-      I’m a Ph.D. candidate in <strong>Statistics</strong> at the 
-      <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank">University of California, Santa Cruz</a>. 
-      Working with <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank">Bruno Sanso</a> and 
-      <a href="https://raquel.soe.ucsc.edu/" target="_blank">Raquel Prado</a>, my research focuses on improving statistical methods to make them practical and effective for solving real-world problems. 
-      My work emphasizes uncertainty quantification, forecasting, and scalable Bayesian techniques, especially in environmental and hydrological contexts.
-    </p>
-  </div>
+<!-- Introduction Section -->
+<div class="intro-section" style="display: flex; flex-direction: column; align-items: center; padding: 2rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+  <img src="/files/images/Me.jpg" 
+       alt="Antonio Aguirre" 
+       style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
+  <h1 style="font-size: 2.3rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; padding-bottom: 0.5rem; text-align: center;">Antonio Aguirre</h1>
+  <p style="font-size: 1.2rem; line-height: 1.8; max-width: 800px; margin: 1rem auto; color: #555; text-align: center;">
+    I’m a Ph.D. candidate in <strong>Statistics</strong> at the 
+    <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank">University of California, Santa Cruz</a>. 
+    Working with <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank">Bruno Sanso</a> and 
+    <a href="https://raquel.soe.ucsc.edu/" target="_blank">Raquel Prado</a>, my research focuses on improving statistical methods to make them practical and effective for solving real-world problems. 
+    My work emphasizes uncertainty quantification, forecasting, and scalable Bayesian techniques, especially in environmental and hydrological contexts.
+  </p>
+</div>
+
 
   <!-- Ongoing Projects Section -->
   <div class="projects-section" style="margin-top: 2rem; padding: 2rem; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
