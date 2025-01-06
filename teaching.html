@@ -2,14 +2,16 @@
 layout: page
 ---
 
-<div class="teaching-section" style="margin: 2rem auto; max-width: 900px;">
-  <!-- Page Introduction -->
-  <div class="page-header" style="text-align: center; margin-bottom: 2rem;">
-    <h1 style="font-size: 2.3rem; font-weight: bold; color: #333; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.3rem;">Teaching</h1>
-    <p style="font-size: 1.2rem; line-height: 1.8; color: #555; max-width: 800px; margin: 0 auto;">
-      Below are some courses I have helped teach, including lecture materials and interactive notebooks. Click on a course to explore resources such as slides, problem sets, and Colab notebooks.
-    </p>
-  </div>
+<!-- Page Header - Teaching -->
+<div class="page-header" style="text-align: center; margin-bottom: 2rem;">
+  <h1 style="font-size: 2.3rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.5rem;">
+    Teaching
+  </h1>
+  <p style="font-size: 1.2rem; line-height: 1.8; color: #555; max-width: 700px; margin-left: auto; margin-right: auto;">
+    Below are some courses I have helped teach, including lecture materials and interactive notebooks. Click on a course to explore resources such as slides, problem sets, and Colab notebooks.
+  </p>
+</div>
+
 
   <!-- Teaching Materials -->
   {% assign courses = site.static_files | where_exp: "file", "file.path contains '/files/teaching/'" %}
