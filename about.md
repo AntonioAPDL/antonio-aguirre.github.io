@@ -62,13 +62,10 @@ layout: page
   <div class="beyond-research-section" style="margin-top: 2rem; padding: 2rem; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
     <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.5rem;">Beyond Research</h2>
     <p style="font-size: 1.2rem; line-height: 1.8; max-width: 800px; margin: 0 auto; color: #555;">
-      When I'm not PhDing, I enjoy baking bread, cooking Mexican dishes, exploring history, diving into the philosophy of science, and learning German.
+      When I'm not PhDing, I enjoy baking bread, cooking Mexican dishes, reading history, diving into the philosophy of science, and learning German.
     </p>
     <p style="font-size: 1.2rem; line-height: 1.8; max-width: 800px; margin: 0 auto; color: #555;">
-      Thanks for stopping by! 
-    </p>
-    <p style="font-size: 1.2rem; line-height: 1.8; max-width: 800px; margin: 0 auto; color: #555;">
-      Feel free to reach out if you’d like to connect or discuss ideas.
+      Feel free to reach out if you’d like to connect or discuss ideas.  Thanks for stopping by! 
     </p>
   </div>
 </div>
