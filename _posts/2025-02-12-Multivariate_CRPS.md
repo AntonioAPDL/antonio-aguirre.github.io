@@ -113,10 +113,10 @@ While computation requires special functions (${}_1F_1$, Γ) or Monte Carlo meth
 
 <div class="yellow-box">
 <strong>Implementation Insight:</strong>  
-<li>For high-𝑑 systems, the hypergeometric term ${}_1F_1(−1/2;𝑑/2;−𝛿^2/2)$ approaches $e^{−𝛿^2/(2𝑑)}$ - revealing a deep connection to Gaussian kernels in RKHS theory [2]</li>
+<li>For high-𝑑 systems, the hypergeometric term ${}_1F_1(−1/2;𝑑/2;−𝛿^2/2)$ approaches $e^{−𝛿^2/(2𝑑)}$ - suggestion some interesting  connections to Gaussian kernels in RKHS theory [2]</li>
 </div>
 
-As multivariate probabilistic AI/ML systems proliferate, the Energy Score provides a principled verification framework - one that honors the CRPS' philosophy while embracing the geometric complexity of high-dimensional spaces.
+As multivariate probabilistic AI/ML systems proliferate, the Energy Score provides a principled verification framework - one that honors the CRPS' "properness" philosophy.
 
 ---
 
