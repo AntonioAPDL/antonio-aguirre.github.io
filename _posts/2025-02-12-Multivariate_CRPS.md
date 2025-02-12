@@ -12,12 +12,12 @@ excerpt: "Closed-form expressions and special cases for the multivariate general
 The Energy Score serves as the multivariate extension of the Continuous Ranked Probability Score (CRPS), maintaining its desirable properties while handling vector-valued forecasts. This post presents the closed-form expression for multivariate normal distributions and its connection to classical CRPS results.
 
 <div class="green-box">
-<strong>Key Insight:</strong>  
+<strong>Insight:</strong>  
 <li>The Energy Score generalizes CRPS through expectations of pairwise distances, avoiding direct integration over multivariate CDFs</li>
 <li>Special function relationships enable closed-form solutions for normal distributions</li>
 </div>
 
-## Energy Score Definition
+## Energy Score: Definition
 
 For a $d$-dimensional forecast distribution $P$ and observation vector $\mathbf{y} \in \mathbb{R}^d$:
 
@@ -27,7 +27,7 @@ $$
 
 where $\mathbf{X}, \mathbf{X'} \sim P$ are independent random vectors.
 
-## Main Result: Multivariate Normal Case
+## The Multivariate Normal Case
 
 For $P = \mathcal{N}_d(\boldsymbol{\mu}, \mathbf{\Sigma})$ and observation $\mathbf{y}$:
 
@@ -75,7 +75,7 @@ where $z = \frac{y - \mu}{\sigma}$ and $\Phi$ is the standard normal CDF.
 | High-dimensional cases  | Monte Carlo sampling              |
 
 <div class="green-box">
-<strong>Implementation Tip:</strong>  
+<strong>Implementation Suggestion:</strong>  
 <li>For d > 3, consider Monte Carlo approximation:</li>
 $$
 \text{ES}(P, \mathbf{y}) \approx \frac{1}{N}\sum_{i=1}^N \|\mathbf{X}_i - \mathbf{y}\| - \frac{1}{2N^2}\sum_{i,j=1}^N \|\mathbf{X}_i - \mathbf{X}_j\|
@@ -103,7 +103,7 @@ $$
 The Energy Score's extension of CRPS to multivariate settings addresses a critical need in modern probabilistic forecasting. Where the univariate CRPS revolutionized verification of scalar forecasts [1], complex systems increasingly demand *joint calibration assessments* of vector-valued predictions - from weather models (temperature-pressure-wind vectors) to financial risk (correlated asset returns).
 
 <div class="green-box">
-<strong>Key Motivations:</strong>
+<strong>Some Motivations:</strong>
 <li><strong>Dependency Awareness:</strong> Unlike marginal CRPS averaging, the Energy Score's pairwise distance terms (𝔼‖𝐗−𝐗'‖) directly penalize misrepresented correlations [2]</li>
 <li><strong>Properness Preservation:</strong> Maintains the CRPS' crucial property of being strictly proper - forecasters can't game the system by misrepresenting uncertainties [1]</li>
 <li><strong>Consistency:</strong> Reduces exactly to CRPS when 𝑑=1, ensuring backward compatibility</li>
