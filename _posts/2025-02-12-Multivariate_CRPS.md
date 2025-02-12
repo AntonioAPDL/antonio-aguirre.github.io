@@ -98,10 +98,29 @@ $$
 \mathbb{E}[\|\mathbf{V}\|] = \sqrt{2\text{tr}(\mathbf{\Omega})} \cdot \frac{\Gamma\left(\frac{d+1}{2}\right)}{\Gamma\left(\frac{d}{2}\right)} \cdot {}_1F_1\left(-\frac{1}{2}; \frac{d}{2}; -\frac{\boldsymbol{\nu}^\top \mathbf{\Omega}^{-1} \boldsymbol{\nu}}{2}\right)
 $$
 
-## Conclusion
+## Comments
 
-The Energy Score provides a theoretically sound generalization of CRPS for multivariate normals, maintaining proper scoring rule properties while requiring careful handling of special functions. The univariate limit confirms consistency with classical results, validating its use in probabilistic forecasting.
+The Energy Score's extension of CRPS to multivariate settings addresses a critical need in modern probabilistic forecasting. Where the univariate CRPS revolutionized verification of scalar forecasts [1], complex systems increasingly demand *joint calibration assessments* of vector-valued predictions - from weather models (temperature-pressure-wind vectors) to financial risk (correlated asset returns).
 
-**References**:  
-1. Gneiting & Raftery (2007) - Strictly Proper Scoring Rules  
-2. Székely & Rizzo (2013) - Energy Statistics
+<div class="green-box">
+<strong>Key Motivations:</strong>
+<li><strong>Dependency Awareness:</strong> Unlike marginal CRPS averaging, the Energy Score's pairwise distance terms (𝔼‖𝐗−𝐗'‖) directly penalize misrepresented correlations [2]</li>
+<li><strong>Properness Preservation:</strong> Maintains the CRPS' crucial property of being strictly proper - forecasters can't game the system by misrepresenting uncertainties [1]</li>
+<li><strong>Consistency:</strong> Reduces exactly to CRPS when 𝑑=1, ensuring backward compatibility</li>
+</div>
+
+While computation requires special functions (${}_1F_1$, Γ) or Monte Carlo methods, this cost reflects the intrinsic complexity of multivariate dependence structures. As shown in [3], alternative scores like the variogram score make different tradeoffs, but the Energy Score remains uniquely tied to the CRPS legacy.
+
+<div class="yellow-box">
+<strong>Implementation Insight:</strong>  
+<li>For high-𝑑 systems, the hypergeometric term ${}_1F_1(−1/2;𝑑/2;−𝛿^2/2)$ approaches $e^{−𝛿^2/(2𝑑)}$ - revealing a deep connection to Gaussian kernels in RKHS theory [2]</li>
+</div>
+
+As multivariate probabilistic AI/ML systems proliferate, the Energy Score provides a principled verification framework - one that honors the CRPS' philosophy while embracing the geometric complexity of high-dimensional spaces.
+
+---
+
+**References**  
+1. [Gneiting, T., & Raftery, A. E. (2007). Strictly proper scoring rules, prediction, and estimation. *JASA*](https://doi.org/10.1198/016214506000001437)  
+2. [Székely, G. J., & Rizzo, M. L. (2013). Energy statistics: A class of statistics based on distances. *JSPI*](https://doi.org/10.1016/j.jspi.2013.03.018)  
+3. [Pinson, P., & Girard, R. (2012). Evaluating the quality of scenarios of short-term wind power generation. *Applied Energy*](https://doi.org/10.1016/j.apenergy.2012.05.010)
