@@ -32,7 +32,7 @@ where $\mathbf{X}, \mathbf{X'} \sim P$ are independent random vectors.
 For $P = \mathcal{N}_d(\boldsymbol{\mu}, \mathbf{\Sigma})$ and observation $\mathbf{y}$:
 
 $$
-\text{ES}(P, \mathbf{y}) = \sqrt{2\text{tr}(\mathbf{\Sigma}) \cdot \frac{\Gamma\left(\frac{d+1}{2}\right)}{\Gamma\left(\frac{d}{2}\right)} \left[ {}_1F_1\left(-\frac{1}{2}; \frac{d}{2}; -\frac{\delta^2}{2}\right) - 1 \right]
+\text{ES}(P, \mathbf{y}) = \sqrt{2\text{tr}(\mathbf{\Sigma})} \cdot \frac{\Gamma\left(\frac{d+1}{2}\right)}{\Gamma\left(\frac{d}{2}\right)} \left[ {}_1F_1\left(-\frac{1}{2}; \frac{d}{2}; -\frac{\delta^2}{2}\right) - 1 \right]
 $$
 
 **Components**:
