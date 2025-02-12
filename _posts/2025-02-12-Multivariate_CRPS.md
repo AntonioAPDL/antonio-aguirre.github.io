@@ -109,7 +109,7 @@ The Energy Score's extension of CRPS to multivariate settings addresses a critic
 <li><strong>Consistency:</strong> Reduces exactly to CRPS when 𝑑=1, ensuring backward compatibility</li>
 </div>
 
-While computation requires special functions (${}_1F_1$, Γ) or Monte Carlo methods, this cost reflects the intrinsic complexity of multivariate dependence structures. As shown in [3], alternative scores like the variogram score make different tradeoffs, but the Energy Score remains uniquely tied to the CRPS legacy.
+While computation requires special functions (${}_1F_1$, Γ) or Monte Carlo methods, this cost reflects the intrinsic complexity of multivariate dependence structures. As shown in [3], alternative scores like the variogram score make different tradeoffs, but the Energy Score remains uniquely tied to the CRPS.
 
 <div class="yellow-box">
 <strong>Implementation Insight:</strong>  
