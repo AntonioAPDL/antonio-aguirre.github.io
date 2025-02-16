@@ -29,9 +29,15 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
 
 ## Interactive Development Sessions
 
-<div class="yellow-box ">
- <strong>When to Use Interactive:</strong>  
- Debugging code • E ploratory analysis • Small simulations • Model prototyping • Visualization
+<div class="yellow-box">
+  <strong>When to Use Interactive:</strong>  
+  <ul>
+    <li>Debugging code</li>
+    <li>Exploratory analysis</li>
+    <li>Small simulations</li>
+    <li>Model prototyping</li>
+    <li>Visualization</li>
+  </ul>
 </div>
 
 ### Example 1: Debugging Bayesian Models in R
