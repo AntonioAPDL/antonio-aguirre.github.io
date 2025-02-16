@@ -71,12 +71,15 @@ ssh -L 8889:localhost:8889 cruzid@hb.ucsc.edu
 
 ## Batch Processing for Production Workloads
 
-<div class="yellow-box ">
- <strong>When to Use Batch:</strong>  
-  <li>Long-running computations</li>
-  <li>Parameter sweeps</li>
-  <li>Production models</li>
-  <li>Final analyses</li>
+<div class="yellow-box">
+  <strong>When to Use Batch Processing:</strong>  
+  <ul>
+    <li>Long-running computations (>4 hours)</li>
+    <li>Parameter sweeps/optimization runs</li>
+    <li>Production model training/inference</li>
+    <li>Final analyses requiring full resources</li>
+    <li>Reproducible pipeline executions</li>
+  </ul>
 </div>
 
 ### Example 1: Large-Scale Bayesian Inference
