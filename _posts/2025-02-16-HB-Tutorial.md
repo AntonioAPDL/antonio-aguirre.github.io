@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Statistical Computing: A tutorial for UCSC Graduate Students"
+title: "Statistical Computing: A tutorial for UCSC Graduate Students (Requires Update!)"
 date: 2025-02-16  <!-- Update with actual date -->
 theme: HPC
 tags: [statistics, HPC, cluster-computing, UCSC]
