@@ -6,7 +6,8 @@ theme: HPC
 tags: [statistics, HPC, cluster-computing, UCSC]
 excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistical research with Bayesian methods, ML workflows, and large-scale simulations"
 ---
- ## Introduction to Cluster Computing for Statisticians
+
+ ## Introduction to Cluster Computing for Stats Grads
 
  <div class="green-box ">
    <strong>Why Statisticians Need HPC?</strong>  
