@@ -13,7 +13,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
  <strong>Why Statisticians Need HPC?</strong>  
  <ul>
    <li><u>MCMC Parallelization:</u> Run thousands of chains simultaneously for hierarchical models (e.g., STAN, PyMC3)</li>
-   <li><u>Resampling Methods:</u> E ecute bootstrap/permutation tests on genomic datasets with 100+ cores</li>
+   <li><u>Resampling Methods:</u> Execute bootstrap/permutation tests on genomic datasets with 100+ cores</li>
    <li><u>ML at Scale:</u> Hyperparameter tuning for ensemble models with GPU acceleration</li>
    <li><u>Spatial Analysis:</u> Process TB-scale climate data using geospatial packages</li>
  </ul>
