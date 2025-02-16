@@ -8,7 +8,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
 ---
  ## Introduction to Cluster Computing for Statisticians
 
- <div class="green-bo ">
+ <div class="green-box ">
    <strong>Why Statisticians Need HPC?</strong>  
    <ul>
      <li><u>MCMC Parallelization:</u> Run thousands of chains simultaneously for hierarchical models (e.g., STAN, PyMC3)</li>
@@ -26,7 +26,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
 
  
  ## Interactive Development Sessions
- <div class="yellow-bo ">
+ <div class="yellow-box ">
    <strong>When to Use Interactive:</strong>  
    Debugging code • E ploratory analysis • Small simulations • Model prototyping • Visualization
  </div>
@@ -65,7 +65,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
 
  
  ## Batch Processing for Production Workloads
- <div class="yellow-bo ">
+ <div class="yellow-box ">
    <strong>When to Use Batch:</strong>  
    Long-running computations • Parameter sweeps • Production models • Final analyses
  </div>
@@ -125,7 +125,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
  conda-lock lock --file environment.yml --platform linu -64  # Create reproducible lockfile
  ```
 
- <div class="green-bo ">
+ <div class="green-box ">
    <strong>Big Data Best Practices</strong>
    <ul>
      <li><u>Chunked Processing:</u> Use dask.dataframe.read_csv(chunksize=1e6) for memory-efficient ETL</li>
@@ -134,7 +134,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
    </ul>
  </div>
 
- <div class="red-bo ">
+ <div class="red-box ">
    <strong>Pro Tip:</strong> Always test workflows interactively before submitting batch jobs!
    <ul>
      <li>Validate data loading in small sessions</li>
@@ -186,7 +186,7 @@ python -m memray run -o profile.bin ml_pipeline.py
 
 ## Department-Specific Resources
 
-<div class="green-box">
+<div class="green-boxx">
   <strong>Statistics HPC Support</strong>
   <ul>
     <li>Pre-built Environments: /hb/software/stats</li>
@@ -202,7 +202,7 @@ seff $(squeue -u $USER -h -o %i)
 ```
 
 
-<div class="red-box">
+<div class="red-boxx">
   <strong>Common Pitfalls</strong>
   <ul>
     <li>Oversubscribing memory: Use --mem-per-cpu for array jobs</li>
