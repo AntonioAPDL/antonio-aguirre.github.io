@@ -20,6 +20,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
  </div>
 
  ### Core Cluster Concepts
+ 
  - **Node**: Dedicated server (128 cores/256GB RAM typical) - Think of it as a powerful workstation
  - **Core**: Individual processing unit (Like a CPU thread) - Your basic computation unit
  - **GPU Node**: Specialized nodes with 4  NVIDIA A100 GPUs (80GB VRAM each) for deep learning
@@ -27,12 +28,14 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
 
  
  ## Interactive Development Sessions
+ 
  <div class="yellow-box ">
    <strong>When to Use Interactive:</strong>  
    Debugging code • E ploratory analysis • Small simulations • Model prototyping • Visualization
  </div>
 
  ### E ample 1: Debugging Bayesian Models in R
+ 
  ```bash
  # Request interactive resources: 4 cores, 8GB RAM for 2 hours
  srun --pty --mem=8G --cpus-per-task=4 --time=02:00:00 bash
@@ -49,6 +52,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
  ```
 
  ### E ample 2: Interactive ML Development with Jupyter
+ 
  ```bash
  # Request heavier resources for data e ploration: 8 cores, 16GB RAM
  srun --pty --mem=16G --cpus-per-task=8 --time=04:00:00 bash
@@ -66,12 +70,14 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
 
  
  ## Batch Processing for Production Workloads
+ 
  <div class="yellow-box ">
    <strong>When to Use Batch:</strong>  
    Long-running computations • Parameter sweeps • Production models • Final analyses
  </div>
 
  ### E ample 1: Large-Scale Bayesian Inference
+ 
  ```bash
  #!/bin/bash
  #SBATCH --job-name=stan_meta          # Job identifier
@@ -91,6 +97,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
  ```
 
  ### E ample 2: Distributed ML Training
+ 
  ```bash
  #!/bin/bash
  #SBATCH --job-name= gb_ensemble       # Job name
@@ -113,6 +120,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
  ## Reproducible Environment Setup
  
  ### Statistical Computing Environments
+ 
  ```bash
  # R: Create project-specific environment with renv
  module load R/4.3.0
@@ -156,6 +164,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
  </div>
 
  ### Memory Management Essentials
+ 
  ```bash
  # For R: Profile memory usage with Valgrind
  # This creates detailed memory usage reports
@@ -182,6 +191,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
  </div>
 
  ### Parallel Computing Patterns Explained
+
  <table>
    <tr>
      <th>Method</th>
