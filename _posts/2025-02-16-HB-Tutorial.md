@@ -30,8 +30,6 @@ You’ll learn to:
 3. **Optimize resources** (avoid memory crashes, leverage GPUs)  
 4. **Manage workflows** (from data storage to result analysis)  
 
-By the end, you’ll be equipped to tackle statistical challenges that once seemed computationally impossible—all while avoiding common pitfalls. Let’s transform those ambitious research questions into publishable results!  
-
 ## Introduction to Cluster Computing for Stats Grads
 
 ### Brief Glossary: 
