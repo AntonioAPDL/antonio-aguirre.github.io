@@ -98,8 +98,8 @@ module load R/4.3.0
 
 # Run STAN model with chain-specific data
 Rscript run_stan.R --model hierarchical \
-                  --data ${SLURM_ARRAY_TASK_ID} \  # Array inde  as data ID
-                  --iter 5000                      # MCMC iterations
+                  --data ${SLURM_ARRAY_TASK_ID} \  
+                  --iter 5000
 ```
 
 ### Example 2: Distributed ML Training
