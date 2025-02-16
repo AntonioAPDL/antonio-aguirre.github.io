@@ -6,97 +6,143 @@ theme: HPC
 tags: [statistics, HPC, cluster-computing, UCSC]
 excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistical research with Bayesian methods, ML workflows, and large-scale simulations"
 ---
+ ## Introduction to Cluster Computing for Statisticians
 
-## Introduction to Cluster Computing for Statisticians
+ <div class="green-bo ">
+   <strong>Why Statisticians Need HPC?</strong>  
+   <ul>
+     <li><u>MCMC Parallelization:</u> Run thousands of chains simultaneously for hierarchical models (e.g., STAN, PyMC3)</li>
+     <li><u>Resampling Methods:</u> E ecute bootstrap/permutation tests on genomic datasets with 100+ cores</li>
+     <li><u>ML at Scale:</u> Hyperparameter tuning for ensemble models with GPU acceleration</li>
+     <li><u>Spatial Analysis:</u> Process TB-scale climate data using geospatial packages</li>
+   </ul>
+ </div>
 
-<div class="green-box">
-  <strong>Why Statisticians Need HPC?</strong>  
-  <ul>
-    <li>Parallelize 10,000 MCMC chains for hierarchical models</li>
-    <li>Run bootstrap resampling on 100-core genomic datasets</li>
-    <li>Train ensemble ML models with hyperparameter grid searches</li>
-    <li>Process spatial statistics on TB-scale climate data</li>
-  </ul>
-</div>
+ ### Core Cluster Concepts
+ - **Node**: Dedicated server (128 cores/256GB RAM typical) - Think of it as a powerful workstation
+ - **Core**: Individual processing unit (Like a CPU thread) - Your basic computation unit
+ - **GPU Node**: Specialized nodes with 4  NVIDIA A100 GPUs (80GB VRAM each) for deep learning
+ - **Scratch Space**: 1PB high-speed temporary storage (Auto-cleaned every 14 days) - Perfect for intermediate results
 
-### Key Concepts Explained
-- **Node**: Physical server (128-core/256GB RAM typical)
-- **Core**: CPU thread for task parallelism  
-- **GPU Node**: 4x A100 GPUs for deep learning  
-- **Scratch Space**: 1PB temporary storage (auto-cleaned every 14 days)
+ 
+ ## Interactive Development Sessions
+ <div class="yellow-bo ">
+   <strong>When to Use Interactive:</strong>  
+   Debugging code • E ploratory analysis • Small simulations • Model prototyping • Visualization
+ </div>
 
+ ### E ample 1: Debugging Bayesian Models in R
+ ```bash
+ # Request interactive resources: 4 cores, 8GB RAM for 2 hours
+ srun --pty --mem=8G --cpus-per-task=4 --time=02:00:00 bash
+ 
+ # Load R environment with Bayesian stack
+ module load R/4.3.0
+ 
+ # Start R session with debugging capabilities
+ R
+ > library(rstan)          # Load STAN interface
+ > debug(fit_model)        # Set breakpoint in function
+ > source("hierarchical_bayes.R")  # Run script until breakpoint
+ > where                  # Show call stack when breakpoint hits
+ ```
 
-## Interactive Workflows for Statistical Development
+ ### E ample 2: Interactive ML Development with Jupyter
+ ```bash
+ # Request heavier resources for data e ploration: 8 cores, 16GB RAM
+ srun --pty --mem=16G --cpus-per-task=8 --time=04:00:00 bash
+ 
+ # Load Python environment
+ module load python/3.11
+ 
+ # Start Jupyter Lab on cluster (no local browser)
+ python -m jupyter lab --no-browser --port=8889
+ 
+ # On your local machine, create SSH tunnel:
+ ssh -L 8889:localhost:8889 cruzid@hb.ucsc.edu
+ # Now access via http://localhost:8889 in local browser
+ ```
 
-  ```bash
-  srun --pty --mem=8G --cpus-per-task=4 --time=02:00:00 bash
-  module load R/4.3.0
-  R
-  > library(rstan)
-  > debug(fit_model)  # Set breakpoint
-  > source("hierarchical_bayes.R")  # Trigger debug mode
-  ```
+ 
+ ## Batch Processing for Production Workloads
+ <div class="yellow-bo ">
+   <strong>When to Use Batch:</strong>  
+   Long-running computations • Parameter sweeps • Production models • Final analyses
+ </div>
 
-  ```bash
-  srun --pty --mem=16G --cpus-per-task=8 --time=04:00:00 bash
-  module load python/3.11
-  python -m jupyter lab --no-browser --port=8889
-  # SSH tunnel to local machine: ssh -L 8889:localhost:8889 cruzid@hb.ucsc.edu
-  ```
+ ### E ample 1: Large-Scale Bayesian Inference
+ ```bash
+ #!/bin/bash
+ #SBATCH --job-name=stan_meta          # Job identifier
+ #SBATCH --output=mcmc_%A_%a.log       # Log file template (JobID_ArrayID)
+ #SBATCH --array=1-100                 # Parallelize 100 independent chains
+ #SBATCH --cpus-per-task=4             # 4 cores per chain (for within-chain parallel)
+ #SBATCH --mem=16G                     # 16GB RAM per chain
+ #SBATCH --time=24:00:00               # 24hr ma  runtime
+ 
+ # Load environment
+ module load R/4.3.0
+ 
+ # Run STAN model with chain-specific data
+ Rscript run_stan.R --model hierarchical \
+                    --data ${SLURM_ARRAY_TASK_ID} \  # Array inde  as data ID
+                    --iter 5000                      # MCMC iterations
+ ```
 
+ ### E ample 2: Distributed ML Training
+ ```bash
+ #!/bin/bash
+ #SBATCH --job-name= gb_ensemble       # Job name
+ #SBATCH --nodes=2                     # Use 2 physical servers
+ #SBATCH --ntasks-per-node=16          # 32 total tasks (16 per node)
+ #SBATCH --mem=128G                    # 128GB total RAM (64GB/node)
+ #SBATCH --time=48:00:00               # 2-day ma  runtime
+ #SBATCH --gres=gpu:2                  # Request 2 GPUs per node
+ 
+ # Load ML environment
+ module load python/3.11
+ 
+ # Train  GBoost ensemble with cross-validation
+ python train_ensemble.py --n-estimators 1000 \  # 1000 trees
+                          --depth-range 3-10 \   # Search depth 3-10
+                          --gpu                  # Enable GPU acceleration
+ ```
 
-## Batch Processing: Statistical Workload Templates
+ 
+ ## Reproducible Environment Setup
+ 
+ ### Statistical Computing Environments
+ ```bash
+ # R: Create project-specific environment with renv
+ module load R/4.3.0
+ R -e "renv::init()"            # Initialize project
+ R -e "renv::install('brms')"   # Install Bayesian regression models
+ 
+ # Python: Lock dependencies with conda-lock
+ module load miniconda3
+ conda create -n stats_proj python=3.11  # New environment
+ conda install -n stats_proj numpy pandas scikit-learn  # Core stack
+ conda-lock lock --file environment.yml --platform linu -64  # Create reproducible lockfile
+ ```
 
-### Bayesian MCMC at Scale  
-```bash
-#!/bin/bash
-#SBATCH --job-name=stan_meta
-#SBATCH --output=mcmc_%A_%a.log  # %A=job ID, %a=array index
-#SBATCH --array=1-100  # 100 parallel chains
-#SBATCH --cpus-per-task=4  # 4 threads per chain
-#SBATCH --mem=16G
-#SBATCH --time=24:00:00
+ <div class="green-bo ">
+   <strong>Big Data Best Practices</strong>
+   <ul>
+     <li><u>Chunked Processing:</u> Use dask.dataframe.read_csv(chunksize=1e6) for memory-efficient ETL</li>
+     <li><u>Memory Mapping:</u> numpy.memmap('large_array.npy') for out-of-core 100GB+ arrays</li>
+     <li><u>Columnar Storage:</u> pd.read_parquet('data.parquet') for fast I/O of structured data</li>
+   </ul>
+ </div>
 
-module load R/4.3.0
-Rscript run_stan.R --model hierarchical --data ${SLURM_ARRAY_TASK_ID} --iter 5000
-```
+ <div class="red-bo ">
+   <strong>Pro Tip:</strong> Always test workflows interactively before submitting batch jobs!
+   <ul>
+     <li>Validate data loading in small sessions</li>
+     <li>Profile memory usage with RStudio/python -m memory_profiler</li>
+     <li>Test single array job element before full submission</li>
+   </ul>
+ </div>
 
-
-### Machine Learning Pipeline  
-```bash
-#!/bin/bash
-#SBATCH --job-name=xgb_ensemble
-#SBATCH --nodes=2  # 2 servers
-#SBATCH --ntasks-per-node=16  # 32 total tasks
-#SBATCH --mem=128G 
-#SBATCH --time=48:00:00
-
-module load python/3.11
-python train_ensemble.py --n-estimators 1000 --depth-range 3-10 --gpu
-```
-
-
-## Advanced Statistical Computing Features
-
-  ```bash
-  X# R environment with renv
-  Xmodule load R/4.3.0
-  XR -e "renv::init(); renv::install('brms')"
-  
-  # Python with conda-lock
-  module load miniconda3
-  conda create -n stats_proj python=3.11
-  conda-lock lock --file environment.yml --platform linux-64
-  ```
-
-<div class="yellow-box">
-  <strong>Big Data Strategies</strong>
-  <ul>
-    <li>Chunked Processing: Use dask.dataframe for >1GB CSVs</li>
-   <li>Memory Mapping: numpy.memmap for 100GB+ arrays</li>
-    <li>Columnar Storage: Parquet/Feather over CSV</li>
-  </ul>
-</div>
 
 
 ## Performance Optimization Guide
