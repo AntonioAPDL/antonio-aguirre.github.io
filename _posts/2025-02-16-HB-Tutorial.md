@@ -34,17 +34,7 @@ By the end, you’ll be equipped to tackle statistical challenges that once seem
 
 ## Introduction to Cluster Computing for Stats Grads
 
-<div class="green-box ">
- <strong>Why Statisticians Need HPC?</strong>  
- <ul>
-   <li><u>MCMC Parallelization:</u> Run thousands of chains simultaneously for hierarchical models (e.g., STAN, PyMC3)</li>
-   <li><u>Resampling Methods:</u> Execute bootstrap/permutation tests on genomic datasets with 100+ cores</li>
-   <li><u>ML at Scale:</u> Hyperparameter tuning for ensemble models with GPU acceleration</li>
-   <li><u>Spatial Analysis:</u> Process TB-scale climate data using geospatial packages</li>
- </ul>
-</div>
-
-### Core Cluster Concepts
+### Explaining some Core/Cluster Concepts
 
 - **Node**: Dedicated server (128 cores/256GB RAM typical) - Think of it as a powerful workstation
 - **Core**: Individual processing unit (Like a CPU thread) - Your basic computation unit
