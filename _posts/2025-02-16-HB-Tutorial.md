@@ -4,11 +4,10 @@ title: "Statistical Computing: A tutorial for UCSC Graduate Students (Requires U
 date: 2025-02-16  <!-- Update with actual date -->
 theme: HPC
 tags: [statistics, HPC, cluster-computing, UCSC]
-excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistical research with Bayesian methods, ML workflows, and large-scale simulations"
+excerpt: "Leveraging Hummingbird HPC for statistical research"
 ---
   
 Hi, grads! Whether you’re running Bayesian models, tuning machine learning algorithms, or analyzing massive datasets, this guide aims to help you take advantage of the full potential of UCSC’s **Hummingbird (HB) clusters**.
-
 
 ### What Are the Hummingbird Clusters?  
 The HB clusters are UCSC’s shared high-performance computing (HPC) systems, built to handle tasks that would overwhelm personal computers. Designed for researchers across disciplines, they offer:  
