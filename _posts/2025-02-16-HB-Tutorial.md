@@ -143,70 +143,112 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
    </ul>
  </div>
 
+ ## Performance Optimization Guide
 
+ <div class="yellow-box">
+   <strong>Understanding Cluster Resources</strong>
+   <ul>
+     <li>All compute happens on <u>remote servers</u> - your laptop just submits jobs</li>
+     <li>Storage paths like /hb/home are <u>network-mounted</u> - accessible from all nodes</li>
+     <li>Always test scripts with small resources first!</li>
+   </ul>
+ </div>
 
-## Performance Optimization Guide
+ ### Memory Management Essentials
+ ```bash
+ # For R: Profile memory usage with Valgrind
+ # This creates detailed memory usage reports
+ module load R/4.3.0
+ R -d "valgrind --tool=massif" -f bayesian_analysis.R
+ # After running, analyze with:
+ ms_print massif.out.* > memory_report.txt
+ 
+ # For Python: Track memory allocation
+ # First install memory profiler in your environment
+ pip install memray
+ # Run profiling and generate report
+ python -m memray run -o profile.bin ml_pipeline.py
+ python -m memray stats --json profile.bin > memory_stats.json
+ ```
 
-### Memory Management
-```bash
-# Monitor R memory
-module load R/4.3.0
-R -d "valgrind --tool=massif" -f bayesian_analysis.R
+ <div class="green-box">
+   <strong>Why Memory Matters:</strong>
+   <ul>
+     <li>Jobs exceeding requested memory get <u>automatically killed</u></li>
+     <li>Use 10-20% less than node maximums for safety</li>
+     <li>Monitor memory during runs with <code>seff JOBID</code></li>
+   </ul>
+ </div>
 
-# Python memory profiling
-pip install memray
-python -m memray run -o profile.bin ml_pipeline.py
-```
+ ### Parallel Computing Patterns Explained
+ <table>
+   <tr>
+     <th>Method</th>
+     <th>SLURM Directives</th>
+     <th>When to Use</th>
+     <th>Example Command</th>
+   </tr>
+   <tr>
+     <td>Embarrassing Parallel</td>
+     <td>--array=1-100</td>
+     <td>Independent tasks (Bootstrap/permutation tests)</td>
+     <td><code>sbatch --array=1-100 job.sh</code></td>
+   </tr>
+   <tr>
+     <td>MPI (Message Passing)</td>
+     <td>--nodes=4 --ntasks-per-node=16</td>
+     <td>Inter-process communication (Gibbs sampling)</td>
+     <td><code>mpirun -np 64 ./model</code></td>
+   </tr>
+   <tr>
+     <td>Multithreading</td>
+     <td>--cpus-per-task=32</td>
+     <td>Shared-memory tasks (XGBoost/CV tuning)</td>
+     <td><code>export OMP_NUM_THREADS=32</code></td>
+   </tr>
+ </table>
 
+ <div class="green-box">
+   <strong>Key Concept:</strong> Always match parallel method to your algorithm:
+   <ul>
+     <li>Embarrassing Parallel: No data sharing between tasks</li>
+     <li>MPI: Needs data exchange between processes</li>
+     <li>Multithreading: Single process with multiple threads</li>
+   </ul>
+ </div>
 
-### Parallel Computing Patterns
-<table>
-  <tr>
-    <th>Method</th>
-    <th>SLURM Directives</th>
-    <th>Use Case</th>
-  </tr>
-  <tr>
-    <td>Embarrassing Parallel</td>
-    <td>--array=1-100</td>
-    <td>Bootstrap/permutation tests</td>
-  </tr>
-  <tr>
-    <td>MPI</td>
-    <td>--nodes=4 --ntasks-per-node=16</td>
-    <td>Gibbs sampling</td>
-  </tr>
-  <tr>
-    <td>Multithreading</td>
-    <td>--cpus-per-task=32</td>
-    <td>XGBoost/CV tuning</td>
-  </tr>
-</table>
+ 
+ ## Getting Help with HPC
+ 
+ <div class="green-box">
+   <strong>Cluster Support Channels</strong>
+   <ul>
+     <li><a href="mailto:hummmingbird@ucsc.edu">Email Support</a>: For technical issues</li>
+     <li><a href="https://join.slack.com/t/ucschummingbi-lph3072/shared_invite/zt-19mbwqvx1-GqguQcumVBLss~nzjOHAYg">Slack Channel</a>: Real-time help from users</li>
+     <li>Documentation: https://hummingbird.ucsc.edu/docs</li>
+   </ul>
+ </div>
 
+ ```bash
+ # Check job efficiency - run this while job is active
+ seff $(squeue -u $USER -h -o %i)
+ # Look for:
+ # - CPU Utilization: Should be >90% for good efficiency
+ # - Memory Usage: Should be < requested amount
+ ```
 
-## Department-Specific Resources
+ <div class="red-box">
+   <strong>Avoid These Common Mistakes</strong>
+   <ul>
+     <li><u>Memory Overallocation:</u><br>
+     Bad: <code>--mem=256G</code> (max is 256GB/node)<br>
+     Good: <code>--mem=230G</code> (leave 10% margin)</li>
+     
+     <li><u>Ignoring Error Logs:</u><br>
+     Always check <code>slurm-JOBID.err</code> after failures</li>
+     
+     <li><u>Local Installs:</u><br>
+     Never use <code>pip install --user</code> - it can break cluster environments</li>
+   </ul>
+ </div>
 
-<div class="green-boxx">
-  <strong>Statistics HPC Support</strong>
-  <ul>
-    <li>Pre-built Environments: /hb/software/stats</li>
-    <li>Datasets: /hb/groups/statdata</li>
-    <li>Consultations: Tues/Thurs 2-4pm AP&M 2312</li>
-    <li>Email: stats-hpc@ucsc.edu</li>
-  </ul>
-</div>
-
-```bash
-# Quick job health check
-seff $(squeue -u $USER -h -o %i)
-```
-
-
-<div class="red-boxx">
-  <strong>Common Pitfalls</strong>
-  <ul>
-    <li>Oversubscribing memory: Use --mem-per-cpu for array jobs</li>
-    <li>Ignoring exit codes: Always check *.err logs</li>
-    <li>Local package installs: Use conda/renv instead</li>
-  </ul>
-</div>
