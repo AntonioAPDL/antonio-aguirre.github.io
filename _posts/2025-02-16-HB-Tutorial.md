@@ -73,7 +73,10 @@ ssh -L 8889:localhost:8889 cruzid@hb.ucsc.edu
 
 <div class="yellow-box ">
  <strong>When to Use Batch:</strong>  
- Long-running computations • Parameter sweeps • Production models • Final analyses
+  <li>Long-running computations</li>
+  <li>Parameter sweeps</li>
+  <li>Production models</li>
+  <li>Final analyses</li>
 </div>
 
 ### E ample 1: Large-Scale Bayesian Inference
