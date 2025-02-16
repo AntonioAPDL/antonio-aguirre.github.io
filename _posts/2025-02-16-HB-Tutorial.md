@@ -34,7 +34,7 @@ By the end, you’ll be equipped to tackle statistical challenges that once seem
 
 ## Introduction to Cluster Computing for Stats Grads
 
-### Explaining some Core/Cluster Concepts
+### Brief Glossary: 
 
 - **Node**: Dedicated server (128 cores/256GB RAM typical) - Think of it as a powerful workstation
 - **Core**: Individual processing unit (Like a CPU thread) - Your basic computation unit
@@ -42,7 +42,7 @@ By the end, you’ll be equipped to tackle statistical challenges that once seem
 - **Scratch Space**: 1PB high-speed temporary storage (Auto-cleaned every 14 days) - Perfect for intermediate results
 
 
-## Interactive Development Sessions
+## I. Interactive Development Sessions
 
 <div class="yellow-box">
   <strong>When to Use Interactive:</strong>  
@@ -90,7 +90,7 @@ ssh -L 8889:localhost:8889 cruzid@hb.ucsc.edu
 ```
 
 
-## Batch Processing for Production Workloads
+## II. Batch Processing for Production Workloads
 
 <div class="yellow-box">
   <strong>When to Use Batch Processing:</strong>  
