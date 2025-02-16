@@ -28,8 +28,6 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
 
 ## Interactive Workflows for Statistical Development
 
-<div class="yellow-box">
-  <strong>Debugging Bayesian Models</strong>  
   ```bash
   srun --pty --mem=8G --cpus-per-task=4 --time=02:00:00 bash
   module load R/4.3.0
@@ -38,17 +36,13 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
   > debug(fit_model)  # Set breakpoint
   > source("hierarchical_bayes.R")  # Trigger debug mode
   ```
-</div>
 
-<div class="green-box">
-  <strong>Live EDA with Dask</strong>  
   ```bash
   srun --pty --mem=16G --cpus-per-task=8 --time=04:00:00 bash
   module load python/3.11
   python -m jupyter lab --no-browser --port=8889
   # SSH tunnel to local machine: ssh -L 8889:localhost:8889 cruzid@hb.ucsc.edu
   ```
-</div>
 
 
 ## Batch Processing: Statistical Workload Templates
@@ -84,8 +78,6 @@ python train_ensemble.py --n-estimators 1000 --depth-range 3-10 --gpu
 
 ## Advanced Statistical Computing Features
 
-<div class="green-box">
-  <strong>Reproducible Environments</strong>  
   ```bash
   X# R environment with renv
   Xmodule load R/4.3.0
@@ -96,7 +88,6 @@ python train_ensemble.py --n-estimators 1000 --depth-range 3-10 --gpu
   conda create -n stats_proj python=3.11
   conda-lock lock --file environment.yml --platform linux-64
   ```
-</div>
 
 <div class="yellow-box">
   <strong>Big Data Strategies</strong>
