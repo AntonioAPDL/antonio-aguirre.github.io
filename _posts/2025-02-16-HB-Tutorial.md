@@ -258,8 +258,8 @@ python -m memray stats --json profile.bin > memory_stats.json
 <div class="green-box">
  <strong>Cluster Support Channels</strong>
  <ul>
-   <li><a href="mailto:hummmingbird@ucsc.edu">Email Support</a>: For technical issues</li>
-   <li><a href="https://join.slack.com/t/ucschummingbi-lph3072/shared_invite/zt-19mbwqvx1-GqguQcumVBLss~nzjOHAYg">Slack Channel</a>: Real-time help from users</li>
+   <li>Email Support: hummmingbird@ucsc.edu</li>
+   <li>Slack Channel: <a href="https://join.slack.com/t/ucschummingbi-lph3072/shared_invite/zt-19mbwqvx1-GqguQcumVBLss~nzjOHAYg">Link</a> </li>
    <li>Documentation at  <a href="https://hummingbird.ucsc.edu/docs">https://hummingbird.ucsc.edu/docs</a> </li>
  </ul>
 </div>
