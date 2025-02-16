@@ -34,7 +34,7 @@ excerpt: "A graduate student's guide to leveraging Hummingbird HPC for statistic
  Debugging code • E ploratory analysis • Small simulations • Model prototyping • Visualization
 </div>
 
-### E ample 1: Debugging Bayesian Models in R
+### Example 1: Debugging Bayesian Models in R
 
 ```bash
 # Request interactive resources: 4 cores, 8GB RAM for 2 hours
@@ -51,7 +51,7 @@ R
 > where                  # Show call stack when breakpoint hits
 ```
 
-### E ample 2: Interactive ML Development with Jupyter
+### Example 2: Interactive ML Development with Jupyter
 
 ```bash
 # Request heavier resources for data e ploration: 8 cores, 16GB RAM
@@ -79,7 +79,7 @@ ssh -L 8889:localhost:8889 cruzid@hb.ucsc.edu
   <li>Final analyses</li>
 </div>
 
-### E ample 1: Large-Scale Bayesian Inference
+### Example 1: Large-Scale Bayesian Inference
 
 ```bash
 #!/bin/bash
@@ -99,7 +99,7 @@ Rscript run_stan.R --model hierarchical \
                   --iter 5000                      # MCMC iterations
 ```
 
-### E ample 2: Distributed ML Training
+### Example 2: Distributed ML Training
 
 ```bash
 #!/bin/bash
