@@ -29,8 +29,6 @@ My expertise in **algorithm implementation and software development** has been a
 - **[Lobato, I. N., Velasco, C. (2022)](https://doi.org/10.1093/ectj/utac001)**  
   *Single Step Estimation of ARMA Roots for Non-Fundamental Nonstationary Fractional Models.*  
   - Led all **algorithmic development, implementation, and journal-requested revisions** using **Python**, **MATLAB** and **C++**.
-
-- **Curriculum Vitae:** [View my CV](https://www.antonio-aguirre.com/cv/)
   
 ### **Why I’m a Strong Fit**
 - **Expertise in R & Bayesian Modeling:** Extensive experience in R, particularly for **Bayesian time series analysis, probabilistic forecasting, and statistical learning**.
@@ -38,7 +36,9 @@ My expertise in **algorithm implementation and software development** has been a
 - **Software Development & Open-Source Contribution:**  
   - Developed and optimized **high-performance statistical algorithms** in **R, Python, MATLAB, and C++**.
   - Committed to **reproducible research, open-source development, and efficient software design**.
-
+    
+- **Curriculum Vitae:** [View my CV](https://www.antonio-aguirre.com/cv/)
+  
 ---
 
 
