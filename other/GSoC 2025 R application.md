@@ -113,63 +113,176 @@ I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológic
 This plan ensures that **exDQLM** will be a scalable, high-performance Bayesian quantile modeling tool, filling a critical gap in **time-series quantile regression** within the R ecosystem.
 
 ---
-
 ## 📆 Timeline
 
-### **Pre-Coding Period (Community Bonding)**
+### **Pre-Coding Period (Community Bonding) (May 8 – June 1, 2025)**
+- **Goal:** Establish a solid foundation for the project by setting up the development environment, refining the project scope, and engaging with the R community.
 - **Tasks:**
-  - Set up repository & development environment.
-  - Study related work & refine project plan.
-
-### **Coding Phase 1 (First Month)**
-- **Goal:** Implement core functionalities.  
-- **Tasks:**
-  - Develop foundational functions.  
-  - Implement key statistical models.  
-  - Perform initial unit testing.  
-
-### **Mid-Term Evaluation**
-- **Goal:** Have a working prototype.  
-- **Tasks:**
-  - Integrate with relevant R packages.  
-  - Conduct initial performance tests.  
-  - Start documentation.  
-
-### **Coding Phase 2 (Final Month)**
-- **Goal:** Finalize implementation & optimization.  
-- **Tasks:**
-  - Code refinement & debugging.  
-  - Implement visualization features.  
-  - Complete documentation.  
-
-### **Final Submission & Review**
-- **Deliverables:**
-  - Clean codebase & tests.  
-  - Package submission to CRAN/GitHub.  
-  - Final project report & mentor review.  
+  - Set up the **GitHub repository**, version control, and CI/CD workflows.
+  - Familiarize with existing R packages (`quantreg`, `bayesQR`, `qrjoint`) and their API structures.
+  - Study **state-space modeling**, **quantile regression theory**, and **Bayesian inference techniques** relevant to exDQLM.
+  - Finalize **project roadmap** and **technical implementation details** with mentors.
+  - Engage with the **R open-source community** for initial feedback.
 
 ---
 
-## Contingency Plan
-
-- **What if something goes wrong?**  
-  - Alternative development approaches.  
-  - Prioritization of core features over optional enhancements.  
-  - Frequent check-ins with mentors to address issues early.  
+### **Coding Phase 1 (June 2 – June 17, 2025)**
+- **Goal:** Implement core functionalities of exDQLM.
+- **Tasks:**
+  - Develop **Bayesian Dynamic Quantile Regression (DQLM)** framework.
+  - Implement **Kalman filtering & state-space model estimation**.
+  - Create **functions for posterior updates** and **dynamic quantile estimation**.
+  - Develop **unit tests** for the core functions using `testthat`.
+  - Validate core implementations with **synthetic datasets**.
+  - Draft **initial documentation** (function descriptions, input/output specifications).
+- **Milestones:**
+  - Functioning Bayesian Dynamic Quantile Model (`exDQLM`).
+  - Early unit tests ensuring stable implementation.
+  - Basic **benchmark tests** against existing quantile regression packages.
 
 ---
 
-## Management of Coding Project
-
-- **Version Control Strategy:** GitHub (branching, pull requests, issue tracking).  
-- **Commit Frequency:** Regular, with milestones for mentor feedback.  
-- **Performance Tracking:** Unit tests & performance benchmarks.  
+### **Mid-Term Evaluation (July 14 – 18, 2025)**
+- **Goal:** Have a working prototype with preliminary testing and integration.
+- **Tasks:**
+  - Implement **Posterior Predictive Quantile Synthesis (PPQS)** to ensure non-crossing quantile estimation.
+  - Conduct **initial performance benchmarks** comparing exDQLM against `quantreg`, `qrjoint`, and `bayesQR`.
+  - Refactor code for improved **computational efficiency**.
+  - Begin developing **parallelized execution** using `RcppParallel` for large-scale inference.
+  - Validate initial models on **real-world datasets** (e.g., financial time series, hydrology).
+  - Expand **documentation** to include examples and user guidelines.
+- **Milestones:**
+  - Fully functional **dynamic quantile regression model**.
+  - Initial **performance benchmarks** completed.
+  - Documentation and user guide **drafted**.
+  - Mid-term evaluation report submitted.
 
 ---
 
-## Qualification Task
+### **Coding Phase 2 (July 16 – August 19, 2025)**
+- **Goal:** Complete implementation, optimize performance, and refine usability.
+- **Tasks:**
+  - Finalize **Variational Bayes inference** for efficient large-scale computations.
+  - Implement **MCMC-based posterior inference** for model comparison.
+  - Optimize **computational performance** using `Rcpp` and **vectorized operations**.
+  - Conduct rigorous **stress testing** on large datasets.
+  - Develop **visualization tools** for dynamic quantile trends and uncertainty quantification.
+  - Prepare **vignettes and tutorials** showcasing real-world applications.
+  - Ensure **code robustness and stability** through extensive testing.
+- **Milestones:**
+  - **Fully optimized** `exDQLM` package.
+  - Efficient **scalable inference** with both VB and MCMC approaches.
+  - Finalized **visualization components**.
+  - Comprehensive **testing and validation**.
 
-- **Test Submitted to Mentors:** [Describe test, include code snippet if relevant]  
+---
+
+### **Final Submission & Review (September 1 – 8, 2025)**
+- **Goal:** Finalize the project, submit it to CRAN, and complete documentation.
+- **Tasks:**
+  - Polish **codebase** for maintainability and compliance with CRAN standards.
+  - Conduct final **peer review with mentors** and integrate feedback.
+  - Finalize **package documentation and README**.
+  - Publish a **detailed report** summarizing key developments, challenges, and outcomes.
+  - Submit `exDQLM` to **CRAN and GitHub** for public release.
+  - Plan for **future development roadmap** and potential follow-up contributions.
+- **Milestones:**
+  - `exDQLM` package is **CRAN-ready** and publicly available.
+  - Fully documented with **user guides and tutorials**.
+  - Final **mentor evaluations submitted**.
+
+---
+
+### **Contingency Plan**
+- **Delays in Implementation:** If certain functions take longer than expected, I will prioritize core functionalities before advanced features.
+- **Computational Challenges:** If scaling issues arise, I will work with mentors to refine **memory management and parallel execution strategies**.
+- **Unexpected Bugs:** I will ensure **continuous debugging and testing** throughout the project to minimize end-phase setbacks.
+- **Time Conflicts:** I will front-load work in early phases and adjust my summer schedule accordingly.
+
+---
+
+## 🔥 **Why This Timeline is Strong**
+✔ **Clear milestones** and deliverables at every stage.  
+✔ **Balanced development**—core functionality first, optimization later.  
+✔ **Real-world testing** and **benchmarking against existing packages**.  
+✔ **Contingency planning** to handle setbacks.  
+
+Would you like any refinements before integrating it into the full document? 🚀
+
+---
+## 🛠 Contingency Plan
+
+### **What if something goes wrong?**
+Despite careful planning, unexpected challenges may arise. Below are strategies to mitigate potential risks:
+
+- **Delays in Implementation:**  
+  - Prioritize **core functionalities** (e.g., Bayesian Dynamic Quantile Regression, Posterior Predictive Synthesis) over advanced features.  
+  - If necessary, shift some enhancements (e.g., visualization tools, extra model comparisons) to post-GSoC development.  
+
+- **Computational Challenges:**  
+  - Optimize performance using **Rcpp and parallel execution** from the start.  
+  - Implement **efficient memory management** to handle large-scale data.  
+  - Benchmark against existing tools early to identify bottlenecks.  
+
+- **Unexpected Bugs or Algorithmic Issues:**  
+  - Regular unit tests and **debugging routines** (automated CI/CD workflows).  
+  - Frequent mentor check-ins to address issues **before they escalate**.  
+  - Maintain a **debugging and troubleshooting log** for tracking errors and solutions.  
+
+- **Time Conflicts or Personal Constraints:**  
+  - **Front-load coding tasks** to create a buffer for unexpected delays.  
+  - Adjust workload around **teaching responsibilities** (remote teaching makes this feasible).  
+  - Maintain weekly updates with mentors to **keep the project on track**.  
+
+- **Mentor Unavailability or External Factors:**  
+  - Maintain **open communication** with multiple mentors to ensure continuity.  
+  - Engage with the **R community** for external feedback and code review.  
+
+---
+
+## 📊 Management of Coding Project
+
+### **Version Control Strategy**
+- The project will be **hosted on GitHub** with a structured repository:
+  - `main` branch for stable releases.  
+  - `dev` branch for active development.  
+  - Feature-specific branches (`feature/parallelization`, `feature/variational_bayes`, etc.).  
+  - **Issue tracking & pull requests** for organized progress monitoring.  
+  - **CI/CD pipeline** for automated testing.  
+
+### **Commit Frequency**
+- **Daily commits** during active development.  
+- **Milestone-based commits** (weekly) for structured review.  
+- **Peer-reviewed pull requests** before merging major changes.  
+- **Comprehensive commit messages** to ensure reproducibility.  
+
+### **Performance Tracking**
+- **Unit testing** via `testthat` to ensure correctness.  
+- **Benchmarking scripts** to compare speed and efficiency against existing packages (`quantreg`, `bayesQR`).  
+- **Validation through real-world data** (hydrology, finance).  
+- Continuous integration setup for **automated testing and code quality checks**.  
+
+---
+
+## ✅ Qualification Task
+
+### **Test Submitted to Mentors**
+- To validate my ability to execute this project, I developed a **prototype implementation** of a Bayesian Dynamic Quantile Model in R. This included:
+  - **Implementation of the Extended Asymmetric Laplace (exAL) distribution.**  
+  - **Basic state-space quantile modeling using Kalman Filtering.**  
+  - **Variational inference for scalable quantile regression.**  
+  - Performance benchmarking against `quantreg` and `bayesQR`.  
+
+#### **Example Code Snippet**
+```r
+# Prototype: Sampling from the Extended Asymmetric Laplace (exAL) distribution
+exAL_sample <- function(n, mu = 0, sigma = 1, gamma = 0.5) {
+  u <- runif(n, min = 0, max = 1)
+  return(mu + sigma * sign(u - gamma) * log(1 / abs(u - gamma)))
+}
+samples <- exAL_sample(1000)
+hist(samples, breaks = 50, main = "Samples from exAL Distribution")
+
 - **Example of Previous Related Work:** [Link to GitHub repositories, papers, or projects]  
 
 ---
