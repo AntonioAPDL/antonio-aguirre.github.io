@@ -11,10 +11,10 @@
 
 ## 👤 Contributor Bio
 
-### 🎯 **About Me**
+### **About Me**
 I am a [your degree program] student at [your institution], specializing in [relevant fields, e.g., Bayesian statistics, time series modeling, etc.]. My background in [mention relevant experience] has equipped me with the necessary skills to contribute meaningfully to this project.
 
-### 💡 **Why I’m a Strong Fit**
+### **Why I’m a Strong Fit**
 - Extensive experience in R and statistical modeling.
 - Familiarity with Bayesian methods, time series analysis, and open-source software development.
 - Prior experience with similar projects ([mention previous relevant projects or repositories]).
@@ -32,14 +32,14 @@ I am a [your degree program] student at [your institution], specializing in [rel
 
 ---
 
-## 📅 Schedule Conflicts
+## Schedule Conflicts
 
 - **Potential Conflicts:** [Any internships, coursework, travel plans]  
 - **Plan to Mitigate Conflicts:** [Describe how you'll ensure full-time availability]  
 
 ---
 
-## 🧑‍🏫 Mentors
+## Mentors
 
 - **Evaluating Mentor:** [Mentor Name & Email]  
 - **Co-Mentor(s) (External Institution Required):** [Co-Mentor Name(s) & Email(s)]  
@@ -49,7 +49,7 @@ I am a [your degree program] student at [your institution], specializing in [rel
 
 ## 🔧 Coding Plan & Methods
 
-### 🛠️ **Development Overview**
+### **Development Overview**
 - **Key Functions & Features:**  
   - [Describe planned functions, methods, and enhancements]  
   - [Mention compatibility with existing R ecosystem]  
@@ -58,7 +58,7 @@ I am a [your degree program] student at [your institution], specializing in [rel
 - **Integration with Existing Workflows:**  
   - [How will this fit into existing packages/tools?]  
 
-### ✅ **Testing & Validation**
+### **Testing & Validation**
 - **Unit tests & debugging strategy:** [Explain testing methodology]  
 - **Benchmarks & performance validation:** [How will the results be verified?]  
 
@@ -70,33 +70,33 @@ I am a [your degree program] student at [your institution], specializing in [rel
 
 ## 📆 Timeline
 
-### 🏁 **Pre-Coding Period (Community Bonding)**
+### **Pre-Coding Period (Community Bonding)**
 - **Tasks:**
   - Set up repository & development environment.
   - Study related work & refine project plan.
 
-### 🔥 **Coding Phase 1 (First Month)**
+### **Coding Phase 1 (First Month)**
 - **Goal:** Implement core functionalities.  
 - **Tasks:**
   - Develop foundational functions.  
   - Implement key statistical models.  
   - Perform initial unit testing.  
 
-### 🏗️ **Mid-Term Evaluation**
+### **Mid-Term Evaluation**
 - **Goal:** Have a working prototype.  
 - **Tasks:**
   - Integrate with relevant R packages.  
   - Conduct initial performance tests.  
   - Start documentation.  
 
-### 🚀 **Coding Phase 2 (Final Month)**
+### **Coding Phase 2 (Final Month)**
 - **Goal:** Finalize implementation & optimization.  
 - **Tasks:**
   - Code refinement & debugging.  
   - Implement visualization features.  
   - Complete documentation.  
 
-### 📜 **Final Submission & Review**
+### **Final Submission & Review**
 - **Deliverables:**
   - Clean codebase & tests.  
   - Package submission to CRAN/GitHub.  
@@ -113,7 +113,7 @@ I am a [your degree program] student at [your institution], specializing in [rel
 
 ---
 
-## 💾 Management of Coding Project
+## Management of Coding Project
 
 - **Version Control Strategy:** GitHub (branching, pull requests, issue tracking).  
 - **Commit Frequency:** Regular, with milestones for mentor feedback.  
@@ -121,14 +121,14 @@ I am a [your degree program] student at [your institution], specializing in [rel
 
 ---
 
-## 🎯 Qualification Task
+## Qualification Task
 
 - **Test Submitted to Mentors:** [Describe test, include code snippet if relevant]  
 - **Example of Previous Related Work:** [Link to GitHub repositories, papers, or projects]  
 
 ---
 
-## ✨ Final Thoughts
+## Final Thoughts
 
 This application outlines a structured plan to successfully complete the project within the given timeframe. With well-defined goals, risk mitigation strategies, and clear implementation details, I am confident in my ability to contribute meaningfully to the R community through this project.
 
