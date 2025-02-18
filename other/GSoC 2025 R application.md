@@ -1,7 +1,7 @@
 
 # 🌟 R GSoC 2025 Application
 
-## 📌 Project Information
+## Project Information
 
 - **Project Title:** Fast and Flexible Dynamic Quantile Inference: exDQLM
 - **Short Title (≤30 chars):** exDQLM: Dynamic Quantile Modeling
@@ -11,7 +11,7 @@
 
 ## 👤 Contributor Bio
 
-### 🎯 **About Me**
+### **About Me**
 I am a **4th-year Ph.D. candidate** in **Statistics** at the [University of California, Santa Cruz (UCSC)](https://engineering.ucsc.edu/departments/statistics/). My research focuses on **Bayesian Statistics**, **Spatio-Temporal Modeling**, and **Machine Learning**, with a particular emphasis on developing scalable and interpretable forecasting methodologies.
 
 I am advised by [Dr. Bruno Sansó](https://users.soe.ucsc.edu/~bruno/) and [Dr. Raquel Prado](https://raquel.soe.ucsc.edu/), and my research applies **Dynamic Quantile Regression**, **Sequential Monte Carlo (SMC) methods**, and **forecast synthesis techniques** to real-world problems, including **climate forecasting** and **hydrology**.
@@ -25,7 +25,7 @@ I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológic
 
 ---
 
-## 📞 Contact Information
+## Contact Information
 
 - **Full Name:** Antonio Aguirre  
 - **Email:** jaguir26 (at) ucsc.edu, antonio.agprz (at) gmail.com  
@@ -36,7 +36,7 @@ I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológic
 
 ---
 
-## 📅 Schedule Conflicts
+## Schedule Conflicts
 
 - **Potential Conflicts:** Teaching Assistant (TA) or Instructor responsibilities during the summer.
 - **Mitigation Plan:** 
@@ -58,7 +58,7 @@ I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológic
 
 ---
 
-## 🔧 Coding Plan & Methods
+## Coding Plan & Methods
 
 ### **Development Overview**
 - **Key Functions & Features:**  
@@ -210,7 +210,7 @@ This plan ensures that **exDQLM** will be a scalable, high-performance Bayesian 
 Would you like any refinements before integrating it into the full document? 🚀
 
 ---
-## 🛠 Contingency Plan
+## Contingency Plan
 
 ### **What if something goes wrong?**
 Despite careful planning, unexpected challenges may arise. Below are strategies to mitigate potential risks:
@@ -240,7 +240,7 @@ Despite careful planning, unexpected challenges may arise. Below are strategies 
 
 ---
 
-## 📊 Management of Coding Project
+## Management of Coding Project
 
 ### **Version Control Strategy**
 - The project will be **hosted on GitHub** with a structured repository:
