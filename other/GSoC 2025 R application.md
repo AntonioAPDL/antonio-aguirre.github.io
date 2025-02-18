@@ -288,7 +288,7 @@ hist(samples, breaks = 50, main = "Samples from exAL Distribution")
 
 ---
 
-## 🎯 Final Thoughts
+##  Final Thoughts
 
 This application presents a structured and well-planned roadmap to successfully implement **exDQLM** within the GSoC 2025 timeframe. By integrating **Bayesian Dynamic Quantile Regression**, **scalable inference methods**, and **robust model validation**, this project will significantly enhance the R ecosystem for quantile-based modeling.
 
@@ -296,11 +296,14 @@ With well-defined objectives, contingency strategies, and an **efficient develop
 
 I look forward to **feedback, mentorship, and collaboration** to refine and enhance this project for maximum impact.
 
+
+**Best,**  
+**Antonio Aguirre**  
+
 ---
 
 ### 🔗 Contact Information  
-**Best,**  
-**Antonio Aguirre**  
+
 📧 **Email:** jaguir26@ucsc.edu | antonio.agprz@gmail.com  
 🔗 **GitHub:** [AntonioAPDL](https://github.com/AntonioAPDL)  
 🌐 **Website:** [antonio-aguirre.com](https://antonio-aguirre.com)  
