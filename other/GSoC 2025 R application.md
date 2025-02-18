@@ -201,7 +201,7 @@ This plan ensures that **exDQLM** will be a scalable, high-performance Bayesian 
 
 ---
 
-## 🔥 **Why This Timeline is Strong**
+## **Why This Timeline is Strong**
 ✔ **Clear milestones** and deliverables at every stage.  
 ✔ **Balanced development**—core functionality first, optimization later.  
 ✔ **Real-world testing** and **benchmarking against existing packages**.  
@@ -302,7 +302,7 @@ I look forward to **feedback, mentorship, and collaboration** to refine and enha
 
 ---
 
-### 🔗 Contact Information  
+### Contact Information  
 
 📧 **Email:** jaguir26@ucsc.edu | antonio.agprz@gmail.com  
 🔗 **GitHub:** [AntonioAPDL](https://github.com/AntonioAPDL)  
