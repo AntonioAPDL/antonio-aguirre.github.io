@@ -19,7 +19,7 @@ I am advised by [Dr. Bruno Sansó](https://users.soe.ucsc.edu/~bruno/) and [Dr. 
 I hold a **B.Sc. in Applied Mathematics** (with an emphasis on **Numerical Analysis**) and an **M.Sc. in Economics** (specializing in **Econometrics**) from [Instituto Tecnológico Autónomo de México (ITAM)](https://www.itam.mx/).
 
 ### **Technical Expertise**
-I have **10+ years of experience** working with **R** and **MATLAB** for statistical modeling, computational inference, and time series analysis. Additionally, I have **8+ years of experience** in **Python** and **C++**, which I use extensively for **high-performance computing, Bayesian inference, and statistical simulations**.
+I have **10+ years of experience** working with **R** and **MATLAB** for statistical modeling, computational inference, time series analysis, and general numerical analyses. Additionally, I have **8+ years of experience** in **Python** and **C++**, which I use extensively for **high-performance computing, Bayesian inference, and statistical simulations**.
 
 My expertise in **algorithm implementation and software development** has been applied in peer-reviewed publications:
 - **[Aguirre, A., Lobato, I.N. (2024)](https://doi.org/10.1007/s00181-024-02564-5)**  
