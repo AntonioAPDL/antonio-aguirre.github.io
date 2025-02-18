@@ -28,7 +28,7 @@ My expertise in **algorithm implementation and software development** has been a
   
 - **[Lobato, I. N., Velasco, C. (2022)](https://doi.org/10.1093/ectj/utac001)**  
   *Single Step Estimation of ARMA Roots for Non-Fundamental Nonstationary Fractional Models.*  
-  - Led all **algorithmic development, implementation, and journal-requested revisions** using **Python**, **MATLAB** and **C++**.
+  - Led all **algorithmic development, implementation, and journal-requested revisions** on **Python**, **MATLAB** and **C++**.
   
 ### **Why I’m a Strong Fit**
 - **Expertise in R & Bayesian Modeling:** Extensive experience in R, particularly for **Bayesian time series analysis, probabilistic forecasting, and statistical learning**.
