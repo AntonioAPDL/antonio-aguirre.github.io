@@ -3,47 +3,69 @@
 
 ## 📌 Project Information
 
-- **Project Title:** [Fill in here]
-- **Short Title (≤30 chars):** [Fill in here]
-- **Project Idea Page:** [Insert URL]
+- **Project Title:** Fast and Flexible Dynamic Quantile Inference: exDQLM
+- **Short Title (≤30 chars):** exDQLM: Scalable Bayesian Quantiles
+- **Project Idea Page:** [Insert URL] (Pending confirmation)
 
 ---
 
 ## 👤 Contributor Bio
 
 ### **About Me**
-I am a [your degree program] student at [your institution], specializing in [relevant fields, e.g., Bayesian statistics, time series modeling, etc.]. My background in [mention relevant experience] has equipped me with the necessary skills to contribute meaningfully to this project.
+Hello! I’m Antonio Aguirre, a Ph.D. candidate in Statistics at the **University of California, Santa Cruz (UCSC)**, advised by **Dr. Bruno Sansó** and **Dr. Raquel Prado**. My research focuses on **Bayesian Statistics, Machine Learning, and Spatio-Temporal Modeling**, with an emphasis on **developing scalable inference methods and operational forecasting models**.
+
+Prior to UCSC, I earned a **B.Sc. in Applied Mathematics** and an **M.Sc. in Economic Theory** from **Instituto Tecnológico Autónomo de México (ITAM)**. My background spans **Numerical Analysis, Econometrics, and Statistical Computing**, equipping me with the expertise to contribute meaningfully to this project.
+
+I am passionate about interdisciplinary collaborations and real-world applications of statistical modeling—always looking for ways to bridge theory and practice!
 
 ### **Why I’m a Strong Fit**
-- Extensive experience in R and statistical modeling.
-- Familiarity with Bayesian methods, time series analysis, and open-source software development.
-- Prior experience with similar projects ([mention previous relevant projects or repositories]).
+- **Extensive experience in R and statistical modeling**, particularly for Bayesian inference and forecasting.
+- **Deep knowledge of dynamic modeling and time series analysis**, with applications in environmental and climate sciences.
+- **Familiarity with open-source development**, including package building, reproducibility workflows, and collaborative projects.
+- **Active research in Dynamic Quantile Regression**, developing fast and interpretable quantile-based inference methods.
+- **Hands-on experience with Continual Learning and Sequential Monte Carlo (SMC) methods**, ensuring scalability in real-time applications.
+
+### **Research Interests**
+- **Spatio-Temporal Modeling:** High-dimensional, interpretable models for climate and environmental applications.
+- **Dynamic Quantile Regression:** Fast, scalable Bayesian quantile-based inference and forecasting.
+- **Continual Learning:** Sequential Monte Carlo and variational approaches for real-time model updates.
+- **Operational Forecasting:** Scalable methodologies for forecast correction and synthesis.
 
 ---
 
 ## 📞 Contact Information
 
-- **Full Name:** [Your Name]  
-- **Email (Google-Registered & Others):** [Your Email(s)]  
-- **Phone Number:** [Your Contact Number]  
-- **Affiliation:** [University/Institution]  
-- **Program & Stage of Completion:** [e.g., 3rd-year PhD Student]  
-- **Preferred Communication Channels:** [e.g., Slack, Discord, Zoom]  
+- **Full Name:** Antonio Aguirre  
+- **Email (Google-Registered & Others):**  
+  - jaguir26 (at) ucsc.edu  
+  - antonio.agprz (at) gmail.com  
+- **Phone Number:** +1 (831) 515-9264  
+- **Affiliation:** University of California, Santa Cruz (UCSC)  
+- **Program & Stage of Completion:** 4th-year Ph.D. Candidate in Statistics  
+- **Preferred Communication Channels:** Email and Phone  
 
 ---
 
-## Schedule Conflicts
+## 📅 Schedule Conflicts
 
-- **Potential Conflicts:** [Any internships, coursework, travel plans]  
-- **Plan to Mitigate Conflicts:** [Describe how you'll ensure full-time availability]  
+- **Potential Conflicts:**  
+  - Possible **Teaching Assistant (TA) or Instructor role** during the summer.
+- **Plan to Mitigate Conflicts:**  
+  - My **teaching workload will be minimal**—I have taught similar courses before, so I already have all materials prepared.  
+  - If I am an **instructor, I will have TAs** assisting with grading and logistical tasks.  
+  - UCSC summer courses allow for **remote teaching**, meaning I **won’t need daily commuting** or rigid scheduling.  
 
 ---
 
-## Mentors
+## 🧑‍🏫 Mentors
 
-- **Evaluating Mentor:** [Mentor Name & Email]  
-- **Co-Mentor(s) (External Institution Required):** [Co-Mentor Name(s) & Email(s)]  
-- **Communication with Mentors:** [Describe previous discussions, feedback, and alignment]  
+- **Evaluating Mentor:**  
+  - **Rebecca Killick** (Lancaster University, UK) – **r.killick@lancaster.ac.uk**  
+- **Co-Mentor (External Institution Required):**  
+  - **Raquel Barata** (Penn State, USA) – **raquelabarata@gmail.com** or **rxb875@psu.edu**  
+- **Communication with Mentors:**  
+  - I have been in **active communication with Rebecca Killick**, discussing project goals and feasibility.  
+  - **Raquel Barata has expressed strong interest in collaborating**, as my research closely aligns with hers. We maintain **ongoing discussions** on dynamic models and statistical methodologies, with plans for **future research collaborations**.  
 
 ---
 
