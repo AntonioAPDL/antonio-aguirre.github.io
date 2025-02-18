@@ -62,7 +62,7 @@ I am a [your degree program] student at [your institution], specializing in [rel
 - **Unit tests & debugging strategy:** [Explain testing methodology]  
 - **Benchmarks & performance validation:** [How will the results be verified?]  
 
-### ⚠️ **Challenges & Risk Mitigation**
+###  **Challenges & Risk Mitigation**
 - **Potential Obstacles:** [e.g., computation limits, debugging complex algorithms]  
 - **Proposed Solutions:** [How will you overcome these?]  
 
@@ -104,7 +104,7 @@ I am a [your degree program] student at [your institution], specializing in [rel
 
 ---
 
-## 🔄 Contingency Plan
+## Contingency Plan
 
 - **What if something goes wrong?**  
   - Alternative development approaches.  
