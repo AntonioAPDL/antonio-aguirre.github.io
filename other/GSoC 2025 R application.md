@@ -12,18 +12,33 @@
 ## 👤 Contributor Bio
 
 ### **About Me**
-I am a **4th-year Ph.D. candidate** in **Statistics** at the [University of California, Santa Cruz (UCSC)](https://engineering.ucsc.edu/departments/statistics/). My research focuses on **Bayesian Statistics**, **Spatio-Temporal Modeling**, and **Machine Learning**, with a particular emphasis on developing scalable and interpretable forecasting methodologies.
+I am a **4th-year Ph.D. candidate** in **Statistics** at the [University of California, Santa Cruz (UCSC)](https://engineering.ucsc.edu/departments/statistics/). My research focuses on **Bayesian Statistics**, **Spatio-Temporal Modeling**, and **Machine Learning**, with a strong emphasis on developing **scalable** and **interpretable** forecasting methodologies.
 
-I am advised by [Dr. Bruno Sansó](https://users.soe.ucsc.edu/~bruno/) and [Dr. Raquel Prado](https://raquel.soe.ucsc.edu/), and my research applies **Dynamic Quantile Regression**, **Sequential Monte Carlo (SMC) methods**, and **forecast synthesis techniques** to real-world problems, including **climate forecasting** and **hydrology**.
+I am advised by [Dr. Bruno Sansó](https://users.soe.ucsc.edu/~bruno/) and [Dr. Raquel Prado](https://raquel.soe.ucsc.edu/). My research applies **Dynamic Quantile Regression**, **Sequential Monte Carlo (SMC) methods**, and **forecast synthesis techniques** to **real-world challenges** in **climate forecasting** and **hydrology**.
 
-I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológico Autónomo de México (ITAM)](https://www.itam.mx/), where I did a B.Sc. in **Applied Mathematics** (Numerical Analysis) and M.Sc. in **Economics**.
+I hold a **B.Sc. in Applied Mathematics** (with an emphasis on **Numerical Analysis**) and an **M.Sc. in Economics** (specializing in **Econometrics**) from [Instituto Tecnológico Autónomo de México (ITAM)](https://www.itam.mx/).
+
+### **Technical Expertise**
+I have **10+ years of experience** working with **R** and **MATLAB** for statistical modeling, computational inference, and time series analysis. Additionally, I have **8+ years of experience** in **Python** and **C++**, which I use extensively for **high-performance computing, Bayesian inference, and statistical simulations**.
+
+My expertise in **algorithm implementation and software development** has been applied in peer-reviewed publications:
+- **[Aguirre, A., Lobato, I.N. (2024)](https://doi.org/10.1007/s00181-024-02564-5)**  
+  *Evidence of Non-Fundamentalness in OECD Capital Stocks.*  
+  - Implemented all **core algorithms** in **MATLAB** and **C++** for the paper.
+  
+- **[Lobato, I. N., Velasco, C. (2022)](https://doi.org/10.1093/ectj/utac001)**  
+  *Single Step Estimation of ARMA Roots for Non-Fundamental Nonstationary Fractional Models.*  
+  - Led all **algorithmic development, implementation, and journal-requested modifications** using **Python**.
 
 ### **Why I’m a Strong Fit**
-- **Strong Expertise in R & Statistical Modeling:** Extensive experience in R, particularly for Bayesian time series modeling and predictive analytics.
-- **Relevant Research Experience:** My work directly aligns with **quantile-based inference, spatio-temporal forecasting, and computational Bayesian methods**.
-- **Open Source Contributions & Software Development:** Strong background in **algorithm design, reproducible research, and software development**.
+- **Expertise in R & Bayesian Modeling:** Extensive experience in R, particularly for **Bayesian time series analysis, probabilistic forecasting, and statistical learning**.
+- **Proven Research & Development Experience:** Strong background in **quantile-based inference, state-space models, and scalable computational Bayesian methods**.
+- **Software Development & Open-Source Contribution:**  
+  - Developed and optimized **high-performance statistical algorithms** in **R, Python, MATLAB, and C++**.
+  - Committed to **reproducible research, open-source development, and efficient software design**.
 
 ---
+
 
 ## Contact Information
 
@@ -32,7 +47,7 @@ I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológic
 - **Phone Number:** 831-515-9264  
 - **Affiliation:** University of California, Santa Cruz (UCSC)  
 - **Program & Stage of Completion:** 4th-year Ph.D. Candidate  
-- **Preferred Communication Channels:** Email, Phone  
+- **Preferred Communication Channels:** Email, Phone, WhatsApp (same as Phone Number)  
 
 ---
 
