@@ -4,68 +4,58 @@
 ## 📌 Project Information
 
 - **Project Title:** Fast and Flexible Dynamic Quantile Inference: exDQLM
-- **Short Title (≤30 chars):** exDQLM: Scalable Bayesian Quantiles
-- **Project Idea Page:** [Insert URL] (Pending confirmation)
+- **Short Title (≤30 chars):** exDQLM: Dynamic Quantile Models
+- **Project Idea Page:** [Insert URL] (to be updated)
 
 ---
 
 ## 👤 Contributor Bio
 
-### **About Me**
-Hello! I’m Antonio Aguirre, a Ph.D. candidate in Statistics at the **University of California, Santa Cruz (UCSC)**, advised by **Dr. Bruno Sansó** and **Dr. Raquel Prado**. My research focuses on **Bayesian Statistics, Machine Learning, and Spatio-Temporal Modeling**, with an emphasis on **developing scalable inference methods and operational forecasting models**.
+### 🎯 **About Me**
+I am a **4th-year Ph.D. candidate** in **Statistics** at the [University of California, Santa Cruz (UCSC)](https://engineering.ucsc.edu/departments/statistics/). My research focuses on **Bayesian Statistics**, **Spatio-Temporal Modeling**, and **Machine Learning**, with a particular emphasis on developing scalable and interpretable forecasting methodologies.
 
-Prior to UCSC, I earned a **B.Sc. in Applied Mathematics** and an **M.Sc. in Economic Theory** from **Instituto Tecnológico Autónomo de México (ITAM)**. My background spans **Numerical Analysis, Econometrics, and Statistical Computing**, equipping me with the expertise to contribute meaningfully to this project.
+I am advised by [Dr. Bruno Sansó](https://users.soe.ucsc.edu/~bruno/) and [Dr. Raquel Prado](https://raquel.soe.ucsc.edu/), and my research applies **Dynamic Quantile Regression**, **Sequential Monte Carlo (SMC) methods**, and **forecast synthesis techniques** to real-world problems, including **climate forecasting** and **hydrology**.
 
-I am passionate about interdisciplinary collaborations and real-world applications of statistical modeling—always looking for ways to bridge theory and practice!
+I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológico Autónomo de México (ITAM)](https://www.itam.mx/), where I specialized in **Applied Mathematics** (Numerical Analysis) and **Econometrics**.
 
-### **Why I’m a Strong Fit**
-- **Extensive experience in R and statistical modeling**, particularly for Bayesian inference and forecasting.
-- **Deep knowledge of dynamic modeling and time series analysis**, with applications in environmental and climate sciences.
-- **Familiarity with open-source development**, including package building, reproducibility workflows, and collaborative projects.
-- **Active research in Dynamic Quantile Regression**, developing fast and interpretable quantile-based inference methods.
-- **Hands-on experience with Continual Learning and Sequential Monte Carlo (SMC) methods**, ensuring scalability in real-time applications.
-
-### **Research Interests**
-- **Spatio-Temporal Modeling:** High-dimensional, interpretable models for climate and environmental applications.
-- **Dynamic Quantile Regression:** Fast, scalable Bayesian quantile-based inference and forecasting.
-- **Continual Learning:** Sequential Monte Carlo and variational approaches for real-time model updates.
-- **Operational Forecasting:** Scalable methodologies for forecast correction and synthesis.
+### 💡 **Why I’m a Strong Fit**
+- **Deep Expertise in R & Statistical Modeling:** Extensive experience in R, particularly for Bayesian time series modeling and predictive analytics.
+- **Relevant Research Experience:** My work directly aligns with **quantile-based inference, spatio-temporal forecasting, and computational Bayesian methods**.
+- **Open Source Contributions & Software Development:** Strong background in **algorithm design, reproducible research, and software development**.
+- **Prior Package Development Experience:** Experience developing efficient and scalable methodologies in **exDQLM**, integrating computational advances for real-time inference.
 
 ---
 
 ## 📞 Contact Information
 
 - **Full Name:** Antonio Aguirre  
-- **Email (Google-Registered & Others):**  
-  - jaguir26 (at) ucsc.edu  
-  - antonio.agprz (at) gmail.com  
-- **Phone Number:** +1 (831) 515-9264  
+- **Email:** jaguir26 (at) ucsc.edu, antonio.agprz (at) gmail.com  
+- **Phone Number:** 831-515-9264  
 - **Affiliation:** University of California, Santa Cruz (UCSC)  
-- **Program & Stage of Completion:** 4th-year Ph.D. Candidate in Statistics  
-- **Preferred Communication Channels:** Email and Phone  
+- **Program & Stage of Completion:** 4th-year Ph.D. Candidate  
+- **Preferred Communication Channels:** Email, Phone  
 
 ---
 
 ## 📅 Schedule Conflicts
 
-- **Potential Conflicts:**  
-  - Possible **Teaching Assistant (TA) or Instructor role** during the summer.
-- **Plan to Mitigate Conflicts:**  
-  - My **teaching workload will be minimal**—I have taught similar courses before, so I already have all materials prepared.  
-  - If I am an **instructor, I will have TAs** assisting with grading and logistical tasks.  
-  - UCSC summer courses allow for **remote teaching**, meaning I **won’t need daily commuting** or rigid scheduling.  
+- **Potential Conflicts:** Teaching Assistant (TA) or Instructor responsibilities during the summer.
+- **Mitigation Plan:** 
+  - My past experience managing both research and teaching responsibilities ensures that this won’t affect my work on GSoC.
+  - If I am an instructor, I will have **TAs assisting with grading**.
+  - **Summer sessions allow remote teaching**, eliminating the need for daily commuting and allowing me to dedicate full-time effort to GSoC.
 
 ---
 
 ## 🧑‍🏫 Mentors
 
 - **Evaluating Mentor:**  
-  - **Rebecca Killick** (Lancaster University, UK) – **r.killick@lancaster.ac.uk**  
-- **Co-Mentor (External Institution Required):**  
-  - **Raquel Barata** (Penn State, USA) – **raquelabarata@gmail.com** or **rxb875@psu.edu**  
+  - **Rebecca Killick** (Lancaster University, UK) – r.killick@lancaster.ac.uk  
+- **Co-Mentor:**  
+  - **Raquel Barata** (Penn State University, USA) – rxb875@psu.edu  
 - **Communication with Mentors:**  
-  - I have been in **active communication with Rebecca Killick**, discussing project goals and feasibility.  
-  - **Raquel Barata has expressed strong interest in collaborating**, as my research closely aligns with hers. We maintain **ongoing discussions** on dynamic models and statistical methodologies, with plans for **future research collaborations**.  
+  - I have been actively collaborating with **Rebecca Killick**, discussing project goals, software integration, and implementation strategies.
+  - **Raquel Barata** has expressed strong interest in staying involved, as **my research aligns closely with her work**. We maintain frequent communication and plan to collaborate on this and future projects.
 
 ---
 
