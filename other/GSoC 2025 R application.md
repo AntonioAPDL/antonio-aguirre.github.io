@@ -282,18 +282,26 @@ exAL_sample <- function(n, mu = 0, sigma = 1, gamma = 0.5) {
 }
 samples <- exAL_sample(1000)
 hist(samples, breaks = 50, main = "Samples from exAL Distribution")
+```
 
 - **Example of Previous Related Work:** [Link to GitHub repositories, papers, or projects]  
 
 ---
 
-## Final Thoughts
+## 🎯 Final Thoughts
 
-This application outlines a structured plan to successfully complete the project within the given timeframe. With well-defined goals, risk mitigation strategies, and clear implementation details, I am confident in my ability to contribute meaningfully to the R community through this project.
+This application presents a structured and well-planned roadmap to successfully implement **exDQLM** within the GSoC 2025 timeframe. By integrating **Bayesian Dynamic Quantile Regression**, **scalable inference methods**, and **robust model validation**, this project will significantly enhance the R ecosystem for quantile-based modeling.
 
-Looking forward to feedback and collaboration!
+With well-defined objectives, contingency strategies, and an **efficient development workflow**, I am confident that this project will provide **a valuable open-source tool** for researchers, analysts, and practitioners working with time-dependent quantile estimation. 
 
+I look forward to **feedback, mentorship, and collaboration** to refine and enhance this project for maximum impact.
+
+---
+
+### 🔗 Contact Information  
 **Best,**  
-[Your Name]  
-[Your Contact Information]  
-[Your GitHub/Website]  
+**Antonio Aguirre**  
+📧 **Email:** jaguir26@ucsc.edu | antonio.agprz@gmail.com  
+🔗 **GitHub:** [AntonioAPDL](https://github.com/AntonioAPDL)  
+🌐 **Website:** [antonio-aguirre.com](https://antonio-aguirre.com)  
+
