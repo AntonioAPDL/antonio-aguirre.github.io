@@ -24,7 +24,7 @@ I have **10+ years of experience** working with **R** and **MATLAB** for statist
 My expertise in **algorithm implementation and software development** has been applied in peer-reviewed publications:
 - **[Aguirre, A., Lobato, I.N. (2024)](https://doi.org/10.1007/s00181-024-02564-5)**  
   *Evidence of Non-Fundamentalness in OECD Capital Stocks.*  
-  - Implemented all **core algorithms** in **MATLAB** and **C++** for the paper.
+  - Develoment and implementation of all ** algorithms** in **MATLAB** and **C++**.
   
 - **[Lobato, I. N., Velasco, C. (2022)](https://doi.org/10.1093/ectj/utac001)**  
   *Single Step Estimation of ARMA Roots for Non-Fundamental Nonstationary Fractional Models.*  
