@@ -46,7 +46,7 @@ I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológic
 
 ---
 
-## 🧑‍🏫 Mentors
+##  Mentors
 
 - **Evaluating Mentor:**  
   - **Rebecca Killick** (Lancaster University, UK) – r.killick@lancaster.ac.uk  
