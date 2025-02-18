@@ -4,7 +4,7 @@
 ## 📌 Project Information
 
 - **Project Title:** Fast and Flexible Dynamic Quantile Inference: exDQLM
-- **Short Title (≤30 chars):** exDQLM: Dynamic Quantile Models
+- **Short Title (≤30 chars):** exDQLM: Dynamic Quantile Modeling
 - **Project Idea Page:** [Insert URL] (to be updated)
 
 ---
@@ -16,13 +16,12 @@ I am a **4th-year Ph.D. candidate** in **Statistics** at the [University of Cali
 
 I am advised by [Dr. Bruno Sansó](https://users.soe.ucsc.edu/~bruno/) and [Dr. Raquel Prado](https://raquel.soe.ucsc.edu/), and my research applies **Dynamic Quantile Regression**, **Sequential Monte Carlo (SMC) methods**, and **forecast synthesis techniques** to real-world problems, including **climate forecasting** and **hydrology**.
 
-I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológico Autónomo de México (ITAM)](https://www.itam.mx/), where I specialized in **Applied Mathematics** (Numerical Analysis) and **Econometrics**.
+I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológico Autónomo de México (ITAM)](https://www.itam.mx/), where I did a B.Sc. in **Applied Mathematics** (Numerical Analysis) and M.Sc. in **Economics**.
 
-### 💡 **Why I’m a Strong Fit**
-- **Deep Expertise in R & Statistical Modeling:** Extensive experience in R, particularly for Bayesian time series modeling and predictive analytics.
+### **Why I’m a Strong Fit**
+- **Strong Expertise in R & Statistical Modeling:** Extensive experience in R, particularly for Bayesian time series modeling and predictive analytics.
 - **Relevant Research Experience:** My work directly aligns with **quantile-based inference, spatio-temporal forecasting, and computational Bayesian methods**.
 - **Open Source Contributions & Software Development:** Strong background in **algorithm design, reproducible research, and software development**.
-- **Prior Package Development Experience:** Experience developing efficient and scalable methodologies in **exDQLM**, integrating computational advances for real-time inference.
 
 ---
 
@@ -54,8 +53,8 @@ I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológic
 - **Co-Mentor:**  
   - **Raquel Barata** (Penn State University, USA) – rxb875@psu.edu  
 - **Communication with Mentors:**  
-  - I have been actively collaborating with **Rebecca Killick**, discussing project goals, software integration, and implementation strategies.
-  - **Raquel Barata** has expressed strong interest in staying involved, as **my research aligns closely with her work**. We maintain frequent communication and plan to collaborate on this and future projects.
+  - I have been actively communicating with **Rebecca Killick**, discussing project goals, software integration, and implementation strategies.
+  - **Raquel Barata** has expressed strong interest in staying involved, as my research aligns closely with her work. We maintain frequent communication and plan to collaborate on this and future projects.
 
 ---
 
@@ -63,20 +62,55 @@ I completed my **Bachelor’s and Master’s degrees** at [Instituto Tecnológic
 
 ### **Development Overview**
 - **Key Functions & Features:**  
-  - [Describe planned functions, methods, and enhancements]  
-  - [Mention compatibility with existing R ecosystem]  
+  - Implement a **Bayesian Dynamic Quantile Regression Model (exDQLM)** for time-series quantile estimation.  
+  - Introduce **Posterior Predictive Quantile Synthesis (PPQS)** to ensure non-crossing quantile estimates.  
+  - Support **static and dynamic quantile regression** under **Variational Bayes (VB)** and **MCMC** frameworks.  
+  - Optimize for scalability using **C++ (via Rcpp)** for computational efficiency.  
+  - Extend quantile modeling by integrating the **Extended Asymmetric Laplace (exAL) distribution**.  
+
 - **Approach to Development:**  
-  - [Describe modular design, dependencies, and API considerations]  
+  - Develop modularized functions for **posterior inference, quantile prediction, and uncertainty quantification**.  
+  - Implement **efficient variational approximations** to handle large datasets with real-time inference capabilities.  
+  - Ensure smooth integration with **existing R ecosystem** (e.g., `quantreg`, `bayesQR`, `qrjoint`).  
+  - Design API and package structure following **tidyverse principles** for usability and maintainability.  
+
 - **Integration with Existing Workflows:**  
-  - [How will this fit into existing packages/tools?]  
+  - Provide compatibility with **dynamic Bayesian models** for time-series forecasting.  
+  - Support **multi-threaded execution** via `RcppParallel` to handle large-scale time-dependent quantile estimation.  
+  - Ensure compatibility with `ggplot2` for visualization and `tidyverse` for data handling.  
+  - Offer **seamless integration with CRAN standards** for reproducibility.  
+
+---
 
 ### **Testing & Validation**
-- **Unit tests & debugging strategy:** [Explain testing methodology]  
-- **Benchmarks & performance validation:** [How will the results be verified?]  
+- **Unit tests & debugging strategy:**  
+  - Implement **unit tests** for each module using `testthat` and `RcppUnit`.  
+  - Validate posterior distributions using **synthetic datasets** with known quantile properties.  
+  - Conduct **Monte Carlo simulations** to test model stability under various scenarios.  
 
-###  **Challenges & Risk Mitigation**
-- **Potential Obstacles:** [e.g., computation limits, debugging complex algorithms]  
-- **Proposed Solutions:** [How will you overcome these?]  
+- **Benchmarks & performance validation:**  
+  - Compare `exDQLM` against existing R packages (`quantreg`, `bayesQR`, `qrjoint`).  
+  - Measure runtime performance across **small, medium, and large datasets**.  
+  - Evaluate **memory efficiency** using large-scale datasets in hydrology and finance.  
+
+---
+
+### **Challenges & Risk Mitigation**
+- **Potential Obstacles:**  
+  - **Computational Limits:** Large-scale Bayesian quantile inference can be computationally expensive.  
+  - **Algorithmic Complexity:** Ensuring **non-crossing quantiles** and proper posterior synthesis.  
+  - **Scalability Issues:** Efficiently handling high-dimensional covariates and multivariate responses.  
+
+- **Proposed Solutions:**  
+  - Optimize via **Variational Bayes (VB)** for faster inference over traditional MCMC.  
+  - Implement **Rcpp-based parallel processing** to reduce computational overhead.  
+  - Use **Cholesky factorization and variational inference techniques** to stabilize large-matrix computations.  
+  - Conduct **extensive testing** on benchmark datasets to fine-tune efficiency.  
+  - Leverage **Posterior Predictive Synthesis (PPQS)** to ensure smooth, interpretable quantile estimates.  
+
+---
+
+This plan ensures that **exDQLM** will be a scalable, high-performance Bayesian quantile modeling tool, filling a critical gap in **time-series quantile regression** within the R ecosystem.
 
 ---
 
