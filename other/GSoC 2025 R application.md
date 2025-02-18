@@ -30,6 +30,8 @@ My expertise in **algorithm implementation and software development** has been a
   *Single Step Estimation of ARMA Roots for Non-Fundamental Nonstationary Fractional Models.*  
   - Led all **algorithmic development, implementation, and journal-requested revisions** using **Python**, **MATLAB** and **C++**.
 
+- **Curriculum Vitae:** [View my CV](https://www.antonio-aguirre.com/cv/)
+  
 ### **Why I’m a Strong Fit**
 - **Expertise in R & Bayesian Modeling:** Extensive experience in R, particularly for **Bayesian time series analysis, probabilistic forecasting, and statistical learning**.
 - **Proven Research & Development Experience:** Strong background in **quantile-based inference, state-space models, and scalable computational Bayesian methods**.
