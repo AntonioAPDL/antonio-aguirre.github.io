@@ -203,11 +203,11 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 ## 📆 Timeline
 
 ### **Week 1-4: Pre-Coding Period (Community Bonding) (May 8 – June 1, 2025)**  
-**Goal:** Establish the development foundation, define the package API, and finalize the implementation roadmap.  
+**Goal:** Establish the development set up, define the package API, and finalize the implementation roadmap.  
 
 #### **Tasks**  
 - Set up **GitHub repository**, version control, and CI/CD workflows.  
-- Study existing packages (`quantreg`, `bayesQR`, `qrjoint`) and **define compatibility strategies**.  
+- Study existing packages (`quantreg`, `bayesQR`, and `qrjoint` among others) and **define compatibility strategies**.  
 - Research **Kalman filtering**, **dynamic linear models (DLMs)**, and **exAL-based quantile regression**.  
 - Design the **package API**, function signatures, and Rcpp bindings.  
 - Finalize the **technical roadmap** with mentors.  
@@ -224,13 +224,13 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 #### **Tasks**  
 - Implement **exAL distribution functions** in R and C++:  
-  - `rexal(n, mu, sigma, gamma, p)`: Random sampling.  
-  - `dexal(x, mu, sigma, gamma, p, log = FALSE)`: Density function.  
-  - `pexal(q, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: CDF.  
-  - `qexal(p, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: Quantile function.  
+  - `rexal(n, tau, mu, sigma, gamma, p)`: Random sampling.  
+  - `dexal(x, tau, mu, sigma, gamma, p, log = FALSE)`: Density function.  
+  - `pexal(q, tau, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: CDF.  
+  - `qexal(p, tau, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: Quantile function.  
 
 - Implement **Static exAL Regression (Bayesian inference using MCMC & VB)**:  
-  - `exal_reg(y, X, method = "MCMC" | "VB")`: Bayesian static quantile regression.  
+  - `exal_reg(tau, y, X, method = "MCMC" | "VB")`: Bayesian static quantile regression.  
 
 - Unit tests for distributional properties and regression functions.  
 
@@ -246,7 +246,7 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 #### **Tasks**  
 - Implement **Dynamic Bayesian Quantile Regression (exDQLM)**:  
-  - `exal_dyn(y, X, trend = TRUE, seasonal = TRUE, covariates = TRUE, method = "MCMC" | "VB")`  
+  - `exal_dyn(tau, y, X, trend = TRUE, seasonal = TRUE, covariates = TRUE, method = "MCMC" | "VB")`  
 
 - Develop **Kalman Filtering & Smoothing in C++ (for VB inference)**:  
   - `kf_update(state, cov, obs, transition, process_noise, obs_noise)`: Kalman filter update.  
