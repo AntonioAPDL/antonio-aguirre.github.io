@@ -312,8 +312,7 @@ This timeline ensures an **incremental and structured update** of the `exDQLM` p
 **Goal:** Complete final optimizations and add Bayesian diagnostics tools.  
 
 #### **Tasks**  
-- Implement **Missing Data Handling for exDQLM**:  
-  - `exal_missing(y, X, method = "EM" | "Bayes")`  
+- Implement **Missing Data Handling for exDQLM**
 
 - Integrate **Bayesian diagnostics and visualization tools**:  
   - Support `bayesplot` for posterior diagnostics.  
