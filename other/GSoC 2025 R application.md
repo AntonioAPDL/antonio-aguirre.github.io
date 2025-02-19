@@ -44,7 +44,6 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
   *Single Step Estimation of ARMA Roots for Non-Fundamental Nonstationary Fractional Models.*  
   - Led all **algorithmic development, implementation, and journal-requested revisions** using **Python**, **MATLAB**, and **C++**.
 
----
 
 ### II. **Professional Experience**
 #### **Computer Systems Coordinator at UCSC Statistics Department (2023 – Present)**
@@ -203,128 +202,141 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 ## 📆 Timeline
 
-### **Weeks 1-4: Pre-Coding Period (Community Bonding) (May 8 – June 1, 2025)**  
-**Goal:** Establish the foundation for the package by setting up infrastructure, reviewing relevant methodologies, and refining technical specifications.  
+### **Week 1-4: Pre-Coding Period (Community Bonding) (May 8 – June 1, 2025)**  
+**Goal:** Establish the development foundation, define the package API, and finalize the implementation roadmap.  
 
-#### **Tasks**
-- Set up the **GitHub repository**, CI/CD pipelines, and version control workflow.
-- Review existing R packages (`quantreg`, `bayesQR`, `qrjoint`) and define integration strategy.
-- Deep dive into **exAL distribution, Bayesian quantile regression, and state-space models**.
-- Finalize the **API structure** for static and dynamic models.
-- Develop **benchmarking strategy** for performance comparisons.
-- Define **initial validation datasets** for synthetic and real-world testing.
+#### **Tasks**  
+- Set up **GitHub repository**, version control, and CI/CD workflows.  
+- Study existing packages (`quantreg`, `bayesQR`, `qrjoint`) and **define compatibility strategies**.  
+- Research **Kalman filtering**, **dynamic linear models (DLMs)**, and **exAL-based quantile regression**.  
+- Design the **package API**, function signatures, and Rcpp bindings.  
+- Finalize the **technical roadmap** with mentors.  
 
-#### **Deliverables**
-- Fully established **repository with initial documentation**.
-- Finalized **function specifications** and API structure.
-- Detailed **roadmap for core implementations**.
-
----
-
-### **Weeks 5-6: Coding Phase 1 – exAL Distribution & Static Model (June 2 – June 17, 2025)**  
-**Goal:** Implement the **exAL distribution** and its application to **static quantile regression**.
-
-#### **Tasks**
-- Implement **exAL (Extended Asymmetric Laplace) distribution** in R and `Rcpp`.
-- Develop **static exAL-based quantile regression**.
-- Implement **Kalman filtering & smoothing in C++** for state estimation.
-  - Robust **matrix factorization techniques** for stability.
-  - Efficient **inverse computation methods**.
-- Create unit tests using `testthat` for **exAL and static regression**.
-- Validate initial implementation using synthetic datasets.
-
-#### **Deliverables**
-- **exAL distribution implementation** with numerical validation.
-- **Static quantile regression functions** with initial tests.
-- **Kalman filtering module** with performance benchmarks.
+#### **Deliverables**  
+- **Repository structure** with package skeleton.  
+- **API documentation draft** and function signatures.  
+- **Community engagement and feedback collection**.  
 
 ---
 
-### **Weeks 7-8: Coding Phase 2 – Dynamic exAL Regression & Quantile Forecasting (June 18 – July 15, 2025)**  
-**Goal:** Extend the model to **dynamic time series quantile regression**.
+### **Week 5-6: Coding Phase 1 – exAL Distribution & Basic Regression (June 2 – June 17, 2025)**  
+**Goal:** Implement the **exAL distribution** and **static regression models**.  
 
-#### **Tasks**
-- Implement **dynamic exAL quantile regression** with:
-  - **Trend, seasonal, and covariate components**.
-  - **Adaptive (dynamic) parameters**.
-  - **Transfer function alternative** for improved model flexibility.
-- Develop **quantile forecasting methods**.
-- Implement **missing data handling** using dynamic imputation.
-- Extend **Kalman filtering for time series estimation**.
-- Optimize **state-space model inference in `Rcpp`** for efficiency.
+#### **Tasks**  
+✅ Implement **exAL distribution functions** in R and C++:  
+  - `rexal(n, mu, sigma, gamma, p)`: Random sampling.  
+  - `dexal(x, mu, sigma, gamma, p, log = FALSE)`: Density function.  
+  - `pexal(q, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: CDF.  
+  - `qexal(p, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: Quantile function.  
 
-#### **Deliverables**
-- Fully functional **dynamic exAL regression model**.
-- **Time-dependent quantile forecasting framework**.
-- Efficient **Kalman filtering for time series modeling**.
+✅ Implement **Static exAL Regression (Bayesian inference using MCMC & VB)**:  
+  - `exal_reg(y, X, method = "MCMC" | "VB")`: Bayesian static quantile regression.  
+
+✅ Unit tests for distributional properties and regression functions.  
+
+#### **Deliverables**  
+- **Fully implemented exAL distribution** (`rexal`, `dexal`, `pexal`, `qexal`).  
+- **Bayesian static exAL regression model** (`exal_reg`).  
+- **Basic unit tests and validation against `bayesQR`**.  
+
+---
+
+### **Week 7-8: Dynamic exAL Regression – Time-Series Framework (June 18 – July 15, 2025)**  
+**Goal:** Implement **Dynamic exAL Regression** with trend, seasonality, and covariates.  
+
+#### **Tasks**  
+✅ Implement **Dynamic Bayesian Quantile Regression (exDQLM)**:  
+  - `exal_dyn(y, X, trend = TRUE, seasonal = TRUE, covariates = TRUE, method = "MCMC" | "VB")`  
+
+✅ Develop **Kalman Filtering & Smoothing in C++ (for VB inference)**:  
+  - `kf_update(state, cov, obs, transition, process_noise, obs_noise)`: Kalman filter update.  
+  - `ks_smooth(kf_results)`: Smoother to refine state estimates.  
+  - **Ensure robust matrix factorization (SVD, QR, Cholesky) for numerical stability.**  
+
+✅ Implement **Adaptive Parameters for Dynamic Models**:  
+  - `adapt_params(y, X, model)`: Allow dynamic learning of coefficients over time.  
+
+✅ Validate on synthetic datasets and compare to `dynquant`.  
+
+#### **Deliverables**  
+- **Dynamic exAL regression model (`exal_dyn`) implemented**.  
+- **Efficient Kalman Filtering & Smoothing in C++**.  
+- **Adaptive parameter estimation integrated**.  
 
 ---
 
 ### **Week 9: Mid-Term Evaluation (July 14 – 18, 2025)**  
-**Goal:** Evaluate progress and finalize core functionalities.
+**Goal:** Assess progress, validate model performance, and improve efficiency.  
 
-#### **Tasks**
-- Conduct extensive **unit testing** for static and dynamic models.
-- Optimize **Kalman filtering routines** for computational efficiency.
-- Review **performance benchmarks** against existing R packages.
-- Address mentor feedback and refine **core model implementation**.
+#### **Tasks**  
+- **Benchmark exDQLM models** against existing tools.  
+- **Refactor Kalman filter implementation for efficiency**.  
+- **Validate adaptive parameters for dynamic quantile inference**.  
+- **Develop documentation on function usage and theoretical background**.  
 
-#### **Deliverables**
-- Mid-term **progress report and mentor evaluation**.
-- Fully functional **static and dynamic quantile regression models**.
-- Validated **benchmarking results**.
-
----
-
-### **Weeks 10-11: Final Coding Phase 1 – MCMC & VB Inference (July 16 – August 2, 2025)**  
-**Goal:** Implement **MCMC and Variational Bayes (VB) inference methods**.
-
-#### **Tasks**
-- Develop **MCMC-based inference** for `exDQLM` in C++.
-- Implement **Variational Bayes (VB) inference** with:
-  - **Laplace/Delta update for non-conjugate parameters**.
-  - **Initialization based on NDLM (Normal-DLM priors)**.
-- Optimize **parallel implementation** for multiple target quantiles.
-- Extend **diagnostics for Bayesian inference** using `bayesplot` and `rstan`.
-
-#### **Deliverables**
-- Fully functional **MCMC and VB inference modules**.
-- **Parallelized** inference implementation for multiple quantiles.
-- Integrated **diagnostics and performance validation tools**.
+#### **Deliverables**  
+- **Performance benchmarks and validation report**.  
+- **Mid-term evaluation report submitted to mentors**.  
 
 ---
 
-### **Weeks 12-13: Final Coding Phase 2 – Quantile Synthesis, Testing & Documentation (August 3 – August 19, 2025)**  
-**Goal:** Finalize **non-crossing quantile synthesis, testing, and documentation**.
+### **Week 10-11: Parallel Quantile Estimation & Multivariate Extension (July 16 – August 2, 2025)**  
+**Goal:** Implement **Multivariate exDQLM** and optimize for parallel execution.  
 
-#### **Tasks**
-- Implement **Posterior Predictive Quantile Synthesis (PPQS)** for:
-  - **Non-crossing quantile processing**.
-  - **Integration of posterior quantile estimates** into a unified predictive distribution.
-- Conduct **final performance benchmarks** on large datasets.
-- Finalize **package documentation, vignettes, and tutorials**.
-- Implement **CRAN compliance checks and package validation**.
+#### **Tasks**  
+✅ Extend `exal_dyn()` to support **Multivariate Time-Series**:  
+  - `exal_dyn_multi(Y, X, ...)`: Multivariate version for multiple quantile processes.  
 
-#### **Deliverables**
-- Fully optimized `exDQLM` with **posterior quantile synthesis**.
-- Comprehensive **package documentation and user guides**.
-- Finalized **performance benchmarking results**.
+✅ Parallelize **inference for multiple quantiles simultaneously**:  
+  - Implement in `RcppParallel` for efficient execution.  
+
+✅ Implement **Laplace/Delta approximation for non-conjugate VB inference**:  
+  - `vb_nonconj(y, X, ...)`: Approximate posterior updates for challenging priors.  
+
+✅ Develop **Posterior Predictive Quantile Synthesis (PPQS)** for non-crossing quantiles:  
+  - `ppqs(post_samples)`: Combine multiple quantile estimates into a coherent posterior.  
+
+#### **Deliverables**  
+- **Multivariate exAL regression (`exal_dyn_multi`) fully implemented**.  
+- **Parallelized inference for multiple quantiles**.  
+- **Non-crossing posterior predictive quantile synthesis (`ppqs`)**.  
 
 ---
 
-### **Weeks 14+: Final Submission, Review & Maintenance (September 1 – Ongoing)**  
-**Goal:** Submit the package to **CRAN**, ensure stability, and plan for future development.
+### **Week 12-13: Bayesian Diagnostics, Missing Data Handling & Final Refinements (August 3 – August 19, 2025)**  
+**Goal:** Complete final optimizations and add Bayesian diagnostics tools.  
 
-#### **Tasks**
-- Conduct **final peer review** and address mentor feedback.
-- Submit `exDQLM` to **CRAN and GitHub**.
-- Develop a **post-release maintenance plan**.
-- Engage with the **R community for continued improvements**.
+#### **Tasks**  
+✅ Implement **Missing Data Handling for exDQLM**:  
+  - `exal_missing(y, X, method = "EM" | "Bayes")`  
 
-#### **Deliverables**
-- Official **CRAN release of `exDQLM`**.
-- Publicly available **GitHub repository with issue tracking**.
-- Defined **roadmap for future updates and enhancements**.
+✅ Integrate **Bayesian diagnostics and visualization tools**:  
+  - Support `bayesplot` for posterior diagnostics.  
+  - Ensure compatibility with `rstan`.  
+  - Develop **interactive visualization tools for quantile estimates**.  
+
+✅ Finalize **function documentation and vignettes**.  
+✅ Conduct **package-wide testing and validation**.  
+
+#### **Deliverables**  
+- **Missing data handling implemented (`exal_missing`)**.  
+- **Bayesian diagnostic tools integrated with `bayesplot` and `rstan`**.  
+- **Final testing and documentation completed**.  
+
+---
+
+### **Week 14+: Post-GSoC Maintenance & CRAN Submission**  
+**Goal:** Final package refinements and CRAN submission.  
+
+#### **Tasks**  
+✅ Finalize **codebase review and CRAN compliance checks**.  
+✅ Submit `exDQLM` to **CRAN and GitHub**.  
+✅ Plan long-term **feature development roadmap**.  
+
+#### **Deliverables**  
+- **CRAN-ready `exDQLM` package**.  
+- **Public documentation and tutorials**.  
+- **Defined roadmap for future enhancements**.  
 
 
 ---
