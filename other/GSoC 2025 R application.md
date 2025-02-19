@@ -111,9 +111,9 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
   - Introduce a **Laplace/Delta approximation** to handle **non-conjugate parameters** in VB updates.  
   - Extend functionality to **static quantile regression** using the **Extended Asymmetric Laplace (exAL) distribution**.  
   - Develop a **parallel inference framework** to estimate multiple quantiles efficiently.  
-  - Implement **Posterior Predictive Quantile Synthesis (PPQS)** to ensure **non-crossing quantile estimates**.  
+  - Implement **Posterior Predictive Quantile Synthesis (PPQS)** ensuring **non-crossing quantile estimates**.  
   - Support additional features:  
-    - **Missing Data Handling** within a **Bayesian state-space model**.  
+    - **Missing Data Handling**   
     - **Multivariate Time Series Support** for joint quantile forecasting.  
 
 ---
