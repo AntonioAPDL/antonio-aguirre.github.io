@@ -198,10 +198,10 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 #### **Tasks**
 - Set up the **GitHub repository**, version control, and CI/CD workflows.
-- Study and analyze existing R packages (`quantreg`, `bayesQR`, `qrjoint`).
+- Study and analyze existing R packages for qusntile regression (`quantreg`, `bayesQR`, `qrjoint`).
 - Familiarize with **state-space modeling**, **Bayesian quantile regression**, and **Variational Bayes**.
 - Finalize the **technical roadmap** with mentors.
-- Define the **API structure** and overall package design.
+- Define the **API structure** and overall package design, and ensure compatibility with `bayesplot`.
 - Engage with the **R open-source community** for early feedback.
 
 #### **Deliverables**
