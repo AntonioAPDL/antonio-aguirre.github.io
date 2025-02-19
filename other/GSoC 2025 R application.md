@@ -160,7 +160,9 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 - **Benchmarks & performance validation:**  
   - Compare `exDQLM` against existing R packages (`quantreg`, `bayesQR`, `qrjoint`, `dynquant`).  
   - Measure runtime performance across **small, medium, and large datasets**.  
-  - Evaluate **memory efficiency** using large-scale datasets in hydrology and finance.  
+  - Evaluate **memory efficiency** using large-scale datasets in hydrology and finance.
+
+  - COMMENT BRIEFLY ON TABLE
 
 | Feature                    | quantreg | dynquant | SPQR | qrjoint | bayesQR | lqr  | exDQLM |
 |----------------------------|----------|---------|------|---------|---------|------|--------|
