@@ -230,14 +230,15 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
   - `qexal(p, tau, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: Quantile function.  
 
 - Implement **Static exAL Regression (Bayesian inference using MCMC & VB)**:  
-  - `exal_reg(tau, y, X, method = "MCMC" | "VB")`: Bayesian static quantile regression.  
+  - `exal_reg(tau, y, X, method = "MCMC" | "VB")`: Bayesian static quantile regression.
+    - Develop a Laplace-Delta approximation for non-conjugate parameters. 
 
 - Unit tests for distributional properties and regression functions.  
 
 #### **Deliverables**  
 - **Fully implemented exAL distribution** (`rexal`, `dexal`, `pexal`, `qexal`).  
 - **Bayesian static exAL regression model** (`exal_reg`).  
-- **Basic unit tests and validation against `bayesQR`**.  
+- **Basic unit tests and validation against `quantreg` and `bayesQR`**.  
 
 ---
 
@@ -253,8 +254,8 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
   - `ks_smooth(kf_results)`: Smoother to refine state estimates.  
   - **Ensure robust matrix factorization (SVD, QR, Cholesky) for numerical stability.**  
 
-- Implement **Adaptive Parameters for Dynamic Models**:  
-  - `adapt_params(y, X, model)`: Allow dynamic learning of coefficients over time.  
+- Implement **Adaptive Parameters for Dynamic Models** via Discount Factors:  
+  - `adapt_params(y, X, model, df)`: Allow dynamic learning of coefficients over time.  
 
 - Validate on synthetic datasets and compare to `dynquant`.  
 
