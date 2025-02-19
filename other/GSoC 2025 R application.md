@@ -199,129 +199,132 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 - WHEN AND HOW TO DO EVALUATION? CONSIDER bayesplot Package?
 - LIST ALL FEATURES OF THE MODEL AND ORGANIZE THEM HOWEVER MAKES MORE SENSE AND FOR WHICH I ALREADY HAVE CODE. 
 
+---
+
 ## 📆 Timeline
 
-### **Week 1-4: Pre-Coding Period (Community Bonding) (May 8 – June 1, 2025)**
-**Goal:** Establish a solid foundation for the project by setting up the development environment, refining the project scope, and engaging with the R community.
+### **Weeks 1-4: Pre-Coding Period (Community Bonding) (May 8 – June 1, 2025)**  
+**Goal:** Establish the foundation for the package by setting up infrastructure, reviewing relevant methodologies, and refining technical specifications.  
 
 #### **Tasks**
-- Set up the **GitHub repository**, version control, and CI/CD workflows.
-- Study and analyze existing R packages for qusntile regression (`quantreg`, `bayesQR`, `qrjoint`).
-- Familiarize with **state-space modeling**, **Bayesian quantile regression**, and **Variational Bayes**.
-- Finalize the **technical roadmap** with mentors.
-- Define the **API structure** and overall package design, and ensure compatibility with `bayesplot`.
-- Engage with the **R open-source community** for early feedback.
+- Set up the **GitHub repository**, CI/CD pipelines, and version control workflow.
+- Review existing R packages (`quantreg`, `bayesQR`, `qrjoint`) and define integration strategy.
+- Deep dive into **exAL distribution, Bayesian quantile regression, and state-space models**.
+- Finalize the **API structure** for static and dynamic models.
+- Develop **benchmarking strategy** for performance comparisons.
+- Define **initial validation datasets** for synthetic and real-world testing.
 
 #### **Deliverables**
-- Established **repository** with project documentation.
-- Initial API **blueprint** and function specifications.
-- Community engagement and feedback collection.
+- Fully established **repository with initial documentation**.
+- Finalized **function specifications** and API structure.
+- Detailed **roadmap for core implementations**.
 
 ---
 
-### **Week 5-6: Coding Phase 1 (June 2 – June 17, 2025)**
-**Goal:** Implement core functionalities of exDQLM.
+### **Weeks 5-6: Coding Phase 1 – exAL Distribution & Static Model (June 2 – June 17, 2025)**  
+**Goal:** Implement the **exAL distribution** and its application to **static quantile regression**.
 
 #### **Tasks**
-- Develop the **Bayesian Dynamic Quantile Regression (DQLM)** theoretical framework.
-- Implement **Kalman filtering and state-space model estimation** in `Rcpp` for speed.
-- Create **posterior update functions** for time-dependent quantile inference.
-  - Implement **MCMC-based inference** for dynamic quantiles.
-  - Implement **Variational Bayes (VB)** inference approximation for conjugate parameters (using **Laplace/Delta techniques**).
-- Develop **unit tests** using `testthat` for core functions.
-- Validate implementation with **synthetic datasets**.
-- Draft function documentation (input/output specifications).
+- Implement **exAL (Extended Asymmetric Laplace) distribution** in R and `Rcpp`.
+- Develop **static exAL-based quantile regression**.
+- Implement **Kalman filtering & smoothing in C++** for state estimation.
+  - Robust **matrix factorization techniques** for stability.
+  - Efficient **inverse computation methods**.
+- Create unit tests using `testthat` for **exAL and static regression**.
+- Validate initial implementation using synthetic datasets.
 
 #### **Deliverables**
-- Functioning **exDQLM** model.
-- Early **unit tests** ensuring stable implementation.
-- Initial **benchmark tests** against `quantreg` and `bayesQR`.
+- **exAL distribution implementation** with numerical validation.
+- **Static quantile regression functions** with initial tests.
+- **Kalman filtering module** with performance benchmarks.
 
 ---
 
-### **Week 7-8: Coding Phase 2 (June 18 – July 15, 2025)**
-**Goal:** Expand core functionality, optimize inference, and refine package structure.
+### **Weeks 7-8: Coding Phase 2 – Dynamic exAL Regression & Quantile Forecasting (June 18 – July 15, 2025)**  
+**Goal:** Extend the model to **dynamic time series quantile regression**.
 
 #### **Tasks**
-- Implement **Posterior Predictive Quantile Synthesis (PPQS)** for non-crossing quantile estimation.
-- Develop **parallel execution support** via `RcppParallel` for large-scale inference.
-- Conduct **initial performance benchmarks** on real-world datasets (financial time series, hydrology).
-- Develop the **Bayesian Static Quantile Regression (DQLM)** theoretical framework under the Extended Asymmetric Laplace 
-- Expand **documentation** to include usage examplesDistribution (exAL). 
+- Implement **dynamic exAL quantile regression** with:
+  - **Trend, seasonal, and covariate components**.
+  - **Adaptive (dynamic) parameters**.
+  - **Transfer function alternative** for improved model flexibility.
+- Develop **quantile forecasting methods**.
+- Implement **missing data handling** using dynamic imputation.
+- Extend **Kalman filtering for time series estimation**.
+- Optimize **state-space model inference in `Rcpp`** for efficiency.
 
 #### **Deliverables**
-- Fully functional **exDQLM** dynamic quantile regression model.
-- Fully functional **exDQLM** static quantile regression model.
-- Optimized **VB & MCMC inference** methods.
-- Initial **performance benchmarks** and **real-world dataset tests**.
+- Fully functional **dynamic exAL regression model**.
+- **Time-dependent quantile forecasting framework**.
+- Efficient **Kalman filtering for time series modeling**.
 
 ---
 
-### **Week 9: Mid-Term Evaluation (July 14 – 18, 2025)**
-**Goal:** Conduct evaluation of progress and ensure the project is on track.
+### **Week 9: Mid-Term Evaluation (July 14 – 18, 2025)**  
+**Goal:** Evaluate progress and finalize core functionalities.
 
 #### **Tasks**
-- Review progress with mentors and address feedback.
-- Ensure **functionality alignment with project goals**.
-- Debug and refine **posterior synthesis & inference methods**.
-- Conduct **extended validation tests** on unseen datasets.
-- Finalize the **first draft of documentation**.
+- Conduct extensive **unit testing** for static and dynamic models.
+- Optimize **Kalman filtering routines** for computational efficiency.
+- Review **performance benchmarks** against existing R packages.
+- Address mentor feedback and refine **core model implementation**.
 
 #### **Deliverables**
-- Mid-term **progress report**.
-- Fully tested **core model implementation**.
-- Review meeting with mentors.
+- Mid-term **progress report and mentor evaluation**.
+- Fully functional **static and dynamic quantile regression models**.
+- Validated **benchmarking results**.
 
 ---
 
-### **Week 10-11: Final Coding Phase (July 16 – August 2, 2025)**
-**Goal:** Complete implementation, optimize performance, and enhance usability.
+### **Weeks 10-11: Final Coding Phase 1 – MCMC & VB Inference (July 16 – August 2, 2025)**  
+**Goal:** Implement **MCMC and Variational Bayes (VB) inference methods**.
 
 #### **Tasks**
-- Finalize **MCMC and Variational Bayes optimizations**.
-- Improve computational performance using **vectorized operations** in `Rcpp`.
-- Conduct **stress testing** on large datasets.
-- Implement **visualization tools** for dynamic quantile estimation.
-- Develop **comprehensive vignettes** and **tutorials**.
-- Refactor code for **robustness and maintainability**.
+- Develop **MCMC-based inference** for `exDQLM` in C++.
+- Implement **Variational Bayes (VB) inference** with:
+  - **Laplace/Delta update for non-conjugate parameters**.
+  - **Initialization based on NDLM (Normal-DLM priors)**.
+- Optimize **parallel implementation** for multiple target quantiles.
+- Extend **diagnostics for Bayesian inference** using `bayesplot` and `rstan`.
 
 #### **Deliverables**
-- Fully optimized `exDQLM` package.
-- Efficient **scalable inference** methods.
-- Finalized **visualization components**.
-- Comprehensive **testing and validation results**.
+- Fully functional **MCMC and VB inference modules**.
+- **Parallelized** inference implementation for multiple quantiles.
+- Integrated **diagnostics and performance validation tools**.
 
 ---
 
-### **Week 12-13: Final Submission & Review (August 3 – August 19, 2025)**
-**Goal:** Polish the project and prepare for CRAN submission.
+### **Weeks 12-13: Final Coding Phase 2 – Quantile Synthesis, Testing & Documentation (August 3 – August 19, 2025)**  
+**Goal:** Finalize **non-crossing quantile synthesis, testing, and documentation**.
 
 #### **Tasks**
-- Finalize **documentation, README, and package manual**.
-- Ensure **compliance with CRAN submission standards**.
-- Conduct **final peer review** with mentors.
-- Prepare a **detailed project report** summarizing key developments.
+- Implement **Posterior Predictive Quantile Synthesis (PPQS)** for:
+  - **Non-crossing quantile processing**.
+  - **Integration of posterior quantile estimates** into a unified predictive distribution.
+- Conduct **final performance benchmarks** on large datasets.
+- Finalize **package documentation, vignettes, and tutorials**.
+- Implement **CRAN compliance checks and package validation**.
+
+#### **Deliverables**
+- Fully optimized `exDQLM` with **posterior quantile synthesis**.
+- Comprehensive **package documentation and user guides**.
+- Finalized **performance benchmarking results**.
+
+---
+
+### **Weeks 14+: Final Submission, Review & Maintenance (September 1 – Ongoing)**  
+**Goal:** Submit the package to **CRAN**, ensure stability, and plan for future development.
+
+#### **Tasks**
+- Conduct **final peer review** and address mentor feedback.
 - Submit `exDQLM` to **CRAN and GitHub**.
+- Develop a **post-release maintenance plan**.
+- Engage with the **R community for continued improvements**.
 
 #### **Deliverables**
-- **CRAN-ready** `exDQLM` package.
-- Completed **documentation and tutorials**.
-- Final project **submission report**.
-
----
-
-### **Week 14+: Post-GSoC Maintenance & Future Work**
-**Goal:** Ensure continued development and usability of the package.
-
-#### **Tasks**
-- Address **community feedback** post-release.
-- Monitor **GitHub issues and bug reports**.
-- Plan potential **enhancements and future contributions**.
-- Engage in **conference presentations** or write a research paper based on exDQLM.
-
-#### **Deliverables**
-- Publicly available `exDQLM` package with continued support.
-- Defined roadmap for **future updates**.
+- Official **CRAN release of `exDQLM`**.
+- Publicly available **GitHub repository with issue tracking**.
+- Defined **roadmap for future updates and enhancements**.
 
 
 ---
