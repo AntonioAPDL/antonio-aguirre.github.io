@@ -101,6 +101,7 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 ---
 
+
 ## Coding Plan & Methods
 
 ### **Development Overview**
@@ -149,47 +150,63 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
   - Maintain **CRAN compliance** for package accessibility and long-term usability.  
 
 ---
-
 ### **Testing & Validation**
-- **Unit tests & debugging strategy:**  
-  - Implement **unit tests** for each module using `testthat` and `RcppUnit`.  
+
+- **Unit Testing & Debugging Strategy:**  
+  - Implement **unit tests** for each module using `testthat` (R) and `RcppUnit` (C++).  
   - Validate posterior distributions using **synthetic datasets** with known quantile properties.  
-  - Conduct **Monte Carlo simulations** to test model stability under various scenarios.  
+  - Conduct **Monte Carlo simulations** to evaluate model stability under different conditions (e.g., varying sample sizes, non-Gaussian errors, and extreme quantile settings).  
 
-- **Benchmarks & performance validation:**  
-  - Compare `exDQLM` against existing R packages (`quantreg`, `bayesQR`, `qrjoint`, `dynquant`).  
-  - Measure runtime performance across **small, medium, and large datasets**.  
-  - Evaluate **memory efficiency** using large-scale datasets in hydrology and finance.
+- **Benchmarking & Performance Validation:**  
+  - Compare `exDQLM` against established R packages (`quantreg`, `bayesQR`, `qrjoint`, `dynquant`).  
+  - Evaluate **runtime performance** across **small, medium, and large datasets** to assess scalability.  
+  - Analyze **memory efficiency** for high-dimensional datasets in hydrology and finance applications.  
+  - Test **parallel execution efficiency** to ensure scalable multi-quantile inference.  
 
-  - COMMENT BRIEFLY ON TABLE
+---
 
-| Feature                    | quantreg | dynquant | SPQR | qrjoint | bayesQR | lqr  | exDQLM |
-|----------------------------|----------|---------|------|---------|---------|------|--------|
-| **Frequentist Approach**   | ✅       | ✅      | ❌   | ✅      | ❌      | ✅   | ✅     |
-| **Bayesian Inference**     | ❌       | ❌      | ✅   | ✅      | ✅      | ❌   | ✅     |
-| **Time-Dependent Data**    | ❌       | ✅      | ❌   | ❌      | ❌      | ❌   | ✅     |
-| **Covariates**             | ✅       | ❌      | ✅   | ❌      | ✅      | ✅   | ✅     |
-| **Scalability (Large Data)** | ❌       | ✅      | ✅   | ❌      | ✅      | ✅   | ✅     |
-| **Non-Linear Regression**  | ✅       | ❌      | ✅   | ❌      | ❌      | ❌   | ❌     |
-| **Multivariate Response**  | ✅       | ❌      | ❌   | ❌      | ❌      | ❌   | ✅     |
-| **Missing Data Handling**  | ❌       | ❌      | ❌   | ❌      | ❌      | ✅   | ✅     |
-| **Non-Crossing Quantiles** | ❌       | ❌      | ✅   | ✅      | ❌      | ❌   | ✅     |
+### **Comparison with Existing Methods**
+
+The following table summarizes the features of existing R packages for quantile regression, highlighting how `exDQLM` improves upon prior approaches.  
+
+| Feature                      | `quantreg` | `dynquant` | `SPQR` | `qrjoint` | `bayesQR` | `lqr`  | `exDQLM` |
+|------------------------------|------------|------------|--------|-----------|-----------|--------|----------|
+| **Frequentist Approach**     | ✅         | ✅         | ❌     | ✅        | ❌        | ✅     | ✅       |
+| **Bayesian Inference**       | ❌         | ❌         | ✅     | ✅        | ✅        | ❌     | ✅       |
+| **Time-Dependent Data**      | ❌         | ✅         | ❌     | ❌        | ❌        | ❌     | ✅       |
+| **Covariates**               | ✅         | ❌         | ✅     | ❌        | ✅        | ✅     | ✅       |
+| **Scalability (Large Data)** | ❌         | ✅         | ✅     | ❌        | ✅        | ✅     | ✅       |
+| **Non-Linear Regression**    | ✅         | ❌         | ✅     | ❌        | ❌        | ❌     | ❌       |
+| **Multivariate Response**    | ✅         | ❌         | ❌     | ❌        | ❌        | ❌     | ✅       |
+| **Missing Data Handling**    | ❌         | ❌         | ❌     | ❌        | ❌        | ✅     | ✅       |
+| **Non-Crossing Quantiles**   | ❌         | ❌         | ✅     | ✅        | ❌        | ❌     | ✅       |
+
+**Table Summary:**  
+The **existing methods** are often limited in scope, particularly for **dynamic, Bayesian, and scalable quantile estimation**. While `quantreg` is widely used for frequentist quantile regression, it lacks **Bayesian inference, dynamic updates, and non-crossing constraints**. Similarly, `dynquant` supports time-dependent quantiles but is **not Bayesian** and does not allow **multi-quantile synthesis**. `SPQR` and `qrjoint` provide **Bayesian** alternatives but lack **state-space modeling** for dynamic updates.  
+
+**How `exDQLM` Improves:**  
+- Introduces **fully Bayesian** time-series quantile estimation with **state-space modeling**.  
+- Supports **Kalman filtering & adaptive learning** for sequential updates.  
+- Implements **parallel multi-quantile inference** for scalability.  
+- Ensures **non-crossing quantiles** via **Posterior Predictive Quantile Synthesis (PPQS)**.  
+- Incorporates **missing data handling** within a Bayesian framework.  
 
 ---
 
 ### **Challenges & Risk Mitigation**
+Despite its advantages, implementing `exDQLM` comes with several challenges:
+
 - **Potential Obstacles:**  
-  - **Computational Limits:** Large-scale Bayesian quantile inference can be computationally expensive.  
-  - **Algorithmic Complexity:** Ensuring **non-crossing quantiles** and proper posterior synthesis.  
-  - **Scalability Issues:** Efficiently handling high-dimensional covariates and multivariate responses.  
+  - **Computational Complexity:** Bayesian inference, especially MCMC, can be computationally intensive.  
+  - **Ensuring Non-Crossing Quantiles:** Standard quantile estimation techniques do not naturally enforce this constraint.  
+  - **Scalability for High-Dimensional Data:** Handling large time-series datasets with **multiple quantiles and covariates**.  
 
 - **Proposed Solutions:**  
-  - Optimize via **Variational Bayes (VB)** for faster inference over traditional MCMC.  
-  - Implement **Rcpp-based parallel processing** to reduce computational overhead.  
-  - Use **Robust Cholesky and SVD factorization and variational inference techniques** to stabilize large-matrix computations.  
-  - Conduct **extensive testing** on benchmark datasets to fine-tune efficiency.  
-  - Leverage **Posterior Predictive Synthesis (PPQS)** to ensure a unified and interpretable estimation of various quantiles.  
-
+  - Optimize inference via **Variational Bayes (VB)** for **faster** convergence over traditional MCMC.  
+  - Implement **parallelized inference** with `RcppParallel` to reduce computational burden.  
+  - Use **Kalman filtering & smoothing** in C++ for efficient Bayesian updates in **dynamic models**.  
+  - Leverage **Posterior Predictive Quantile Synthesis (PPQS)** to enforce coherent quantile estimation.  
+  - Conduct **extensive testing** using **real-world datasets** to fine-tune efficiency and stability.  
 
 ---
 
