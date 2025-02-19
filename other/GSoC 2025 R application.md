@@ -30,7 +30,7 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 ---
 
-###  **Academic & Research Experience**
+### I. **Academic & Research Experience**
 #### **Ph.D. Research at University of California, Santa Cruz (UCSC)**
 - Developing **Bayesian Dynamic Quantile Models (DQLMs)** for probabilistic forecasting in climate and environmental sciences.
 - Extensive use of **Sequential Monte Carlo (SMC), Variational Bayes, and Posterior Predictive Synthesis** for scalable Bayesian inference.
@@ -46,7 +46,7 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 ---
 
-###  **Professional Experience**
+### II. **Professional Experience**
 #### **Computer Systems Coordinator at UCSC Statistics Department (2023 – Present)**
 - **Linux Systems Administration:** Maintain and optimize department **servers** for faculty and research use.
 - **Technical Support & Compliance:** Collaborate with UCSC IT to align department resources with university policies.
