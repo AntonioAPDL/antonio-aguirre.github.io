@@ -196,81 +196,104 @@ This plan aims to guarantee that **exDQLM** will be a scalable, high-performance
 ---
 ## 📆 Timeline
 
-### **Pre-Coding Period (Community Bonding) (May 8 – June 1, 2025)**
+### **Pre-Coding Period (Community Bonding) - Week 1-4 (May 8 – June 1, 2025)**
 - **Goal:** Establish a solid foundation for the project by setting up the development environment, refining the project scope, and engaging with the R community.
 - **Tasks:**
   - Set up the **GitHub repository**, version control, and CI/CD workflows.
   - Familiarize with existing R packages (`quantreg`, `bayesQR`, `qrjoint`) and their API structures.
-  - Study **state-space modeling**, **quantile regression theory**, and **Bayesian inference techniques** relevant to exDQLM.
+  - Study **state-space modeling**, **quantile regression theory**, and **Bayesian inference techniques** relevant to `exDQLM`.
   - Finalize **project roadmap** and **technical implementation details** with mentors.
   - Engage with the **R open-source community** for initial feedback.
+- **Milestones:**
+  - Fully established **repository and documentation framework**.
+  - Clear **roadmap and technical specifications** ready for coding phase.
 
 ---
 
-### **Coding Phase 1 (June 2 – June 17, 2025)**
-- **Goal:** Implement core functionalities of exDQLM.
+### **Week 5-6: Core Framework Implementation (June 2 – June 17, 2025)**
+- **Goal:** Implement the fundamental Bayesian Dynamic Quantile Regression (DQLM) model.
 - **Tasks:**
   - Develop **Bayesian Dynamic Quantile Regression (DQLM)** framework.
   - Implement **Kalman filtering & state-space model estimation**.
   - Create **functions for posterior updates** and **dynamic quantile estimation**.
-  - Develop **unit tests** for the core functions using `testthat`.
+  - Develop **unit tests** for core functions using `testthat`.
   - Validate core implementations with **synthetic datasets**.
   - Draft **initial documentation** (function descriptions, input/output specifications).
 - **Milestones:**
-  - Functioning Bayesian Dynamic Quantile Model (`exDQLM`).
-  - Early unit tests ensuring stable implementation.
+  - Fully functional **Bayesian Dynamic Quantile Model (`exDQLM`)**.
+  - Early **unit tests ensuring implementation stability**.
   - Basic **benchmark tests** against existing quantile regression packages.
 
 ---
 
-### **Mid-Term Evaluation (July 14 – 18, 2025)**
-- **Goal:** Have a working prototype with preliminary testing and integration.
+### **Week 7-8: Model Refinement & Early Testing (June 18 – July 1, 2025)**
+- **Goal:** Enhance model robustness, implement performance optimizations, and conduct testing.
 - **Tasks:**
-  - Implement **Posterior Predictive Quantile Synthesis (PPQS)** to ensure non-crossing quantile estimation.
-  - Conduct **initial performance benchmarks** comparing exDQLM against `quantreg`, `qrjoint`, and `bayesQR`.
-  - Refactor code for improved **computational efficiency**.
+  - Implement **Posterior Predictive Quantile Synthesis (PPQS)** for non-crossing quantile estimation.
+  - Optimize **Kalman filtering efficiency** for large datasets.
+  - Conduct **initial performance benchmarks** comparing `exDQLM` with `quantreg`, `qrjoint`, and `bayesQR`.
   - Begin developing **parallelized execution** using `RcppParallel` for large-scale inference.
-  - Validate initial models on **real-world datasets** (e.g., financial time series, hydrology).
+  - Validate models on **real-world datasets** (e.g., financial time series, hydrology).
   - Expand **documentation** to include examples and user guidelines.
 - **Milestones:**
   - Fully functional **dynamic quantile regression model**.
-  - Initial **performance benchmarks** completed.
-  - Documentation and user guide **drafted**.
-  - Mid-term evaluation report submitted.
+  - Initial **performance benchmarks completed**.
+  - Mid-term evaluation **preparation completed**.
 
 ---
 
-### **Coding Phase 2 (July 16 – August 19, 2025)**
-- **Goal:** Complete implementation, optimize performance, and refine usability.
+### **Week 9: Mid-Term Evaluation (July 2 – July 7, 2025)**
+- **Goal:** Ensure project progress aligns with expectations, submit evaluation materials.
 - **Tasks:**
-  - Finalize **Variational Bayes inference** for efficient large-scale computations.
+  - Submit a **comprehensive mid-term evaluation report**.
+  - Review progress with mentors and adjust development priorities.
+  - Identify remaining challenges and mitigation strategies.
+- **Milestones:**
+  - Mid-term evaluation report **approved**.
+  - Project **on track** for final implementation.
+
+---
+
+### **Week 10-11: Advanced Feature Implementation (July 8 – July 22, 2025)**
+- **Goal:** Expand functionality, integrate additional statistical techniques, and optimize performance.
+- **Tasks:**
+  - Finalize **Variational Bayes inference** for large-scale computations.
   - Implement **MCMC-based posterior inference** for model comparison.
   - Optimize **computational performance** using `Rcpp` and **vectorized operations**.
   - Conduct rigorous **stress testing** on large datasets.
   - Develop **visualization tools** for dynamic quantile trends and uncertainty quantification.
-  - Prepare **vignettes and tutorials** showcasing real-world applications.
-  - Ensure **code robustness and stability** through extensive testing.
 - **Milestones:**
-  - **Fully optimized** `exDQLM` package.
-  - Efficient **scalable inference** with both VB and MCMC approaches.
-  - Finalized **visualization components**.
-  - Comprehensive **testing and validation**.
+  - **Efficient inference** using both **Variational Bayes and MCMC**.
+  - Fully optimized **Kalman filtering & state-space estimation**.
+  - Working **visualization components**.
 
 ---
 
-### **Final Submission & Review (September 1 – 8, 2025)**
-- **Goal:** Finalize the project, submit it to CRAN, and complete documentation.
+### **Week 12-13: Documentation & Final Testing (July 23 – August 6, 2025)**
+- **Goal:** Ensure robustness, refine usability, and prepare for final submission.
 - **Tasks:**
-  - Polish **codebase** for maintainability and compliance with CRAN standards.
-  - Conduct final **peer review with mentors** and integrate feedback.
-  - Finalize **package documentation and README**.
-  - Publish a **detailed report** summarizing key developments, challenges, and outcomes.
-  - Submit `exDQLM` to **CRAN and GitHub** for public release.
-  - Plan for **future development roadmap** and potential follow-up contributions.
+  - Develop comprehensive **vignettes and tutorials** showcasing real-world applications.
+  - Conduct extensive **testing and validation**.
+  - Refactor and clean up **codebase** for maintainability.
+  - Ensure compliance with **CRAN submission guidelines**.
+  - Final peer review with mentors and integrate feedback.
 - **Milestones:**
-  - `exDQLM` package is **CRAN-ready** and publicly available.
-  - Fully documented with **user guides and tutorials**.
+  - Fully documented **package with tutorials**.
+  - Codebase **ready for public submission**.
+
+---
+
+### **Week 14+: Final Submission & Maintenance (August 7 – September 8, 2025)**
+- **Goal:** Submit to CRAN/GitHub and wrap up the project with a future development roadmap.
+- **Tasks:**
+  - Publish final **detailed project report**.
+  - Submit **exDQLM** to **CRAN and GitHub** for public release.
+  - Conduct final **mentor evaluation**.
+  - Plan for **future development** and roadmap.
+- **Milestones:**
+  - `exDQLM` package **officially released**.
   - Final **mentor evaluations submitted**.
+  - Future contributions **planned and outlined**.
 
 ---
 
