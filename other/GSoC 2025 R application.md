@@ -18,18 +18,46 @@ I am advised by [Dr. Bruno Sansó](https://users.soe.ucsc.edu/~bruno/) and [Dr. 
 
 I hold a **B.Sc. in Applied Mathematics** (with an emphasis on **Numerical Analysis**) and an **M.Sc. in Economics** (specializing in **Econometrics**) from [Instituto Tecnológico Autónomo de México (ITAM)](https://www.itam.mx/).
 
-### **Technical Expertise**
-I have **10+ years of experience** working with **R** and **MATLAB** for statistical modeling, computational inference, time series analysis, and general numerical analyses. Additionally, I have **8+ years of experience** in **Python** and **C++**, which I use extensively for **high-performance computing, Bayesian inference, and statistical simulations**.
+## Technical Expertise
 
-My expertise in **algorithm implementation and software development** has been applied in peer-reviewed publications:
+I have **10+ years of experience** working with **R** and **MATLAB** for **statistical modeling, computational inference, time series analysis, and numerical computing**. Additionally, I have **8+ years of experience** in **Python** and **C++**, which I use extensively for **high-performance computing, Bayesian inference, and statistical simulations**.
+
+###  **Software & Programming Skills**
+- **Languages:** R, MATLAB, Python, C++, SQL, Bash
+- **Tools & Frameworks:** Git, Bitbucket, DBeaver, Rcpp, OpenMP
+- **OS & Systems:** Linux (Ubuntu), macOS, Windows
+- **Data & HPC:** Parallel Computing, Cloud Storage, Spatio-Temporal Modeling, Forecasting
+
+---
+
+###  **Academic & Research Experience**
+#### **Ph.D. Research | University of California, Santa Cruz (UCSC)**
+- Developing **Bayesian Dynamic Quantile Models (DQLMs)** for probabilistic forecasting in climate and environmental sciences.
+- Extensive use of **Sequential Monte Carlo (SMC), Variational Bayes, and Posterior Predictive Synthesis** for scalable Bayesian inference.
+
+#### **Software work at Publications**
 - **[Aguirre, A., Lobato, I.N. (2024)](https://doi.org/10.1007/s00181-024-02564-5)**  
   *Evidence of Non-Fundamentalness in OECD Capital Stocks.*  
-  - Develoment and implementation of all **algorithms** in **MATLAB** and **C++**.
-  
+  - Developed and implemented all **computational algorithms** in **MATLAB** and **C++**.
+
 - **[Lobato, I. N., Velasco, C. (2022)](https://doi.org/10.1093/ectj/utac001)**  
   *Single Step Estimation of ARMA Roots for Non-Fundamental Nonstationary Fractional Models.*  
-  - Led all **algorithmic development, implementation, and journal-requested revisions** on **Python**, **MATLAB** and **C++**.
-  
+  - Led all **algorithmic development, implementation, and journal-requested revisions** using **Python**, **MATLAB**, and **C++**.
+
+---
+
+###  **Professional Experience**
+#### **Computer Systems Coordinator | UCSC Statistics Department (2023 – Present)**
+- **Linux Systems Administration:** Maintain and optimize department **servers** for faculty and research use.
+- **Technical Support & Compliance:** Collaborate with UCSC IT to align department resources with university policies.
+- **User Support & Resource Allocation:** Assist faculty and graduate students with **server usage, software installation, and issue resolution**.
+
+#### **Data Analyst | NeatLeaf Inc. (2021 – 2022, Scotts Valley, CA)**
+- **Data Engineering & Automation:** Built an automated **data pipeline** for real-time microclimate monitoring in greenhouses.
+- **Spatio-Temporal Modeling:** Developed a **statistical model** for detecting **air anomalies** in greenhouse environments.
+- **Sensor Calibration & Diagnostics:** Calibrated **temperature, humidity, and CO2 sensors (BME680 & SCD41)**.
+- **Performance Reporting & Compliance:** Provided **weekly reports** adhering to **Google Coding Standards**.
+
 ### **Why I’m a Strong Fit**
 - **Expertise in R & Bayesian Modeling:** Extensive experience in R, particularly for **Bayesian time series analysis, probabilistic forecasting, and statistical learning**.
 - **Proven Research & Development Experience:** Strong background in **quantile-based inference, state-space models, and scalable computational Bayesian methods**.
@@ -40,7 +68,6 @@ My expertise in **algorithm implementation and software development** has been a
 - **Curriculum Vitae:** [View my CV](https://www.antonio-aguirre.com/cv/)
   
 ---
-
 
 ## Contact Information
 
