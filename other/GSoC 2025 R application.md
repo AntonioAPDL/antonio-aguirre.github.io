@@ -191,6 +191,11 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 
 ---
+
+CHECK IT AGAIN AND MAKE SENSE. 
+WHEN TO DO THE STATIC? 
+WHEN AND HOW TO DO EVALUATION? CONSIDER bayesplot Package?
+
 ## 📆 Timeline
 
 ### **Week 1-4: Pre-Coding Period (Community Bonding) (May 8 – June 1, 2025)**
@@ -215,10 +220,11 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 **Goal:** Implement core functionalities of exDQLM.
 
 #### **Tasks**
-- Develop the **Bayesian Dynamic Quantile Regression (DQLM)** framework.
-- Implement **Kalman filtering and state-space model estimation**.
+- Develop the **Bayesian Dynamic Quantile Regression (DQLM)** theoretical framework.
+- Implement **Kalman filtering and state-space model estimation** in `Rcpp` for speed.
 - Create **posterior update functions** for time-dependent quantile inference.
-- Implement initial **Variational Bayes (VB)** inference for conjugate parameters.
+  - Implement **MCMC-based inference** for dynamic quantiles.
+  - Implement **Variational Bayes (VB)** inference approximation for conjugate parameters (using **Laplace/Delta techniques**).
 - Develop **unit tests** using `testthat` for core functions.
 - Validate implementation with **synthetic datasets**.
 - Draft function documentation (input/output specifications).
@@ -235,15 +241,14 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 #### **Tasks**
 - Implement **Posterior Predictive Quantile Synthesis (PPQS)** for non-crossing quantile estimation.
-- Extend **Variational Bayes inference** for non-conjugate parameters using **Laplace/Delta techniques**.
-- Implement **MCMC-based inference** for dynamic quantiles.
-- Optimize **Kalman filtering implementation** in `Rcpp` for speed.
 - Develop **parallel execution support** via `RcppParallel` for large-scale inference.
 - Conduct **initial performance benchmarks** on real-world datasets (financial time series, hydrology).
-- Expand **documentation** to include usage examples.
+- Develop the **Bayesian Static Quantile Regression (DQLM)** theoretical framework under the Extended Asymmetric Laplace 
+- Expand **documentation** to include usage examplesDistribution (exAL). 
 
 #### **Deliverables**
 - Fully functional **exDQLM** dynamic quantile regression model.
+- Fully functional **exDQLM** static quantile regression model.
 - Optimized **VB & MCMC inference** methods.
 - Initial **performance benchmarks** and **real-world dataset tests**.
 
@@ -400,13 +405,7 @@ Despite careful planning, unexpected challenges may arise. Below are strategies 
 
 #### **Example Code Snippet**
 ```r
-# Prototype: Sampling from the Extended Asymmetric Laplace (exAL) distribution
-exAL_sample <- function(n, mu = 0, sigma = 1, gamma = 0.5) {
-  u <- runif(n, min = 0, max = 1)
-  return(mu + sigma * sign(u - gamma) * log(1 / abs(u - gamma)))
-}
-samples <- exAL_sample(1000)
-hist(samples, breaks = 50, main = "Samples from exAL Distribution")
+
 ```
 
 - **Example of Previous Related Work:** [Link to GitHub repositories, papers, or projects]  
