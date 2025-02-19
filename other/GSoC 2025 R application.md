@@ -75,7 +75,7 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 - **Email:** jaguir26 (at) ucsc.edu, antonio.agprz (at) gmail.com  
 - **Phone Number:** 831-515-9264  
 - **Affiliation:** University of California, Santa Cruz (UCSC)  
-- **Program & Stage of Completion:** 4th-year Ph.D. Candidate  
+- **Program & Stage of Completion:** 4th-year Ph.D. Candidate in Statistics
 - **Preferred Communication Channels:** Email, Phone, WhatsApp (same as Phone Number)  
 
 ---
