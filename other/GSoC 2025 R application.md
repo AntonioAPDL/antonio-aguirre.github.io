@@ -174,6 +174,23 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 | **Missing Data Handling**  | ❌       | ❌      | ❌   | ❌      | ❌      | ✅   | ✅     |
 | **Non-Crossing Quantiles** | ❌       | ❌      | ✅   | ✅      | ❌      | ❌   | ✅     |
 
+\[
+\begin{array}{|l|c|c|c|c|c|c|c|}
+\hline
+\textbf{Feature} & \textbf{quantreg} & \textbf{dynquant} & \textbf{SPQR} & \textbf{qrjoint} & \textbf{bayesQR} & \textbf{lqr} & \textbf{exDQLM} \\
+\hline
+\textbf{Frequentist Approach} & \cmark & \cmark & \xmark & \cmark & \xmark & \cmark & \cmark \\
+\textbf{Bayesian Inference} & \xmark & \xmark & \cmark & \cmark & \cmark & \xmark & \cmark \\
+\textbf{Time-Dependent Data} & \xmark & \cmark & \xmark & \xmark & \xmark & \xmark & \cmark \\
+\textbf{Covariates} & \cmark & \xmark & \cmark & \xmark & \cmark & \cmark & \cmark \\
+\textbf{Scalability (Large Data)} & \xmark & \cmark & \cmark & \xmark & \cmark & \cmark & \cmark \\
+\textbf{Non-Linear Regression} & \cmark & \xmark & \cmark & \xmark & \xmark & \xmark & \xmark \\
+\textbf{Multivariate Response} & \cmark & \xmark & \xmark & \xmark & \xmark & \xmark & \cmark \\
+\textbf{Missing Data Handling} & \xmark & \xmark & \xmark & \xmark & \xmark & \cmark & \cmark \\
+\textbf{Non-Crossing Quantiles} & \xmark & \xmark & \cmark & \cmark & \xmark & \xmark & \cmark \\
+\hline
+\end{array}
+\]
 
 ---
 
