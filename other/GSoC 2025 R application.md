@@ -128,7 +128,7 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
   - Implement **multi-threaded execution** to support computational scalability.  
 
 - **Software Design & API Integration:**  
-  - Ensure **seamless compatibility** with key R packages such as `quantreg`, `bayesQR`, and `qrjoint`.  
+  - Ensure **seamless compatibility** with key R packages such as `rstan` and `bayesplot`.  
   - Follow **tidyverse design principles** for an intuitive API and maintainability.  
   - Implement **comprehensive function documentation** with `roxygen2`.  
 
@@ -144,7 +144,8 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
   - Support **large-scale inference** using parallel computing frameworks.  
 
 - **Usability & Visualization:**  
-  - Ensure **compatibility with `ggplot2`** for **intuitive visualization** of quantile estimates.  
+  - Ensure **compatibility with `ggplot2`** for **intuitive visualization** of quantile estimates.
+  - Ensure **compatibility with `bayesplot`** `for a standard bayesian model evaluation.
   - Leverage `tidyverse` for seamless **data handling and processing**.  
   - Maintain **CRAN compliance** for package accessibility and long-term usability.  
 
@@ -157,9 +158,22 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
   - Conduct **Monte Carlo simulations** to test model stability under various scenarios.  
 
 - **Benchmarks & performance validation:**  
-  - Compare `exDQLM` against existing R packages (`quantreg`, `bayesQR`, `qrjoint`).  
+  - Compare `exDQLM` against existing R packages (`quantreg`, `bayesQR`, `qrjoint`, `dynquant`).  
   - Measure runtime performance across **small, medium, and large datasets**.  
   - Evaluate **memory efficiency** using large-scale datasets in hydrology and finance.  
+
+| Feature                    | quantreg | dynquant | SPQR | qrjoint | bayesQR | lqr  | exDQLM |
+|----------------------------|----------|---------|------|---------|---------|------|--------|
+| **Frequentist Approach**   | ✅       | ✅      | ❌   | ✅      | ❌      | ✅   | ✅     |
+| **Bayesian Inference**     | ❌       | ❌      | ✅   | ✅      | ✅      | ❌   | ✅     |
+| **Time-Dependent Data**    | ❌       | ✅      | ❌   | ❌      | ❌      | ❌   | ✅     |
+| **Covariates**             | ✅       | ❌      | ✅   | ❌      | ✅      | ✅   | ✅     |
+| **Scalability (Large Data)** | ❌       | ✅      | ✅   | ❌      | ✅      | ✅   | ✅     |
+| **Non-Linear Regression**  | ✅       | ❌      | ✅   | ❌      | ❌      | ❌   | ❌     |
+| **Multivariate Response**  | ✅       | ❌      | ❌   | ❌      | ❌      | ❌   | ✅     |
+| **Missing Data Handling**  | ❌       | ❌      | ❌   | ❌      | ❌      | ✅   | ✅     |
+| **Non-Crossing Quantiles** | ❌       | ❌      | ✅   | ✅      | ❌      | ❌   | ✅     |
+
 
 ---
 
@@ -172,13 +186,13 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 - **Proposed Solutions:**  
   - Optimize via **Variational Bayes (VB)** for faster inference over traditional MCMC.  
   - Implement **Rcpp-based parallel processing** to reduce computational overhead.  
-  - Use **Cholesky factorization and variational inference techniques** to stabilize large-matrix computations.  
+  - Use **Robust Cholesky and SVD factorization and variational inference techniques** to stabilize large-matrix computations.  
   - Conduct **extensive testing** on benchmark datasets to fine-tune efficiency.  
-  - Leverage **Posterior Predictive Synthesis (PPQS)** to ensure smooth, interpretable quantile estimates.  
+  - Leverage **Posterior Predictive Synthesis (PPQS)** to ensure a unified and interpretable estimation of various quantiles.  
 
 ---
 
-This plan ensures that **exDQLM** will be a scalable, high-performance Bayesian quantile modeling tool, filling a critical gap in **time-series quantile regression** within the R ecosystem.
+This plan aims to guarantee that **exDQLM** will be a scalable, high-performance Bayesian quantile modeling tool, filling a critical gap in **time-series quantile regression** within the R ecosystem.
 
 ---
 ## 📆 Timeline
