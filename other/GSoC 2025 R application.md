@@ -31,7 +31,7 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 ---
 
 ###  **Academic & Research Experience**
-#### **Ph.D. Research | University of California, Santa Cruz (UCSC)**
+#### **Ph.D. Research at University of California, Santa Cruz (UCSC)**
 - Developing **Bayesian Dynamic Quantile Models (DQLMs)** for probabilistic forecasting in climate and environmental sciences.
 - Extensive use of **Sequential Monte Carlo (SMC), Variational Bayes, and Posterior Predictive Synthesis** for scalable Bayesian inference.
 
@@ -47,12 +47,12 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 ---
 
 ###  **Professional Experience**
-#### **Computer Systems Coordinator | UCSC Statistics Department (2023 – Present)**
+#### **Computer Systems Coordinator at UCSC Statistics Department (2023 – Present)**
 - **Linux Systems Administration:** Maintain and optimize department **servers** for faculty and research use.
 - **Technical Support & Compliance:** Collaborate with UCSC IT to align department resources with university policies.
 - **User Support & Resource Allocation:** Assist faculty and graduate students with **server usage, software installation, and issue resolution**.
 
-#### **Data Analyst | NeatLeaf Inc. (2021 – 2022, Scotts Valley, CA)**
+#### **Data Analyst at NeatLeaf Inc. (2021 – 2022, Scotts Valley, CA)**
 - **Data Engineering & Automation:** Built an automated **data pipeline** for real-time microclimate monitoring in greenhouses.
 - **Spatio-Temporal Modeling:** Developed a **statistical model** for detecting **air anomalies** in greenhouse environments.
 - **Sensor Calibration & Diagnostics:** Calibrated **temperature, humidity, and CO2 sensors (BME680 & SCD41)**.
