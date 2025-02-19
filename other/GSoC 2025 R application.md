@@ -105,24 +105,48 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 ## Coding Plan & Methods
 
 ### **Development Overview**
-- **Key Functions & Features:**  
-  - Implement a **Bayesian Dynamic Quantile Regression Model (exDQLM)** for time-series quantile estimation.  
-  - Introduce **Posterior Predictive Quantile Synthesis (PPQS)** to ensure non-crossing quantile estimates.  
-  - Support **static and dynamic quantile regression** under **Variational Bayes (VB)** and **MCMC** frameworks.  
-  - Optimize for scalability using **C++ (via Rcpp)** for computational efficiency.  
-  - Extend quantile modeling by integrating the **Extended Asymmetric Laplace (exAL) distribution**.  
+- **Core Enhancements:**  
+  - Refactor the current implementation of **Bayesian Dynamic Quantile Regression Models (exDQLM)** for **time-series quantile estimation**.  
+  - Implement **Variational Bayes (VB) & Markov Chain Monte Carlo (MCMC) inference** in **C++** for improved efficiency.  
+  - Introduce a **Laplace/Delta approximation** to handle **non-conjugate parameters** in VB updates.  
+  - Extend functionality to **static quantile regression** using the **Extended Asymmetric Laplace (exAL) distribution**.  
+  - Develop a **parallel inference framework** to estimate multiple quantiles efficiently.  
+  - Implement **Posterior Predictive Quantile Synthesis (PPQS)** to ensure **non-crossing quantile estimates**.  
+  - Support additional features:  
+    - **Missing Data Handling** within a **Bayesian state-space model**.  
+    - **Multivariate Time Series Support** for joint quantile forecasting.  
 
-- **Approach to Development:**  
-  - Develop modularized functions for **posterior inference, quantile prediction, and uncertainty quantification**.  
-  - Implement **efficient variational approximations** to handle large datasets with real-time inference capabilities.  
-  - Ensure smooth integration with **existing R ecosystem** (e.g., `quantreg`, `bayesQR`, `qrjoint`).  
-  - Design API and package structure following **tidyverse principles** for usability and maintainability.  
+---
 
-- **Integration with Existing Workflows:**  
-  - Provide compatibility with **dynamic Bayesian models** for time-series forecasting.  
-  - Support **multi-threaded execution** via `RcppParallel` to handle large-scale time-dependent quantile estimation.  
-  - Ensure compatibility with `ggplot2` for visualization and `tidyverse` for data handling.  
-  - Offer **seamless integration with CRAN standards** for reproducibility.  
+### **Approach to Development**
+- **Modular Implementation:**  
+  - Develop separate **core functions** for **posterior inference, quantile prediction, and uncertainty quantification**.  
+  - Implement **efficient variational approximations** for handling large datasets with **real-time inference capabilities**.  
+
+- **Computational Efficiency & Parallelization:**  
+  - **Optimize code using C++ (`Rcpp` & `RcppParallel`)** for faster inference and large-scale applications.  
+  - Implement **multi-threaded execution** to support computational scalability.  
+
+- **Software Design & API Integration:**  
+  - Ensure **seamless compatibility** with key R packages such as `quantreg`, `bayesQR`, and `qrjoint`.  
+  - Follow **tidyverse design principles** for an intuitive API and maintainability.  
+  - Implement **comprehensive function documentation** with `roxygen2`.  
+
+---
+
+### **Integration with Existing Workflows**
+- **Modeling & Forecasting:**  
+  - Enable easy integration with **dynamic Bayesian models** for **time-series forecasting**.  
+  - Provide a **flexible framework** to extend Bayesian quantile estimation for various applications.  
+
+- **Performance Optimization:**  
+  - Utilize **C++-based inference methods** for **scalable and efficient computation**.  
+  - Support **large-scale inference** using parallel computing frameworks.  
+
+- **Usability & Visualization:**  
+  - Ensure **compatibility with `ggplot2`** for **intuitive visualization** of quantile estimates.  
+  - Leverage `tidyverse` for seamless **data handling and processing**.  
+  - Maintain **CRAN compliance** for package accessibility and long-term usability.  
 
 ---
 
