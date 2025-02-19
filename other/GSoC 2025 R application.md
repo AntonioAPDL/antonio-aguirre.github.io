@@ -199,22 +199,26 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 - LIST ALL FEATURES OF THE MODEL AND ORGANIZE THEM HOWEVER MAKES MORE SENSE AND FOR WHICH I ALREADY HAVE CODE. 
 
 ---
-
 ## 📆 Timeline
 
+This timeline ensures an **incremental and structured update** of the `exDQLM` package, integrating **fully optimized C++ implementations**, a **modular R API**, and **rigorous Bayesian inference frameworks**.
+
+---
+
 ### **Week 1-4: Pre-Coding Period (Community Bonding) (May 8 – June 1, 2025)**  
-**Goal:** Establish the development set up, define the package API, and finalize the implementation roadmap.  
+**Goal:** Establish the development setup, define the package API, and finalize the implementation roadmap.  
 
 #### **Tasks**  
 - Set up **GitHub repository**, version control, and CI/CD workflows.  
-- Study existing packages (`quantreg`, `bayesQR`, and `qrjoint` among others) and **define compatibility strategies**.  
+- Review the **existing `exDQLM` package**, identifying areas for refactoring.  
+- Study existing packages (`quantreg`, `bayesQR`, `qrjoint`) and **define compatibility strategies**.  
 - Research **Kalman filtering**, **dynamic linear models (DLMs)**, and **exAL-based quantile regression**.  
-- Design the **package API**, function signatures, and Rcpp bindings.  
+- Design the **new function structures**, ensuring consistency with `exdqlmISVB` and `exdqlmMCMC`.  
 - Finalize the **technical roadmap** with mentors.  
 
 #### **Deliverables**  
 - **Repository structure** with package skeleton.  
-- **API documentation draft** and function signatures.  
+- **Updated API documentation draft** with function signatures.  
 - **Community engagement and feedback collection**.  
 
 ---
@@ -231,13 +235,15 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 - Implement **Static exAL Regression (Bayesian inference using MCMC & VB)**:  
   - `exal_reg(tau, y, X, method = "MCMC" | "VB")`: Bayesian static quantile regression.
-    - Develop a Laplace-Delta approximation for non-conjugate parameters. 
+    - Implement **Laplace/Delta approximation for non-conjugate VB inference**:  
+      - `vb_nonconj(y, X, ...)`: Approximate posterior updates for challenging priors.  
 
-- Unit tests for distributional properties and regression functions.  
+- Refactor **exdqlmISVB()**, replacing **Importance Sampling VB** with a **Laplace-Delta-based variational inference approach**.  
 
 #### **Deliverables**  
 - **Fully implemented exAL distribution** (`rexal`, `dexal`, `pexal`, `qexal`).  
-- **Bayesian static exAL regression model** (`exal_reg`).  
+- **Bayesian static exAL regression model (`exal_reg`)**.  
+- **Refactored `exdqlmISVB()` with Laplace-Delta VB inference**.  
 - **Basic unit tests and validation against `quantreg` and `bayesQR`**.  
 
 ---
@@ -257,12 +263,13 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 - Implement **Adaptive Parameters for Dynamic Models** via Discount Factors:  
   - `adapt_params(y, X, model, df)`: Allow dynamic learning of coefficients over time.  
 
-- Validate on synthetic datasets and compare to `dynquant`.  
+- Refactor **exdqlmMCMC()**, implementing **full MCMC inference in C++**.  
 
 #### **Deliverables**  
 - **Dynamic exAL regression model (`exal_dyn`) implemented**.  
 - **Efficient Kalman Filtering & Smoothing in C++**.  
 - **Adaptive parameter estimation integrated**.  
+- **Refactored `exdqlmMCMC()` with fully optimized MCMC in C++**.  
 
 ---
 
@@ -270,7 +277,7 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 **Goal:** Assess progress, validate model performance, and improve efficiency.  
 
 #### **Tasks**  
-- **Benchmark exDQLM models** against existing tools.  
+- **Benchmark exDQLM models** against existing tools (`dynquant`, `qrjoint`).  
 - **Refactor Kalman filter implementation for efficiency**.  
 - **Validate adaptive parameters for dynamic quantile inference**.  
 - **Develop documentation on function usage and theoretical background**.  
@@ -290,9 +297,6 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 
 - Parallelize **inference for multiple quantiles simultaneously**:  
   - Implement in `RcppParallel` for efficient execution.  
-
-- Implement **Laplace/Delta approximation for non-conjugate VB inference**:  
-  - `vb_nonconj(y, X, ...)`: Approximate posterior updates for challenging priors.  
 
 - Develop **Posterior Predictive Quantile Synthesis (PPQS)** for non-crossing quantiles:  
   - `ppqs(post_samples)`: Combine multiple quantile estimates into a coherent posterior.  
@@ -338,7 +342,6 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 - **CRAN-ready `exDQLM` package**.  
 - **Public documentation and tutorials**.  
 - **Defined roadmap for future enhancements**.  
-
 
 ---
 
