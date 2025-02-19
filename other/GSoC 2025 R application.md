@@ -223,16 +223,16 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 **Goal:** Implement the **exAL distribution** and **static regression models**.  
 
 #### **Tasks**  
-✅ Implement **exAL distribution functions** in R and C++:  
+- Implement **exAL distribution functions** in R and C++:  
   - `rexal(n, mu, sigma, gamma, p)`: Random sampling.  
   - `dexal(x, mu, sigma, gamma, p, log = FALSE)`: Density function.  
   - `pexal(q, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: CDF.  
   - `qexal(p, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: Quantile function.  
 
-✅ Implement **Static exAL Regression (Bayesian inference using MCMC & VB)**:  
+- Implement **Static exAL Regression (Bayesian inference using MCMC & VB)**:  
   - `exal_reg(y, X, method = "MCMC" | "VB")`: Bayesian static quantile regression.  
 
-✅ Unit tests for distributional properties and regression functions.  
+- Unit tests for distributional properties and regression functions.  
 
 #### **Deliverables**  
 - **Fully implemented exAL distribution** (`rexal`, `dexal`, `pexal`, `qexal`).  
@@ -245,18 +245,18 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 **Goal:** Implement **Dynamic exAL Regression** with trend, seasonality, and covariates.  
 
 #### **Tasks**  
-✅ Implement **Dynamic Bayesian Quantile Regression (exDQLM)**:  
+- Implement **Dynamic Bayesian Quantile Regression (exDQLM)**:  
   - `exal_dyn(y, X, trend = TRUE, seasonal = TRUE, covariates = TRUE, method = "MCMC" | "VB")`  
 
-✅ Develop **Kalman Filtering & Smoothing in C++ (for VB inference)**:  
+- Develop **Kalman Filtering & Smoothing in C++ (for VB inference)**:  
   - `kf_update(state, cov, obs, transition, process_noise, obs_noise)`: Kalman filter update.  
   - `ks_smooth(kf_results)`: Smoother to refine state estimates.  
   - **Ensure robust matrix factorization (SVD, QR, Cholesky) for numerical stability.**  
 
-✅ Implement **Adaptive Parameters for Dynamic Models**:  
+- Implement **Adaptive Parameters for Dynamic Models**:  
   - `adapt_params(y, X, model)`: Allow dynamic learning of coefficients over time.  
 
-✅ Validate on synthetic datasets and compare to `dynquant`.  
+- Validate on synthetic datasets and compare to `dynquant`.  
 
 #### **Deliverables**  
 - **Dynamic exAL regression model (`exal_dyn`) implemented**.  
@@ -284,16 +284,16 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 **Goal:** Implement **Multivariate exDQLM** and optimize for parallel execution.  
 
 #### **Tasks**  
-✅ Extend `exal_dyn()` to support **Multivariate Time-Series**:  
+- Extend `exal_dyn()` to support **Multivariate Time-Series**:  
   - `exal_dyn_multi(Y, X, ...)`: Multivariate version for multiple quantile processes.  
 
-✅ Parallelize **inference for multiple quantiles simultaneously**:  
+- Parallelize **inference for multiple quantiles simultaneously**:  
   - Implement in `RcppParallel` for efficient execution.  
 
-✅ Implement **Laplace/Delta approximation for non-conjugate VB inference**:  
+- Implement **Laplace/Delta approximation for non-conjugate VB inference**:  
   - `vb_nonconj(y, X, ...)`: Approximate posterior updates for challenging priors.  
 
-✅ Develop **Posterior Predictive Quantile Synthesis (PPQS)** for non-crossing quantiles:  
+- Develop **Posterior Predictive Quantile Synthesis (PPQS)** for non-crossing quantiles:  
   - `ppqs(post_samples)`: Combine multiple quantile estimates into a coherent posterior.  
 
 #### **Deliverables**  
@@ -307,16 +307,16 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 **Goal:** Complete final optimizations and add Bayesian diagnostics tools.  
 
 #### **Tasks**  
-✅ Implement **Missing Data Handling for exDQLM**:  
+- Implement **Missing Data Handling for exDQLM**:  
   - `exal_missing(y, X, method = "EM" | "Bayes")`  
 
-✅ Integrate **Bayesian diagnostics and visualization tools**:  
+- Integrate **Bayesian diagnostics and visualization tools**:  
   - Support `bayesplot` for posterior diagnostics.  
   - Ensure compatibility with `rstan`.  
   - Develop **interactive visualization tools for quantile estimates**.  
 
-✅ Finalize **function documentation and vignettes**.  
-✅ Conduct **package-wide testing and validation**.  
+- Finalize **function documentation and vignettes**.  
+- Conduct **package-wide testing and validation**.  
 
 #### **Deliverables**  
 - **Missing data handling implemented (`exal_missing`)**.  
@@ -329,9 +329,9 @@ I have **10+ years of experience** working with **R** and **MATLAB** for **stati
 **Goal:** Final package refinements and CRAN submission.  
 
 #### **Tasks**  
-✅ Finalize **codebase review and CRAN compliance checks**.  
-✅ Submit `exDQLM` to **CRAN and GitHub**.  
-✅ Plan long-term **feature development roadmap**.  
+- Finalize **codebase review and CRAN compliance checks**.  
+- Submit `exDQLM` to **CRAN and GitHub**.  
+- Plan long-term **feature development roadmap**.  
 
 #### **Deliverables**  
 - **CRAN-ready `exDQLM` package**.  
