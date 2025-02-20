@@ -357,20 +357,10 @@ Despite its advantages, implementing `exDQLM` comes with several challenges:
 - **Time Conflicts:** I will front-load work in early phases and adjust my summer schedule accordingly.
 
 ---
-
-## **Why This Timeline is Strong**
-✔ **Clear milestones** and deliverables at every stage.  
-✔ **Balanced development**—core functionality first, optimization later.  
-✔ **Real-world testing** and **benchmarking against existing packages**.  
-✔ **Contingency planning** to handle setbacks.  
-
-Would you like any refinements before integrating it into the full document? 🚀
-
----
 ## Contingency Plan
 
 ### **What if something goes wrong?**
-Despite careful planning, unexpected challenges may arise. Below are strategies to mitigate potential risks:
+Below are strategies to mitigate potential risks:
 
 - **Delays in Implementation:**  
   - Prioritize **core functionalities** (e.g., Bayesian Dynamic Quantile Regression, Posterior Predictive Synthesis) over advanced features.  
@@ -420,36 +410,49 @@ Despite careful planning, unexpected challenges may arise. Below are strategies 
 - Continuous integration setup for **automated testing and code quality checks**.  
 
 ---
-
-## ✅ Qualification Task
-
-### **Test Submitted to Mentors**
-- To validate my ability to execute this project, I developed a **prototype implementation** of a Bayesian Dynamic Quantile Model in R. This included:
-  - **Implementation of the Extended Asymmetric Laplace (exAL) distribution.**  
-  - **Basic state-space quantile modeling using Kalman Filtering.**  
-  - **Variational inference for scalable quantile regression.**  
-  - Performance benchmarking against `quantreg` and `bayesQR`.  
-
-#### **Example Code Snippet**
-```r
-
-```
-
-- **Example of Previous Related Work:** [Link to GitHub repositories, papers, or projects]  
-
----
-
-##  Final Thoughts
-
-This application presents a structured and well-planned roadmap to successfully implement **exDQLM** within the GSoC 2025 timeframe. By integrating **Bayesian Dynamic Quantile Regression**, **scalable inference methods**, and **robust model validation**, this project will significantly enhance the R ecosystem for quantile-based modeling.
-
-With well-defined objectives, contingency strategies, and an **efficient development workflow**, I am confident that this project will provide **a valuable open-source tool** for researchers, analysts, and practitioners working with time-dependent quantile estimation. 
-
-I look forward to **feedback, mentorship, and collaboration** to refine and enhance this project for maximum impact.
-
-
-**Best,**  
-**Antonio Aguirre**  
+ # GSoC 2025 - Qualification Task and Final Thoughts
+ 
+ # ✅ Qualification Task
+ 
+ ## **Qualification Test**
+ To demonstrate my capability for this project, I will submit three progressively challenging qualification tasks: **Easy, Medium, and Hard**. These tasks will assess key technical skills required for implementing **exDQLM**, including **Bayesian inference, time-series modeling, and C++ optimization for R**.
+ 
+ ### **Test Tasks**
+ 
+ #### **Easy: Implementation of the exAL Distribution**
+ - Implement **density (`dexal`), cumulative (`pexal`), quantile (`qexal`), and random sampling (`rexal`)** functions for the **Extended Asymmetric Laplace (exAL) distribution** in R.
+ - Ensure results are consistent with standard Laplace and asymmetric Laplace distributions when parameters are simplified.
+ - Validate implementation against known analytical properties.
+ 
+ #### **Medium: Bayesian Quantile Regression (Static Case)**
+ - Implement **Bayesian static quantile regression** using the **exAL distribution** in R.
+ - Implement both **Variational Bayes (VB)** and **MCMC** approaches.
+ - Compare with `quantreg` and `bayesQR` results for correctness.
+ - Validate **posterior convergence and parameter estimation**.
+ 
+ #### **Hard: Dynamic Quantile Regression with Kalman Filtering**
+ - Implement **Kalman Filtering & Smoothing in C++** for dynamic quantile regression.
+ - Ensure integration with R using `Rcpp`.
+ - Implement **Laplace/Delta approximation for VB inference** of non-conjugate parameters.
+ - Perform **posterior predictive checks** and validate accuracy.
+ 
+ ### **Submission Table**
+ | Contributor Name | GitHub Profile | Test Results |
+ |----------------|---------------|-------------|
+ | Antonio Aguirre | [AntonioAPDL](https://github.com/AntonioAPDL) | [Test Submission](#) |
+ 
+ ---
+ 
+ # 📌 Final Thoughts
+ 
+ This proposal outlines a structured plan to successfully develop **exDQLM** during GSoC 2025. By integrating **Bayesian Dynamic Quantile Regression, scalable inference techniques, and computational optimizations**, this project will provide a robust and efficient framework for **quantile-based time-series modeling**.
+ 
+ With **well-defined milestones, risk management strategies, and extensive validation**, I am confident in my ability to deliver a **high-quality open-source tool** that will be valuable for **researchers, statisticians, and data scientists**.
+ 
+ I am excited about the opportunity to work with **mentors and the R community** and look forward to **feedback and collaboration** to refine and enhance this project.
+ 
+ **Best,**  
+ **Antonio Aguirre**
 
 ---
 
