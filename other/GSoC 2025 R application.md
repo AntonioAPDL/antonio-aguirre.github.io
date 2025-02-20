@@ -434,8 +434,8 @@ Below are strategies to mitigate potential risks:
 - Optimize computation using **robust matrix factorization techniques (Cholesky, QR, SVD)**.  
 
 #### **Hard: Bayesian Dynamic Quantile Regression via VB in C++**
-- Implement **Bayesian dynamic quantile regression** using the **exAL distribution** in R via **Variational Bayes (VB)**.  
-- Use **Laplace/Delta approximation** for VB inference of **non-conjugate parameters**, following **Barata et al. (2022)**.  
+- Implement an univariate **Bayesian dynamic quantile regression** using the **exAL distribution** in R via **Variational Bayes (VB)**, following **Barata et al. (2022)**.  
+- Use **Laplace/Delta approximation** for VB inference of **non-conjugate parameters**, following **Wang and Blei (2012)**.  
 - Implement all VB inference steps in **C++ for efficiency**, ensuring compatibility with `Rcpp`.  
 - Compare model performance and inference results against the **R package `dynquant`**.  
 - Validate **posterior convergence, quantile estimates, and parameter inference accuracy**.  
