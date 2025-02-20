@@ -211,8 +211,6 @@ Despite its advantages, implementing `exDQLM` comes with several challenges:
 ---
 ## 📆 Timeline
 
----
-
 ### **Week 1-4: Pre-Coding Period (Community Bonding) (May 8 – June 1, 2025)**  
 **Goal:** Establish the development setup, define the package API, and finalize the implementation roadmap.  
 
