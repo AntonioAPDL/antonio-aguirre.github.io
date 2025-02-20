@@ -442,7 +442,7 @@ Below are strategies to mitigate potential risks:
 ### **Submission Table**
 | Contributor Name | GitHub Profile | Test Results |
 |----------------|---------------|-------------|
-| Antonio Aguirre | [AntonioAPDL](https://github.com/AntonioAPDL) | [Test Submission](#) |
+| Antonio Aguirre | [AntonioAPDL](https://github.com/AntonioAPDL) | [Hard](#), [Medium](#), [Easy](#) |
 
 ---
 
