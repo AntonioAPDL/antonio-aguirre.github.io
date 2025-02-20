@@ -436,17 +436,15 @@ Below are strategies to mitigate potential risks:
  ### **Submission Table**
  | Contributor Name | GitHub Profile | Test Results |
  |----------------|---------------|-------------|
- | Antonio Aguirre | [AntonioAPDL](https://github.com/AntonioAPDL) | [Test Submission](#) |
+ | Antonio Aguirre | [AntonioAPDL](https://github.com/AntonioAPDL) | [Easy](#), [Medium](#), [Hard](#) |
  
  ---
  
  ## 📌 Final Thoughts
  
- This proposal outlines a structured plan to successfully develop **exDQLM** during GSoC 2025. By integrating **Bayesian Dynamic Quantile Regression, scalable inference techniques, and computational optimizations**, this project will provide a robust and efficient framework for **quantile-based time-series modeling**.
- 
- With **well-defined milestones, risk management strategies, and extensive validation**, I am confident in my ability to deliver a **high-quality open-source tool** that will be valuable for **researchers, statisticians, and data scientists**.
- 
- I am excited about the opportunity to work with **mentors and the R community** and look forward to **feedback and collaboration** to refine and enhance this project.
+ This proposal outlines a structured plan to develop further and update **exDQLM** during GSoC 2025. Our main goal is to integrate **Bayesian Dynamic Quantile Regression, scalable inference techniques, and computational optimizations** into a functional tool that will provide a robust and efficient framework for **quantile-based time-series modeling**.
+
+ We are excited about the opportunity to work with **mentors and the R community** and look forward to **feedback and collaboration** to refine and improve this project.
  
  **Best,**  
  **Antonio Aguirre**
