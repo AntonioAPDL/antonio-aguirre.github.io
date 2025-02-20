@@ -410,9 +410,6 @@ Below are strategies to mitigate potential risks:
 - Continuous integration setup for **automated testing and code quality checks**.  
 
 ---
- # GSoC 2025 - Qualification Task and Final Thoughts
- 
- # ✅ Qualification Task
  
  ## **Qualification Test**
  To demonstrate my capability for this project, I will submit three progressively challenging qualification tasks: **Easy, Medium, and Hard**. These tasks will assess key technical skills required for implementing **exDQLM**, including **Bayesian inference, time-series modeling, and C++ optimization for R**.
@@ -443,7 +440,7 @@ Below are strategies to mitigate potential risks:
  
  ---
  
- # 📌 Final Thoughts
+ ## 📌 Final Thoughts
  
  This proposal outlines a structured plan to successfully develop **exDQLM** during GSoC 2025. By integrating **Bayesian Dynamic Quantile Regression, scalable inference techniques, and computational optimizations**, this project will provide a robust and efficient framework for **quantile-based time-series modeling**.
  
