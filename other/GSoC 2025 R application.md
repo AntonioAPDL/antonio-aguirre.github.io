@@ -411,38 +411,46 @@ Below are strategies to mitigate potential risks:
 
 ---
  
+ 
  ## **Qualification Test**
- To demonstrate my capability for this project, I will submit three progressively challenging qualification tasks: **Easy, Medium, and Hard**. These tasks will assess key technical skills required for implementing **exDQLM**, including **Bayesian inference, time-series modeling, and C++ optimization for R**.
+ To demonstrate my capability for this project, I will submit three progressively challenging qualification tasks: **Easy, Medium, and Hard**. These tasks assess critical skills for implementing **exDQLM**, including **Bayesian inference, time-series modeling, and C++ optimization for R**.
  
  ### **Test Tasks**
  
- #### **Easy: Implementation of the exAL Distribution**
- - Implement **density (`dexal`), cumulative (`pexal`), quantile (`qexal`), and random sampling (`rexal`)** functions for the **Extended Asymmetric Laplace (exAL) distribution** in R.
- - Ensure results are consistent with standard Laplace and asymmetric Laplace distributions when parameters are simplified.
- - Validate implementation against known analytical properties.
+ #### **Easy: Implementation of the exAL Distribution in C++**
+ - Implement the **Extended Asymmetric Laplace (exAL) distribution** in C++ following **Yan and Kottas (2017)**.  
+ - Implement and expose the following functions to R using `Rcpp`:  
+   - `dexal(x, tau, mu, sigma, gamma, p, log = FALSE)`: Density function.  
+   - `pexal(q, tau, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: CDF function.  
+   - `qexal(p, tau, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: Quantile function.  
+   - `rexal(n, tau, mu, sigma, gamma, p)`: Random sampling function.  
+ - Ensure numerical stability and efficiency of the C++ implementation.  
+ - Validate implementation by comparing against **analytical properties** and **existing R implementations**.  
  
- #### **Medium: Bayesian Quantile Regression (Static Case)**
- - Implement **Bayesian static quantile regression** using the **exAL distribution** in R.
- - Implement both **Variational Bayes (VB)** and **MCMC** approaches.
- - Compare with `quantreg` and `bayesQR` results for correctness.
- - Validate **posterior convergence and parameter estimation**.
+ #### **Medium: Multivariate Kalman Filtering and Smoothing in C++**
+ - Implement **Multivariate Kalman Filtering (KF) and Kalman Smoothing (KS)** algorithms in C++.  
+ - Develop an R interface via `Rcpp` and `RcppArmadillo`.  
+ - Use the implementation to fit a **Multivariate Normal Dynamic Linear Model (DLM)**.  
+ - Compare results with the **R package `dlm`** to validate correctness.  
+ - Optimize computation using **robust matrix factorization techniques (Cholesky, QR, SVD)**.  
  
- #### **Hard: Dynamic Quantile Regression with Kalman Filtering**
- - Implement **Kalman Filtering & Smoothing in C++** for dynamic quantile regression.
- - Ensure integration with R using `Rcpp`.
- - Implement **Laplace/Delta approximation for VB inference** of non-conjugate parameters.
- - Perform **posterior predictive checks** and validate accuracy.
+ #### **Hard: Bayesian Dynamic Quantile Regression via VB in C++**
+ - Implement **Bayesian dynamic quantile regression** using the **exAL distribution** in R via **Variational Bayes (VB)**.  
+ - Use **Laplace/Delta approximation** for VB inference of **non-conjugate parameters**, following **Barata et al. (2022)**.  
+ - Implement all VB inference steps in **C++ for efficiency**, ensuring compatibility with `Rcpp`.  
+ - Compare model performance and inference results against the **R package `dynquant`**.  
+ - Validate **posterior convergence, quantile estimates, and parameter inference accuracy**.  
  
  ### **Submission Table**
  | Contributor Name | GitHub Profile | Test Results |
  |----------------|---------------|-------------|
- | Antonio Aguirre | [AntonioAPDL](https://github.com/AntonioAPDL) | [Easy](#), [Medium](#), [Hard](#) |
+ | Antonio Aguirre | [AntonioAPDL](https://github.com/AntonioAPDL) | [Test Submission](#) |
  
  ---
  
  ## 📌 Final Thoughts
  
- This proposal outlines a structured plan to develop further and update **exDQLM** during GSoC 2025. Our main goal is to integrate **Bayesian Dynamic Quantile Regression, scalable inference techniques, and computational optimizations** into a functional tool that will provide a robust and efficient framework for **quantile-based time-series modeling**.
+This proposal outlines a plan to develop further and update **exDQLM** during GSoC 2025. Our main goal is to integrate **Bayesian Dynamic Quantile Regression, scalable inference techniques, and computational optimizations** into a functional tool to provide a robust and efficient framework for **quantile-based time-series modeling**.
 
  We are excited about the opportunity to work with **mentors and the R community** and look forward to **feedback and collaboration** to refine and improve this project.
  
