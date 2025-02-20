@@ -419,10 +419,10 @@ Below are strategies to mitigate potential risks:
 #### **Easy: Implementation of the exAL Distribution in C++**
 - Implement the **Extended Asymmetric Laplace (exAL) distribution** in C++ following **Yan and Kottas (2017)**.  
 - Implement and expose the following functions to R using `Rcpp`:  
- - `dexal(x, tau, mu, sigma, gamma, p, log = FALSE)`: Density function.  
- - `pexal(q, tau, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: CDF function.  
- - `qexal(p, tau, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: Quantile function.  
- - `rexal(n, tau, mu, sigma, gamma, p)`: Random sampling function.  
+   - `dexal(x, tau, mu, sigma, gamma, p, log = FALSE)`: Density function.  
+   - `pexal(q, tau, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: CDF function.  
+   - `qexal(p, tau, mu, sigma, gamma, p, lower.tail = TRUE, log.p = FALSE)`: Quantile function.  
+   - `rexal(n, tau, mu, sigma, gamma, p)`: Random sampling function.  
 - Ensure numerical stability and efficiency of the C++ implementation.  
 - Validate implementation by comparing against **analytical properties** and **existing R implementations**.  
 
