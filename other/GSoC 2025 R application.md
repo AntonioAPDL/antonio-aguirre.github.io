@@ -452,9 +452,6 @@ This proposal outlines a plan to develop further and update **exDQLM** during GS
 
 We are excited about the opportunity to work with **mentors and the R community** and look forward to **feedback and collaboration** to refine and improve this project.
 
-**Best,**  
-**Antonio Aguirre**
-
 ---
 
 ### Contact Information  
