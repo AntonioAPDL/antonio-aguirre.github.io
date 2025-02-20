@@ -185,7 +185,7 @@ The following table summarizes the features of existing R packages for quantile 
 The **existing methods** are often limited in scope, particularly for **dynamic, Bayesian, and scalable quantile estimation**. While `quantreg` is widely used for frequentist quantile regression, it lacks **Bayesian inference, dynamic updates, and non-crossing constraints**. Similarly, `dynquant` supports time-dependent quantiles but is **not Bayesian** and does not allow **multi-quantile synthesis**. `SPQR` and `qrjoint` provide **Bayesian** alternatives but lack **state-space modeling** for temporal data.  
 
 **How the updated `exDQLM` Improves:**  
-- Introduces **fully Bayesian** time-series quantile estimation with **state-space modeling** for both univariate and univariate temporal data.  
+- Introduces **fully Bayesian** time-series quantile estimation with **state-space modeling** for univariate and univariate temporal data.  
 - Supports **Kalman filtering & adaptive learning** for sequential updates.  
 - Implements **parallel multi-quantile inference** for scalability.  
 - Ensures **non-crossing quantiles** via **Posterior Predictive Quantile Synthesis (PPQS)**.  
@@ -197,21 +197,19 @@ The **existing methods** are often limited in scope, particularly for **dynamic,
 Despite its advantages, implementing `exDQLM` comes with several challenges:
 
 - **Potential Obstacles:**  
-  - **Computational Complexity:** Bayesian inference, especially MCMC, can be computationally intensive.  
-  - **Ensuring Non-Crossing Quantiles:** Standard quantile estimation techniques do not naturally enforce this constraint.  
+  - **Computational Complexity:** Bayesian inference, especially MCMC, can be computationally intensive.
+  - **Ensuring Non-Crossing Quantiles:** Standard quantile estimation techniques do not naturally enforce this constraint, and even the PPQS introduced might face challenges.     
   - **Scalability for High-Dimensional Data:** Handling large time-series datasets with **multiple quantiles and covariates**.  
 
 - **Proposed Solutions:**  
-  - Optimize inference via **Variational Bayes (VB)** for **faster** convergence over traditional MCMC.  
-  - Implement **parallelized inference** with `RcppParallel` to reduce computational burden.  
-  - Use **Kalman filtering & smoothing** in C++ for efficient Bayesian updates in **dynamic models**.  
-  - Leverage **Posterior Predictive Quantile Synthesis (PPQS)** to enforce coherent quantile estimation.  
+  - Optimize inference via **Variational Bayes (VB)** for **faster** and a more **robust** convergence over traditional MCMC.  
+  - Implement **parallelized inference** with `RcppParallel` to reduce the computational burden.  
+  - Implement the modified **Kalman filtering & smoothing** in C++ for efficient Bayesian updates in **dynamic models**.  
+  - Utilize a  **Posterior Predictive Quantile Synthesis (PPQS)** to enforce coherent quantile estimation into a unified posterior predictive distribution.  
   - Conduct **extensive testing** using **real-world datasets** to fine-tune efficiency and stability.  
 
 ---
 ## 📆 Timeline
-
-This timeline ensures an **incremental and structured update** of the `exDQLM` package, integrating **fully optimized C++ implementations**, a **modular R API**, and **rigorous Bayesian inference frameworks**.
 
 ---
 
