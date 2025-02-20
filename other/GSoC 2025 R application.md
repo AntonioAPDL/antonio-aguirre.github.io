@@ -182,10 +182,10 @@ The following table summarizes the features of existing R packages for quantile 
 | **Non-Crossing Quantiles**   | ❌         | ❌         | ✅     | ✅        | ❌        | ❌     | ✅       |
 
 **Table Summary:**  
-The **existing methods** are often limited in scope, particularly for **dynamic, Bayesian, and scalable quantile estimation**. While `quantreg` is widely used for frequentist quantile regression, it lacks **Bayesian inference, dynamic updates, and non-crossing constraints**. Similarly, `dynquant` supports time-dependent quantiles but is **not Bayesian** and does not allow **multi-quantile synthesis**. `SPQR` and `qrjoint` provide **Bayesian** alternatives but lack **state-space modeling** for dynamic updates.  
+The **existing methods** are often limited in scope, particularly for **dynamic, Bayesian, and scalable quantile estimation**. While `quantreg` is widely used for frequentist quantile regression, it lacks **Bayesian inference, dynamic updates, and non-crossing constraints**. Similarly, `dynquant` supports time-dependent quantiles but is **not Bayesian** and does not allow **multi-quantile synthesis**. `SPQR` and `qrjoint` provide **Bayesian** alternatives but lack **state-space modeling** for temporal data.  
 
-**How `exDQLM` Improves:**  
-- Introduces **fully Bayesian** time-series quantile estimation with **state-space modeling**.  
+**How the updated `exDQLM` Improves:**  
+- Introduces **fully Bayesian** time-series quantile estimation with **state-space modeling** for both univariate and univariate temporal data.  
 - Supports **Kalman filtering & adaptive learning** for sequential updates.  
 - Implements **parallel multi-quantile inference** for scalability.  
 - Ensures **non-crossing quantiles** via **Posterior Predictive Quantile Synthesis (PPQS)**.  
@@ -207,13 +207,6 @@ Despite its advantages, implementing `exDQLM` comes with several challenges:
   - Use **Kalman filtering & smoothing** in C++ for efficient Bayesian updates in **dynamic models**.  
   - Leverage **Posterior Predictive Quantile Synthesis (PPQS)** to enforce coherent quantile estimation.  
   - Conduct **extensive testing** using **real-world datasets** to fine-tune efficiency and stability.  
-
----
-
-- CHECK IT AGAIN AND MAKE SENSE. 
-- WHEN TO DO THE STATIC? 
-- WHEN AND HOW TO DO EVALUATION? CONSIDER bayesplot Package?
-- LIST ALL FEATURES OF THE MODEL AND ORGANIZE THEM HOWEVER MAKES MORE SENSE AND FOR WHICH I ALREADY HAVE CODE. 
 
 ---
 ## 📆 Timeline
