@@ -433,20 +433,20 @@ Below are strategies to mitigate potential risks:
 - Compare results with the **R package `dlm`** to validate correctness.  
 - Optimize computation using **robust matrix factorization techniques (Cholesky, QR, SVD)**.  
 
-#### **Hard: Bayesian Dynamic Quantile Regression via VB 
+#### Hard: Bayesian Dynamic Quantile Regression via VB 
 - Implement an univariate **Bayesian dynamic quantile regression** using the **exAL distribution** in R via **Variational Bayes (VB)**, following **Barata et al. (2022)**.  
 - Use **Laplace/Delta approximation** for VB inference of **non-conjugate parameters**, following **Wang and Blei (2012)**.    
 - Compare model performance and inference results against the **R package `dynquant`**.  
 - Validate **posterior convergence, quantile estimates, and parameter inference accuracy**.  
 
 ### **Submission Table**
-| Contributor Name | GitHub Profile | Test Results |
+| Contributor Name | GitHub Profile | Test |
 |----------------|---------------|-------------|
 | Antonio Aguirre | [AntonioAPDL](https://github.com/AntonioAPDL) | [Hard](#), [Medium](#), [Easy](#) |
 
 ---
 
-## 📌 Final Thoughts
+## 📌 Final Comments
 
 This proposal outlines a plan to develop further and update **exDQLM** during GSoC 2025. Our main goal is to integrate **Bayesian Dynamic Quantile Regression, scalable inference techniques, and computational optimizations** into a functional tool to provide a robust and efficient framework for **quantile-based time-series modeling**.
 
