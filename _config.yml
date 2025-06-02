@@ -14,6 +14,7 @@ logo:                "/files/images/logo.png"      # Path to the logo file
 course_names:
   stat131: "STAT131: Probability Theory"
   stat132: "STAT132: Classical and Bayesian Inference"
+  stat5: "STAT5: Statistics"
 
 # Author Information
 author:
