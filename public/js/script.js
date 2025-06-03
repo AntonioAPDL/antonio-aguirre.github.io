@@ -13,3 +13,12 @@
     checkbox.checked = false;
   }, false);
 })(document);
+
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('theme-toggle-btn');
+  if(btn) {
+    btn.addEventListener('click', function() {
+      document.body.classList.toggle('dark-theme');
+    });
+  }
+});
