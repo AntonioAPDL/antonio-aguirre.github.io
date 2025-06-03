@@ -4,9 +4,7 @@ layout: default
 
 <div class="software-section">
   <!-- Page Title -->
-  <div class="section-divider">
-    <h1 class="section-heading">Software</h1>
-  </div>
+  <h1 class="section-heading">Software</h1>
   
   <!-- Notice -->
   <div class="note-box" style="margin-bottom:2rem;">

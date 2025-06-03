@@ -6,8 +6,6 @@ title: Research
 <div class="research-section">
   <!-- Title and Introduction -->
   <h1 class="section-heading">Research Overview</h1>
-    Research Overview
-  </h1>
   <p class="intro-text">
     I am currently a Ph.D. candidate in the Department of Statistics at the University of California, Santa Cruz, under the guidance of <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank">Bruno Sanso</a> and <a href="https://raquel.soe.ucsc.edu/" target="_blank">Raquel Prado</a>. My research is focused on advancing Bayesian methods to address challenges in spatio-temporal modeling and real-time forecasting. I am particularly interested in developing interpretable and operational models for hydrology and environmental sciences, as well as integrating modern computational approaches for scalable Bayesian inference.
   </p>
