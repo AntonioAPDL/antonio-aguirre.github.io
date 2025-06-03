@@ -15,6 +15,12 @@
   <link rel="canonical" href="{{ page.url | absolute_url }}">
   {% endif %}
 
+  <meta name="description" content="{{ site.description }}">
+  <meta property="og:title" content="{{ page.title }} · {{ site.title }}">
+  <meta property="og:description" content="{{ site.description }}">
+  <meta property="og:url" content="{{ page.url | absolute_url }}">
+  <meta property="og:type" content="website">
+
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&family=Source+Serif+Pro:wght@400;700&display=swap" rel="stylesheet">
 
@@ -41,11 +47,6 @@
   <script type="text/javascript" async
     src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js">
   </script>
-  <link rel="stylesheet" href="{{ '/public/css/poole.css' | absolute_url }}">
-  <link rel="stylesheet" href="{{ '/public/css/syntax.css' | absolute_url }}">
-  <link rel="stylesheet" href="{{ '/public/css/lanyon.css' | absolute_url }}">
-
-
   <!-- Google Analytics -->
   {% if site.google_analytics_id %}
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics_id }}"></script>

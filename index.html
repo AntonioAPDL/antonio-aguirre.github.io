@@ -3,62 +3,59 @@ layout: default
 title: Home
 ---
 
-<div class="home-section" style="margin: 2rem auto; max-width: 1000px; text-align: center;">
+<div class="home-section">
   <!-- Intro Section -->
-  <div class="home-intro" style="text-align: center; padding: 2rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-    <div style="display: flex; flex-direction: column; align-items: center;">
-      <img src="/files/images/Me2.jpg" 
-           alt="Antonio Aguirre" 
-           class="profile-pic" 
-           style="width: 150px; height: 150px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
-      <h1 style="font-size: 2.3rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.5rem;">Welcome</h1>
+  <div class="home-intro">
+    <div class="intro-wrapper">
+      <img src="/files/images/Me2.jpg" alt="Antonio Aguirre" class="profile-pic">
+      <h1 class="home-title">Welcome</h1>
     </div>
-    <p class="intro-text" style="font-size: 1.2rem; line-height: 1.8; color: #555; margin-bottom: 1rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <p class="intro-text">
       Hello! I’m <strong>Antonio Aguirre</strong>, a dedicated <strong>Ph.D. candidate</strong> at the 
       <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank">University of California, Santa Cruz</a>. 
       Under the mentorship of <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank">Dr. Bruno Sansó</a> and 
       <a href="https://raquel.soe.ucsc.edu/" target="_blank">Dr. Raquel Prado</a>, I specialize in <strong>Bayesian Statistics</strong>, <strong>Machine Learning</strong>, 
       and <strong>Spatio-Temporal Modeling</strong>. My research focuses on developing scalable methods for inference and forecasting, emphasizing interpretable and operational models for real-world applications.
     </p>
-    <p class="intro-text" style="font-size: 1.2rem; line-height: 1.8; color: #555; margin-bottom: 1rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <p class="intro-text">
       I completed my <strong>Bachelor’s</strong> and <strong>Master’s degrees</strong> at 
       <a href="https://www.itam.mx/" target="_blank">Instituto Tecnológico Autónomo de México (ITAM)</a>. My undergraduate in Applied Mathematics had an emphasis on
       <strong>Numerical Analysis</strong>, while my graduate studies in Economics focused on <strong>Econometrics</strong>.
     </p>
-    <p class="intro-text" style="font-size: 1.2rem; line-height: 1.8; color: #555; margin-bottom: 1rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <p class="intro-text">
       I'm always actively looking for new interdisciplinary projects and collaborations. 
       Feel free to reach out to me!  
     </p>
   </div>
 
   <!-- Research Interests Section -->
-  <div class="home-content" style="margin-top: 2rem; padding: 2rem; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: left;">
-    <h2 class="section-heading" style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.5rem;">Research Interests</h2>
-    <ul class="research-list" style="list-style: none; padding: 0; max-width: 800px; margin: 0 auto; color: #555;">
-      <li style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem;">
+  <div class="home-content">
+    <h2 class="section-heading">Research Interests</h2>
+    <ul class="research-list">
+      <li>
         <strong>Spatio-Temporal Modeling:</strong> Developing interpretable models for high-dimensional spatio-temporal data with applications in climate and environmental science.
       </li>
-      <li style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem;">
+      <li>
         <strong>Dynamic Quantile Regression:</strong> Innovating scalable, fast quantile-based inference and forecasting.
       </li>
-      <li style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem;">
+      <li>
         <strong>Continual Learning:</strong> Exploring Sequential Monte Carlo (SMC) methods and variational approaches for real-time model updating.
       </li>
-      <li style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem;">
+      <li>
         <strong>Operational Methodologies:</strong> Building efficient, scalable workflows for forecast correction, synthesis, and real-time decision-making.
       </li>
     </ul>
   </div>
 
   <!-- Plot Section -->
-  <div class="plot-container" style="margin: 3rem auto; max-width: 900px; padding: 1.5rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);">
-    <h2 style="font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 1rem; border-bottom: 3px solid #ffcc00; display: inline-block; padding-bottom: 0.5rem;">
+  <div class="plot-container">
+    <h2 class="section-heading">
       Real-Time Monitoring: San Lorenzo River Discharge Flow
     </h2>
-    <div class="note-box" style="margin: 1rem auto; max-width: 800px; text-align: left; padding: 1rem; background-color: #fff9db; border-left: 6px solid #ffcc00; border-radius: 8px; font-size: 1rem; line-height: 1.6; color: #856404;">
+    <div class="note-box">
       <strong>Note:</strong> This plot provides real-time monitoring of the San Lorenzo River's discharge flow at Big Trees. The data updates automatically every <strong> ten minutes</strong>. Stay tuned as I plan to add more features and insights to this visualization, reflecting my ongoing research.
     </div>
-    <div id="loading" style="font-style: italic; color: gray; margin-bottom: 1rem;">Loading plot...</div>
-    <iframe src="https://f056-128-114-48-164.ngrok-free.app/plot" class="plot-iframe" style="width: 100%; height: 65vh; border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px;" onload="document.getElementById('loading').style.display='none';"></iframe>
+    <div id="loading">Loading plot...</div>
+    <iframe src="https://f056-128-114-48-164.ngrok-free.app/plot" class="plot-iframe" onload="document.getElementById('loading').style.display='none';"></iframe>
   </div> 
 </div>
