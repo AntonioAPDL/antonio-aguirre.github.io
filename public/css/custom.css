@@ -560,10 +560,21 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .theme-toggle {
-  margin-top: 1rem;
+  display: block;
+  margin: 1rem auto;
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
+}
+
+/* Center page headers */
+.page-header {
+  text-align: center;
+}
+
+/* Keep masthead size consistent when other libraries are loaded */
+.masthead-title {
+  font-size: 1.25rem !important;
 }
 
