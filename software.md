@@ -12,10 +12,10 @@ description: "Overview of software projects and tools in development."
   <div class="note-box">
     <h2><strong>Notice</strong></h2>
     <p>
-      I am currently organizing and preparing my software projects for release. Please check back soon to explore
-      my contributions in <strong>R</strong>, <strong>MATLAB</strong>, <strong>Python</strong>, <strong>C++</strong>, and <strong>Julia</strong>.
-      These tools and packages are designed for <em>statistical modeling</em>, <em>machine learning</em>, and <em>scientific computing</em>.
-      <br><strong>Last Update:</strong> 12/20/2024
+      I'm currently curating and documenting my software projects for release. Expect tools and packages in
+      <strong>R</strong>, <strong>MATLAB</strong>, <strong>Python</strong>, <strong>C++</strong>, and <strong>Julia</strong>,
+      focused on <em>statistical modeling</em>, <em>machine learning</em>, and <em>scientific computing</em>.
+      <br><strong>Last update:</strong> December 20, 2024
     </p>
   </div>
 

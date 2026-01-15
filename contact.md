@@ -10,7 +10,7 @@ description: "Contact Antonio Aguirre via email or social platforms."
 
   <!-- Introduction -->
   <p class="contact-description">
-    I’d love to connect. Reach out via email or find me on these platforms for professional inquiries, collaborations, or just to say hello.
+    For collaboration, speaking invitations, or questions about my work, email me or connect on these platforms.
   </p>
 
   <!-- Contact Links -->
