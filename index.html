@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Home
+description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian methods, machine learning, and spatio-temporal modeling."
 ---
 
 <div class="home-section">
@@ -11,20 +12,20 @@ title: Home
       <h1 class="home-title">Welcome</h1>
     </div>
     <p class="intro-text">
-      Hello! I’m <strong>Antonio Aguirre</strong>, a dedicated <strong>Ph.D. candidate</strong> at the 
-      <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank">University of California, Santa Cruz</a>. 
-      Under the mentorship of <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank">Dr. Bruno Sansó</a> and 
-      <a href="https://raquel.soe.ucsc.edu/" target="_blank">Dr. Raquel Prado</a>, I specialize in <strong>Bayesian Statistics</strong>, <strong>Machine Learning</strong>, 
+      Hello! I’m <strong>Antonio Aguirre</strong>, a dedicated <strong>Ph.D. candidate</strong> at the
+      <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>.
+      Under the mentorship of <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Dr. Bruno Sansó</a> and
+      <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Dr. Raquel Prado</a>, I specialize in <strong>Bayesian Statistics</strong>, <strong>Machine Learning</strong>,
       and <strong>Spatio-Temporal Modeling</strong>. My research focuses on developing scalable methods for inference and forecasting, emphasizing interpretable and operational models for real-world applications.
     </p>
     <p class="intro-text">
-      I completed my <strong>Bachelor’s</strong> and <strong>Master’s degrees</strong> at 
-      <a href="https://www.itam.mx/" target="_blank">Instituto Tecnológico Autónomo de México (ITAM)</a>. My undergraduate in Applied Mathematics had an emphasis on
+      I completed my <strong>Bachelor’s</strong> and <strong>Master’s degrees</strong> at
+      <a href="https://www.itam.mx/" target="_blank" rel="noopener noreferrer">Instituto Tecnológico Autónomo de México (ITAM)</a>. My undergraduate in Applied Mathematics had an emphasis on
       <strong>Numerical Analysis</strong>, while my graduate studies in Economics focused on <strong>Econometrics</strong>.
     </p>
     <p class="intro-text">
-      I'm always actively looking for new interdisciplinary projects and collaborations. 
-      Feel free to reach out to me!  
+      I’m always actively looking for new interdisciplinary projects and collaborations.
+      Feel free to reach out to me!
     </p>
   </div>
 
@@ -53,9 +54,9 @@ title: Home
       Real-Time Monitoring: San Lorenzo River Discharge Flow
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> This plot provides real-time monitoring of the San Lorenzo River's discharge flow at Big Trees. The data updates automatically every <strong> ten minutes</strong>. Stay tuned as I plan to add more features and insights to this visualization, reflecting my ongoing research.
+      <strong>Note:</strong> This plot provides real-time monitoring of the San Lorenzo River’s discharge flow at Big Trees. The data updates automatically every <strong>ten minutes</strong>. Stay tuned as I plan to add more features and insights to this visualization, reflecting my ongoing research.
     </div>
-    <div id="loading">Loading plot...</div>
-    <iframe src="https://f056-128-114-48-164.ngrok-free.app/plot" class="plot-iframe" onload="document.getElementById('loading').style.display='none';"></iframe>
-  </div> 
+    <div id="loading" role="status" aria-live="polite">Loading plot...</div>
+    <iframe src="https://f056-128-114-48-164.ngrok-free.app/plot" class="plot-iframe" title="San Lorenzo River discharge flow plot" onload="document.getElementById('loading').style.display='none';"></iframe>
+  </div>
 </div>

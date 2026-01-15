@@ -1,40 +1,41 @@
 ---
 layout: default
 title: Contact
+description: "Contact Antonio Aguirre via email or social platforms."
 ---
 
 <div class="contact-section">
   <!-- Title -->
   <h1 class="contact-title">Get in Touch</h1>
-  
+
   <!-- Introduction -->
   <p class="contact-description">
-    I’d love to connect! Reach out via email or find me on these platforms for professional inquiries, collaborations, or just to say hello.
+    I’d love to connect. Reach out via email or find me on these platforms for professional inquiries, collaborations, or just to say hello.
   </p>
 
   <!-- Contact Links -->
   <div class="contact-links">
     <ul class="contact-list">
       <li>
-        <a href="{{ site.social_media.github }}" target="_blank">
+        <a href="{{ site.social_media.github }}" target="_blank" rel="noopener noreferrer">
           <i class="fab fa-github"></i>
           <span>GitHub</span>
         </a>
       </li>
       <li>
-        <a href="{{ site.social_media.linkedin }}" target="_blank">
+        <a href="{{ site.social_media.linkedin }}" target="_blank" rel="noopener noreferrer">
           <i class="fab fa-linkedin"></i>
           <span>LinkedIn</span>
         </a>
       </li>
       <li>
-        <a href="{{ site.social_media.twitter }}" target="_blank">
+        <a href="{{ site.social_media.twitter }}" target="_blank" rel="noopener noreferrer">
           <i class="fab fa-twitter"></i>
           <span>Twitter</span>
         </a>
       </li>
       <li>
-        <a href="https://{{ site.social_media.bsky }}" target="_blank">
+        <a href="https://{{ site.social_media.bsky }}" target="_blank" rel="noopener noreferrer">
           <i class="fas fa-circle"></i>
           <span>Bluesky</span>
         </a>
@@ -48,4 +49,3 @@ title: Contact
     </ul>
   </div>
 </div>
-

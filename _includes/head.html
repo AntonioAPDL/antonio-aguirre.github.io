@@ -1,27 +1,45 @@
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {% assign page_title = page.title | default: site.title %}
+  {% assign page_description = page.description | default: site.description %}
+  {% assign page_url = page.url | absolute_url %}
+  {% assign page_image = page.image | default: site.logo %}
 
   <title>
     {% if page.title == "Home" %}
       {{ site.title }} &middot; {{ site.tagline }}
     {% else %}
-      {{ page.title }} &middot; {{ site.title }}
+      {{ page_title }} &middot; {{ site.title }}
     {% endif %}
   </title>
 
   <!-- Canonical URL for SEO -->
-  {% if page.url and site.baseurl %}
-  <link rel="canonical" href="{{ page.url | absolute_url }}">
+  {% if page.url %}
+  <link rel="canonical" href="{{ page_url }}">
   {% endif %}
 
-  <meta name="description" content="{{ site.description }}">
-  <meta property="og:title" content="{{ page.title }} · {{ site.title }}">
-  <meta property="og:description" content="{{ site.description }}">
-  <meta property="og:url" content="{{ page.url | absolute_url }}">
-  <meta property="og:type" content="website">
+  <meta name="description" content="{{ page_description }}">
+  <meta property="og:title" content="{{ page_title }} &middot; {{ site.title }}">
+  <meta property="og:description" content="{{ page_description }}">
+  <meta property="og:url" content="{{ page_url }}">
+  <meta property="og:type" content="{% if page.layout == 'post' %}article{% else %}website{% endif %}">
+  <meta property="og:site_name" content="{{ site.title }}">
+  {% if page_image %}
+  <meta property="og:image" content="{{ page_image | absolute_url }}">
+  <meta property="og:image:alt" content="{{ page_title }}">
+  {% endif %}
+  <meta name="twitter:card" content="{% if page_image %}summary_large_image{% else %}summary{% endif %}">
+  <meta name="twitter:title" content="{{ page_title }} &middot; {{ site.title }}">
+  <meta name="twitter:description" content="{{ page_description }}">
+  {% if page_image %}
+  <meta name="twitter:image" content="{{ page_image | absolute_url }}">
+  {% endif %}
 
   <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&family=Source+Serif+Pro:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -44,9 +62,6 @@
   <!-- RSS Feed -->
   <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ '/atom.xml' | absolute_url }}">
 
-  <script type="text/javascript" async
-    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js">
-  </script>
   <!-- Google Analytics -->
   {% if site.google_analytics_id %}
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics_id }}"></script>
@@ -57,4 +72,6 @@
     gtag('config', '{{ site.google_analytics_id }}');
   </script>
   {% endif %}
+
+  {% include mathjax.html %}
 </head>

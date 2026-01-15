@@ -1,7 +1,7 @@
 # Website Setup
 title:               Antonio Aguirre
-tagline:             "Data Modelling·Bayesian Statistics·Machine Learning"
-description:         "Statistics and more."
+tagline:             "Data Modeling | Bayesian Statistics | Machine Learning"
+description:         "Bayesian statistics, machine learning, and spatio-temporal modeling."
 url:                 "https://antonio-aguirre.com" # Website URL
 baseurl:             ""                           # Leave empty for root deployment
 paginate:            5                             # Number of posts per page
@@ -28,19 +28,21 @@ social_media:
   linkedin: https://www.linkedin.com/in/AntonioAPDL
   twitter: https://twitter.com/AntonioAPDL
   bsky: antonioaguirre.bsky.social
-  email: mailto:jaguir26@ucsc.edu
+  email: jaguir26@ucsc.edu
 
 # Plugins
 plugins:
+  - jekyll-feed
   - jekyll-paginate  # Enable pagination for blog posts
+  - jekyll-sitemap
+  - jemoji
 
 # Custom Variables
 version:             1.1.0
 google_analytics_id: ""  # Add Google Analytics ID if applicable
 
-# Example configuration for custom CSS
+# Markdown configuration
 markdown: kramdown
-theme: minima
 highlighter: rouge
 
 # Add this if you haven't already
@@ -50,4 +52,3 @@ sass:
 # Ensure custom CSS is referenced correctly
 include:
   - public/css/
-

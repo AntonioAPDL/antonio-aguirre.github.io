@@ -19,13 +19,15 @@
       <li><a class="sidebar-nav-item{% if page.title == 'CV' %} active{% endif %}" href="{{ '/cv/' | absolute_url }}">CV</a></li>
       <li><a class="sidebar-nav-item{% if page.title == 'Contact' %} active{% endif %}" href="{{ '/contact/' | absolute_url }}">Contact</a></li>
     </ul>
-    <button id="theme-toggle-btn" class="theme-toggle" aria-label="Toggle theme">🌓</button>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" aria-pressed="false">
+      <i class="fas fa-moon" aria-hidden="true"></i>
+    </button>
   </nav>
 
   <!-- Sidebar Buy Me a Coffee -->
   <div class="sidebar-item">
     <p>Hi, I’m Antonio—a Ph.D. candidate in Statistics. If I’ve helped you survive stats, buy me a coffee—it’s cheaper than therapy.</p>
-    <a href="https://buymeacoffee.com/antonioaguirre" target="_blank">
+    <a href="https://buymeacoffee.com/antonioaguirre" target="_blank" rel="noopener noreferrer">
       <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px; width: auto;">
     </a>
   </div>
@@ -33,6 +35,8 @@
   <!-- Footer -->
   <div class="sidebar-footer">
     <p>&copy; {{ site.time | date: '%Y' }} All rights reserved.</p>
-    <button id="theme-toggle-btn" class="theme-toggle" aria-label="Toggle theme">🌓</button>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" aria-pressed="false">
+      <i class="fas fa-moon" aria-hidden="true"></i>
+    </button>
   </div>
 </div>
