@@ -24,7 +24,7 @@ description: "Overview of software projects and tools in development."
     <!-- R Section -->
     <div>
       <h2>
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/r/r-original.svg" alt="R" loading="lazy" class="software-icon"> R
+        <img src="{{ '/public/images/devicons/r.svg' | absolute_url }}" alt="R" loading="lazy" class="software-icon"> R
       </h2>
       <p>Coming soon...</p>
     </div>
@@ -32,7 +32,7 @@ description: "Overview of software projects and tools in development."
     <!-- MATLAB Section -->
     <div>
       <h2>
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/matlab/matlab-original.svg" alt="MATLAB" loading="lazy" class="software-icon"> MATLAB
+        <img src="{{ '/public/images/devicons/matlab.svg' | absolute_url }}" alt="MATLAB" loading="lazy" class="software-icon"> MATLAB
       </h2>
       <p>Coming soon...</p>
     </div>
@@ -40,7 +40,7 @@ description: "Overview of software projects and tools in development."
     <!-- Python Section -->
     <div>
       <h2>
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python" loading="lazy" class="software-icon"> Python
+        <img src="{{ '/public/images/devicons/python.svg' | absolute_url }}" alt="Python" loading="lazy" class="software-icon"> Python
       </h2>
       <p>Coming soon...</p>
     </div>
@@ -48,7 +48,7 @@ description: "Overview of software projects and tools in development."
     <!-- C++ Section -->
     <div>
       <h2>
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++" loading="lazy" class="software-icon"> C++
+        <img src="{{ '/public/images/devicons/cpp.svg' | absolute_url }}" alt="C++" loading="lazy" class="software-icon"> C++
       </h2>
       <p>Coming soon...</p>
     </div>
@@ -56,7 +56,7 @@ description: "Overview of software projects and tools in development."
     <!-- Julia Section -->
     <div>
       <h2>
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/julia/julia-original.svg" alt="Julia" loading="lazy" class="software-icon"> Julia
+        <img src="{{ '/public/images/devicons/julia.svg' | absolute_url }}" alt="Julia" loading="lazy" class="software-icon"> Julia
       </h2>
       <p>Coming soon...</p>
     </div>

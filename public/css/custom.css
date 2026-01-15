@@ -28,6 +28,7 @@
   --note-border: #f2c94c;
 }
 
+html.dark-theme,
 body.dark-theme {
   --background-color: #0f1216;
   --background-gradient: radial-gradient(1200px 600px at 10% -10%, rgba(27, 99, 198, 0.18), transparent 60%),
@@ -55,6 +56,16 @@ body {
   background-image: var(--background-gradient);
   color: var(--text-color);
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container {
+  max-width: 60rem;
+}
+
+@media (min-width: 76em) {
+  .container {
+    max-width: 64rem;
+  }
 }
 
 img {

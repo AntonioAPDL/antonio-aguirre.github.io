@@ -52,3 +52,10 @@ sass:
 # Ensure custom CSS is referenced correctly
 include:
   - public/css/
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      math: true

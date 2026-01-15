@@ -18,12 +18,20 @@
 
 document.addEventListener('DOMContentLoaded', function() {
   var toggles = document.querySelectorAll('[data-theme-toggle]');
+  var root = document.documentElement;
+  var body = document.body;
   var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  var storedTheme = window.localStorage.getItem('theme');
+  var storedTheme = null;
+  try {
+    storedTheme = window.localStorage.getItem('theme');
+  } catch (e) {
+    storedTheme = null;
+  }
   var isDark = storedTheme ? storedTheme === 'dark' : prefersDark;
 
   function applyTheme(dark, persist) {
-    document.body.classList.toggle('dark-theme', dark);
+    root.classList.toggle('dark-theme', dark);
+    body.classList.toggle('dark-theme', dark);
     toggles.forEach(function(toggle) {
       toggle.setAttribute('aria-pressed', dark ? 'true' : 'false');
       var icon = toggle.querySelector('i');
@@ -33,7 +41,9 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     if (persist) {
-      window.localStorage.setItem('theme', dark ? 'dark' : 'light');
+      try {
+        window.localStorage.setItem('theme', dark ? 'dark' : 'light');
+      } catch (e) {}
     }
   }
 
@@ -41,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     applyTheme(isDark, false);
     toggles.forEach(function(toggle) {
       toggle.addEventListener('click', function() {
-        applyTheme(!document.body.classList.contains('dark-theme'), true);
+        applyTheme(!root.classList.contains('dark-theme'), true);
       });
     });
   }
