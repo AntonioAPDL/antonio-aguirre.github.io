@@ -11,10 +11,10 @@ description: "Background, research focus, and interests of Antonio Aguirre."
     <h1 class="home-title">Antonio Aguirre</h1>
     <p class="intro-text">
       I'm a Ph.D. candidate in <strong>Statistics</strong> at the
-      <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>.
-      I work with <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Bruno Sansó</a> and
-      <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Raquel Prado</a> on Bayesian methods for spatio-temporal modeling and forecasting.
-      My research emphasizes uncertainty quantification and scalable inference, with applications in hydrology and environmental science.
+      <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>,
+      advised by <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Bruno Sansó</a> and
+      <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Raquel Prado</a>.
+      My research focuses on Bayesian time series forecasting, quantile modeling, and uncertainty quantification, with emphasis on model selection and scalable variational inference.
     </p>
   </div>
 
@@ -23,26 +23,48 @@ description: "Background, research focus, and interests of Antonio Aguirre."
     <h2 class="section-heading">Ongoing Projects</h2>
     <ul class="about-list">
       <li>
-        <strong>Forecast Synthesis and Bias Correction:</strong> Combining climate model outputs and historical observations using generalized Bayesian updating and proper scoring rules to improve probabilistic forecasts.
+        <strong>Quantile-Based Forecast Correction:</strong> Bayesian correction and synthesis of river flow forecasts (submitted to <em>Environmetrics</em>).
       </li>
       <li>
-        <strong>Quantile State-Space Modeling:</strong> Building fast Bayesian quantile models for river discharge and other environmental time series.
+        <strong>Dynamic Time Series Models:</strong> Distributional calibration, model selection, and diagnostics for probabilistic forecasting.
       </li>
       <li>
-        <strong>Scalable Inference for Dynamic Systems:</strong> Developing variational and Sequential Monte Carlo methods for real-time updating in operational workflows.
+        <strong>Scalable Bayesian Inference:</strong> Variational Bayes and Sequential Monte Carlo for real-time updating in operational settings.
+      </li>
+    </ul>
+  </div>
+
+  <!-- Applied and Professional Experience -->
+  <div class="service-section about-card">
+    <h2 class="section-heading">Applied and Professional Experience</h2>
+    <ul class="about-list">
+      <li>
+        <strong>Quantitative Researcher (Contract), Delos Financial Technologies:</strong> Built evaluation workflows, automated backtests on AWS, and standardized model diagnostics (2025).
+      </li>
+      <li>
+        <strong>Data Analyst, NeatLeaf Inc.:</strong> Developed data pipelines and spatiotemporal models for greenhouse telemetry and anomaly detection (2021-2022).
+      </li>
+      <li>
+        <strong>Data Analyst, Banco de México:</strong> Built pipelines for image datasets, anomaly classification models, and forecasting prototypes (2018-2019).
+      </li>
+      <li>
+        <strong>Computer Systems Coordinator, UCSC Statistics:</strong> Administer Linux servers and build automation for research workflows (2024-present).
       </li>
     </ul>
   </div>
 
   <!-- Teaching and Service Section -->
   <div class="service-section about-card">
-    <h2 class="section-heading">Teaching and Service</h2>
+    <h2 class="section-heading">Teaching and Mentoring</h2>
     <ul class="about-list">
       <li>
-        <strong>TA Training Workshops:</strong> Design and lead sessions on inclusive teaching and active learning for incoming TAs.
+        <strong>Graduate Student Instructor:</strong> Data Visualization (STAT 80B), Spring 2025.
       </li>
       <li>
-        <strong>TA Wiki Maintenance:</strong> Maintain and expand the department's TA wiki to support day-to-day teaching and professional development.
+        <strong>Teaching Assistant:</strong> Led discussion sections and supported statistics and probability courses (2021-present).
+      </li>
+      <li>
+        <strong>ASA DataFest Mentor:</strong> Guided student teams on modeling and communication (2023).
       </li>
     </ul>
   </div>
@@ -53,7 +75,7 @@ description: "Background, research focus, and interests of Antonio Aguirre."
     <ul class="about-list about-list-disc">
       <li>
         <strong>Ph.D. in Statistics:</strong>
-        <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a> (2021-present)
+        <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a> (2021-present, expected 2026)
       </li>
       <li>
         <strong>M.Sc. in Economic Theory:</strong>
