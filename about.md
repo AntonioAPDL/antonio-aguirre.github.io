@@ -14,7 +14,8 @@ description: "Background, research focus, and interests of Antonio Aguirre."
       <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>,
       advised by <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Bruno Sansó</a> and
       <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Raquel Prado</a>.
-      My research focuses on Bayesian time series forecasting, quantile modeling, and uncertainty quantification, with emphasis on model selection and scalable variational inference.
+      My research centers on Bayesian time series forecasting, quantile modeling, and uncertainty quantification, with an emphasis on scalable variational inference.
+      I also explore modern machine learning methods for forecasting, including Deep Echo State Networks (Deep ESN).
     </p>
   </div>
 
@@ -26,10 +27,13 @@ description: "Background, research focus, and interests of Antonio Aguirre."
         <strong>Quantile-Based Forecast Correction:</strong> Bayesian correction and synthesis of river flow forecasts (submitted to <em>Environmetrics</em>).
       </li>
       <li>
-        <strong>Dynamic Time Series Models:</strong> Distributional calibration, model selection, and diagnostics for probabilistic forecasting.
+        <strong>Deep ESN Forecasting:</strong> Deep Echo State Networks for nonlinear dynamics and short-term prediction.
       </li>
       <li>
         <strong>Scalable Bayesian Inference:</strong> Variational Bayes and Sequential Monte Carlo for real-time updating in operational settings.
+      </li>
+      <li>
+        <strong>TA Training Program:</strong> Co-organizing a teaching training series focused on inclusive teaching and active learning.
       </li>
     </ul>
   </div>
@@ -39,7 +43,7 @@ description: "Background, research focus, and interests of Antonio Aguirre."
     <h2 class="section-heading">Applied and Professional Experience</h2>
     <ul class="about-list">
       <li>
-        <strong>Quantitative Researcher (Contract), Delos Financial Technologies:</strong> Built evaluation workflows, automated backtests on AWS, and standardized model diagnostics (2025).
+        <strong>Quantitative Researcher, Delos Financial Technologies:</strong> Built evaluation workflows, automated backtests on AWS, and standardized model diagnostics (2025).
       </li>
       <li>
         <strong>Data Analyst, NeatLeaf Inc.:</strong> Developed data pipelines and spatiotemporal models for greenhouse telemetry and anomaly detection (2021-2022).
@@ -62,6 +66,9 @@ description: "Background, research focus, and interests of Antonio Aguirre."
       </li>
       <li>
         <strong>Teaching Assistant:</strong> Led discussion sections and supported statistics and probability courses (2021-present).
+      </li>
+      <li>
+        <strong>TA Training Program:</strong> Co-organize workshops on inclusive teaching and active learning.
       </li>
       <li>
         <strong>ASA DataFest Mentor:</strong> Guided student teams on modeling and communication (2023).
@@ -92,7 +99,7 @@ description: "Background, research focus, and interests of Antonio Aguirre."
   <div class="beyond-research-section about-card">
     <h2 class="section-heading">Beyond Research</h2>
     <p class="intro-text">
-      Outside of research, I enjoy baking bread, cooking Mexican dishes, reading history, studying the philosophy of science, and learning German.
+      Outside of work, I enjoy baking bread, cooking Mexican dishes, reading history, the philosophy of science, and learning German.
     </p>
     <p class="intro-text">
       If you'd like to connect or discuss ideas, feel free to reach out. Thanks for stopping by!

@@ -11,12 +11,12 @@ description: "Research on Bayesian time series forecasting, quantile modeling, a
     I am a Ph.D. candidate in the Department of Statistics at the University of California, Santa Cruz, advised by
     <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Bruno Sansó</a> and
     <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Raquel Prado</a>.
-    My research develops Bayesian time series methods for probabilistic forecasting, with emphasis on quantile modeling,
-    uncertainty quantification, and model selection.
+    My research develops Bayesian time series methods for probabilistic forecasting, with an emphasis on quantile modeling,
+    uncertainty quantification, and scalable inference.
   </p>
   <p class="intro-text">
-    Applications include environmental and hydrological forecasting, where models must be interpretable, efficient, and
-    easy to update as new data arrive.
+    Much of my work is motivated by environmental and hydrological data, but the methods are general and apply to other
+    domains where forecasts must be transparent, efficient, and easy to update as new data arrive.
   </p>
 
   <!-- Current Projects -->
@@ -24,7 +24,7 @@ description: "Research on Bayesian time series forecasting, quantile modeling, a
     <h2>Current Projects</h2>
     <ul>
       <li><strong>Quantile-Based Forecast Correction:</strong> Bayesian correction and synthesis of river flow forecasts using proper scoring rules.</li>
-      <li><strong>Dynamic Time Series Models:</strong> Calibration, model selection, and diagnostics for probabilistic forecasting.</li>
+      <li><strong>Deep ESN Forecasting:</strong> Deep Echo State Networks for nonlinear dynamics and short-term prediction.</li>
       <li><strong>Scalable Inference:</strong> Variational Bayes and Sequential Monte Carlo for real-time updating in dynamic systems.</li>
     </ul>
   </div>
@@ -42,9 +42,6 @@ description: "Research on Bayesian time series forecasting, quantile modeling, a
         Empirical Economics. <a href="https://doi.org/10.1007/s00181-024-02564-5" target="_blank" rel="noopener noreferrer">[DOI]</a>
       </li>
     </ul>
-    <p class="intro-text">
-      For a full list, see my <a href="/cv.html">CV</a>.
-    </p>
   </div>
 
 </div>
