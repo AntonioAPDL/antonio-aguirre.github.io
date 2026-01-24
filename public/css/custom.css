@@ -101,6 +101,9 @@ button:focus-visible {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+  .plot-skeleton__spinner {
+    animation: none !important;
+  }
 }
 
 /* Red box */
@@ -278,6 +281,82 @@ button:focus-visible {
   font-style: italic;
   color: var(--text-subtle);
   margin-bottom: 1rem;
+}
+
+.plot-status {
+  font-size: 0.95rem;
+  color: var(--text-subtle);
+  margin: 0.75rem 0 1rem;
+  text-align: left;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+}
+
+.plot-status--error {
+  color: var(--note-text);
+  background-color: var(--note-bg);
+  border-color: var(--note-border);
+}
+
+.plot-stage {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-1);
+}
+
+.usgs-iv-plot__chart {
+  width: 100%;
+  height: 100%;
+}
+
+.plot-skeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-subtle);
+  background: linear-gradient(135deg, var(--surface-2), var(--surface-1));
+  z-index: 2;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.plot-skeleton__spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid var(--surface-3);
+  border-top-color: var(--accent-color);
+  animation: plot-spin 0.9s linear infinite;
+}
+
+.plot-skeleton__text {
+  font-size: 0.95rem;
+}
+
+.plot-caption {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-subtle);
+  text-align: left;
+}
+
+.usgs-iv-plot.is-loaded .plot-skeleton {
+  opacity: 0;
+  visibility: hidden;
+}
+
+@keyframes plot-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 600px) {

@@ -56,9 +56,31 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
       Real-Time Monitoring: San Lorenzo River Discharge Flow
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> This plot provides real-time monitoring of the San Lorenzo River's discharge at Big Trees. It is currently offline because the university servers and ngrok tunnel used for streaming were not approved for continuous public access. I am migrating to a 24/7 hosting setup and will bring it back online soon.
+      <strong>Note:</strong> This plot loads live USGS NWIS instantaneous values data (site 11160500, parameter 00060) directly in your browser and refreshes every 15 minutes while this page is open.
     </div>
-    <div id="loading" role="status" aria-live="polite">Loading plot...</div>
-    <iframe src="https://f056-128-114-48-164.ngrok-free.app/plot" class="plot-iframe" title="San Lorenzo River discharge flow plot" onload="document.getElementById('loading').style.display='none';"></iframe>
+    <div class="usgs-iv-plot"
+         data-site="11160500"
+         data-parameter="00060"
+         data-period="P30D"
+         data-refresh-min="15"
+         data-timeout-sec="20"
+         data-title="San Lorenzo River Discharge Flow"
+         data-ylabel="Discharge">
+      <div class="plot-status" role="status" aria-live="polite">Loading data...</div>
+      <div class="plot-stage plot-iframe" role="img" aria-label="San Lorenzo River discharge flow plot">
+        <div class="plot-skeleton" aria-hidden="true">
+          <div class="plot-skeleton__spinner"></div>
+          <div class="plot-skeleton__text">Loading latest observations...</div>
+        </div>
+        <div class="usgs-iv-plot__chart"></div>
+      </div>
+      <div class="plot-caption">
+        Data source:
+        <a href="https://waterservices.usgs.gov/" target="_blank" rel="noopener noreferrer">USGS NWIS IV</a>
+      </div>
+    </div>
   </div>
 </div>
+
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script src="{{ '/public/js/sanlorenzo_flow.js' | relative_url }}"></script>
