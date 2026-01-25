@@ -58,6 +58,15 @@ Supported attributes:
 - `data-timeout-sec` (fetch timeout in seconds)
 - `data-title` (optional label for accessibility)
 - `data-ylabel` (base Y-axis label; units are appended automatically when available)
+- `data-y-min`, `data-y-max` (fixed Y-axis range; defaults to 0–12 for log scale)
+- `data-threshold-minor`, `data-threshold-major` (horizontal threshold lines + shaded regions)
+
+The plot currently applies a log transform (`log(value + 1)`) to discharge values for stability.
+If you want a different transform, edit `transformValue()` in `public/js/sanlorenzo_flow.js`.
+
+Current flood threshold settings (discharge):
+- Minor: ~6100 cfs (approximate discharge equivalent of 16.5 ft stage).
+- Major: ~15000 cfs (approximate discharge at 21.76 ft stage).
 
 ### Cache behavior (localStorage)
 
@@ -75,3 +84,4 @@ localStorage.removeItem('usgs-iv:11160500:00060:P30D:v1');
 - **Rate limiting (403/429):** The script backs off and shows a warning. Increase `data-refresh-min` if needed.
 - **Offline:** The status line reports offline and retries when the connection returns.
 - **Unexpected response:** A schema or JSON error will show a warning; verify the endpoint.
+- **Threshold units:** Thresholds are assumed to be in the same units as the USGS parameter. NOAA flood thresholds are typically stage (feet), while parameter `00060` is discharge (cfs). If you want exact discharge thresholds, derive them from the USGS rating curve or switch to parameter `00065` (gage height).

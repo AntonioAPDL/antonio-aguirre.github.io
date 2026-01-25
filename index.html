@@ -56,7 +56,8 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
       Real-Time Monitoring: San Lorenzo River Discharge Flow
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> This plot loads live USGS NWIS instantaneous values data (site 11160500, parameter 00060) directly in your browser and refreshes every 15 minutes while this page is open.
+      <strong>Note:</strong> This plot shows log(discharge + 1) from USGS NWIS instantaneous values (site 11160500, parameter 00060)
+      and refreshes every 15 minutes while this page is open. Flood thresholds are approximate discharge equivalents.
     </div>
     <div class="usgs-iv-plot"
          data-site="11160500"
@@ -64,6 +65,10 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
          data-period="P30D"
          data-refresh-min="15"
          data-timeout-sec="20"
+         data-y-min="0"
+         data-y-max="12"
+         data-threshold-minor="6100"
+         data-threshold-major="15000"
          data-title="San Lorenzo River Discharge Flow"
          data-ylabel="Discharge">
       <div class="plot-status" role="status" aria-live="polite">Loading data...</div>
@@ -77,6 +82,8 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
       <div class="plot-caption">
         Data source:
         <a href="https://waterservices.usgs.gov/" target="_blank" rel="noopener noreferrer">USGS NWIS IV</a>
+        <span class="plot-caption__sep">|</span>
+        Dashed lines: NOAA minor/major flood thresholds (approx discharge)
       </div>
     </div>
   </div>

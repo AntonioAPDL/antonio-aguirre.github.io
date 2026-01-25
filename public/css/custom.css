@@ -348,6 +348,11 @@ button:focus-visible {
   text-align: left;
 }
 
+.plot-caption__sep {
+  margin: 0 0.35rem;
+  color: var(--border-color);
+}
+
 .usgs-iv-plot.is-loaded .plot-skeleton {
   opacity: 0;
   visibility: hidden;

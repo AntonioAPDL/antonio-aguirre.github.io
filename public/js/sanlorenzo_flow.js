@@ -9,12 +9,14 @@
   const DEFAULTS = {
     period: 'P30D',
     refreshMin: 15,
-    timeoutSec: 20
+    timeoutSec: 20,
+    yMin: 0,
+    yMax: 12
   };
   const ENDPOINT_BASE = 'https://waterservices.usgs.gov/nwis/iv/';
   const MAX_BACKOFF_MS = 60 * 60 * 1000;
   const MIN_CACHE_AGE_MS = 30 * 60 * 1000;
-  const STORAGE_VERSION = 1;
+  const STORAGE_VERSION = 2;
 
   const instances = [];
 
@@ -30,6 +32,12 @@
     if (raw === undefined || raw === null || raw === '') return fallback;
     const parsed = Number(raw);
     return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  function parseOptionalNumber(raw) {
+    if (raw === undefined || raw === null || raw === '') return null;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   function formatDate(value) {
@@ -62,6 +70,12 @@
     return error;
   }
 
+  function transformValue(value) {
+    const safe = Math.max(0, value);
+    if (Math.log1p) return Math.log1p(safe);
+    return Math.log(safe + 1);
+  }
+
   function buildUrl(config) {
     const params = new URLSearchParams({
       format: 'json',
@@ -92,7 +106,7 @@
         if (Number.isNaN(timestamp.getTime())) return null;
         return {
           x: timestamp,
-          y: numeric
+          y: transformValue(numeric)
         };
       })
       .filter(Boolean)
@@ -105,11 +119,12 @@
     return { series, points };
   }
 
-  function buildLayout(yTitle, colors) {
+  function buildLayout(yTitle, colors, yRange, shapes) {
     return {
       margin: { l: 60, r: 20, t: 20, b: 50 },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
+      shapes: shapes || [],
       font: {
         color: colors.text,
         family: 'Source Sans Pro, Helvetica, Arial, sans-serif'
@@ -124,7 +139,9 @@
       yaxis: {
         title: yTitle,
         gridcolor: colors.grid,
-        zerolinecolor: colors.grid
+        zerolinecolor: colors.grid,
+        range: yRange,
+        autorange: false
       }
     };
   }
@@ -139,6 +156,89 @@
       line: { color: colors.line, width: 2 },
       hovertemplate: `%{x}<br>%{y:.2f}${unitLabel}<extra></extra>`
     };
+  }
+
+  function buildThresholdShapes(config, colors) {
+    const shapes = [];
+    const minor = config.thresholdMinor;
+    const major = config.thresholdMajor;
+    const yMin = config.yMin;
+    const yMax = config.yMax;
+
+    if (!Number.isFinite(minor) || !Number.isFinite(major)) {
+      return shapes;
+    }
+
+    const minorTransformed = transformValue(minor);
+    const majorTransformed = transformValue(major);
+
+    if (majorTransformed <= minorTransformed) {
+      console.warn('[usgs-iv] Major threshold must exceed minor threshold.', config);
+      return shapes;
+    }
+
+    const minorColor = 'rgba(242, 201, 76, 0.18)';
+    const majorColor = 'rgba(220, 38, 38, 0.16)';
+    const minorLine = colors && colors.line ? colors.line : '#f2c94c';
+    const majorLine = '#dc2626';
+
+    const minorLower = Math.max(yMin, minorTransformed);
+    const minorUpper = Math.min(yMax, majorTransformed);
+    if (minorUpper > minorLower) {
+      shapes.push({
+        type: 'rect',
+        xref: 'paper',
+        yref: 'y',
+        x0: 0,
+        x1: 1,
+        y0: minorLower,
+        y1: minorUpper,
+        fillcolor: minorColor,
+        line: { width: 0 },
+        layer: 'below'
+      });
+    }
+
+    const majorLower = Math.max(yMin, majorTransformed);
+    const majorUpper = yMax;
+    if (majorUpper > majorLower) {
+      shapes.push({
+        type: 'rect',
+        xref: 'paper',
+        yref: 'y',
+        x0: 0,
+        x1: 1,
+        y0: majorLower,
+        y1: majorUpper,
+        fillcolor: majorColor,
+        line: { width: 0 },
+        layer: 'below'
+      });
+    }
+
+    shapes.push({
+      type: 'line',
+      xref: 'paper',
+      x0: 0,
+      x1: 1,
+      yref: 'y',
+      y0: minorTransformed,
+      y1: minorTransformed,
+      line: { color: minorLine, width: 1.5, dash: 'dash' }
+    });
+
+    shapes.push({
+      type: 'line',
+      xref: 'paper',
+      x0: 0,
+      x1: 1,
+      yref: 'y',
+      y0: majorTransformed,
+      y1: majorTransformed,
+      line: { color: majorLine, width: 1.5, dash: 'dash' }
+    });
+
+    return shapes;
   }
 
   function storageAvailable() {
@@ -182,6 +282,8 @@
       const dataset = container.dataset || {};
       const refreshMin = parseNumber(dataset.refreshMin, DEFAULTS.refreshMin);
       const timeoutSec = parseNumber(dataset.timeoutSec, DEFAULTS.timeoutSec);
+      const yMin = parseNumber(dataset.yMin, DEFAULTS.yMin);
+      const yMax = parseNumber(dataset.yMax, DEFAULTS.yMax);
       return {
         siteId: dataset.site,
         parameterCd: dataset.parameter,
@@ -189,7 +291,11 @@
         refreshMs: clampNumber(refreshMin, 1, 1440, DEFAULTS.refreshMin) * 60 * 1000,
         timeoutMs: clampNumber(timeoutSec, 5, 60, DEFAULTS.timeoutSec) * 1000,
         title: dataset.title || '',
-        yLabel: dataset.ylabel || 'Discharge'
+        yLabel: dataset.ylabel || 'Discharge',
+        yMin: yMin,
+        yMax: yMax,
+        thresholdMinor: parseOptionalNumber(dataset.thresholdMinor),
+        thresholdMajor: parseOptionalNumber(dataset.thresholdMajor)
       };
     }
 
@@ -204,6 +310,21 @@
       if (!this.config.siteId || !this.config.parameterCd) {
         console.warn('[usgs-iv] Missing data-site or data-parameter on plot container.', this.container);
         valid = false;
+      }
+
+      if (this.config.yMax <= this.config.yMin) {
+        console.warn('[usgs-iv] data-y-max must exceed data-y-min.', this.container);
+      }
+
+      if (this.config.thresholdMinor && this.config.thresholdMajor &&
+          this.config.thresholdMajor <= this.config.thresholdMinor) {
+        console.warn('[usgs-iv] data-threshold-major should exceed data-threshold-minor.', this.container);
+      }
+      if (this.config.thresholdMajor) {
+        const majorTransformed = transformValue(this.config.thresholdMajor);
+        if (majorTransformed >= this.config.yMax) {
+          console.warn('[usgs-iv] data-y-max should exceed the transformed major threshold.', this.container);
+        }
       }
 
       if (!this.statusEl) {
@@ -283,12 +404,15 @@
       }
 
       const colors = getThemeColors();
-      const yTitle = units ? `${this.config.yLabel} (${units})` : this.config.yLabel;
+      const yTitleBase = `log(${this.config.yLabel} + 1)`;
+      const yTitle = units ? `${yTitleBase} (${units})` : yTitleBase;
+      const shapes = buildThresholdShapes(this.config, colors);
+      const yRange = [this.config.yMin, this.config.yMax];
 
       Plotly.react(
         this.chartEl,
         [buildTrace(points, units, colors)],
-        buildLayout(yTitle, colors),
+        buildLayout(yTitle, colors, yRange, shapes),
         { responsive: true, displayModeBar: false }
       );
 
