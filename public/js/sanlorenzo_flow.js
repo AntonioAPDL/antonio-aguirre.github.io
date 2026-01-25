@@ -404,21 +404,22 @@
       }
 
       const colors = getThemeColors();
-      const yTitleBase = `log(${this.config.yLabel} + 1)`;
-      const yTitle = units ? `${yTitleBase} (${units})` : yTitleBase;
+      const displayUnits = 'log1';
+      const yTitleBase = `log1p(${this.config.yLabel})`;
+      const yTitle = `${yTitleBase} (${displayUnits})`;
       const shapes = buildThresholdShapes(this.config, colors);
       const yRange = [this.config.yMin, this.config.yMax];
 
       Plotly.react(
         this.chartEl,
-        [buildTrace(points, units, colors)],
+        [buildTrace(points, displayUnits, colors)],
         buildLayout(yTitle, colors, yRange, shapes),
         { responsive: true, displayModeBar: false }
       );
 
       this.lastSuccess = {
         siteName,
-        units,
+        units: displayUnits,
         lastObs,
         lastRefresh
       };
@@ -615,7 +616,7 @@
         const lastRefresh = new Date();
 
         this.renderPlot({ points, siteName, units, lastObs, lastRefresh });
-        this.saveCache({ points, siteName, units });
+        this.saveCache({ points, siteName, units: displayUnits });
         this.scheduleNext(true);
       } catch (err) {
         if (err && err.name === 'AbortError' && (this.abortedForVisibility || document.hidden)) {
