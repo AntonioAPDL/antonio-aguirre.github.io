@@ -10,13 +10,13 @@
     period: 'P30D',
     refreshMin: 15,
     timeoutSec: 20,
-    yMin: 0,
-    yMax: 12
+    mode: 'discharge',
+    logY: false
   };
   const ENDPOINT_BASE = 'https://waterservices.usgs.gov/nwis/iv/';
   const MAX_BACKOFF_MS = 60 * 60 * 1000;
   const MIN_CACHE_AGE_MS = 30 * 60 * 1000;
-  const STORAGE_VERSION = 2;
+  const STORAGE_VERSION = 3;
 
   const instances = [];
 
@@ -40,6 +40,14 @@
     return Number.isFinite(parsed) ? parsed : null;
   }
 
+  function parseBoolean(raw, fallback) {
+    if (raw === undefined || raw === null || raw === '') return fallback;
+    const value = String(raw).toLowerCase();
+    if (value === 'true' || value === '1' || value === 'yes') return true;
+    if (value === 'false' || value === '0' || value === 'no') return false;
+    return fallback;
+  }
+
   function formatDate(value) {
     if (!value) return '--';
     const date = value instanceof Date ? value : new Date(value);
@@ -52,6 +60,18 @@
     } catch (err) {
       return date.toISOString();
     }
+  }
+
+  function normalizeUnits(unitCode) {
+    if (!unitCode) return unitCode;
+    const normalized = unitCode.toLowerCase();
+    if (normalized === 'ft3/s' || normalized === 'ft^3/s' || normalized === 'ft3s-1') {
+      return 'cfs';
+    }
+    if (normalized === 'ft') {
+      return 'ft';
+    }
+    return unitCode;
   }
 
   function getThemeColors() {
@@ -70,10 +90,16 @@
     return error;
   }
 
-  function transformValue(value) {
-    const safe = Math.max(0, value);
-    if (Math.log1p) return Math.log1p(safe);
-    return Math.log(safe + 1);
+  function getDataExtent(points, logAxis) {
+    const values = points
+      .map((point) => point.y)
+      .filter((value) => Number.isFinite(value))
+      .filter((value) => !logAxis || value > 0);
+    if (!values.length) return null;
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values)
+    };
   }
 
   function buildUrl(config) {
@@ -106,25 +132,43 @@
         if (Number.isNaN(timestamp.getTime())) return null;
         return {
           x: timestamp,
-          y: transformValue(numeric)
+          y: numeric
         };
       })
       .filter(Boolean)
       .sort((a, b) => a.x - b.x);
 
     if (!points.length) {
-      throw createError('schema', 'No numeric discharge values available.');
+      throw createError('schema', 'No numeric values available.');
     }
 
     return { series, points };
   }
 
-  function buildLayout(yTitle, colors, yRange, shapes) {
+  function buildLayout(yTitle, colors, yRange, shapes, logAxis, annotations) {
+    const yaxis = {
+      title: yTitle,
+      gridcolor: colors.grid,
+      zerolinecolor: colors.grid,
+      type: logAxis ? 'log' : 'linear'
+    };
+
+    if (Array.isArray(yRange) && Number.isFinite(yRange[0]) && Number.isFinite(yRange[1])) {
+      if (logAxis && yRange[0] > 0 && yRange[1] > 0) {
+        yaxis.range = [Math.log10(yRange[0]), Math.log10(yRange[1])];
+        yaxis.autorange = false;
+      } else if (!logAxis) {
+        yaxis.range = yRange;
+        yaxis.autorange = false;
+      }
+    }
+
     return {
       margin: { l: 60, r: 20, t: 20, b: 50 },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
       shapes: shapes || [],
+      annotations: annotations || [],
       font: {
         color: colors.text,
         family: 'Source Sans Pro, Helvetica, Arial, sans-serif'
@@ -136,13 +180,7 @@
         zerolinecolor: colors.grid,
         tickformat: '%b %d'
       },
-      yaxis: {
-        title: yTitle,
-        gridcolor: colors.grid,
-        zerolinecolor: colors.grid,
-        range: yRange,
-        autorange: false
-      }
+      yaxis: yaxis
     };
   }
 
@@ -158,61 +196,84 @@
     };
   }
 
-  function buildThresholdShapes(config, colors) {
+  function buildThresholdShapes(config, colors, yRange) {
     const shapes = [];
+    const annotations = [];
     const minor = config.thresholdMinor;
+    const moderate = config.thresholdModerate;
     const major = config.thresholdMajor;
-    const yMin = config.yMin;
-    const yMax = config.yMax;
 
     if (!Number.isFinite(minor) || !Number.isFinite(major)) {
-      return shapes;
+      return { shapes, annotations };
     }
 
-    const minorTransformed = transformValue(minor);
-    const majorTransformed = transformValue(major);
-
-    if (majorTransformed <= minorTransformed) {
+    if (Number.isFinite(moderate) && (moderate <= minor || major <= moderate)) {
+      console.warn('[usgs-iv] Thresholds should be ordered minor < moderate < major.', config);
+    } else if (major <= minor) {
       console.warn('[usgs-iv] Major threshold must exceed minor threshold.', config);
-      return shapes;
+      return { shapes, annotations };
     }
 
-    const minorColor = 'rgba(242, 201, 76, 0.18)';
-    const majorColor = 'rgba(220, 38, 38, 0.16)';
-    const minorLine = colors && colors.line ? colors.line : '#f2c94c';
-    const majorLine = '#dc2626';
+    const yMin = Array.isArray(yRange) ? yRange[0] : null;
+    const yMax = Array.isArray(yRange) ? yRange[1] : null;
 
-    const minorLower = Math.max(yMin, minorTransformed);
-    const minorUpper = Math.min(yMax, majorTransformed);
-    if (minorUpper > minorLower) {
+    const bandMinor = 'rgba(242, 201, 76, 0.18)';
+    const bandModerate = 'rgba(251, 146, 60, 0.18)';
+    const bandMajor = 'rgba(220, 38, 38, 0.16)';
+    const lineMinor = colors && colors.line ? colors.line : '#f2c94c';
+    const lineModerate = '#fb923c';
+    const lineMajor = '#dc2626';
+
+    const bands = [];
+    if (Number.isFinite(moderate)) {
+      bands.push({ start: minor, end: moderate, color: bandMinor });
+      bands.push({ start: moderate, end: major, color: bandModerate });
+    } else {
+      bands.push({ start: minor, end: major, color: bandMinor });
+    }
+    if (Number.isFinite(major)) {
+      bands.push({ start: major, end: yMax, color: bandMajor });
+    }
+
+    bands.forEach((band) => {
+      const lower = Number.isFinite(yMin) ? Math.max(yMin, band.start) : band.start;
+      const upper = Number.isFinite(yMax) ? Math.min(yMax, band.end) : band.end;
+      if (!Number.isFinite(lower) || !Number.isFinite(upper) || upper <= lower) return;
       shapes.push({
         type: 'rect',
         xref: 'paper',
         yref: 'y',
         x0: 0,
         x1: 1,
-        y0: minorLower,
-        y1: minorUpper,
-        fillcolor: minorColor,
+        y0: lower,
+        y1: upper,
+        fillcolor: band.color,
         line: { width: 0 },
         layer: 'below'
       });
-    }
+    });
 
-    const majorLower = Math.max(yMin, majorTransformed);
-    const majorUpper = yMax;
-    if (majorUpper > majorLower) {
+    shapes.push({
+      type: 'line',
+      xref: 'paper',
+      x0: 0,
+      x1: 1,
+      yref: 'y',
+      y0: minor,
+      y1: minor,
+      line: { color: lineMinor, width: 1.5, dash: 'dash' }
+    });
+
+    if (Number.isFinite(moderate)) {
       shapes.push({
-        type: 'rect',
+        type: 'line',
         xref: 'paper',
-        yref: 'y',
         x0: 0,
         x1: 1,
-        y0: majorLower,
-        y1: majorUpper,
-        fillcolor: majorColor,
-        line: { width: 0 },
-        layer: 'below'
+        yref: 'y',
+        y0: moderate,
+        y1: moderate,
+        line: { color: lineModerate, width: 1.5, dash: 'dash' }
       });
     }
 
@@ -222,23 +283,40 @@
       x0: 0,
       x1: 1,
       yref: 'y',
-      y0: minorTransformed,
-      y1: minorTransformed,
-      line: { color: minorLine, width: 1.5, dash: 'dash' }
+      y0: major,
+      y1: major,
+      line: { color: lineMajor, width: 1.5, dash: 'dash' }
     });
 
-    shapes.push({
-      type: 'line',
-      xref: 'paper',
-      x0: 0,
-      x1: 1,
-      yref: 'y',
-      y0: majorTransformed,
-      y1: majorTransformed,
-      line: { color: majorLine, width: 1.5, dash: 'dash' }
-    });
+    const addLabel = (label, yValue, color) => {
+      if (!Number.isFinite(yValue)) return;
+      if (config.logY && yValue <= 0) return;
+      annotations.push({
+        xref: 'paper',
+        x: 0.02,
+        yref: 'y',
+        y: yValue,
+        text: label,
+        showarrow: false,
+        xanchor: 'left',
+        yanchor: 'bottom',
+        font: {
+          size: 11,
+          color: color
+        },
+        bgcolor: 'rgba(255, 255, 255, 0.6)',
+        bordercolor: 'rgba(255, 255, 255, 0.0)',
+        borderpad: 2
+      });
+    };
 
-    return shapes;
+    addLabel('Minor flood', minor, lineMinor);
+    if (Number.isFinite(moderate)) {
+      addLabel('Moderate flood', moderate, lineModerate);
+    }
+    addLabel('Major flood', major, lineMajor);
+
+    return { shapes, annotations };
   }
 
   function storageAvailable() {
@@ -282,20 +360,28 @@
       const dataset = container.dataset || {};
       const refreshMin = parseNumber(dataset.refreshMin, DEFAULTS.refreshMin);
       const timeoutSec = parseNumber(dataset.timeoutSec, DEFAULTS.timeoutSec);
-      const yMin = parseNumber(dataset.yMin, DEFAULTS.yMin);
-      const yMax = parseNumber(dataset.yMax, DEFAULTS.yMax);
+      const modeRaw = (dataset.mode || DEFAULTS.mode).toLowerCase();
+      const mode = modeRaw === 'stage' ? 'stage' : 'discharge';
+      const logY = parseBoolean(dataset.logY, DEFAULTS.logY);
+      const yMin = parseOptionalNumber(dataset.yMin);
+      const yMax = parseOptionalNumber(dataset.yMax);
+      const parameterCd = dataset.parameter || (mode === 'stage' ? '00065' : '00060');
+      const defaultLabel = mode === 'stage' ? 'Stage' : 'Discharge';
       return {
         siteId: dataset.site,
-        parameterCd: dataset.parameter,
+        parameterCd: parameterCd,
+        mode: mode,
         period: dataset.period || DEFAULTS.period,
         refreshMs: clampNumber(refreshMin, 1, 1440, DEFAULTS.refreshMin) * 60 * 1000,
         timeoutMs: clampNumber(timeoutSec, 5, 60, DEFAULTS.timeoutSec) * 1000,
         title: dataset.title || '',
-        yLabel: dataset.ylabel || 'Discharge',
+        yLabel: dataset.ylabel || defaultLabel,
         yMin: yMin,
         yMax: yMax,
         thresholdMinor: parseOptionalNumber(dataset.thresholdMinor),
-        thresholdMajor: parseOptionalNumber(dataset.thresholdMajor)
+        thresholdModerate: parseOptionalNumber(dataset.thresholdModerate),
+        thresholdMajor: parseOptionalNumber(dataset.thresholdMajor),
+        logY: logY
       };
     }
 
@@ -312,19 +398,35 @@
         valid = false;
       }
 
-      if (this.config.yMax <= this.config.yMin) {
+      if (Number.isFinite(this.config.yMin) && Number.isFinite(this.config.yMax) &&
+          this.config.yMax <= this.config.yMin) {
         console.warn('[usgs-iv] data-y-max must exceed data-y-min.', this.container);
       }
 
-      if (this.config.thresholdMinor && this.config.thresholdMajor &&
+      if (this.config.logY && Number.isFinite(this.config.yMin) && this.config.yMin <= 0) {
+        console.warn('[usgs-iv] data-y-min must be > 0 for log scale.', this.container);
+      }
+
+      if (Number.isFinite(this.config.thresholdMinor) && Number.isFinite(this.config.thresholdMajor) &&
           this.config.thresholdMajor <= this.config.thresholdMinor) {
         console.warn('[usgs-iv] data-threshold-major should exceed data-threshold-minor.', this.container);
       }
-      if (this.config.thresholdMajor) {
-        const majorTransformed = transformValue(this.config.thresholdMajor);
-        if (majorTransformed >= this.config.yMax) {
-          console.warn('[usgs-iv] data-y-max should exceed the transformed major threshold.', this.container);
+
+      if (Number.isFinite(this.config.thresholdModerate) &&
+          Number.isFinite(this.config.thresholdMinor) &&
+          Number.isFinite(this.config.thresholdMajor)) {
+        if (this.config.thresholdModerate <= this.config.thresholdMinor ||
+            this.config.thresholdModerate >= this.config.thresholdMajor) {
+          console.warn('[usgs-iv] data-threshold-moderate should sit between minor and major.', this.container);
         }
+      }
+      if (this.config.logY) {
+        ['thresholdMinor', 'thresholdModerate', 'thresholdMajor'].forEach((key) => {
+          const value = this.config[key];
+          if (Number.isFinite(value) && value <= 0) {
+            console.warn('[usgs-iv] Thresholds must be > 0 for log scale.', this.container);
+          }
+        });
       }
 
       if (!this.statusEl) {
@@ -364,23 +466,36 @@
       if (!this.statusEl) return;
 
       const data = this.lastSuccess || {};
-      const parts = [];
-
-      const siteValue = siteName || data.siteName;
-      const unitsValue = units || data.units;
+      const siteValue = siteName || data.siteName || this.config.title || 'USGS observations';
+      const unitsValue = normalizeUnits(units || data.units);
       const lastObsValue = lastObs || data.lastObs;
       const lastRefreshValue = lastRefresh || data.lastRefresh;
 
-      if (siteValue) parts.push(`Site: ${siteValue}`);
-      if (unitsValue) parts.push(`Units: ${unitsValue}`);
-      if (lastObsValue) parts.push(`Last obs: ${formatDate(lastObsValue)}`);
-      if (lastRefreshValue) parts.push(`Last refresh: ${formatDate(lastRefreshValue)}`);
-      if (note) parts.push(`Note: ${note}`);
-      if (warning) parts.push(`Warning: ${warning}`);
-      if (!parts.length) parts.push('Loading data...');
+      while (this.statusEl.firstChild) {
+        this.statusEl.removeChild(this.statusEl.firstChild);
+      }
 
-      this.statusEl.textContent = parts.join(' | ');
+      const titleEl = document.createElement('div');
+      titleEl.className = 'plot-status__title';
+      titleEl.textContent = siteValue;
+      this.statusEl.appendChild(titleEl);
+
+      const metaParts = [];
+      if (unitsValue) metaParts.push(`Units: ${unitsValue}`);
+      if (lastObsValue) metaParts.push(`Last obs: ${formatDate(lastObsValue)}`);
+      if (lastRefreshValue) metaParts.push(`Updated: ${formatDate(lastRefreshValue)}`);
+      if (note) metaParts.push(note);
+
+      const metaEl = document.createElement('div');
+      metaEl.className = 'plot-status__meta';
+      metaEl.textContent = metaParts.length ? metaParts.join(' • ') : 'Loading data...';
+      this.statusEl.appendChild(metaEl);
+
       if (warning) {
+        const warnEl = document.createElement('div');
+        warnEl.className = 'plot-status__warning';
+        warnEl.textContent = warning;
+        this.statusEl.appendChild(warnEl);
         this.statusEl.classList.add('plot-status--error');
       } else {
         this.statusEl.classList.remove('plot-status--error');
@@ -404,16 +519,38 @@
       }
 
       const colors = getThemeColors();
-      const displayUnits = 'log1';
-      const yTitleBase = `log1p(${this.config.yLabel})`;
-      const yTitle = `${yTitleBase} (${displayUnits})`;
-      const shapes = buildThresholdShapes(this.config, colors);
-      const yRange = [this.config.yMin, this.config.yMax];
+      const logAxis = this.config.logY;
+      const usablePoints = logAxis
+        ? points.filter((point) => Number.isFinite(point.y) && point.y > 0)
+        : points.slice();
+
+      if (!usablePoints.length) {
+        this.setStatus({ warning: 'No valid data available for plotting.' });
+        return;
+      }
+
+      const extent = getDataExtent(usablePoints, logAxis);
+      let yMin = Number.isFinite(this.config.yMin) ? this.config.yMin : extent && extent.min;
+      let yMax = Number.isFinite(this.config.yMax) ? this.config.yMax : extent && extent.max;
+
+      if (logAxis && Number.isFinite(yMin) && yMin <= 0 && extent) {
+        yMin = extent.min;
+      }
+      if (!Number.isFinite(yMin) || !Number.isFinite(yMax) || yMax <= yMin) {
+        yMin = extent ? extent.min : null;
+        yMax = extent ? extent.max : null;
+      }
+
+      const yRange = Number.isFinite(yMin) && Number.isFinite(yMax) ? [yMin, yMax] : null;
+      const displayUnits = normalizeUnits(units);
+      const yTitleBase = displayUnits ? `${this.config.yLabel} (${displayUnits})` : this.config.yLabel;
+      const yTitle = logAxis ? `${yTitleBase} (log scale)` : yTitleBase;
+      const threshold = buildThresholdShapes(this.config, colors, yRange);
 
       Plotly.react(
         this.chartEl,
-        [buildTrace(points, displayUnits, colors)],
-        buildLayout(yTitle, colors, yRange, shapes),
+        [buildTrace(usablePoints, displayUnits, colors)],
+        buildLayout(yTitle, colors, yRange, threshold.shapes, logAxis, threshold.annotations),
         { responsive: true, displayModeBar: false }
       );
 
@@ -518,7 +655,9 @@
         return 'Unexpected response format (JSON).';
       }
       if (error.kind === 'http') {
-        return `USGS request failed (${error.status}). Retrying.`;
+        return error.status
+          ? `USGS request failed (${error.status}). Retrying.`
+          : 'USGS request failed. Retrying.';
       }
       return error.message || 'Failed to load data.';
     }
@@ -616,7 +755,7 @@
         const lastRefresh = new Date();
 
         this.renderPlot({ points, siteName, units, lastObs, lastRefresh });
-        this.saveCache({ points, siteName, units: displayUnits });
+        this.saveCache({ points, siteName, units });
         this.scheduleNext(true);
       } catch (err) {
         if (err && err.name === 'AbortError' && (this.abortedForVisibility || document.hidden)) {

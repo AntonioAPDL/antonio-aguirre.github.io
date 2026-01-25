@@ -23,9 +23,9 @@ This repository contains the source for antonio-aguirre.com, built with Jekyll a
 - `public/`: theme assets and custom styles
 - `files/`: PDFs and images
 
-## San Lorenzo River live discharge plot
+## San Lorenzo River live USGS plot
 
-The home page includes a client-side Plotly chart of USGS instantaneous discharge data for the San Lorenzo River (site 11160500, parameter 00060). It is fully static and runs in the browser.
+The home page includes a client-side Plotly chart of USGS instantaneous values for the San Lorenzo River (site 11160500). It is fully static and runs in the browser, with a mode toggle for stage or discharge.
 
 - **Page location:** `index.html` (Plot Section).
 - **Container class:** `.usgs-iv-plot`.
@@ -35,16 +35,42 @@ The home page includes a client-side Plotly chart of USGS instantaneous discharg
 
 ### Configuration via data attributes
 
-The plot reads settings from HTML `data-*` attributes. Example:
+Stage mode (authoritative NOAA thresholds, exact stage values):
 
 ```html
 <div class="usgs-iv-plot"
      data-site="11160500"
-     data-parameter="00060"
+     data-mode="stage"
      data-period="P30D"
      data-refresh-min="15"
      data-timeout-sec="20"
-     data-title="San Lorenzo River Discharge Flow"
+     data-y-min="0"
+     data-y-max="25"
+     data-threshold-minor="16.5"
+     data-threshold-moderate="19.5"
+     data-threshold-major="21.76"
+     data-title="San Lorenzo River Stage"
+     data-ylabel="Stage">
+  ...
+</div>
+```
+
+Discharge mode (thresholds must be rating-derived; log axis optional):
+
+```html
+<div class="usgs-iv-plot"
+     data-site="11160500"
+     data-mode="discharge"
+     data-period="P30D"
+     data-refresh-min="15"
+     data-timeout-sec="20"
+     data-log-y="true"
+     data-y-min="10"
+     data-y-max="50000"
+     data-threshold-minor="REPLACE_WITH_CFS"
+     data-threshold-moderate="REPLACE_WITH_CFS"
+     data-threshold-major="REPLACE_WITH_CFS"
+     data-title="San Lorenzo River Discharge"
      data-ylabel="Discharge">
   ...
 </div>
@@ -52,21 +78,29 @@ The plot reads settings from HTML `data-*` attributes. Example:
 
 Supported attributes:
 
-- `data-site` (required), `data-parameter` (required)
+- `data-site` (required)
+- `data-mode` (`stage` or `discharge`, default `discharge`)
+- `data-parameter` (optional; overrides the mode default of `00065` for stage or `00060` for discharge)
 - `data-period` (e.g., `P7D`, `P30D`, `P90D`)
 - `data-refresh-min` (poll interval in minutes)
 - `data-timeout-sec` (fetch timeout in seconds)
+- `data-log-y` (`true`/`false` to enable a log-scale y-axis)
 - `data-title` (optional label for accessibility)
 - `data-ylabel` (base Y-axis label; units are appended automatically when available)
-- `data-y-min`, `data-y-max` (fixed Y-axis range; defaults to 0–12 for log scale)
-- `data-threshold-minor`, `data-threshold-major` (horizontal threshold lines + shaded regions)
+- `data-y-min`, `data-y-max` (optional fixed Y-axis range)
+- `data-threshold-minor`, `data-threshold-moderate`, `data-threshold-major` (horizontal threshold lines + shaded regions)
 
-The plot currently applies a log transform (`log(value + 1)`) to discharge values for stability.
-If you want a different transform, edit `transformValue()` in `public/js/sanlorenzo_flow.js`.
+### Deriving discharge thresholds from stage
 
-Current flood threshold settings (discharge):
-- Minor: ~6100 cfs (approximate discharge equivalent of 16.5 ft stage).
-- Major: ~15000 cfs (approximate discharge at 21.76 ft stage).
+Discharge thresholds are not canonical constants; derive them from the USGS rating curve and record the run date.
+
+Script:
+
+```bash
+Rscript scripts/compute_discharge_thresholds_from_stage.R 11160500 16.5 19.5 21.76
+```
+
+Update the `data-threshold-*` values in the HTML with the computed cfs numbers and note the rating retrieval date.
 
 ### Cache behavior (localStorage)
 
@@ -75,7 +109,7 @@ The last successful data payload is cached in `localStorage` and used on load if
 To clear the cache, open dev tools and remove keys starting with `usgs-iv:` or run:
 
 ```js
-localStorage.removeItem('usgs-iv:11160500:00060:P30D:v1');
+localStorage.removeItem('usgs-iv:11160500:00065:P30D:v3');
 ```
 
 ### Troubleshooting
@@ -84,4 +118,4 @@ localStorage.removeItem('usgs-iv:11160500:00060:P30D:v1');
 - **Rate limiting (403/429):** The script backs off and shows a warning. Increase `data-refresh-min` if needed.
 - **Offline:** The status line reports offline and retries when the connection returns.
 - **Unexpected response:** A schema or JSON error will show a warning; verify the endpoint.
-- **Threshold units:** Thresholds are assumed to be in the same units as the USGS parameter. NOAA flood thresholds are typically stage (feet), while parameter `00060` is discharge (cfs). If you want exact discharge thresholds, derive them from the USGS rating curve or switch to parameter `00065` (gage height).
+- **Threshold units:** Thresholds must match the parameter units. NOAA flood thresholds are stage (ft); for discharge (`00060`), use rating-derived cfs thresholds.

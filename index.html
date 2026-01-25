@@ -53,26 +53,26 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
   <!-- Plot Section -->
   <div class="plot-container">
     <h2 class="section-heading">
-      Real-Time Monitoring: San Lorenzo River Discharge Flow
+      Real-Time Monitoring: San Lorenzo River Stage
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> Live USGS discharge (site 11160500) displayed as log1p(cfs); shaded bands mark NOAA minor/major flood thresholds
-      using approximate discharge equivalents.
+      <strong>Note:</strong> Live river stage at Big Trees. Shaded bands indicate NOAA minor, moderate, and major flood levels.
     </div>
     <div class="usgs-iv-plot"
          data-site="11160500"
-         data-parameter="00060"
+         data-mode="stage"
          data-period="P30D"
          data-refresh-min="15"
          data-timeout-sec="20"
-         data-y-min="3"
-         data-y-max="12"
-         data-threshold-minor="6100"
-         data-threshold-major="15000"
-         data-title="San Lorenzo River Discharge Flow"
-         data-ylabel="Discharge">
+         data-y-min="0"
+         data-y-max="25"
+         data-threshold-minor="16.5"
+         data-threshold-moderate="19.5"
+         data-threshold-major="21.76"
+         data-title="San Lorenzo River Stage"
+         data-ylabel="Stage">
       <div class="plot-status" role="status" aria-live="polite">Loading data...</div>
-      <div class="plot-stage plot-iframe" role="img" aria-label="San Lorenzo River discharge flow plot">
+      <div class="plot-stage plot-iframe" role="img" aria-label="San Lorenzo River stage plot">
         <div class="plot-skeleton" aria-hidden="true">
           <div class="plot-skeleton__spinner"></div>
           <div class="plot-skeleton__text">Loading latest observations...</div>
@@ -83,7 +83,7 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
         Data source:
         <a href="https://waterservices.usgs.gov/" target="_blank" rel="noopener noreferrer">USGS NWIS IV</a>
         <span class="plot-caption__sep">|</span>
-        Dashed lines: NOAA minor/major flood thresholds (approx discharge)
+        Dashed lines: NOAA minor/moderate/major flood thresholds
       </div>
     </div>
   </div>

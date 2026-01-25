@@ -26,6 +26,10 @@
   --note-bg: #fff7d1;
   --note-text: #7b5f10;
   --note-border: #f2c94c;
+  --info-bg: rgba(27, 99, 198, 0.08);
+  --info-border: rgba(27, 99, 198, 0.25);
+  --info-text: #2f3b4a;
+  --info-warning: #b45309;
 }
 
 html.dark-theme,
@@ -46,6 +50,10 @@ body.dark-theme {
   --note-bg: #2a240f;
   --note-text: #f1d28a;
   --note-border: #d4a738;
+  --info-bg: rgba(27, 99, 198, 0.2);
+  --info-border: rgba(27, 99, 198, 0.45);
+  --info-text: #d7e0ea;
+  --info-warning: #fbbf24;
 }
 
 body {
@@ -285,19 +293,34 @@ button:focus-visible {
 
 .plot-status {
   font-size: 0.95rem;
-  color: var(--text-subtle);
+  color: var(--info-text);
   margin: 0.75rem 0 1rem;
   text-align: left;
-  background-color: var(--surface-2);
-  border: 1px solid var(--border-color);
+  background-color: var(--info-bg);
+  border: 1px solid var(--info-border);
   border-radius: var(--radius-md);
   padding: 0.5rem 0.75rem;
 }
 
 .plot-status--error {
-  color: var(--note-text);
-  background-color: var(--note-bg);
-  border-color: var(--note-border);
+  border-color: rgba(251, 146, 60, 0.4);
+}
+
+.plot-status__title {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
+}
+
+.plot-status__meta {
+  font-size: 0.92rem;
+  color: var(--info-text);
+}
+
+.plot-status__warning {
+  margin-top: 0.4rem;
+  font-size: 0.92rem;
+  color: var(--info-warning);
 }
 
 .plot-stage {
