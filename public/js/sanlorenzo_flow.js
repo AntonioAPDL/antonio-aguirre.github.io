@@ -14,6 +14,7 @@
     logY: false
   };
   const ENDPOINT_BASE = 'https://waterservices.usgs.gov/nwis/iv/';
+  const FORECAST_DEFAULT_URL = '/assets/data/forecasts/big_trees_latest.json';
   const MAX_BACKOFF_MS = 60 * 60 * 1000;
   const MIN_CACHE_AGE_MS = 30 * 60 * 1000;
   const STORAGE_VERSION = 3;
@@ -62,6 +63,13 @@
     }
   }
 
+  function formatUtc(value) {
+    if (!value) return null;
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toISOString().replace('T', ' ').replace('Z', '');
+  }
+
   function normalizeUnits(unitCode) {
     if (!unitCode) return unitCode;
     const normalized = unitCode.toLowerCase();
@@ -72,6 +80,11 @@
       return 'ft';
     }
     return unitCode;
+  }
+
+  function normalizeForecastUnits(units) {
+    if (!Array.isArray(units)) return [];
+    return units.map((unit) => normalizeUnits(unit)).filter(Boolean);
   }
 
   function getThemeColors() {
@@ -191,9 +204,70 @@
       y: points.map((p) => p.y),
       type: 'scatter',
       mode: 'lines',
+      name: 'Observed',
+      showlegend: true,
+      legendrank: 10,
       line: { color: colors.line, width: 2 },
-      hovertemplate: `%{x}<br>%{y:.2f}${unitLabel}<extra></extra>`
+      hovertemplate: `%{x}<br>%{y:.2f}${unitLabel}<br>Observed<extra></extra>`
     };
+  }
+
+  function buildForecastLine(points, label, color, legendrank) {
+    return {
+      x: points.map((p) => p.x),
+      y: points.map((p) => p.y),
+      type: 'scatter',
+      mode: 'lines',
+      name: label,
+      legendrank: legendrank,
+      line: { color: color, width: 2, dash: 'dot' },
+      hovertemplate: `%{x}<br>%{y:.2f}<br>${label}<extra></extra>`
+    };
+  }
+
+  function buildForecastBand(p10, p50, p90, label, color, legendrank) {
+    const band = `${label} (p10–p90)`;
+    const mid = `${label} (p50)`;
+    const rgba = color.replace('rgb', 'rgba').replace(')', ', 0.18)');
+    return [
+      {
+        x: p10.map((p) => p.x),
+        y: p10.map((p) => p.y),
+        type: 'scatter',
+        mode: 'lines',
+        line: { width: 0 },
+        name: band,
+        legendgroup: label,
+        showlegend: false,
+        legendrank: legendrank,
+        hovertemplate: `%{x}<br>%{y:.2f}<br>${label} p10<extra></extra>`
+      },
+      {
+        x: p90.map((p) => p.x),
+        y: p90.map((p) => p.y),
+        type: 'scatter',
+        mode: 'lines',
+        line: { width: 0 },
+        fill: 'tonexty',
+        fillcolor: rgba,
+        name: band,
+        legendgroup: label,
+        showlegend: true,
+        legendrank: legendrank,
+        hovertemplate: `%{x}<br>%{y:.2f}<br>${label} p90<extra></extra>`
+      },
+      {
+        x: p50.map((p) => p.x),
+        y: p50.map((p) => p.y),
+        type: 'scatter',
+        mode: 'lines',
+        name: mid,
+        legendgroup: label,
+        legendrank: legendrank + 1,
+        line: { color: color, width: 2 },
+        hovertemplate: `%{x}<br>%{y:.2f}<br>${label} p50<extra></extra>`
+      }
+    ];
   }
 
   function buildThresholdShapes(config, colors, yRange) {
@@ -352,6 +426,12 @@
       this.abortController = null;
       this.abortedForVisibility = false;
       this.lastSuccess = null;
+      this.lastPlotState = null;
+      this.forecastData = null;
+      this.forecastNote = null;
+      this.forecastWarning = null;
+      this.forecastLoaded = false;
+      this.forecastInFlight = false;
 
       this.storageKey = this.buildStorageKey();
     }
@@ -367,6 +447,9 @@
       const yMax = parseOptionalNumber(dataset.yMax);
       const parameterCd = dataset.parameter || (mode === 'stage' ? '00065' : '00060');
       const defaultLabel = mode === 'stage' ? 'Stage' : 'Discharge';
+      const floodMinor = parseOptionalNumber(dataset.floodMinorCfs || dataset.thresholdMinor);
+      const floodModerate = parseOptionalNumber(dataset.floodModerateCfs || dataset.thresholdModerate);
+      const floodMajor = parseOptionalNumber(dataset.floodMajorCfs || dataset.thresholdMajor);
       return {
         siteId: dataset.site,
         parameterCd: parameterCd,
@@ -378,10 +461,11 @@
         yLabel: dataset.ylabel || defaultLabel,
         yMin: yMin,
         yMax: yMax,
-        thresholdMinor: parseOptionalNumber(dataset.thresholdMinor),
-        thresholdModerate: parseOptionalNumber(dataset.thresholdModerate),
-        thresholdMajor: parseOptionalNumber(dataset.thresholdMajor),
-        logY: logY
+        thresholdMinor: floodMinor,
+        thresholdModerate: floodModerate,
+        thresholdMajor: floodMajor,
+        logY: logY,
+        forecastUrl: dataset.forecastUrl || FORECAST_DEFAULT_URL
       };
     }
 
@@ -459,6 +543,7 @@
       }
 
       this.renderFromCache();
+      this.fetchForecast();
       this.requestRefresh('init');
     }
 
@@ -485,6 +570,8 @@
       if (lastObsValue) metaParts.push(`Last obs: ${formatDate(lastObsValue)}`);
       if (lastRefreshValue) metaParts.push(`Updated: ${formatDate(lastRefreshValue)}`);
       if (note) metaParts.push(note);
+      if (this.forecastNote) metaParts.push(this.forecastNote);
+      if (this.forecastWarning) metaParts.push(this.forecastWarning);
 
       const metaEl = document.createElement('div');
       metaEl.className = 'plot-status__meta';
@@ -547,9 +634,15 @@
       const yTitle = logAxis ? `${yTitleBase} (log scale)` : yTitleBase;
       const threshold = buildThresholdShapes(this.config, colors, yRange);
 
+      const traces = [buildTrace(usablePoints, displayUnits, colors)];
+      const forecastTraces = this.buildForecastTraces(displayUnits);
+      if (forecastTraces.length) {
+        traces.push(...forecastTraces);
+      }
+
       Plotly.react(
         this.chartEl,
-        [buildTrace(usablePoints, displayUnits, colors)],
+        traces,
         buildLayout(yTitle, colors, yRange, threshold.shapes, logAxis, threshold.annotations),
         { responsive: true, displayModeBar: false }
       );
@@ -560,11 +653,113 @@
         lastObs,
         lastRefresh
       };
+      this.lastPlotState = { points, siteName, units, lastObs, lastRefresh };
 
       this.updateAriaLabel(siteName);
       this.setLoadedState(true);
       if (!options.silentStatus) {
         this.setStatus({ siteName, units, lastObs, lastRefresh, note: options.note });
+      }
+    }
+
+    buildForecastTraces(units) {
+      if (!this.forecastData) return [];
+      this.forecastWarning = null;
+      const normalizedUnits = normalizeUnits(units);
+      const forecastUnits = normalizeForecastUnits(this.forecastData.units);
+      if (normalizedUnits && forecastUnits.length && !forecastUnits.includes(normalizedUnits)) {
+        console.warn('[forecast] Units mismatch. Skipping overlay.', this.forecastData.units, normalizedUnits);
+        this.forecastWarning = 'Forecast hidden (units mismatch).';
+        return [];
+      }
+
+      const colors = {
+        analysis: 'rgb(14, 116, 144)',
+        short: 'rgb(37, 99, 235)',
+        medium: 'rgb(245, 158, 11)',
+        long: 'rgb(239, 68, 68)'
+      };
+
+      const traces = [];
+      const ranges = this.forecastData.ranges || {};
+      const analysis = ranges.analysis || ranges.analysis_assimilation;
+      const short = ranges.short || ranges.short_range;
+      const medium = ranges.medium_range;
+      const long = ranges.long_range;
+
+      if (analysis && Array.isArray(analysis.deterministic)) {
+        const points = this.forecastPoints(analysis.deterministic);
+        if (points.length) {
+          traces.push(buildForecastLine(points, 'NWS (analysis)', colors.analysis, 20));
+        }
+      }
+
+      if (short && Array.isArray(short.deterministic)) {
+        const points = this.forecastPoints(short.deterministic);
+        if (points.length) {
+          traces.push(buildForecastLine(points, 'NWS (short)', colors.short, 30));
+        }
+      }
+
+      if (medium && medium.p10 && medium.p50 && medium.p90) {
+        const p10 = this.forecastPoints(medium.p10);
+        const p50 = this.forecastPoints(medium.p50);
+        const p90 = this.forecastPoints(medium.p90);
+        if (p10.length && p50.length && p90.length) {
+          traces.push(...buildForecastBand(p10, p50, p90, 'NWM medium', colors.medium, 40));
+        }
+      }
+
+      if (long && long.p10 && long.p50 && long.p90) {
+        const p10 = this.forecastPoints(long.p10);
+        const p50 = this.forecastPoints(long.p50);
+        const p90 = this.forecastPoints(long.p90);
+        if (p10.length && p50.length && p90.length) {
+          traces.push(...buildForecastBand(p10, p50, p90, 'NWM long', colors.long, 50));
+        }
+      }
+
+      return traces;
+    }
+
+    forecastPoints(series) {
+      return series
+        .map((point) => {
+          const timestamp = new Date(point.t);
+          const value = Number(point.v);
+          if (Number.isNaN(timestamp.getTime()) || !Number.isFinite(value)) return null;
+          return { x: timestamp, y: value };
+        })
+        .filter(Boolean);
+    }
+
+    async fetchForecast() {
+      if (this.forecastInFlight || this.forecastLoaded) return;
+      if (!this.config.forecastUrl) return;
+      this.forecastInFlight = true;
+      const url = `${this.config.forecastUrl}?v=${Date.now()}`;
+      try {
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error(`forecast HTTP ${response.status}`);
+        }
+        const payload = await response.json();
+        if (!payload || !payload.ranges) {
+          throw new Error('forecast schema missing ranges');
+        }
+        this.forecastData = payload;
+        const generated = formatUtc(payload.generated_utc || payload.generated_at_utc);
+        if (generated) {
+          this.forecastNote = `Forecast updated: ${generated} UTC`;
+        }
+        this.forecastLoaded = true;
+        if (this.lastPlotState) {
+          this.renderPlot(this.lastPlotState, { silentStatus: true });
+        }
+      } catch (err) {
+        console.warn('[forecast] Failed to load forecast overlay.', err);
+      } finally {
+        this.forecastInFlight = false;
       }
     }
 

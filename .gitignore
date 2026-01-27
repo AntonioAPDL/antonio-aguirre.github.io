@@ -43,3 +43,16 @@ validation-report.json
 # Folders to ignore
 node_modules
 bower_components
+
+# Sandbox / local data
+_sandbox/
+data/_sandbox_nwm/
+data/_sandbox_nws/
+.python-version
+__pycache__/
+.pytest_cache/
+.venv/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/cache/

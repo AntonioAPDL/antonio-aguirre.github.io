@@ -1,0 +1,46 @@
+name: Update Big Trees forecast
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-forecast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r _sandbox/nws_ensemble_point/requirements.txt
+
+      - name: Update forecast JSON
+        run: |
+          python _sandbox/nws_ensemble_point/nwx_extract.py \
+            --config _sandbox/nws_ensemble_point/config.yaml \
+            --latest --profile web --export-web
+          mkdir -p assets/data/forecasts
+          cp data/_sandbox_nws/big_trees_latest.json assets/data/forecasts/big_trees_latest.json
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/data/forecasts/big_trees_latest.json
+          git commit -m "chore: update Big Trees forecast"
+          git push

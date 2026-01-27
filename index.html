@@ -53,24 +53,23 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
   <!-- Plot Section -->
   <div class="plot-container">
     <h2 class="section-heading">
-      Real-Time Monitoring: San Lorenzo River Stage
+      Real-Time Monitoring: San Lorenzo River Discharge
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> Live river stage at Big Trees. Shaded bands indicate NOAA minor, moderate, and major flood levels.
+      <strong>Note:</strong> Live discharge at Big Trees with a short-range forecast overlay when available.
     </div>
     <div class="usgs-iv-plot"
          data-site="11160500"
-         data-mode="stage"
+         data-mode="discharge"
          data-period="P30D"
          data-refresh-min="15"
          data-timeout-sec="20"
-         data-y-min="0"
-         data-y-max="25"
-         data-threshold-minor="16.5"
-         data-threshold-moderate="19.5"
-         data-threshold-major="21.76"
-         data-title="San Lorenzo River Stage"
-         data-ylabel="Stage">
+         data-forecast-url="{{ '/assets/data/forecasts/big_trees_latest.json' | relative_url }}"
+         data-title="San Lorenzo River Discharge"
+         data-ylabel="Discharge"
+         data-flood-minor-cfs=""
+         data-flood-moderate-cfs=""
+         data-flood-major-cfs="">
       <div class="plot-status" role="status" aria-live="polite">Loading data...</div>
       <div class="plot-stage plot-iframe" role="img" aria-label="San Lorenzo River stage plot">
         <div class="plot-skeleton" aria-hidden="true">
@@ -83,7 +82,9 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
         Data source:
         <a href="https://waterservices.usgs.gov/" target="_blank" rel="noopener noreferrer">USGS NWIS IV</a>
         <span class="plot-caption__sep">|</span>
-        Dashed lines: NOAA minor/moderate/major flood thresholds
+        Forecast overlay: NWS/NWM ensembles
+        <span class="plot-caption__sep">|</span>
+        Flood thresholds: discharge-based (approx.)
       </div>
     </div>
   </div>

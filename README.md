@@ -89,6 +89,29 @@ Supported attributes:
 - `data-ylabel` (base Y-axis label; units are appended automatically when available)
 - `data-y-min`, `data-y-max` (optional fixed Y-axis range)
 - `data-threshold-minor`, `data-threshold-moderate`, `data-threshold-major` (horizontal threshold lines + shaded regions)
+- `data-forecast-url` (optional forecast overlay JSON; defaults to `/assets/data/forecasts/big_trees_latest.json`)
+- `data-flood-minor-cfs`, `data-flood-moderate-cfs`, `data-flood-major-cfs` (discharge-only thresholds; optional)
+
+### Forecast overlay (NWS/NWM)
+
+The plot can overlay forecast guidance from a tracked JSON artifact:
+
+- **Artifact:** `assets/data/forecasts/big_trees_latest.json` (tracked in git)
+- **Update script:** `scripts/update_big_trees_forecast.sh` (runs the sandbox extractor as needed)
+- **Included series:** NWPS analysis/short (deterministic) + NWM medium/long ensembles (p10/p50/p90)
+- **TODO:** HEFS ensembles once location_id lookup is resolved
+
+To update the tracked forecast JSON:
+
+```bash
+scripts/update_big_trees_forecast.sh
+```
+
+If the forecast JSON is missing, the plot still renders observations only and logs a console warning.
+
+Forecast JSON fields (abridged):
+- `generated_utc`, `provider_mix`, `init_times`
+- `ranges.{analysis|short|medium_range|long_range}` with deterministic or p10/p50/p90 series
 
 ### Deriving discharge thresholds from stage
 
