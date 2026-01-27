@@ -207,12 +207,12 @@
       name: 'Observed',
       showlegend: true,
       legendrank: 10,
-      line: { color: colors.line, width: 2 },
+      line: { color: colors.line, width: 2.6 },
       hovertemplate: `%{x}<br>%{y:.2f}${unitLabel}<br>Observed<extra></extra>`
     };
   }
 
-  function buildForecastLine(points, label, color, legendrank) {
+  function buildForecastLine(points, label, color, legendrank, dashStyle) {
     return {
       x: points.map((p) => p.x),
       y: points.map((p) => p.y),
@@ -220,7 +220,7 @@
       mode: 'lines',
       name: label,
       legendrank: legendrank,
-      line: { color: color, width: 2, dash: 'dot' },
+      line: { color: color, width: 2.2, dash: dashStyle || 'dot' },
       hovertemplate: `%{x}<br>%{y:.2f}<br>${label}<extra></extra>`
     };
   }
@@ -674,10 +674,10 @@
       }
 
       const colors = {
-        analysis: 'rgb(14, 116, 144)',
-        short: 'rgb(37, 99, 235)',
+        analysis: 'rgb(15, 118, 110)',
+        short: 'rgb(22, 163, 74)',
         medium: 'rgb(245, 158, 11)',
-        long: 'rgb(239, 68, 68)'
+        long: 'rgb(220, 38, 38)'
       };
 
       const traces = [];
@@ -690,14 +690,14 @@
       if (analysis && Array.isArray(analysis.deterministic)) {
         const points = this.forecastPoints(analysis.deterministic);
         if (points.length) {
-          traces.push(buildForecastLine(points, 'NWS (analysis)', colors.analysis, 20));
+          traces.push(buildForecastLine(points, 'NWS (analysis)', colors.analysis, 20, 'dash'));
         }
       }
 
       if (short && Array.isArray(short.deterministic)) {
         const points = this.forecastPoints(short.deterministic);
         if (points.length) {
-          traces.push(buildForecastLine(points, 'NWS (short)', colors.short, 30));
+          traces.push(buildForecastLine(points, 'NWS (short)', colors.short, 30, 'dot'));
         }
       }
 
@@ -748,6 +748,7 @@
           throw new Error('forecast schema missing ranges');
         }
         this.forecastData = payload;
+        this.forecastWarning = null;
         const generated = formatUtc(payload.generated_utc || payload.generated_at_utc);
         if (generated) {
           this.forecastNote = `Forecast updated: ${generated} UTC`;
@@ -758,6 +759,15 @@
         }
       } catch (err) {
         console.warn('[forecast] Failed to load forecast overlay.', err);
+        this.forecastWarning = 'Forecast unavailable.';
+        if (this.lastPlotState) {
+          this.setStatus({
+            siteName: this.lastPlotState.siteName,
+            units: this.lastPlotState.units,
+            lastObs: this.lastPlotState.lastObs,
+            lastRefresh: this.lastPlotState.lastRefresh
+          });
+        }
       } finally {
         this.forecastInFlight = false;
       }
