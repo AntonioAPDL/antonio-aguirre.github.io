@@ -158,7 +158,7 @@
     return { series, points };
   }
 
-  function buildLayout(yTitle, colors, yRange, shapes, logAxis, annotations) {
+  function buildLayout(yTitle, colors, yRange, shapes, logAxis, annotations, xRange) {
     const yaxis = {
       title: yTitle,
       gridcolor: colors.grid,
@@ -176,6 +176,18 @@
       }
     }
 
+    const xaxis = {
+      title: 'Date',
+      type: 'date',
+      gridcolor: colors.grid,
+      zerolinecolor: colors.grid,
+      tickformat: '%b %d'
+    };
+
+    if (Array.isArray(xRange) && xRange[0] && xRange[1]) {
+      xaxis.range = xRange;
+    }
+
     return {
       margin: { l: 60, r: 20, t: 20, b: 50 },
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -186,13 +198,7 @@
         color: colors.text,
         family: 'Source Sans Pro, Helvetica, Arial, sans-serif'
       },
-      xaxis: {
-        title: 'Date',
-        type: 'date',
-        gridcolor: colors.grid,
-        zerolinecolor: colors.grid,
-        tickformat: '%b %d'
-      },
+      xaxis: xaxis,
       yaxis: yaxis
     };
   }
@@ -570,6 +576,7 @@
       if (lastObsValue) metaParts.push(`Last obs: ${formatDate(lastObsValue)}`);
       if (lastRefreshValue) metaParts.push(`Updated: ${formatDate(lastRefreshValue)}`);
       if (note) metaParts.push(note);
+      if (this.coverageNote) metaParts.push(this.coverageNote);
       if (this.forecastNote) metaParts.push(this.forecastNote);
       if (this.forecastWarning) metaParts.push(this.forecastWarning);
 
@@ -640,10 +647,12 @@
         traces.push(...forecastTraces);
       }
 
+      const xRange = this.buildXRange(usablePoints);
+
       Plotly.react(
         this.chartEl,
         traces,
-        buildLayout(yTitle, colors, yRange, threshold.shapes, logAxis, threshold.annotations),
+        buildLayout(yTitle, colors, yRange, threshold.shapes, logAxis, threshold.annotations, xRange),
         { responsive: true, displayModeBar: false }
       );
 
@@ -658,6 +667,7 @@
       this.updateAriaLabel(siteName);
       this.setLoadedState(true);
       if (!options.silentStatus) {
+        this.setCoverageNote(usablePoints);
         this.setStatus({ siteName, units, lastObs, lastRefresh, note: options.note });
       }
     }
@@ -720,6 +730,48 @@
       }
 
       return traces;
+    }
+
+    setCoverageNote(observedPoints) {
+      const obsExtent = this.seriesExtent(observedPoints);
+      const fcstExtent = this.forecastExtent();
+      const obsText = obsExtent ? `${formatDate(obsExtent.start)}–${formatDate(obsExtent.end)}` : '—';
+      const fcstText = fcstExtent ? `${formatDate(fcstExtent.start)}–${formatDate(fcstExtent.end)}` : '—';
+      this.coverageNote = `Obs: ${obsText} • Fcst: ${fcstText}`;
+    }
+
+    seriesExtent(points) {
+      if (!points || !points.length) return null;
+      const sorted = points.slice().sort((a, b) => a.x - b.x);
+      return { start: sorted[0].x, end: sorted[sorted.length - 1].x };
+    }
+
+    forecastExtent() {
+      if (!this.forecastData || !this.forecastData.ranges) return null;
+      const ranges = this.forecastData.ranges;
+      const seriesList = [];
+      Object.values(ranges).forEach((payload) => {
+        if (!payload) return;
+        if (Array.isArray(payload.deterministic)) seriesList.push(payload.deterministic);
+        if (Array.isArray(payload.p50)) seriesList.push(payload.p50);
+      });
+      const points = seriesList
+        .flat()
+        .map((point) => ({ x: new Date(point.t), y: point.v }))
+        .filter((point) => !Number.isNaN(point.x.getTime()));
+      return this.seriesExtent(points);
+    }
+
+    buildXRange(observedPoints) {
+      const obsExtent = this.seriesExtent(observedPoints);
+      const fcstExtent = this.forecastExtent();
+      if (!obsExtent) return null;
+      const start = obsExtent.start;
+      let end = obsExtent.end;
+      if (fcstExtent && fcstExtent.end > end) {
+        end = fcstExtent.end;
+      }
+      return [start, end];
     }
 
     forecastPoints(series) {
