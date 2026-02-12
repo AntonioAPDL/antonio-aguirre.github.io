@@ -14,7 +14,6 @@
     logY: false
   };
   const ENDPOINT_BASE = 'https://waterservices.usgs.gov/nwis/iv/';
-  const FORECAST_DEFAULT_URL = '/assets/data/forecasts/big_trees_latest.json';
   const MAX_BACKOFF_MS = 60 * 60 * 1000;
   const MIN_CACHE_AGE_MS = 30 * 60 * 1000;
   const STORAGE_VERSION = 3;
@@ -63,13 +62,6 @@
     }
   }
 
-  function formatUtc(value) {
-    if (!value) return null;
-    const date = value instanceof Date ? value : new Date(value);
-    if (Number.isNaN(date.getTime())) return null;
-    return date.toISOString().replace('T', ' ').replace('Z', '');
-  }
-
   function normalizeUnits(unitCode) {
     if (!unitCode) return unitCode;
     const normalized = unitCode.toLowerCase();
@@ -80,11 +72,6 @@
       return 'ft';
     }
     return unitCode;
-  }
-
-  function normalizeForecastUnits(units) {
-    if (!Array.isArray(units)) return [];
-    return units.map((unit) => normalizeUnits(unit)).filter(Boolean);
   }
 
   function getThemeColors() {
@@ -216,64 +203,6 @@
       line: { color: colors.line, width: 2.6 },
       hovertemplate: `%{x}<br>%{y:.2f}${unitLabel}<br>Observed<extra></extra>`
     };
-  }
-
-  function buildForecastLine(points, label, color, legendrank, dashStyle) {
-    return {
-      x: points.map((p) => p.x),
-      y: points.map((p) => p.y),
-      type: 'scatter',
-      mode: 'lines',
-      name: label,
-      legendrank: legendrank,
-      line: { color: color, width: 2.2, dash: dashStyle || 'dot' },
-      hovertemplate: `%{x}<br>%{y:.2f}<br>${label}<extra></extra>`
-    };
-  }
-
-  function buildForecastBand(p10, p50, p90, label, color, legendrank) {
-    const band = `${label} (p10–p90)`;
-    const mid = `${label} (p50)`;
-    const rgba = color.replace('rgb', 'rgba').replace(')', ', 0.18)');
-    return [
-      {
-        x: p10.map((p) => p.x),
-        y: p10.map((p) => p.y),
-        type: 'scatter',
-        mode: 'lines',
-        line: { width: 0 },
-        name: band,
-        legendgroup: label,
-        showlegend: false,
-        legendrank: legendrank,
-        hovertemplate: `%{x}<br>%{y:.2f}<br>${label} p10<extra></extra>`
-      },
-      {
-        x: p90.map((p) => p.x),
-        y: p90.map((p) => p.y),
-        type: 'scatter',
-        mode: 'lines',
-        line: { width: 0 },
-        fill: 'tonexty',
-        fillcolor: rgba,
-        name: band,
-        legendgroup: label,
-        showlegend: true,
-        legendrank: legendrank,
-        hovertemplate: `%{x}<br>%{y:.2f}<br>${label} p90<extra></extra>`
-      },
-      {
-        x: p50.map((p) => p.x),
-        y: p50.map((p) => p.y),
-        type: 'scatter',
-        mode: 'lines',
-        name: mid,
-        legendgroup: label,
-        legendrank: legendrank + 1,
-        line: { color: color, width: 2 },
-        hovertemplate: `%{x}<br>%{y:.2f}<br>${label} p50<extra></extra>`
-      }
-    ];
   }
 
   function buildThresholdShapes(config, colors, yRange) {
@@ -432,12 +361,6 @@
       this.abortController = null;
       this.abortedForVisibility = false;
       this.lastSuccess = null;
-      this.lastPlotState = null;
-      this.forecastData = null;
-      this.forecastNote = null;
-      this.forecastWarning = null;
-      this.forecastLoaded = false;
-      this.forecastInFlight = false;
 
       this.storageKey = this.buildStorageKey();
     }
@@ -470,8 +393,7 @@
         thresholdMinor: floodMinor,
         thresholdModerate: floodModerate,
         thresholdMajor: floodMajor,
-        logY: logY,
-        forecastUrl: dataset.forecastUrl || FORECAST_DEFAULT_URL
+        logY: logY
       };
     }
 
@@ -549,7 +471,6 @@
       }
 
       this.renderFromCache();
-      this.fetchForecast();
       this.requestRefresh('init');
     }
 
@@ -576,9 +497,6 @@
       if (lastObsValue) metaParts.push(`Last obs: ${formatDate(lastObsValue)}`);
       if (lastRefreshValue) metaParts.push(`Updated: ${formatDate(lastRefreshValue)}`);
       if (note) metaParts.push(note);
-      if (this.coverageNote) metaParts.push(this.coverageNote);
-      if (this.forecastNote) metaParts.push(this.forecastNote);
-      if (this.forecastWarning) metaParts.push(this.forecastWarning);
 
       const metaEl = document.createElement('div');
       metaEl.className = 'plot-status__meta';
@@ -641,18 +559,10 @@
       const yTitle = logAxis ? `${yTitleBase} (log scale)` : yTitleBase;
       const threshold = buildThresholdShapes(this.config, colors, yRange);
 
-      const traces = [buildTrace(usablePoints, displayUnits, colors)];
-      const forecastTraces = this.buildForecastTraces(displayUnits);
-      if (forecastTraces.length) {
-        traces.push(...forecastTraces);
-      }
-
-      const xRange = this.buildXRange(usablePoints);
-
       Plotly.react(
         this.chartEl,
-        traces,
-        buildLayout(yTitle, colors, yRange, threshold.shapes, logAxis, threshold.annotations, xRange),
+        [buildTrace(usablePoints, displayUnits, colors)],
+        buildLayout(yTitle, colors, yRange, threshold.shapes, logAxis, threshold.annotations),
         { responsive: true, displayModeBar: false }
       );
 
@@ -662,166 +572,11 @@
         lastObs,
         lastRefresh
       };
-      this.lastPlotState = { points, siteName, units, lastObs, lastRefresh };
 
       this.updateAriaLabel(siteName);
       this.setLoadedState(true);
       if (!options.silentStatus) {
-        this.setCoverageNote(usablePoints);
         this.setStatus({ siteName, units, lastObs, lastRefresh, note: options.note });
-      }
-    }
-
-    buildForecastTraces(units) {
-      if (!this.forecastData) return [];
-      this.forecastWarning = null;
-      const normalizedUnits = normalizeUnits(units);
-      const forecastUnits = normalizeForecastUnits(this.forecastData.units);
-      if (normalizedUnits && forecastUnits.length && !forecastUnits.includes(normalizedUnits)) {
-        console.warn('[forecast] Units mismatch. Skipping overlay.', this.forecastData.units, normalizedUnits);
-        this.forecastWarning = 'Forecast hidden (units mismatch).';
-        return [];
-      }
-
-      const colors = {
-        analysis: 'rgb(15, 118, 110)',
-        short: 'rgb(22, 163, 74)',
-        medium: 'rgb(245, 158, 11)',
-        long: 'rgb(220, 38, 38)'
-      };
-
-      const traces = [];
-      const ranges = this.forecastData.ranges || {};
-      const analysis = ranges.analysis || ranges.analysis_assimilation;
-      const short = ranges.short || ranges.short_range;
-      const medium = ranges.medium_range;
-      const long = ranges.long_range;
-
-      if (analysis && Array.isArray(analysis.deterministic)) {
-        const points = this.forecastPoints(analysis.deterministic);
-        if (points.length) {
-          traces.push(buildForecastLine(points, 'NWS (analysis)', colors.analysis, 20, 'dash'));
-        }
-      }
-
-      if (short && Array.isArray(short.deterministic)) {
-        const points = this.forecastPoints(short.deterministic);
-        if (points.length) {
-          traces.push(buildForecastLine(points, 'NWS (short)', colors.short, 30, 'dot'));
-        }
-      }
-
-      if (medium && medium.p10 && medium.p50 && medium.p90) {
-        const p10 = this.forecastPoints(medium.p10);
-        const p50 = this.forecastPoints(medium.p50);
-        const p90 = this.forecastPoints(medium.p90);
-        if (p10.length && p50.length && p90.length) {
-          traces.push(...buildForecastBand(p10, p50, p90, 'NWM medium', colors.medium, 40));
-        }
-      }
-
-      if (long && long.p10 && long.p50 && long.p90) {
-        const p10 = this.forecastPoints(long.p10);
-        const p50 = this.forecastPoints(long.p50);
-        const p90 = this.forecastPoints(long.p90);
-        if (p10.length && p50.length && p90.length) {
-          traces.push(...buildForecastBand(p10, p50, p90, 'NWM long', colors.long, 50));
-        }
-      }
-
-      return traces;
-    }
-
-    setCoverageNote(observedPoints) {
-      const obsExtent = this.seriesExtent(observedPoints);
-      const fcstExtent = this.forecastExtent();
-      const obsText = obsExtent ? `${formatDate(obsExtent.start)}–${formatDate(obsExtent.end)}` : '—';
-      const fcstText = fcstExtent ? `${formatDate(fcstExtent.start)}–${formatDate(fcstExtent.end)}` : '—';
-      this.coverageNote = `Obs: ${obsText} • Fcst: ${fcstText}`;
-    }
-
-    seriesExtent(points) {
-      if (!points || !points.length) return null;
-      const sorted = points.slice().sort((a, b) => a.x - b.x);
-      return { start: sorted[0].x, end: sorted[sorted.length - 1].x };
-    }
-
-    forecastExtent() {
-      if (!this.forecastData || !this.forecastData.ranges) return null;
-      const ranges = this.forecastData.ranges;
-      const seriesList = [];
-      Object.values(ranges).forEach((payload) => {
-        if (!payload) return;
-        if (Array.isArray(payload.deterministic)) seriesList.push(payload.deterministic);
-        if (Array.isArray(payload.p50)) seriesList.push(payload.p50);
-      });
-      const points = seriesList
-        .flat()
-        .map((point) => ({ x: new Date(point.t), y: point.v }))
-        .filter((point) => !Number.isNaN(point.x.getTime()));
-      return this.seriesExtent(points);
-    }
-
-    buildXRange(observedPoints) {
-      const obsExtent = this.seriesExtent(observedPoints);
-      const fcstExtent = this.forecastExtent();
-      if (!obsExtent) return null;
-      const start = obsExtent.start;
-      let end = obsExtent.end;
-      if (fcstExtent && fcstExtent.end > end) {
-        end = fcstExtent.end;
-      }
-      return [start, end];
-    }
-
-    forecastPoints(series) {
-      return series
-        .map((point) => {
-          const timestamp = new Date(point.t);
-          const value = Number(point.v);
-          if (Number.isNaN(timestamp.getTime()) || !Number.isFinite(value)) return null;
-          return { x: timestamp, y: value };
-        })
-        .filter(Boolean);
-    }
-
-    async fetchForecast() {
-      if (this.forecastInFlight || this.forecastLoaded) return;
-      if (!this.config.forecastUrl) return;
-      this.forecastInFlight = true;
-      const url = `${this.config.forecastUrl}?v=${Date.now()}`;
-      try {
-        const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) {
-          throw new Error(`forecast HTTP ${response.status}`);
-        }
-        const payload = await response.json();
-        if (!payload || !payload.ranges) {
-          throw new Error('forecast schema missing ranges');
-        }
-        this.forecastData = payload;
-        this.forecastWarning = null;
-        const generated = formatUtc(payload.generated_utc || payload.generated_at_utc);
-        if (generated) {
-          this.forecastNote = `Forecast updated: ${generated} UTC`;
-        }
-        this.forecastLoaded = true;
-        if (this.lastPlotState) {
-          this.renderPlot(this.lastPlotState, { silentStatus: true });
-        }
-      } catch (err) {
-        console.warn('[forecast] Failed to load forecast overlay.', err);
-        this.forecastWarning = 'Forecast unavailable.';
-        if (this.lastPlotState) {
-          this.setStatus({
-            siteName: this.lastPlotState.siteName,
-            units: this.lastPlotState.units,
-            lastObs: this.lastPlotState.lastObs,
-            lastRefresh: this.lastPlotState.lastRefresh
-          });
-        }
-      } finally {
-        this.forecastInFlight = false;
       }
     }
 

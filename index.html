@@ -56,7 +56,7 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
       Real-Time Monitoring: San Lorenzo River Discharge
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> Live discharge at Big Trees with a short-range forecast overlay when available.
+      <strong>Note:</strong> Live observed discharge at Big Trees (last 30 days).
     </div>
     <div class="usgs-iv-plot"
          data-site="11160500"
@@ -64,14 +64,15 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
          data-period="P30D"
          data-refresh-min="15"
          data-timeout-sec="20"
-         data-forecast-url="{{ '/assets/data/forecasts/big_trees_latest.json' | relative_url }}"
+         data-y-min="0"
+         data-y-max="20000"
          data-title="San Lorenzo River Discharge"
          data-ylabel="Discharge"
          data-flood-minor-cfs=""
          data-flood-moderate-cfs=""
          data-flood-major-cfs="">
       <div class="plot-status" role="status" aria-live="polite">Loading data...</div>
-      <div class="plot-stage plot-iframe" role="img" aria-label="San Lorenzo River stage plot">
+      <div class="plot-stage plot-iframe" role="img" aria-label="San Lorenzo River discharge plot">
         <div class="plot-skeleton" aria-hidden="true">
           <div class="plot-skeleton__spinner"></div>
           <div class="plot-skeleton__text">Loading latest observations...</div>
@@ -81,10 +82,6 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
       <div class="plot-caption">
         Data source:
         <a href="https://waterservices.usgs.gov/" target="_blank" rel="noopener noreferrer">USGS NWIS IV</a>
-        <span class="plot-caption__sep">|</span>
-        Forecast overlay: NWS/NWM ensembles
-        <span class="plot-caption__sep">|</span>
-        Flood thresholds: discharge-based (approx.)
       </div>
     </div>
   </div>
