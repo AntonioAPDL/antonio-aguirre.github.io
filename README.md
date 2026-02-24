@@ -109,7 +109,29 @@ scripts/update_big_trees_forecast.sh
 
 If the forecast JSON is missing, the plot still renders observations only and logs a console warning.
 
-Forecast JSON fields (abridged):
+## GEFS forecast panel (new, additive)
+
+The home page now includes a second panel for GEFS point forecasts (precipitation + soil moisture) near Big Trees.
+
+- **Panel container:** `index.html` (`.gefs-forecast-panel`)
+- **Client script:** `public/js/gefs_forecast_panel.js`
+- **Tracked asset:** `assets/data/forecasts/gefs_big_trees_latest.json`
+- **Pipeline source:** `_sandbox/gefs_point_pipeline`
+- **Update script:** `scripts/update_big_trees_gefs_forecast.sh`
+- **Scheduled workflow:** `.github/workflows/update_gefs_forecast.yml` (every 3 hours)
+
+Behavior:
+
+- Fetches `gefs_big_trees_latest.json`
+- Renders two Plotly charts:
+  - APCP band (`p10-p90`) + `p50` + mean
+  - SOILW depth-level medians (`p50`) with optional uncertainty bands
+- Displays metadata and freshness warning if stale
+- Degrades gracefully when JSON is missing/invalid
+
+The existing USGS discharge panel logic in `public/js/sanlorenzo_flow.js` remains unchanged.
+
+NWS/NWM overlay JSON fields (abridged, existing USGS panel):
 - `generated_utc`, `provider_mix`, `init_times`
 - `ranges.{analysis|short|medium_range|long_range}` with deterministic or p10/p50/p90 series
 

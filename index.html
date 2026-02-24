@@ -85,7 +85,34 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
       </div>
     </div>
   </div>
+
+  <div class="plot-container">
+    <h2 class="section-heading">
+      GEFS Point Forecast: Precipitation and Soil Moisture
+    </h2>
+    <div class="note-box">
+      <strong>Note:</strong> Ensemble forecast extracted near USGS Big Trees (<code>11160500</code>).
+    </div>
+    <div class="gefs-forecast-panel"
+         data-gefs-url="/assets/data/forecasts/gefs_big_trees_latest.json"
+         data-stale-hours="12">
+      <div class="plot-status gefs-forecast-status" role="status" aria-live="polite">
+        Loading GEFS forecast...
+      </div>
+      <div class="plot-stage plot-iframe" role="img" aria-label="GEFS precipitation forecast">
+        <div class="gefs-forecast-precip"></div>
+      </div>
+      <div class="plot-stage plot-iframe" role="img" aria-label="GEFS soil moisture forecast" style="margin-top: 1rem;">
+        <div class="gefs-forecast-soil"></div>
+      </div>
+      <div class="plot-caption">
+        Data source:
+        <a href="https://registry.opendata.aws/noaa-gefs/" target="_blank" rel="noopener noreferrer">NOAA GEFS (AWS open data)</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <script src="{{ '/public/js/sanlorenzo_flow.js' | relative_url }}"></script>
+<script src="{{ '/public/js/gefs_forecast_panel.js' | relative_url }}"></script>
