@@ -112,6 +112,13 @@
     el.classList.toggle('plot-status--error', Boolean(warning));
   }
 
+  function buildFetchUrl(baseUrl) {
+    const url = new URL(baseUrl, window.location.origin);
+    // Bust browser/proxy caches so periodic refresh checks latest artifact.
+    url.searchParams.set('_ts', String(Date.now()));
+    return url.toString();
+  }
+
   function renderPanel(container, payload) {
     const precipEl = container.querySelector('.gefs-forecast-precip');
     const soilEl = container.querySelector('.gefs-forecast-soil');
@@ -166,22 +173,35 @@
     if (!window.Plotly) return;
     const statusEl = container.querySelector('.gefs-forecast-status');
     const url = container.dataset.gefsUrl || '/assets/data/forecasts/gefs_big_trees_latest.json';
-    try {
-      const response = await fetch(url, { cache: 'no-store' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const payload = await response.json();
-      if (!payload || typeof payload !== 'object') throw new Error('Invalid JSON payload');
-      renderPanel(container, payload);
-    } catch (err) {
-      if (statusEl) {
-        statusEl.textContent = `GEFS forecast unavailable (${err.message || 'unknown error'})`;
-        statusEl.classList.add('plot-status--error');
+    const refreshMinutes = Math.max(1, numberOrNull(container.dataset.refreshMin) || 60);
+    const refreshMs = refreshMinutes * 60 * 1000;
+    let inFlight = false;
+
+    async function refreshOnce() {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        const response = await fetch(buildFetchUrl(url), { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        if (!payload || typeof payload !== 'object') throw new Error('Invalid JSON payload');
+        renderPanel(container, payload);
+      } catch (err) {
+        if (statusEl) {
+          statusEl.textContent = `GEFS forecast unavailable (${err.message || 'unknown error'})`;
+          statusEl.classList.add('plot-status--error');
+        }
+        const precipEl = container.querySelector('.gefs-forecast-precip');
+        const soilEl = container.querySelector('.gefs-forecast-soil');
+        if (precipEl && window.Plotly) Plotly.purge(precipEl);
+        if (soilEl && window.Plotly) Plotly.purge(soilEl);
+      } finally {
+        inFlight = false;
       }
-      const precipEl = container.querySelector('.gefs-forecast-precip');
-      const soilEl = container.querySelector('.gefs-forecast-soil');
-      if (precipEl && window.Plotly) Plotly.purge(precipEl);
-      if (soilEl && window.Plotly) Plotly.purge(soilEl);
     }
+
+    await refreshOnce();
+    window.setInterval(refreshOnce, refreshMs);
   }
 
   function init() {
