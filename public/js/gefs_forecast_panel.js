@@ -41,6 +41,115 @@
     return { x, y };
   }
 
+  function parseDailyTimestamp(value) {
+    if (!value) return null;
+    const raw = String(value).trim();
+    if (!raw) return null;
+    const isoDay = /^\d{4}-\d{2}-\d{2}$/;
+    if (isoDay.test(raw)) {
+      return parseDate(`${raw}T00:00:00Z`);
+    }
+    return parseDate(raw);
+  }
+
+  function parseSimpleCsv(text) {
+    if (typeof text !== 'string' || !text.trim()) return [];
+    const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map((value) => String(value || '').trim());
+    const idx = Object.create(null);
+    headers.forEach((name, i) => { idx[name] = i; });
+    if (idx.timestamp === undefined) return [];
+    const rows = [];
+    for (let i = 1; i < lines.length; i += 1) {
+      const cols = lines[i].split(',');
+      const timestamp = cols[idx.timestamp] ? String(cols[idx.timestamp]).trim() : '';
+      if (!timestamp) continue;
+      rows.push({
+        timestamp,
+        daily_avg_ppt: idx.daily_avg_ppt === undefined ? '' : (cols[idx.daily_avg_ppt] || '').trim(),
+        daily_avg_soil_ERA5: idx.daily_avg_soil_ERA5 === undefined ? '' : (cols[idx.daily_avg_soil_ERA5] || '').trim(),
+        daily_avg_soil_NWM_SOIL_M: idx.daily_avg_soil_NWM_SOIL_M === undefined ? '' : (cols[idx.daily_avg_soil_NWM_SOIL_M] || '').trim(),
+        daily_avg_soil_NWM_SOIL_W: idx.daily_avg_soil_NWM_SOIL_W === undefined ? '' : (cols[idx.daily_avg_soil_NWM_SOIL_W] || '').trim()
+      });
+    }
+    return rows;
+  }
+
+  function buildObservedRetrospectiveFromCsv(rows, initDate, observationWindowDays, sourceCsv) {
+    if (!Array.isArray(rows) || !initDate) return null;
+    const startDate = new Date(initDate.getTime() - observationWindowDays * 24 * 3600 * 1000);
+    const filtered = rows
+      .map((row) => {
+        const ts = parseDailyTimestamp(row.timestamp);
+        if (!ts) return null;
+        if (ts < startDate || ts >= initDate) return null;
+        return { ...row, _date: ts };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a._date - b._date);
+    if (!filtered.length) return null;
+
+    function toSeries(column) {
+      const series = [];
+      filtered.forEach((row) => {
+        const num = numberOrNull(row[column]);
+        if (num === null) return;
+        series.push({ t: row._date.toISOString(), v: num });
+      });
+      return series;
+    }
+
+    return {
+      window_days: observationWindowDays,
+      start_utc: startDate.toISOString(),
+      end_utc: initDate.toISOString(),
+      source_csv: sourceCsv,
+      daily_avg_ppt: toSeries('daily_avg_ppt'),
+      daily_avg_soil_ERA5: toSeries('daily_avg_soil_ERA5'),
+      daily_avg_soil_NWM_SOIL_M: toSeries('daily_avg_soil_NWM_SOIL_M'),
+      daily_avg_soil_NWM_SOIL_W: toSeries('daily_avg_soil_NWM_SOIL_W')
+    };
+  }
+
+  function hasObservedRetrospective(payload) {
+    if (!payload || typeof payload !== 'object') return false;
+    const observed = payload.observed_retrospective;
+    if (!observed || typeof observed !== 'object') return false;
+    const keys = [
+      'daily_avg_ppt',
+      'daily_avg_soil_ERA5',
+      'daily_avg_soil_NWM_SOIL_M',
+      'daily_avg_soil_NWM_SOIL_W'
+    ];
+    return keys.some((key) => Array.isArray(observed[key]) && observed[key].length > 0);
+  }
+
+  async function attachObservedRetrospective(container, payload) {
+    if (!payload || typeof payload !== 'object') return payload;
+    if (hasObservedRetrospective(payload)) return payload;
+    const initDate = parseDate(payload.init_time_utc);
+    if (!initDate) return payload;
+    const observationWindowDays = Math.max(
+      1,
+      numberOrNull(container.dataset.observationWindowDays) ||
+        numberOrNull(payload.observation_window_days) ||
+        20
+    );
+    const csvUrl = container.dataset.observedCsvUrl || '/climate_daily_ppt_soil.csv';
+    try {
+      const response = await fetch(buildFetchUrl(csvUrl), { cache: 'no-store' });
+      if (!response.ok) return payload;
+      const text = await response.text();
+      const rows = parseSimpleCsv(text);
+      const observed = buildObservedRetrospectiveFromCsv(rows, initDate, observationWindowDays, csvUrl);
+      if (observed) payload.observed_retrospective = observed;
+    } catch (err) {
+      // Keep panel resilient when optional observed CSV is unavailable.
+    }
+    return payload;
+  }
+
   function latestPointDate(pointGroups) {
     let latest = null;
     (pointGroups || []).forEach((points) => {
@@ -324,8 +433,9 @@
       try {
         const response = await fetch(buildFetchUrl(url), { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const payload = await response.json();
+        let payload = await response.json();
         if (!payload || typeof payload !== 'object') throw new Error('Invalid JSON payload');
+        payload = await attachObservedRetrospective(container, payload);
         renderPanel(container, payload);
       } catch (err) {
         if (statusEl) {
