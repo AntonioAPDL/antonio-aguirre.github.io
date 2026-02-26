@@ -98,15 +98,39 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
          data-refresh-min="60"
          data-observation-window-days="20"
          data-stale-hours="12">
+      <div class="gefs-panel-meta">
+        <p class="gefs-panel-meta__title">Operational context</p>
+        <p class="gefs-panel-meta__text">
+          20-day observed retrospective plus GEFS guidance (0 to 240 h, 3-hour leads, 31 members).
+        </p>
+        <div class="gefs-key" aria-label="Forecast plot legend guide">
+          <span class="gefs-key__item gefs-key__item--observed">Observed retrospective</span>
+          <span class="gefs-key__item gefs-key__item--band">Ensemble band (p10-p90)</span>
+          <span class="gefs-key__item gefs-key__item--median">Ensemble median (p50)</span>
+          <span class="gefs-key__item gefs-key__item--mean">Ensemble mean</span>
+        </div>
+      </div>
       <div class="plot-status gefs-forecast-status" role="status" aria-live="polite">
         Loading GEFS forecast...
       </div>
-      <div class="plot-stage plot-iframe" role="img" aria-label="GEFS precipitation forecast">
-        <div class="gefs-forecast-precip"></div>
-      </div>
-      <div class="plot-stage plot-iframe" role="img" aria-label="GEFS soil moisture forecast" style="margin-top: 1rem;">
-        <div class="gefs-forecast-soil"></div>
-      </div>
+      <section class="gefs-chart-card">
+        <div class="gefs-chart-card__head">
+          <h3>Precipitation Forecast</h3>
+          <p>Surface accumulated precipitation with observed context and GEFS ensemble spread.</p>
+        </div>
+        <div class="plot-stage plot-iframe" role="img" aria-label="GEFS precipitation forecast">
+          <div class="gefs-forecast-precip"></div>
+        </div>
+      </section>
+      <section class="gefs-chart-card">
+        <div class="gefs-chart-card__head">
+          <h3>Soil Moisture Forecast</h3>
+          <p>Observed ERA5/NWM context with depth-resolved GEFS soil moisture forecasts.</p>
+        </div>
+        <div class="plot-stage plot-iframe" role="img" aria-label="GEFS soil moisture forecast">
+          <div class="gefs-forecast-soil"></div>
+        </div>
+      </section>
       <div class="plot-caption">
         Data source:
         <a href="https://registry.opendata.aws/noaa-gefs/" target="_blank" rel="noopener noreferrer">NOAA GEFS (AWS open data)</a>

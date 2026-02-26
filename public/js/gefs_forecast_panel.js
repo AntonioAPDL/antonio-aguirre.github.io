@@ -174,7 +174,8 @@
     return [start, end];
   }
 
-  function buildBandTrace(low, high, name, color) {
+  function buildBandTrace(low, high, name, color, options) {
+    const opts = options || {};
     const lower = seriesToXY(low);
     const upper = seriesToXY(high);
     if (!lower.x.length || !upper.x.length) return null;
@@ -187,7 +188,8 @@
       line: { color: 'rgba(0,0,0,0)' },
       name,
       hoverinfo: 'skip',
-      showlegend: true
+      legendgroup: opts.legendGroup || undefined,
+      showlegend: opts.showLegend === undefined ? false : Boolean(opts.showLegend)
     };
   }
 
@@ -195,14 +197,19 @@
     const series = seriesToXY(points);
     if (!series.x.length) return null;
     const opts = options || {};
+    const unitSuffix = opts.unit ? ` ${opts.unit}` : '';
+    const valueFormat = opts.valueFormat || '.2f';
+    const hoverLabel = opts.hoverLabel || name;
     return {
       x: series.x,
       y: series.y,
       type: 'scatter',
       mode: 'lines',
       name,
+      legendgroup: opts.legendGroup || undefined,
       opacity: opts.opacity === undefined ? 1 : opts.opacity,
       line: { color, width: opts.width || 2, dash: dash || 'solid' },
+      hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>${hoverLabel}: %{y:${valueFormat}}${unitSuffix}<extra></extra>`,
       showlegend: opts.showlegend === undefined ? true : Boolean(opts.showlegend)
     };
   }
@@ -212,24 +219,60 @@
     return {
       text: styles.getPropertyValue('--text-color').trim() || '#1f2933',
       grid: styles.getPropertyValue('--border-color').trim() || '#e2e8f0',
-      accent: styles.getPropertyValue('--accent-color').trim() || '#1b63c6'
+      accent: styles.getPropertyValue('--accent-color').trim() || '#1b63c6',
+      muted: styles.getPropertyValue('--text-subtle').trim() || '#64748b',
+      surface: styles.getPropertyValue('--surface-1').trim() || '#ffffff'
     };
   }
 
   function layout(title, yTitle, colors, options) {
     const opts = options || {};
     const chartLayout = {
-      margin: { l: 56, r: 18, t: 26, b: 48 },
-      title: { text: title, font: { size: 14, color: colors.text } },
+      margin: { l: 60, r: 20, t: 42, b: 52 },
+      title: { text: title, font: { size: 15, color: colors.text }, x: 0.01, xanchor: 'left' },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
       font: { color: colors.text, family: 'Source Sans Pro, Helvetica, Arial, sans-serif' },
-      xaxis: { type: 'date', title: 'Valid time', gridcolor: colors.grid },
-      yaxis: { title: yTitle, gridcolor: colors.grid },
-      legend: { orientation: 'h', y: 1.14, x: 0 }
+      hovermode: 'x unified',
+      hoverlabel: {
+        bgcolor: colors.surface,
+        bordercolor: colors.grid,
+        font: { color: colors.text, size: 11 }
+      },
+      xaxis: {
+        type: 'date',
+        title: 'Valid time (UTC)',
+        gridcolor: colors.grid,
+        showline: true,
+        linecolor: colors.grid,
+        tickformat: '%b %d',
+        showspikes: true,
+        spikemode: 'across',
+        spikesnap: 'cursor',
+        spikedash: 'dot',
+        automargin: true
+      },
+      yaxis: {
+        title: yTitle,
+        gridcolor: colors.grid,
+        showline: true,
+        linecolor: colors.grid,
+        automargin: true
+      },
+      legend: {
+        orientation: 'h',
+        y: opts.legendY === undefined ? 1.14 : opts.legendY,
+        x: 0,
+        font: { size: 11, color: colors.text },
+        itemclick: 'toggle',
+        itemdoubleclick: 'toggleothers'
+      }
     };
     if (Array.isArray(opts.xRange) && opts.xRange.length === 2) {
       chartLayout.xaxis.range = opts.xRange;
+    }
+    if (opts.yTickFormat) {
+      chartLayout.yaxis.tickformat = opts.yTickFormat;
     }
     if (opts.initTime) {
       chartLayout.shapes = [
@@ -242,6 +285,19 @@
           y0: 0,
           y1: 1,
           line: { color: '#64748b', width: 1, dash: 'dot' }
+        }
+      ];
+      chartLayout.annotations = [
+        {
+          xref: 'x',
+          x: opts.initTime,
+          yref: 'paper',
+          y: 1.03,
+          text: 'Forecast init',
+          showarrow: false,
+          font: { size: 11, color: colors.muted },
+          xanchor: 'left',
+          yanchor: 'bottom'
         }
       ];
     }
@@ -269,18 +325,13 @@
     const observed = payload && payload.observed_retrospective && typeof payload.observed_retrospective === 'object'
       ? payload.observed_retrospective
       : null;
-    const observedPoints = observed
-      ? [
-          observed.daily_avg_ppt,
-          observed.daily_avg_soil_ERA5,
-          observed.daily_avg_soil_NWM_SOIL_M,
-          observed.daily_avg_soil_NWM_SOIL_W
-        ]
-          .reduce((acc, series) => acc + (Array.isArray(series) ? series.length : 0), 0)
-      : 0;
+    const observedPptCount = observed && Array.isArray(observed.daily_avg_ppt) ? observed.daily_avg_ppt.length : 0;
+    const observedEra5Count = observed && Array.isArray(observed.daily_avg_soil_ERA5) ? observed.daily_avg_soil_ERA5.length : 0;
+    const observedNwmMCount = observed && Array.isArray(observed.daily_avg_soil_NWM_SOIL_M) ? observed.daily_avg_soil_NWM_SOIL_M.length : 0;
+    const observedNwmWCount = observed && Array.isArray(observed.daily_avg_soil_NWM_SOIL_W) ? observed.daily_avg_soil_NWM_SOIL_W.length : 0;
     const retroText = retroWindowDays ? `Retrospective window: ${retroWindowDays}d` : '';
-    const observedText = observedPoints > 0 ? `Observed context points: ${observedPoints}` : '';
-    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${retroText ? ` | ${retroText}` : ''}${observedText ? ` | ${observedText}` : ''}${warning ? ` | ${warning}` : ''}`;
+    const observedText = `Obs points (ppt/ERA5/NWM_M/NWM_W): ${observedPptCount}/${observedEra5Count}/${observedNwmMCount}/${observedNwmWCount}`;
+    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${retroText ? ` | ${retroText}` : ''} | ${observedText}${warning ? ` | ${warning}` : ''}`;
     el.classList.toggle('plot-status--error', Boolean(warning));
   }
 
@@ -320,30 +371,92 @@
     const precipLevel = precipLevelName ? precipLevels[precipLevelName] : null;
     if (precipEl && precipLevel) {
       const traces = [];
+      const precipUnits = precipLevel.units || '';
       const observedPrecip = observedRetro.daily_avg_ppt;
       const hasObservedPrecip = Array.isArray(observedPrecip) && observedPrecip.length > 0;
       const retroPrecip = ((retrospective.precip || {})[precipLevelName]) || null;
       if (hasObservedPrecip) {
-        const obsTrace = buildLineTrace(observedPrecip, 'observed ppt (PRISM)', '#111827', 'solid', { width: 2.2 });
+        const obsTrace = buildLineTrace(
+          observedPrecip,
+          'Observed PRISM',
+          '#0f766e',
+          'solid',
+          { width: 2.3, unit: precipUnits, valueFormat: '.2f', hoverLabel: 'Observed PRISM' }
+        );
         if (obsTrace) traces.push(obsTrace);
       } else if (retroPrecip) {
         const retroBand = buildBandTrace(
           retroPrecip.p10,
           retroPrecip.p90,
-          'retrospective p10-p90',
-          'rgba(100,116,139,0.18)'
+          'Retrospective p10-p90',
+          'rgba(100,116,139,0.16)',
+          { showLegend: true, legendGroup: 'precip_retro' }
         );
         if (retroBand) traces.push(retroBand);
-        const retroP50 = buildLineTrace(retroPrecip.p50, 'retrospective p50', '#475569', 'dash', { width: 1.8 });
+        const retroP50 = buildLineTrace(
+          retroPrecip.p50,
+          'Retrospective p50',
+          '#475569',
+          'dash',
+          {
+            width: 1.8,
+            unit: precipUnits,
+            valueFormat: '.2f',
+            hoverLabel: 'Retrospective p50',
+            legendGroup: 'precip_retro'
+          }
+        );
         if (retroP50) traces.push(retroP50);
-        const retroMean = buildLineTrace(retroPrecip.mean, 'retrospective mean', '#64748b', 'dot', { width: 1.6 });
+        const retroMean = buildLineTrace(
+          retroPrecip.mean,
+          'Retrospective mean',
+          '#64748b',
+          'dot',
+          {
+            width: 1.6,
+            unit: precipUnits,
+            valueFormat: '.2f',
+            hoverLabel: 'Retrospective mean',
+            legendGroup: 'precip_retro'
+          }
+        );
         if (retroMean) traces.push(retroMean);
       }
-      const band = buildBandTrace(precipLevel.p10, precipLevel.p90, 'p10-p90', 'rgba(27,99,198,0.16)');
+      const band = buildBandTrace(
+        precipLevel.p10,
+        precipLevel.p90,
+        'GEFS p10-p90',
+        'rgba(29,78,216,0.15)',
+        { showLegend: true, legendGroup: 'precip_forecast' }
+      );
       if (band) traces.push(band);
-      const p50Trace = buildLineTrace(precipLevel.p50, 'p50', colors.accent);
+      const p50Trace = buildLineTrace(
+        precipLevel.p50,
+        'GEFS p50',
+        colors.accent,
+        'solid',
+        {
+          width: 2.2,
+          unit: precipUnits,
+          valueFormat: '.2f',
+          hoverLabel: 'GEFS p50',
+          legendGroup: 'precip_forecast'
+        }
+      );
       if (p50Trace) traces.push(p50Trace);
-      const meanTrace = buildLineTrace(precipLevel.mean, 'mean', '#fb923c', 'dash');
+      const meanTrace = buildLineTrace(
+        precipLevel.mean,
+        'GEFS mean',
+        '#ea580c',
+        'dash',
+        {
+          width: 1.9,
+          unit: precipUnits,
+          valueFormat: '.2f',
+          hoverLabel: 'GEFS mean',
+          legendGroup: 'precip_forecast'
+        }
+      );
       if (meanTrace) traces.push(meanTrace);
       const precipXRange = buildXRange(
         initDate,
@@ -359,10 +472,10 @@
         precipEl,
         traces,
         layout(
-          'GEFS Precipitation (Surface)',
+          'Precipitation: observed context + GEFS ensemble',
           `APCP (${precipLevel.units || ''})`,
           colors,
-          { xRange: precipXRange, initTime: initDate }
+          { xRange: precipXRange, initTime: initDate, yTickFormat: '.1f', legendY: 1.16 }
         ),
         { responsive: true, displayModeBar: false }
       );
@@ -370,7 +483,7 @@
 
     if (soilEl) {
       const levels = Object.keys(payload.soil_moisture || {}).sort((a, b) => levelSortKey(a) - levelSortKey(b));
-      const palette = ['#1b63c6', '#0ea5e9', '#22c55e', '#f97316', '#ef4444'];
+      const palette = ['#1d4ed8', '#0284c7', '#16a34a', '#f59e0b', '#dc2626'];
       const traces = [];
       const pointGroups = [];
       const observedSoilEra5 = observedRetro.daily_avg_soil_ERA5;
@@ -378,11 +491,29 @@
       const observedSoilNwmW = observedRetro.daily_avg_soil_NWM_SOIL_W;
       const hasObservedSoil = [observedSoilEra5, observedSoilNwmM, observedSoilNwmW]
         .some((series) => Array.isArray(series) && series.length > 0);
-      const obsEra5Trace = buildLineTrace(observedSoilEra5, 'observed soil ERA5', '#0f766e', 'solid', { width: 2.1 });
+      const obsEra5Trace = buildLineTrace(
+        observedSoilEra5,
+        'Observed ERA5 swvl1',
+        '#0f766e',
+        'solid',
+        { width: 2.2, valueFormat: '.3f', hoverLabel: 'Observed ERA5 swvl1', legendGroup: 'soil_obs' }
+      );
       if (obsEra5Trace) traces.push(obsEra5Trace);
-      const obsNwmMTrace = buildLineTrace(observedSoilNwmM, 'observed soil NWM SOIL_M', '#7c3aed', 'solid', { width: 1.8 });
+      const obsNwmMTrace = buildLineTrace(
+        observedSoilNwmM,
+        'Observed NWM SOIL_M',
+        '#7c3aed',
+        'solid',
+        { width: 1.8, valueFormat: '.3f', hoverLabel: 'Observed NWM SOIL_M', legendGroup: 'soil_obs' }
+      );
       if (obsNwmMTrace) traces.push(obsNwmMTrace);
-      const obsNwmWTrace = buildLineTrace(observedSoilNwmW, 'observed soil NWM SOIL_W', '#be185d', 'solid', { width: 1.8 });
+      const obsNwmWTrace = buildLineTrace(
+        observedSoilNwmW,
+        'Observed NWM SOIL_W',
+        '#be185d',
+        'solid',
+        { width: 1.8, valueFormat: '.3f', hoverLabel: 'Observed NWM SOIL_W', legendGroup: 'soil_obs' }
+      );
       if (obsNwmWTrace) traces.push(obsNwmWTrace);
       pointGroups.push(observedSoilEra5, observedSoilNwmM, observedSoilNwmW);
       levels.forEach((level, idx) => {
@@ -391,17 +522,41 @@
         if (!hasObservedSoil && retroLevel && retroLevel.p50) {
           const retroTrace = buildLineTrace(
             retroLevel.p50,
-            `${level} retrospective p50`,
-            palette[idx % palette.length],
+            `Retrospective p50 · ${level}`,
+            '#64748b',
             'dot',
-            { width: 1.5, opacity: 0.55, showlegend: false }
+            {
+              width: 1.5,
+              opacity: 0.7,
+              showlegend: idx === 0,
+              valueFormat: '.3f',
+              hoverLabel: `Retrospective p50 · ${level}`,
+              legendGroup: 'soil_retro'
+            }
           );
           if (retroTrace) traces.push(retroTrace);
           pointGroups.push(retroLevel.p50);
         }
-        const band = buildBandTrace(block.p10, block.p90, `${level} p10-p90`, `rgba(14,165,233,${0.08 + idx * 0.03})`);
+        const band = buildBandTrace(
+          block.p10,
+          block.p90,
+          `${level} p10-p90`,
+          `rgba(14,165,233,${0.07 + idx * 0.02})`,
+          { showLegend: false, legendGroup: `soil_${idx}` }
+        );
         if (band) traces.push(band);
-        const soilP50 = buildLineTrace(block.p50, `${level} p50`, palette[idx % palette.length]);
+        const soilP50 = buildLineTrace(
+          block.p50,
+          `GEFS p50 · ${level}`,
+          palette[idx % palette.length],
+          'solid',
+          {
+            width: 1.95,
+            valueFormat: '.3f',
+            hoverLabel: `GEFS p50 · ${level}`,
+            legendGroup: `soil_${idx}`
+          }
+        );
         if (soilP50) traces.push(soilP50);
         pointGroups.push(block.p10, block.p50, block.p90);
       });
@@ -410,10 +565,10 @@
         soilEl,
         traces,
         layout(
-          'GEFS Soil Moisture by Depth',
+          'Soil moisture: observed context + depth-resolved GEFS',
           'SOILW (fraction)',
           colors,
-          { xRange: soilXRange, initTime: initDate }
+          { xRange: soilXRange, initTime: initDate, yTickFormat: '.2f', legendY: 1.18 }
         ),
         { responsive: true, displayModeBar: false }
       );
