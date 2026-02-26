@@ -31,10 +31,6 @@
   --info-text: #2f3b4a;
   --info-warning: #b45309;
   --chart-card-bg: linear-gradient(150deg, rgba(27, 99, 198, 0.06), rgba(255, 255, 255, 0.9));
-  --chip-observed: #0f766e;
-  --chip-band: #1d4ed8;
-  --chip-median: #0ea5e9;
-  --chip-mean: #f59e0b;
 }
 
 html.dark-theme,
@@ -60,10 +56,6 @@ body.dark-theme {
   --info-text: #d7e0ea;
   --info-warning: #fbbf24;
   --chart-card-bg: linear-gradient(150deg, rgba(27, 99, 198, 0.22), rgba(21, 26, 33, 0.96));
-  --chip-observed: #34d399;
-  --chip-band: #60a5fa;
-  --chip-median: #7dd3fc;
-  --chip-mean: #fbbf24;
 }
 
 body {
@@ -359,74 +351,6 @@ button:focus-visible {
   text-align: left;
 }
 
-.gefs-panel-meta {
-  margin-bottom: 0.75rem;
-  padding: 0.95rem 1rem;
-  background: var(--chart-card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-}
-
-.gefs-panel-meta__title {
-  margin: 0;
-  font-size: 0.88rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-subtle);
-}
-
-.gefs-panel-meta__text {
-  margin: 0.35rem 0 0;
-  font-size: 0.96rem;
-  line-height: 1.55;
-  color: var(--text-muted);
-}
-
-.gefs-key {
-  margin-top: 0.7rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 0.6rem;
-}
-
-.gefs-key__item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-color);
-  background: var(--surface-1);
-  border: 1px solid var(--border-color);
-  border-radius: 999px;
-  padding: 0.24rem 0.58rem 0.24rem 0.48rem;
-}
-
-.gefs-key__item::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  display: inline-block;
-}
-
-.gefs-key__item--observed::before {
-  background: var(--chip-observed);
-}
-
-.gefs-key__item--band::before {
-  background: var(--chip-band);
-}
-
-.gefs-key__item--median::before {
-  background: var(--chip-median);
-}
-
-.gefs-key__item--mean::before {
-  background: var(--chip-mean);
-}
-
 .gefs-chart-card {
   margin-top: 0.85rem;
   border: 1px solid var(--border-color);
@@ -522,9 +446,6 @@ button:focus-visible {
   .gefs-forecast-panel .plot-iframe {
     height: 46vh;
     min-height: 250px;
-  }
-  .gefs-key__item {
-    font-size: 0.76rem;
   }
 }
 
