@@ -1,0 +1,131 @@
+# GEFS Point Pipeline (Sandbox)
+
+Pipeline for GEFS point extraction at USGS `11160500` (Big Trees) with:
+
+- Latest complete-cycle discovery
+- Multi-product field resolution (`atmos.5`, `atmos.5b`)
+- Multi-layer SOILW extraction (4 target depths)
+- QC fail-fast and schema validation
+- Idempotent publish + strict retention hygiene
+- Web JSON export for homepage panel
+
+## Setup
+
+```bash
+cd _sandbox/gefs_point_pipeline
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+## Run Profiles
+
+`run_latest.py` supports explicit profiles:
+
+- `full` (default): production scope (`31` members, leads `0..240 step 3`)
+- `smoke`: reduced scope for quick validation
+
+Compatibility flags:
+
+- `--smoke` is retained and maps to profile `smoke`
+- `--profile full|smoke` is explicit and preferred
+
+Examples:
+
+```bash
+# Smoke profile
+python run_latest.py --smoke --log-level INFO
+
+# Full profile
+python run_latest.py --profile full --log-level INFO
+```
+
+Common options:
+
+- `--force`: overwrite existing run directory for same init/profile
+- `--init-time 2026-02-24T00:00:00Z`: force cycle instead of discovery
+- `--point-id big_trees`: location key from `config/points.yaml`
+
+## Output Layout
+
+Full runs:
+
+- `data/_sandbox_gefs/runs/<YYYYMMDD_HH>/`
+
+Smoke runs:
+
+- `data/_sandbox_gefs/smoke_runs/<YYYYMMDD_HH>/`
+
+Per run:
+
+- `point_member.parquet`
+- `point_ens_summary.parquet`
+- `manifest.json`
+- `run.log`
+
+Full profile only:
+
+- `data/_sandbox_gefs/runs/latest_init.txt`
+- `data/_sandbox_gefs/runs/latest` symlink (best effort)
+
+Retention controls (in `config/gefs.yaml`):
+
+- `runtime.keep_cycles` (full successful runs, default `1`)
+- `runtime.keep_smoke_runs` (smoke successful runs)
+- `runtime.keep_failed_runs` (bounded `.failed_*` retention)
+
+## Manifest Contract Highlights
+
+`manifest.json` includes:
+
+- `run_profile`
+- `resolved_fields`
+- `resolved_products`
+- `resolved_soil_levels`
+- `missing_expected_levels`
+- `bytes_downloaded`
+- `record_counts_by_variable_level`
+- `rows_expected`
+- `qc` check list with pass/fail details
+
+## Web Export
+
+Export latest successful **full** run to web JSON:
+
+```bash
+python export_latest_web_json.py
+```
+
+Default output:
+
+- `data/_sandbox_gefs/web/gefs_big_trees_latest.json`
+
+Payload includes:
+
+- metadata (`generated_at_utc`, `site_id`, `init_time_utc`, `member_count`, `schema_version`)
+- `precip` quantile/mean series by level
+- `soil_moisture` quantile/mean series by depth level
+- `missing_levels`
+
+## End-to-End Update Script
+
+From repo root:
+
+```bash
+scripts/update_big_trees_gefs_forecast.sh
+```
+
+This script:
+
+1. Runs full profile pipeline.
+2. Exports latest web JSON.
+3. Copies tracked asset to `assets/data/forecasts/gefs_big_trees_latest.json`.
+
+## Scheduler
+
+GitHub Actions workflow:
+
+- `.github/workflows/update_gefs_forecast.yml`
+- schedule: every 3 hours (`0 */3 * * *`)
+- overlap protection via `concurrency`
+- commits only the GEFS asset when content changed

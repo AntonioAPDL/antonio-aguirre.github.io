@@ -1,0 +1,6 @@
+big_trees:
+  usgs_site: "11160500"
+  lat: 37.0443931303376
+  lon: -122.072464053904
+  search_max_km: 200
+  method: "nearest_non_nan"

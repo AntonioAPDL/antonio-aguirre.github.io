@@ -1,0 +1,7 @@
+pandas>=2.2
+numpy>=1.26
+PyYAML>=6.0
+pyarrow>=15.0
+xarray>=2024.1
+herbie-data>=2024.3.0
+cfgrib>=0.9.10

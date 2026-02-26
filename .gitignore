@@ -45,7 +45,9 @@ node_modules
 bower_components
 
 # Sandbox / local data
-_sandbox/
+_sandbox/*
+!_sandbox/gefs_point_pipeline/
+!_sandbox/gefs_point_pipeline/**
 data/_sandbox_nwm/
 data/_sandbox_nws/
 .python-version

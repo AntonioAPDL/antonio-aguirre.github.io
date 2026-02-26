@@ -1,0 +1,8 @@
+# Local runtime environment and caches
+.venv/
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# Runtime data/output (generated)
+data/
