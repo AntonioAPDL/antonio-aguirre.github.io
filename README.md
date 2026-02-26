@@ -136,12 +136,59 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - `retrospective.start_utc`, `retrospective.end_utc`
 - `retrospective.precip.<level>.{p10,p50,p90,mean}`
 - `retrospective.soil_moisture.<level>.p50`
+- `observed_retrospective.start_utc`, `observed_retrospective.end_utc`
+- `observed_retrospective.daily_avg_ppt` (from PRISM combined climate CSV)
+- `observed_retrospective.daily_avg_soil_ERA5`
+- `observed_retrospective.daily_avg_soil_NWM_SOIL_M`
+- `observed_retrospective.daily_avg_soil_NWM_SOIL_W`
 
 Panel override:
 
 - `data-observation-window-days` (defaults to `20` if omitted)
 
 The existing USGS discharge panel logic in `public/js/sanlorenzo_flow.js` remains unchanged.
+
+## Climate Data Automation (PRISM + ERA5 + NWM retro soil)
+
+This repo includes a cron-safe climate stack that keeps canonical point series and a merged table:
+
+- `prism_precipitation_santa_cruz_1987_2023.csv`
+- `soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv`
+- `soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv`
+- `climate_daily_ppt_soil.csv`
+- `climate_series_status.csv`
+
+Fixed point:
+
+- latitude `37.0443931`
+- longitude `-122.072464`
+
+Main scripts:
+
+- `scripts/build_prism_ppt_point_series.R`
+- `scripts/update_ppt_incremental.sh`
+- `scripts/build_era5_soil_moisture_point_series.py`
+- `scripts/update_soil_incremental.sh`
+- `scripts/build_nwm_retro_soil_point_series.py`
+- `scripts/update_nwm_soil_retro_full.sh`
+- `scripts/build_climate_daily_combined_csv.py`
+- `scripts/write_climate_series_status.py`
+- `scripts/run_climate_updates_cron.sh`
+- `scripts/install_climate_update_cron.sh`
+
+Install cron (default every 6h at minute 17):
+
+```bash
+scripts/install_climate_update_cron.sh
+```
+
+Run one manual cycle:
+
+```bash
+scripts/run_climate_updates_cron.sh
+```
+
+Logs are written under `logs/climate_updates/` and `latest.log` points to the newest run log.
 
 NWS/NWM overlay JSON fields (abridged, existing USGS panel):
 - `generated_utc`, `provider_mix`, `init_times`

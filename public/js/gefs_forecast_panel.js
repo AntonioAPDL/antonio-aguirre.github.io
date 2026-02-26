@@ -156,8 +156,21 @@
     const retroWindowDays = payload && Number.isFinite(Number(payload.observation_window_days))
       ? Number(payload.observation_window_days)
       : null;
+    const observed = payload && payload.observed_retrospective && typeof payload.observed_retrospective === 'object'
+      ? payload.observed_retrospective
+      : null;
+    const observedPoints = observed
+      ? [
+          observed.daily_avg_ppt,
+          observed.daily_avg_soil_ERA5,
+          observed.daily_avg_soil_NWM_SOIL_M,
+          observed.daily_avg_soil_NWM_SOIL_W
+        ]
+          .reduce((acc, series) => acc + (Array.isArray(series) ? series.length : 0), 0)
+      : 0;
     const retroText = retroWindowDays ? `Retrospective window: ${retroWindowDays}d` : '';
-    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${retroText ? ` | ${retroText}` : ''}${warning ? ` | ${warning}` : ''}`;
+    const observedText = observedPoints > 0 ? `Observed context points: ${observedPoints}` : '';
+    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${retroText ? ` | ${retroText}` : ''}${observedText ? ` | ${observedText}` : ''}${warning ? ` | ${warning}` : ''}`;
     el.classList.toggle('plot-status--error', Boolean(warning));
   }
 
@@ -181,6 +194,7 @@
         20
     );
     const retrospective = payload.retrospective || {};
+    const observedRetro = payload.observed_retrospective || {};
 
     const staleHours = numberOrNull(container.dataset.staleHours) ?? numberOrNull(payload.stale_after_hours) ?? 12;
     let staleWarning = '';
@@ -196,8 +210,13 @@
     const precipLevel = precipLevelName ? precipLevels[precipLevelName] : null;
     if (precipEl && precipLevel) {
       const traces = [];
+      const observedPrecip = observedRetro.daily_avg_ppt;
+      const hasObservedPrecip = Array.isArray(observedPrecip) && observedPrecip.length > 0;
       const retroPrecip = ((retrospective.precip || {})[precipLevelName]) || null;
-      if (retroPrecip) {
+      if (hasObservedPrecip) {
+        const obsTrace = buildLineTrace(observedPrecip, 'observed ppt (PRISM)', '#111827', 'solid', { width: 2.2 });
+        if (obsTrace) traces.push(obsTrace);
+      } else if (retroPrecip) {
         const retroBand = buildBandTrace(
           retroPrecip.p10,
           retroPrecip.p90,
@@ -220,6 +239,7 @@
         initDate,
         observationWindowDays,
         [
+          observedPrecip,
           precipLevel.p10, precipLevel.p50, precipLevel.p90, precipLevel.mean,
           retroPrecip && retroPrecip.p10, retroPrecip && retroPrecip.p50,
           retroPrecip && retroPrecip.p90, retroPrecip && retroPrecip.mean
@@ -243,10 +263,22 @@
       const palette = ['#1b63c6', '#0ea5e9', '#22c55e', '#f97316', '#ef4444'];
       const traces = [];
       const pointGroups = [];
+      const observedSoilEra5 = observedRetro.daily_avg_soil_ERA5;
+      const observedSoilNwmM = observedRetro.daily_avg_soil_NWM_SOIL_M;
+      const observedSoilNwmW = observedRetro.daily_avg_soil_NWM_SOIL_W;
+      const hasObservedSoil = [observedSoilEra5, observedSoilNwmM, observedSoilNwmW]
+        .some((series) => Array.isArray(series) && series.length > 0);
+      const obsEra5Trace = buildLineTrace(observedSoilEra5, 'observed soil ERA5', '#0f766e', 'solid', { width: 2.1 });
+      if (obsEra5Trace) traces.push(obsEra5Trace);
+      const obsNwmMTrace = buildLineTrace(observedSoilNwmM, 'observed soil NWM SOIL_M', '#7c3aed', 'solid', { width: 1.8 });
+      if (obsNwmMTrace) traces.push(obsNwmMTrace);
+      const obsNwmWTrace = buildLineTrace(observedSoilNwmW, 'observed soil NWM SOIL_W', '#be185d', 'solid', { width: 1.8 });
+      if (obsNwmWTrace) traces.push(obsNwmWTrace);
+      pointGroups.push(observedSoilEra5, observedSoilNwmM, observedSoilNwmW);
       levels.forEach((level, idx) => {
         const block = payload.soil_moisture[level];
         const retroLevel = ((retrospective.soil_moisture || {})[level]) || null;
-        if (retroLevel && retroLevel.p50) {
+        if (!hasObservedSoil && retroLevel && retroLevel.p50) {
           const retroTrace = buildLineTrace(
             retroLevel.p50,
             `${level} retrospective p50`,

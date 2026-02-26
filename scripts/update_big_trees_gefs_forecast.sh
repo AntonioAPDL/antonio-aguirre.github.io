@@ -67,4 +67,11 @@ print("retrospective_start_utc:", retro.get("start_utc"))
 print("retrospective_end_utc:", retro.get("end_utc"))
 print("retrospective_precip_levels:", list((retro.get("precip") or {}).keys()))
 print("retrospective_soil_levels:", list((retro.get("soil_moisture") or {}).keys()))
+obs = data.get("observed_retrospective") or {}
+print("observed_retrospective_start_utc:", obs.get("start_utc"))
+print("observed_retrospective_end_utc:", obs.get("end_utc"))
+print("observed_ppt_points:", len(obs.get("daily_avg_ppt") or []))
+print("observed_soil_era5_points:", len(obs.get("daily_avg_soil_ERA5") or []))
+print("observed_soil_nwm_m_points:", len(obs.get("daily_avg_soil_NWM_SOIL_M") or []))
+print("observed_soil_nwm_w_points:", len(obs.get("daily_avg_soil_NWM_SOIL_W") or []))
 PY

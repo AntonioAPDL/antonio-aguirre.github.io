@@ -171,6 +171,63 @@ def _load_optional_json(path: Path) -> Optional[Dict[str, Any]]:
     return data
 
 
+def _build_observed_retrospective_payload(
+    climate_csv_path: Path,
+    init_time_utc: dt.datetime,
+    observation_window_days: int,
+) -> Dict[str, Any]:
+    start_time = init_time_utc - dt.timedelta(days=max(1, int(observation_window_days)))
+    end_time = init_time_utc
+    payload: Dict[str, Any] = {
+        "window_days": int(max(1, observation_window_days)),
+        "start_utc": start_time.isoformat(),
+        "end_utc": end_time.isoformat(),
+        "source_csv": str(climate_csv_path),
+        "daily_avg_ppt": [],
+        "daily_avg_soil_ERA5": [],
+        "daily_avg_soil_NWM_SOIL_M": [],
+        "daily_avg_soil_NWM_SOIL_W": [],
+    }
+
+    if not climate_csv_path.exists():
+        return payload
+
+    try:
+        df = pd.read_csv(climate_csv_path)
+    except Exception:
+        return payload
+    if "timestamp" not in df.columns:
+        return payload
+
+    ts = pd.to_datetime(df["timestamp"], errors="coerce", utc=True)
+    valid = df.loc[ts.notna()].copy()
+    if valid.empty:
+        return payload
+    valid["timestamp"] = pd.to_datetime(valid["timestamp"], errors="coerce", utc=True)
+    valid = valid.sort_values("timestamp").drop_duplicates(subset=["timestamp"], keep="last")
+    mask = (valid["timestamp"] >= pd.Timestamp(start_time)) & (valid["timestamp"] < pd.Timestamp(end_time))
+    window = valid.loc[mask].copy()
+    if window.empty:
+        return payload
+
+    def series_for(column: str) -> List[Dict[str, float]]:
+        if column not in window.columns:
+            return []
+        vals = pd.to_numeric(window[column], errors="coerce")
+        out: List[Dict[str, float]] = []
+        for ts_val, num in zip(window["timestamp"], vals):
+            if pd.isna(num):
+                continue
+            out.append({"t": pd.Timestamp(ts_val).isoformat(), "v": float(num)})
+        return out
+
+    payload["daily_avg_ppt"] = series_for("daily_avg_ppt")
+    payload["daily_avg_soil_ERA5"] = series_for("daily_avg_soil_ERA5")
+    payload["daily_avg_soil_NWM_SOIL_M"] = series_for("daily_avg_soil_NWM_SOIL_M")
+    payload["daily_avg_soil_NWM_SOIL_W"] = series_for("daily_avg_soil_NWM_SOIL_W")
+    return payload
+
+
 def _latest_run_tag(runs_root: Path, pointer_name: str) -> str:
     pointer = runs_root / pointer_name
     if pointer.exists():
@@ -276,6 +333,13 @@ def main() -> int:
         prior_payload=prior_payload,
         observation_window_days=int(max(1, args.observation_window_days)),
     )
+    init_for_window = _parse_iso(payload.get("init_time_utc"))
+    if init_for_window is not None:
+        payload["observed_retrospective"] = _build_observed_retrospective_payload(
+            climate_csv_path=(repo_root / "climate_daily_ppt_soil.csv"),
+            init_time_utc=init_for_window,
+            observation_window_days=int(max(1, args.observation_window_days)),
+        )
 
     out_path = Path(args.out) if args.out else (repo_root / cfg.output.web_out_dir / cfg.output.web_filename)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -290,6 +354,12 @@ def main() -> int:
         f"retrospective_points="
         f"{sum(len(v.get('p50', [])) for v in (payload.get('retrospective', {}).get('soil_moisture', {}) or {}).values())}"
     )
+    obs = payload.get("observed_retrospective", {})
+    if isinstance(obs, dict):
+        print(f"observed_ppt_points={len(obs.get('daily_avg_ppt', []))}")
+        print(f"observed_soil_era5_points={len(obs.get('daily_avg_soil_ERA5', []))}")
+        print(f"observed_soil_nwm_m_points={len(obs.get('daily_avg_soil_NWM_SOIL_M', []))}")
+        print(f"observed_soil_nwm_w_points={len(obs.get('daily_avg_soil_NWM_SOIL_W', []))}")
     return 0
 
 

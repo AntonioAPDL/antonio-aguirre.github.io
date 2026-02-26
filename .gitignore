@@ -58,3 +58,7 @@ __pycache__/
 **/__pycache__/
 **/.pytest_cache/
 **/cache/
+prism_data_work/
+soil_moisture_data/.tmp_*/
+soil_moisture_data/.soil_daily_incremental_*.csv
+logs/climate_updates/
