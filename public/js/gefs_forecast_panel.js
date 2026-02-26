@@ -227,9 +227,9 @@
 
   function layout(title, yTitle, colors, options) {
     const opts = options || {};
+    const hasTitle = typeof title === 'string' && title.trim().length > 0;
     const chartLayout = {
-      margin: { l: 60, r: 20, t: 42, b: 52 },
-      title: { text: title, font: { size: 15, color: colors.text }, x: 0.01, xanchor: 'left' },
+      margin: { l: 60, r: 20, t: hasTitle ? 42 : 20, b: 52 },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
       font: { color: colors.text, family: 'Source Sans Pro, Helvetica, Arial, sans-serif' },
@@ -268,6 +268,9 @@
         itemdoubleclick: 'toggleothers'
       }
     };
+    if (hasTitle) {
+      chartLayout.title = { text: title, font: { size: 15, color: colors.text }, x: 0.01, xanchor: 'left' };
+    }
     if (Array.isArray(opts.xRange) && opts.xRange.length === 2) {
       chartLayout.xaxis.range = opts.xRange;
     }
@@ -472,7 +475,7 @@
         precipEl,
         traces,
         layout(
-          'Precipitation: observed context + GEFS ensemble',
+          '',
           `APCP (${precipLevel.units || ''})`,
           colors,
           { xRange: precipXRange, initTime: initDate, yTickFormat: '.1f', legendY: 1.16 }
@@ -565,7 +568,7 @@
         soilEl,
         traces,
         layout(
-          'Soil moisture: observed context + depth-resolved GEFS',
+          '',
           'SOILW (fraction)',
           colors,
           { xRange: soilXRange, initTime: initDate, yTickFormat: '.2f', legendY: 1.18 }
