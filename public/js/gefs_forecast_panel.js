@@ -41,6 +41,29 @@
     return { x, y };
   }
 
+  function latestPointDate(pointGroups) {
+    let latest = null;
+    (pointGroups || []).forEach((points) => {
+      if (!Array.isArray(points)) return;
+      points.forEach((point) => {
+        if (!point || !point.t) return;
+        const ts = parseDate(point.t);
+        if (!ts) return;
+        if (!latest || ts > latest) latest = ts;
+      });
+    });
+    return latest;
+  }
+
+  function buildXRange(initDate, windowDays, pointGroups) {
+    if (!initDate) return null;
+    const start = new Date(initDate.getTime() - windowDays * 24 * 3600 * 1000);
+    const latest = latestPointDate(pointGroups);
+    const fallbackEnd = new Date(initDate.getTime() + 24 * 3600 * 1000);
+    const end = latest && latest > initDate ? latest : fallbackEnd;
+    return [start, end];
+  }
+
   function buildBandTrace(low, high, name, color) {
     const lower = seriesToXY(low);
     const upper = seriesToXY(high);
@@ -58,16 +81,19 @@
     };
   }
 
-  function buildLineTrace(points, name, color, dash) {
+  function buildLineTrace(points, name, color, dash, options) {
     const series = seriesToXY(points);
+    if (!series.x.length) return null;
+    const opts = options || {};
     return {
       x: series.x,
       y: series.y,
       type: 'scatter',
       mode: 'lines',
       name,
-      line: { color, width: 2, dash: dash || 'solid' },
-      showlegend: true
+      opacity: opts.opacity === undefined ? 1 : opts.opacity,
+      line: { color, width: opts.width || 2, dash: dash || 'solid' },
+      showlegend: opts.showlegend === undefined ? true : Boolean(opts.showlegend)
     };
   }
 
@@ -80,8 +106,9 @@
     };
   }
 
-  function layout(title, yTitle, colors) {
-    return {
+  function layout(title, yTitle, colors, options) {
+    const opts = options || {};
+    const chartLayout = {
       margin: { l: 56, r: 18, t: 26, b: 48 },
       title: { text: title, font: { size: 14, color: colors.text } },
       paper_bgcolor: 'rgba(0,0,0,0)',
@@ -91,6 +118,24 @@
       yaxis: { title: yTitle, gridcolor: colors.grid },
       legend: { orientation: 'h', y: 1.14, x: 0 }
     };
+    if (Array.isArray(opts.xRange) && opts.xRange.length === 2) {
+      chartLayout.xaxis.range = opts.xRange;
+    }
+    if (opts.initTime) {
+      chartLayout.shapes = [
+        {
+          type: 'line',
+          xref: 'x',
+          yref: 'paper',
+          x0: opts.initTime,
+          x1: opts.initTime,
+          y0: 0,
+          y1: 1,
+          line: { color: '#64748b', width: 1, dash: 'dot' }
+        }
+      ];
+    }
+    return chartLayout;
   }
 
   function levelSortKey(level) {
@@ -108,7 +153,11 @@
     const missing = payload && Array.isArray(payload.missing_levels) && payload.missing_levels.length
       ? `Missing layers: ${payload.missing_levels.join(', ')}`
       : 'All configured layers resolved';
-    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${warning ? ` | ${warning}` : ''}`;
+    const retroWindowDays = payload && Number.isFinite(Number(payload.observation_window_days))
+      ? Number(payload.observation_window_days)
+      : null;
+    const retroText = retroWindowDays ? `Retrospective window: ${retroWindowDays}d` : '';
+    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${retroText ? ` | ${retroText}` : ''}${warning ? ` | ${warning}` : ''}`;
     el.classList.toggle('plot-status--error', Boolean(warning));
   }
 
@@ -124,6 +173,14 @@
     const soilEl = container.querySelector('.gefs-forecast-soil');
     const statusEl = container.querySelector('.gefs-forecast-status');
     const colors = getThemeColors();
+    const initDate = parseDate(payload.init_time_utc);
+    const observationWindowDays = Math.max(
+      1,
+      numberOrNull(container.dataset.observationWindowDays) ||
+        numberOrNull(payload.observation_window_days) ||
+        20
+    );
+    const retrospective = payload.retrospective || {};
 
     const staleHours = numberOrNull(container.dataset.staleHours) ?? numberOrNull(payload.stale_after_hours) ?? 12;
     let staleWarning = '';
@@ -135,17 +192,48 @@
     setStatus(statusEl, payload, staleWarning);
 
     const precipLevels = payload.precip || {};
-    const precipLevel = precipLevels.surface || precipLevels[Object.keys(precipLevels)[0]];
+    const precipLevelName = precipLevels.surface ? 'surface' : Object.keys(precipLevels)[0];
+    const precipLevel = precipLevelName ? precipLevels[precipLevelName] : null;
     if (precipEl && precipLevel) {
       const traces = [];
+      const retroPrecip = ((retrospective.precip || {})[precipLevelName]) || null;
+      if (retroPrecip) {
+        const retroBand = buildBandTrace(
+          retroPrecip.p10,
+          retroPrecip.p90,
+          'retrospective p10-p90',
+          'rgba(100,116,139,0.18)'
+        );
+        if (retroBand) traces.push(retroBand);
+        const retroP50 = buildLineTrace(retroPrecip.p50, 'retrospective p50', '#475569', 'dash', { width: 1.8 });
+        if (retroP50) traces.push(retroP50);
+        const retroMean = buildLineTrace(retroPrecip.mean, 'retrospective mean', '#64748b', 'dot', { width: 1.6 });
+        if (retroMean) traces.push(retroMean);
+      }
       const band = buildBandTrace(precipLevel.p10, precipLevel.p90, 'p10-p90', 'rgba(27,99,198,0.16)');
       if (band) traces.push(band);
-      traces.push(buildLineTrace(precipLevel.p50, 'p50', colors.accent));
-      traces.push(buildLineTrace(precipLevel.mean, 'mean', '#fb923c', 'dash'));
+      const p50Trace = buildLineTrace(precipLevel.p50, 'p50', colors.accent);
+      if (p50Trace) traces.push(p50Trace);
+      const meanTrace = buildLineTrace(precipLevel.mean, 'mean', '#fb923c', 'dash');
+      if (meanTrace) traces.push(meanTrace);
+      const precipXRange = buildXRange(
+        initDate,
+        observationWindowDays,
+        [
+          precipLevel.p10, precipLevel.p50, precipLevel.p90, precipLevel.mean,
+          retroPrecip && retroPrecip.p10, retroPrecip && retroPrecip.p50,
+          retroPrecip && retroPrecip.p90, retroPrecip && retroPrecip.mean
+        ]
+      );
       Plotly.react(
         precipEl,
         traces,
-        layout('GEFS Precipitation (Surface)', `APCP (${precipLevel.units || ''})`, colors),
+        layout(
+          'GEFS Precipitation (Surface)',
+          `APCP (${precipLevel.units || ''})`,
+          colors,
+          { xRange: precipXRange, initTime: initDate }
+        ),
         { responsive: true, displayModeBar: false }
       );
     }
@@ -154,16 +242,37 @@
       const levels = Object.keys(payload.soil_moisture || {}).sort((a, b) => levelSortKey(a) - levelSortKey(b));
       const palette = ['#1b63c6', '#0ea5e9', '#22c55e', '#f97316', '#ef4444'];
       const traces = [];
+      const pointGroups = [];
       levels.forEach((level, idx) => {
         const block = payload.soil_moisture[level];
+        const retroLevel = ((retrospective.soil_moisture || {})[level]) || null;
+        if (retroLevel && retroLevel.p50) {
+          const retroTrace = buildLineTrace(
+            retroLevel.p50,
+            `${level} retrospective p50`,
+            palette[idx % palette.length],
+            'dot',
+            { width: 1.5, opacity: 0.55, showlegend: false }
+          );
+          if (retroTrace) traces.push(retroTrace);
+          pointGroups.push(retroLevel.p50);
+        }
         const band = buildBandTrace(block.p10, block.p90, `${level} p10-p90`, `rgba(14,165,233,${0.08 + idx * 0.03})`);
         if (band) traces.push(band);
-        traces.push(buildLineTrace(block.p50, `${level} p50`, palette[idx % palette.length]));
+        const soilP50 = buildLineTrace(block.p50, `${level} p50`, palette[idx % palette.length]);
+        if (soilP50) traces.push(soilP50);
+        pointGroups.push(block.p10, block.p50, block.p90);
       });
+      const soilXRange = buildXRange(initDate, observationWindowDays, pointGroups);
       Plotly.react(
         soilEl,
         traces,
-        layout('GEFS Soil Moisture by Depth', 'SOILW (fraction)', colors),
+        layout(
+          'GEFS Soil Moisture by Depth',
+          'SOILW (fraction)',
+          colors,
+          { xRange: soilXRange, initTime: initDate }
+        ),
         { responsive: true, displayModeBar: false }
       );
     }

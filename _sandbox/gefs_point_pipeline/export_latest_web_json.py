@@ -6,7 +6,7 @@ import datetime as dt
 import json
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
@@ -39,6 +39,138 @@ def _quantile_payload(df: pd.DataFrame) -> Dict[str, List[Dict[str, float]]]:
     }
 
 
+def _parse_iso(value: Any) -> Optional[dt.datetime]:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def _series_in_window(
+    points: Any,
+    start_utc: dt.datetime,
+    end_utc: dt.datetime,
+) -> Dict[str, Tuple[dt.datetime, float]]:
+    out: Dict[str, Tuple[dt.datetime, float]] = {}
+    if not isinstance(points, list):
+        return out
+    for point in points:
+        if not isinstance(point, dict):
+            continue
+        ts = _parse_iso(point.get("t"))
+        if ts is None or not (start_utc <= ts < end_utc):
+            continue
+        try:
+            value = float(point.get("v"))
+        except (TypeError, ValueError):
+            continue
+        out[ts.isoformat()] = (ts, value)
+    return out
+
+
+def _merge_series_window(
+    carry_points: Any,
+    prior_forecast_points: Any,
+    start_utc: dt.datetime,
+    end_utc: dt.datetime,
+) -> List[Dict[str, float]]:
+    merged = _series_in_window(carry_points, start_utc, end_utc)
+    # Prefer freshest values from the prior cycle forecast for duplicate timestamps.
+    merged.update(_series_in_window(prior_forecast_points, start_utc, end_utc))
+    ordered = sorted(merged.values(), key=lambda item: item[0])
+    return [{"t": ts.isoformat(), "v": value} for ts, value in ordered]
+
+
+def _build_retrospective_payload(
+    current_payload: Dict[str, Any],
+    prior_payload: Optional[Dict[str, Any]],
+    observation_window_days: int,
+) -> Dict[str, Any]:
+    init_time = _parse_iso(current_payload.get("init_time_utc"))
+    if init_time is None:
+        return {}
+
+    start_time = init_time - dt.timedelta(days=max(1, int(observation_window_days)))
+    prior_payload = prior_payload or {}
+    prior_retro = prior_payload.get("retrospective") if isinstance(prior_payload, dict) else {}
+    if not isinstance(prior_retro, dict):
+        prior_retro = {}
+
+    retrospective: Dict[str, Any] = {
+        "window_days": int(max(1, observation_window_days)),
+        "start_utc": start_time.isoformat(),
+        "end_utc": init_time.isoformat(),
+        "precip": {},
+        "soil_moisture": {},
+    }
+
+    # Precip retains full forecast statistics (p10/p50/p90/mean) for retrospective context.
+    precip_levels = current_payload.get("precip")
+    if isinstance(precip_levels, dict):
+        for level_name in precip_levels.keys():
+            level_name = str(level_name)
+            level_block: Dict[str, Any] = {}
+            prior_forecast_level = (
+                (prior_payload.get("precip") or {}).get(level_name, {})
+                if isinstance(prior_payload, dict)
+                else {}
+            )
+            prior_retro_level = (prior_retro.get("precip") or {}).get(level_name, {})
+            for metric in ("p10", "p50", "p90", "mean"):
+                merged = _merge_series_window(
+                    carry_points=(prior_retro_level or {}).get(metric, []),
+                    prior_forecast_points=(prior_forecast_level or {}).get(metric, []),
+                    start_utc=start_time,
+                    end_utc=init_time,
+                )
+                if merged:
+                    level_block[metric] = merged
+            if level_block:
+                retrospective["precip"][level_name] = level_block
+
+    # Soil moisture retrospective emphasizes p50 for readability.
+    soil_levels = current_payload.get("soil_moisture")
+    if isinstance(soil_levels, dict):
+        for level_name in soil_levels.keys():
+            level_name = str(level_name)
+            prior_forecast_level = (
+                (prior_payload.get("soil_moisture") or {}).get(level_name, {})
+                if isinstance(prior_payload, dict)
+                else {}
+            )
+            prior_retro_level = (prior_retro.get("soil_moisture") or {}).get(level_name, {})
+            merged = _merge_series_window(
+                carry_points=(prior_retro_level or {}).get("p50", []),
+                prior_forecast_points=(prior_forecast_level or {}).get("p50", []),
+                start_utc=start_time,
+                end_utc=init_time,
+            )
+            if merged:
+                retrospective["soil_moisture"][level_name] = {"p50": merged}
+
+    return retrospective
+
+
+def _load_optional_json(path: Path) -> Optional[Dict[str, Any]]:
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if not isinstance(data, dict):
+        return None
+    return data
+
+
 def _latest_run_tag(runs_root: Path, pointer_name: str) -> str:
     pointer = runs_root / pointer_name
     if pointer.exists():
@@ -65,6 +197,17 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=12,
         help="Staleness threshold used by web panel metadata.",
+    )
+    parser.add_argument(
+        "--observation-window-days",
+        type=int,
+        default=20,
+        help="Retrospective observation window size before init time.",
+    )
+    parser.add_argument(
+        "--prior-web-json",
+        default=None,
+        help="Optional prior web JSON used to roll retrospective context.",
     )
     parser.add_argument(
         "--out",
@@ -107,6 +250,7 @@ def main() -> int:
         "member_count": member_count,
         "schema_version": int(manifest.get("schema_version", cfg.runtime.schema_version)),
         "stale_after_hours": int(args.stale_after_hours),
+        "observation_window_days": int(max(1, args.observation_window_days)),
         "missing_levels": (manifest.get("missing_expected_levels", {}) or {}).get("soil_moisture", []),
         "precip": {},
         "soil_moisture": {},
@@ -124,6 +268,15 @@ def main() -> int:
         section["units"] = str(level_df["units"].dropna().iloc[0]) if not level_df["units"].dropna().empty else ""
         payload["soil_moisture"][str(level)] = section
 
+    default_prior_path = repo_root / "assets/data/forecasts/gefs_big_trees_latest.json"
+    prior_path = Path(args.prior_web_json) if args.prior_web_json else default_prior_path
+    prior_payload = _load_optional_json(prior_path)
+    payload["retrospective"] = _build_retrospective_payload(
+        current_payload=payload,
+        prior_payload=prior_payload,
+        observation_window_days=int(max(1, args.observation_window_days)),
+    )
+
     out_path = Path(args.out) if args.out else (repo_root / cfg.output.web_out_dir / cfg.output.web_filename)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -133,6 +286,10 @@ def main() -> int:
     print(f"run_dir={run_dir}")
     print(f"out_path={out_path}")
     print(f"member_count={member_count}")
+    print(
+        f"retrospective_points="
+        f"{sum(len(v.get('p50', [])) for v in (payload.get('retrospective', {}).get('soil_moisture', {}) or {}).values())}"
+    )
     return 0
 
 

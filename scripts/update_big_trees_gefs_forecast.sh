@@ -61,4 +61,10 @@ print("member_count:", data.get("member_count"))
 print("missing_levels:", data.get("missing_levels"))
 print("precip_levels:", list((data.get("precip") or {}).keys()))
 print("soil_levels:", list((data.get("soil_moisture") or {}).keys()))
+retro = data.get("retrospective") or {}
+print("observation_window_days:", data.get("observation_window_days"))
+print("retrospective_start_utc:", retro.get("start_utc"))
+print("retrospective_end_utc:", retro.get("end_utc"))
+print("retrospective_precip_levels:", list((retro.get("precip") or {}).keys()))
+print("retrospective_soil_levels:", list((retro.get("soil_moisture") or {}).keys()))
 PY

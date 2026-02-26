@@ -126,8 +126,20 @@ Behavior:
 - Renders two Plotly charts:
   - APCP band (`p10-p90`) + `p50` + mean
   - SOILW depth-level medians (`p50`) with optional uncertainty bands
+- Adds retrospective context from prior GEFS cycles and shows a fixed 20-day pre-forecast window
 - Displays metadata and freshness warning if stale
 - Degrades gracefully when JSON is missing/invalid
+
+GEFS JSON includes optional retrospective metadata used by the panel:
+
+- `observation_window_days` (default `20`)
+- `retrospective.start_utc`, `retrospective.end_utc`
+- `retrospective.precip.<level>.{p10,p50,p90,mean}`
+- `retrospective.soil_moisture.<level>.p50`
+
+Panel override:
+
+- `data-observation-window-days` (defaults to `20` if omitted)
 
 The existing USGS discharge panel logic in `public/js/sanlorenzo_flow.js` remains unchanged.
 
