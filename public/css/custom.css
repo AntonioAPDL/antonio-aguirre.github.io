@@ -324,6 +324,11 @@ button:focus-visible {
   margin-bottom: 0.25rem;
 }
 
+html.dark-theme .plot-status__title,
+body.dark-theme .plot-status__title {
+  color: #f1f5f9;
+}
+
 .plot-status__meta {
   font-size: 0.92rem;
   color: var(--info-text);

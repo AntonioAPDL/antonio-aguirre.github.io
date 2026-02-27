@@ -361,6 +361,7 @@
       this.abortController = null;
       this.abortedForVisibility = false;
       this.lastSuccess = null;
+      this.lastRenderData = null;
 
       this.storageKey = this.buildStorageKey();
     }
@@ -572,11 +573,29 @@
         lastObs,
         lastRefresh
       };
+      this.lastRenderData = {
+        points: usablePoints.map((point) => ({ x: point.x, y: point.y })),
+        siteName,
+        units: displayUnits,
+        lastObs,
+        lastRefresh
+      };
 
       this.updateAriaLabel(siteName);
       this.setLoadedState(true);
       if (!options.silentStatus) {
         this.setStatus({ siteName, units, lastObs, lastRefresh, note: options.note });
+      }
+    }
+
+    rerenderForTheme() {
+      if (!this.lastRenderData || !Array.isArray(this.lastRenderData.points) || !this.lastRenderData.points.length) {
+        return;
+      }
+      try {
+        this.renderPlot(this.lastRenderData, { silentStatus: true });
+      } catch (err) {
+        console.warn('[usgs-iv] Failed to rerender for theme update', err);
       }
     }
 
@@ -825,6 +844,36 @@
     window.addEventListener('offline', () => {
       instances.forEach((instance) => instance.handleError(createError('offline', 'Offline')));
     });
+
+    let themeRerenderTimer = null;
+    const scheduleThemeRerender = () => {
+      if (themeRerenderTimer) {
+        clearTimeout(themeRerenderTimer);
+      }
+      themeRerenderTimer = setTimeout(() => {
+        themeRerenderTimer = null;
+        instances.forEach((instance) => instance.rerenderForTheme());
+      }, 90);
+    };
+
+    const themeToggles = document.querySelectorAll('[data-theme-toggle]');
+    themeToggles.forEach((toggle) => {
+      toggle.addEventListener('click', scheduleThemeRerender);
+    });
+
+    const themeObserver = new MutationObserver((records) => {
+      for (let i = 0; i < records.length; i += 1) {
+        const rec = records[i];
+        if (rec.type === 'attributes' && rec.attributeName === 'class') {
+          scheduleThemeRerender();
+          break;
+        }
+      }
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    if (document.body) {
+      themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
   }
 
   if (document.readyState === 'loading') {
