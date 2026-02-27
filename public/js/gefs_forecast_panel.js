@@ -592,7 +592,6 @@
     }
 
     const palette = ['#1d4ed8', '#0284c7', '#16a34a', '#f59e0b'];
-    const analysisColor = '#475569';
     const traces = [];
     const pointGroups = [];
     const analysisSoilBlock = (payload.gefs_analysis_context || {}).soil_f000 || {};
@@ -601,6 +600,7 @@
     levels.forEach((level, idx) => {
       const block = payload.soil_moisture[level];
       if (!block || typeof block !== 'object') return;
+      const levelColor = palette[idx % palette.length];
 
       const factor = resolveSoilFactorToFraction(
         block.units || '',
@@ -621,7 +621,7 @@
         const analysisTrace = buildLineTrace(
           analysis,
           idx === 0 ? 'GEFS f000 analysis history' : `GEFS f000 analysis · ${level}`,
-          analysisColor,
+          levelColor,
           'dot',
           {
             width: 1.25,
@@ -672,7 +672,7 @@
       const soilP50 = buildLineTrace(
         forecast.p50,
         `GEFS p50 · ${level}`,
-        palette[idx % palette.length],
+        levelColor,
         'solid',
         {
           width: 2.05,
