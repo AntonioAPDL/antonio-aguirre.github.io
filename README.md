@@ -197,6 +197,31 @@ scripts/run_climate_updates_cron.sh
 
 Logs are written under `logs/climate_updates/` and `latest.log` points to the newest run log.
 
+### GitHub Actions Automation
+
+The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
+
+- `.github/workflows/update_climate_series.yml`
+  - cadence: every 6 hours (`17 */6 * * *`)
+  - updates and commits:
+    - `prism_precipitation_santa_cruz_1987_2023.csv`
+    - `soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv`
+    - `soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv`
+    - `soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.meta.json`
+    - `climate_series_status.csv`
+    - `climate_daily_ppt_soil.csv`
+  - dispatches `update_gefs_forecast.yml` after climate changes are pushed
+
+- `.github/workflows/update_gefs_forecast.yml`
+  - cadence: every 3 hours (`0 */3 * * *`)
+  - updates and commits:
+    - `assets/data/forecasts/gefs_big_trees_latest.json`
+
+Required repository secrets for ERA5 updates:
+
+- `CDSAPI_KEY` (format: `<uid>:<api-token>`)
+- optional `CDSAPI_URL` (defaults to `https://cds.climate.copernicus.eu/api`)
+
 NWS/NWM overlay JSON fields (abridged, existing USGS panel):
 - `generated_utc`, `provider_mix`, `init_times`
 - `ranges.{analysis|short|medium_range|long_range}` with deterministic or p10/p50/p90 series

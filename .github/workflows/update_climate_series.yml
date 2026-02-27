@@ -1,0 +1,119 @@
+name: Update climate series
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: update-climate-series
+  cancel-in-progress: false
+
+jobs:
+  update-climate-series:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdal-dev libproj-dev libgeos-dev libudunits2-dev
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy xarray netCDF4 cdsapi fsspec s3fs zarr
+
+      - name: Install R dependencies
+        run: |
+          Rscript -e "install.packages(c('prism','raster'), repos='https://cloud.r-project.org')"
+
+      - name: Configure CDS credentials
+        env:
+          CDSAPI_KEY: ${{ secrets.CDSAPI_KEY }}
+          CDSAPI_URL: ${{ secrets.CDSAPI_URL }}
+        run: |
+          URL_VALUE="${CDSAPI_URL:-https://cds.climate.copernicus.eu/api}"
+          if [[ -z "${CDSAPI_KEY:-}" ]]; then
+            echo "CDSAPI_KEY is not configured; ERA5 updates may fail."
+            exit 0
+          fi
+          {
+            echo "url: ${URL_VALUE}"
+            echo "key: ${CDSAPI_KEY}"
+          } > "${HOME}/.cdsapirc"
+          chmod 600 "${HOME}/.cdsapirc"
+
+      - name: Run climate update stack
+        id: climate
+        continue-on-error: true
+        env:
+          PYTHON_BIN: python3
+          RSCRIPT_BIN: Rscript
+          BOOST_LIB_DIR: ""
+        run: |
+          chmod +x scripts/run_climate_updates_cron.sh
+          scripts/run_climate_updates_cron.sh
+
+      - name: Commit and push climate data if changed
+        id: commit
+        if: always()
+        run: |
+          set -euo pipefail
+          TRACKED=(
+            prism_precipitation_santa_cruz_1987_2023.csv
+            soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv
+            soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv
+            soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.meta.json
+            climate_series_status.csv
+            climate_daily_ppt_soil.csv
+          )
+
+          if git diff --quiet -- "${TRACKED[@]}"; then
+            echo "No climate data changes to commit."
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "${TRACKED[@]}"
+
+          if git diff --cached --quiet; then
+            echo "No staged climate data changes to commit."
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          git commit -m "chore: update climate point series"
+          git pull --rebase origin main
+          git push
+          echo "changed=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Trigger GEFS refresh
+        if: steps.commit.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: "update_gefs_forecast.yml",
+              ref: "main"
+            });
