@@ -143,8 +143,9 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - `observed_retrospective.daily_avg_soil_ERA5`
 - `observed_retrospective.daily_avg_soil_NWM_SOIL_M`
 - `observed_retrospective.daily_avg_soil_NWM_SOIL_W`
-- `gefs_analysis_context.precip_f003_proxy.<level>` (optional cycle history, currently not plotted)
-- `gefs_analysis_context.soil_f000.<level>` (optional cycle history, currently not plotted)
+- `gefs_analysis_context.precip_f003_proxy.<level>` (GEFS cycle-history analysis proxy, plotted)
+- `gefs_analysis_context.soil_f000.<level>` (GEFS cycle-history analysis, plotted)
+- Plot units are harmonized by panel logic (`APCP` in mm water-equivalent; `SOILW` in m3/m3)
 
 Panel override:
 
