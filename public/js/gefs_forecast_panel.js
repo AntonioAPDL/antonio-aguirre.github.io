@@ -466,6 +466,7 @@
       const hasObservedPrecip = Array.isArray(observedPrecip) && observedPrecip.length > 0;
       const retroPrecip = ((retrospective.precip || {})[precipLevelName]) || null;
       const analysisPrecip = ((gefsAnalysisContext.precip_f003_proxy || {})[precipLevelName]) || null;
+      let analysisPrecipTrace = null;
       if (hasObservedPrecip) {
         const obsTrace = buildLineTrace(
           observedPrecip,
@@ -514,24 +515,23 @@
         if (retroMean) traces.push(retroMean);
       }
       if (Array.isArray(analysisPrecip) && analysisPrecip.length) {
-        const analysisTrace = buildLineTrace(
+        analysisPrecipTrace = buildLineTrace(
           analysisPrecip,
           'GEFS f003 (0-3h acc) by cycle',
           '#334155',
           'dot',
           {
             width: 1.7,
-            opacity: 0.82,
-            mode: analysisPrecip.length <= 3 ? 'lines+markers' : 'lines',
-            markerSize: 5,
-            markerSymbol: 'diamond-open',
+            opacity: 0.95,
+            mode: analysisPrecip.length <= 3 ? 'markers' : 'lines+markers',
+            markerSize: 8,
+            markerSymbol: 'diamond',
             unit: precipUnits,
             valueFormat: '.2f',
             hoverLabel: 'GEFS f003 (0-3h acc) by cycle',
             legendGroup: 'precip_analysis'
           }
         );
-        if (analysisTrace) traces.push(analysisTrace);
       }
       const band = buildBandTrace(
         precipLevel.p10,
@@ -569,6 +569,7 @@
         }
       );
       if (meanTrace) traces.push(meanTrace);
+      if (analysisPrecipTrace) traces.push(analysisPrecipTrace);
       const precipXRange = buildXRange(
         initDate,
         observationWindowDays,
@@ -597,6 +598,7 @@
       const levels = Object.keys(payload.soil_moisture || {}).sort((a, b) => levelSortKey(a) - levelSortKey(b));
       const palette = ['#1d4ed8', '#0284c7', '#16a34a', '#f59e0b', '#dc2626'];
       const traces = [];
+      const overlayTraces = [];
       const pointGroups = [];
       const analysisSoilBlock = gefsAnalysisContext.soil_f000 || {};
       const observedSoilEra5 = observedRetro.daily_avg_soil_ERA5;
@@ -641,17 +643,17 @@
             'dot',
             {
               width: 1.3,
-              opacity: 0.58,
-              mode: analysisLevel.length <= 3 ? 'lines+markers' : 'lines',
-              markerSize: 4.2,
-              markerSymbol: 'circle-open',
+              opacity: 0.9,
+              mode: analysisLevel.length <= 3 ? 'markers' : 'lines+markers',
+              markerSize: 6.2,
+              markerSymbol: 'circle',
               showlegend: idx === 0,
               valueFormat: '.3f',
               hoverLabel: `GEFS f000 analysis · ${level}`,
               legendGroup: 'soil_analysis'
             }
           );
-          if (analysisTrace) traces.push(analysisTrace);
+          if (analysisTrace) overlayTraces.push(analysisTrace);
           pointGroups.push(analysisLevel);
         }
         if (!hasObservedSoil && retroLevel && retroLevel.p50) {
@@ -695,6 +697,7 @@
         if (soilP50) traces.push(soilP50);
         pointGroups.push(block.p10, block.p50, block.p90);
       });
+      traces.push(...overlayTraces);
       const soilXRange = buildXRange(initDate, observationWindowDays, pointGroups);
       Plotly.react(
         soilEl,
