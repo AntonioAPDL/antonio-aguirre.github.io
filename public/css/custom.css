@@ -31,6 +31,11 @@
   --info-text: #2f3b4a;
   --info-warning: #b45309;
   --chart-card-bg: linear-gradient(150deg, rgba(27, 99, 198, 0.06), rgba(255, 255, 255, 0.9));
+  --gefs-card-bg: linear-gradient(180deg, rgba(248, 250, 252, 0.72) 0%, rgba(255, 255, 255, 1) 34%);
+  --gefs-card-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  --gefs-head-bg: linear-gradient(90deg, rgba(30, 64, 175, 0.06) 0%, rgba(2, 132, 199, 0.04) 55%, rgba(15, 23, 42, 0.02) 100%);
+  --gefs-plot-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.6) 100%);
+  --gefs-plot-grid: rgba(148, 163, 184, 0.06);
 }
 
 html.dark-theme,
@@ -56,6 +61,11 @@ body.dark-theme {
   --info-text: #d7e0ea;
   --info-warning: #fbbf24;
   --chart-card-bg: linear-gradient(150deg, rgba(27, 99, 198, 0.22), rgba(21, 26, 33, 0.96));
+  --gefs-card-bg: linear-gradient(180deg, rgba(25, 33, 44, 0.96) 0%, rgba(21, 28, 37, 1) 36%);
+  --gefs-card-shadow: 0 12px 28px rgba(0, 0, 0, 0.46);
+  --gefs-head-bg: linear-gradient(90deg, rgba(30, 64, 175, 0.3) 0%, rgba(2, 132, 199, 0.2) 55%, rgba(15, 23, 42, 0.2) 100%);
+  --gefs-plot-bg: linear-gradient(180deg, rgba(24, 32, 43, 0.96) 0%, rgba(20, 28, 37, 0.92) 100%);
+  --gefs-plot-grid: rgba(148, 163, 184, 0.12);
 }
 
 body {
@@ -355,14 +365,14 @@ button:focus-visible {
   margin-top: 1rem;
   border: 1px solid var(--border-color);
   border-radius: 14px;
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.72) 0%, rgba(255, 255, 255, 1) 34%);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  background: var(--gefs-card-bg);
+  box-shadow: var(--gefs-card-shadow);
   overflow: hidden;
 }
 
 .gefs-chart-card__head {
   padding: 0.86rem 1rem 0.52rem;
-  background: linear-gradient(90deg, rgba(30, 64, 175, 0.06) 0%, rgba(2, 132, 199, 0.04) 55%, rgba(15, 23, 42, 0.02) 100%);
+  background: var(--gefs-head-bg);
 }
 
 .gefs-chart-card__head h3 {
@@ -383,11 +393,11 @@ button:focus-visible {
 .gefs-chart-card .plot-stage {
   border-top: 1px solid var(--border-color);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.6) 100%),
+    var(--gefs-plot-bg),
     repeating-linear-gradient(
       0deg,
-      rgba(148, 163, 184, 0.06) 0px,
-      rgba(148, 163, 184, 0.06) 1px,
+      var(--gefs-plot-grid) 0px,
+      var(--gefs-plot-grid) 1px,
       transparent 1px,
       transparent 30px
     );

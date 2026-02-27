@@ -340,7 +340,7 @@
           x1: opts.initTime,
           y0: 0,
           y1: 1,
-          line: { color: '#64748b', width: 1, dash: 'dot' }
+          line: { color: colors.muted, width: 1, dash: 'dot' }
         }
       ];
       chartLayout.annotations = [
@@ -767,6 +767,45 @@
     const refreshMinutes = Math.max(1, numberOrNull(container.dataset.refreshMin) || 60);
     const refreshMs = refreshMinutes * 60 * 1000;
     let inFlight = false;
+    let lastPayload = null;
+    let rerenderTimer = null;
+
+    function rerenderFromCache() {
+      if (!lastPayload || typeof lastPayload !== 'object') return;
+      try {
+        renderPanel(container, lastPayload);
+      } catch (err) {
+        // Keep theme toggles resilient; next refresh will recover if needed.
+      }
+    }
+
+    function scheduleThemeRerender() {
+      if (!lastPayload || typeof lastPayload !== 'object') return;
+      if (rerenderTimer) window.clearTimeout(rerenderTimer);
+      rerenderTimer = window.setTimeout(() => {
+        rerenderTimer = null;
+        rerenderFromCache();
+      }, 90);
+    }
+
+    const themeToggles = document.querySelectorAll('[data-theme-toggle]');
+    themeToggles.forEach((toggle) => {
+      toggle.addEventListener('click', scheduleThemeRerender);
+    });
+
+    const themeObserver = new MutationObserver((records) => {
+      for (let i = 0; i < records.length; i += 1) {
+        const rec = records[i];
+        if (rec.type === 'attributes' && rec.attributeName === 'class') {
+          scheduleThemeRerender();
+          break;
+        }
+      }
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    if (document.body) {
+      themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
 
     async function refreshOnce() {
       if (inFlight) return;
@@ -776,6 +815,7 @@
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const payload = await response.json();
         if (!payload || typeof payload !== 'object') throw new Error('Invalid JSON payload');
+        lastPayload = payload;
         renderPanel(container, payload);
       } catch (err) {
         if (statusEl) {
