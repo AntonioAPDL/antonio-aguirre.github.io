@@ -97,10 +97,11 @@ Supported attributes:
 The plot can overlay forecast guidance from a tracked JSON artifact:
 
 - **Artifact:** `assets/data/forecasts/big_trees_latest.json` (tracked in git)
-- **Update script:** `scripts/update_big_trees_forecast.sh` (runs the sandbox extractor as needed)
-- **Included series:** NWPS analysis/short (deterministic) + NWM medium/long ensembles (p10/p50/p90)
+- **Update script:** `scripts/update_big_trees_forecast.sh`
+- **Included series:** NWPS analysis/short deterministic + NWM medium/long quantiles (`p10/p50/p90`) when available
 - **TODO:** HEFS ensembles once location_id lookup is resolved
-- **Ops guard:** script fails fast if `_sandbox/nws_ensemble_point` is missing. CI can opt into stale-asset fallback via `BIG_TREES_FORECAST_ALLOW_STALE_ON_MISSING_PIPELINE=1`.
+- **Fallback behavior:** if `_sandbox/nws_ensemble_point` is absent, updater builds JSON directly from NOAA NWPS APIs.
+- **Ops guard:** on updater errors, CI can keep the last tracked artifact by setting `BIG_TREES_FORECAST_ALLOW_STALE_ON_ERROR=1`.
 
 To update the tracked forecast JSON:
 

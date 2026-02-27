@@ -6,13 +6,14 @@ NWS_ROOT="${REPO_ROOT}/_sandbox/nws_ensemble_point"
 EXTRACTOR="${REPO_ROOT}/_sandbox/nws_ensemble_point/nwx_extract.py"
 CONFIG="${REPO_ROOT}/_sandbox/nws_ensemble_point/config.yaml"
 REQUIREMENTS="${REPO_ROOT}/_sandbox/nws_ensemble_point/requirements.txt"
+API_BUILDER="${REPO_ROOT}/scripts/build_big_trees_forecast_json.py"
 SANDBOX_JSON="${REPO_ROOT}/data/_sandbox_nws/big_trees_latest.json"
 ASSETS_JSON="${REPO_ROOT}/assets/data/forecasts/big_trees_latest.json"
 VENV_ACTIVATE="${REPO_ROOT}/_sandbox/nws_ensemble_point/.venv/bin/activate"
 MAX_SANDBOX_AGE_SEC=21600
 
 INSTALL_DEPS="${BIG_TREES_FORECAST_INSTALL_DEPS:-0}"
-ALLOW_STALE_ON_MISSING_PIPELINE="${BIG_TREES_FORECAST_ALLOW_STALE_ON_MISSING_PIPELINE:-0}"
+ALLOW_STALE_ON_ERROR="${BIG_TREES_FORECAST_ALLOW_STALE_ON_ERROR:-${BIG_TREES_FORECAST_ALLOW_STALE_ON_MISSING_PIPELINE:-0}}"
 
 log_info() { echo "[INFO] $*"; }
 log_warn() { echo "[WARN] $*" >&2; }
@@ -38,20 +39,11 @@ else
   exit 3
 fi
 
-missing_paths=()
-for required in "${NWS_ROOT}" "${EXTRACTOR}" "${CONFIG}" "${REQUIREMENTS}"; do
-  if [[ ! -e "${required}" ]]; then
-    missing_paths+=("${required}")
-  fi
-done
-
-if (( ${#missing_paths[@]} > 0 )); then
-  if [[ "${ALLOW_STALE_ON_MISSING_PIPELINE}" == "1" ]] && [[ -f "${ASSETS_JSON}" ]]; then
-    gh_warn "NWS ensemble pipeline is incomplete in this repository clone."
-    for path in "${missing_paths[@]}"; do
-      gh_warn "Missing required path: ${path}"
-    done
-    gh_warn "Skipping Big Trees forecast extraction; pipeline files are missing. Keeping tracked asset: ${ASSETS_JSON}"
+keep_stale_and_exit() {
+  local reason="$1"
+  if [[ "${ALLOW_STALE_ON_ERROR}" == "1" ]] && [[ -f "${ASSETS_JSON}" ]]; then
+    gh_warn "${reason}"
+    gh_warn "Keeping tracked asset without update: ${ASSETS_JSON}"
     "${PYTHON_BIN}" - <<'PY'
 import json
 from pathlib import Path
@@ -63,70 +55,101 @@ PY
     exit 0
   fi
 
-  log_error "NWS ensemble pipeline is incomplete in this repository clone."
-  for path in "${missing_paths[@]}"; do
-    log_error "Missing required path: ${path}"
-  done
-  log_error "Failing fast. To allow stale-asset fallback, set BIG_TREES_FORECAST_ALLOW_STALE_ON_MISSING_PIPELINE=1."
+  log_error "${reason}"
+  log_error "To allow stale-asset fallback, set BIG_TREES_FORECAST_ALLOW_STALE_ON_ERROR=1."
   exit 2
-fi
+}
 
-if [[ -f "${VENV_ACTIVATE}" ]]; then
-  # shellcheck disable=SC1090
-  source "${VENV_ACTIVATE}"
-fi
+legacy_ready=1
+for required in "${NWS_ROOT}" "${EXTRACTOR}" "${CONFIG}" "${REQUIREMENTS}"; do
+  if [[ ! -e "${required}" ]]; then
+    legacy_ready=0
+    break
+  fi
+done
 
-if [[ "${INSTALL_DEPS}" == "1" ]]; then
-  log_info "Installing dependencies from ${REQUIREMENTS}"
-  "${PYTHON_BIN}" -m pip install --upgrade pip
-  "${PYTHON_BIN}" -m pip install -r "${REQUIREMENTS}"
-fi
+run_legacy_pipeline() {
+  if [[ -f "${VENV_ACTIVATE}" ]]; then
+    # shellcheck disable=SC1090
+    source "${VENV_ACTIVATE}"
+  fi
 
-if ! "${PYTHON_BIN}" - <<'PY' 2>/dev/null
+  if [[ "${INSTALL_DEPS}" == "1" ]]; then
+    log_info "Installing dependencies from ${REQUIREMENTS}"
+    "${PYTHON_BIN}" -m pip install --upgrade pip
+    "${PYTHON_BIN}" -m pip install -r "${REQUIREMENTS}"
+  fi
+
+  if ! "${PYTHON_BIN}" - <<'PY' 2>/dev/null
 import pandas, numpy, yaml, requests  # noqa: F401
 PY
-then
-  echo "Missing Python dependencies for the extractor. Activate the sandbox venv and install requirements:" >&2
-  echo "  cd _sandbox/nws_ensemble_point && python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt" >&2
-  exit 1
-fi
-
-RUN_EXTRACTOR=1
-if [[ -f "${SANDBOX_JSON}" ]]; then
-  NOW_TS=$(date +%s)
-  FILE_TS=$(stat -c %Y "${SANDBOX_JSON}")
-  AGE_SEC=$((NOW_TS - FILE_TS))
-  if [[ $AGE_SEC -lt ${MAX_SANDBOX_AGE_SEC} ]]; then
-    log_info "Recent sandbox artifact found (${AGE_SEC}s old); skipping extractor run."
-    RUN_EXTRACTOR=0
+  then
+    return 1
   fi
-fi
 
-if [[ $RUN_EXTRACTOR -eq 1 ]]; then
-  set +e
-  OUTPUT=$("${PYTHON_BIN}" "${EXTRACTOR}" --config "${CONFIG}" --latest --profile web --export-web 2>&1)
-  STATUS=$?
-  set -e
+  local run_extractor=1
+  if [[ -f "${SANDBOX_JSON}" ]]; then
+    local now_ts file_ts age_sec
+    now_ts=$(date +%s)
+    file_ts=$(stat -c %Y "${SANDBOX_JSON}")
+    age_sec=$((now_ts - file_ts))
+    if [[ ${age_sec} -lt ${MAX_SANDBOX_AGE_SEC} ]]; then
+      log_info "Recent sandbox artifact found (${age_sec}s old); skipping legacy extractor run."
+      run_extractor=0
+    fi
+  fi
 
-  if [[ $STATUS -ne 0 ]]; then
-    if command -v rg >/dev/null 2>&1; then
-      CHECK_CMD=(rg -q "unrecognized arguments: --profile")
-    else
-      CHECK_CMD=(grep -q "unrecognized arguments: --profile")
+  if [[ ${run_extractor} -eq 1 ]]; then
+    set +e
+    local output status
+    output=$("${PYTHON_BIN}" "${EXTRACTOR}" --config "${CONFIG}" --latest --profile web --export-web 2>&1)
+    status=$?
+    set -e
+
+    if [[ ${status} -ne 0 ]]; then
+      if command -v rg >/dev/null 2>&1; then
+        CHECK_CMD=(rg -q "unrecognized arguments: --profile")
+      else
+        CHECK_CMD=(grep -q "unrecognized arguments: --profile")
+      fi
+      if echo "${output}" | "${CHECK_CMD[@]}"; then
+        log_warn "Profile flag not supported; falling back to --latest --export-web."
+        "${PYTHON_BIN}" "${EXTRACTOR}" --config "${CONFIG}" --latest --export-web
+      else
+        echo "${output}" >&2
+        return ${status}
+      fi
     fi
-    if echo "${OUTPUT}" | "${CHECK_CMD[@]}"; then
-      echo "Profile flag not supported; falling back to --latest --export-web." >&2
-      "${PYTHON_BIN}" "${EXTRACTOR}" --config "${CONFIG}" --latest --export-web
-    else
-      echo "${OUTPUT}" >&2
-      exit $STATUS
-    fi
+  fi
+  return 0
+}
+
+run_api_builder() {
+  if [[ ! -f "${API_BUILDER}" ]]; then
+    return 4
+  fi
+
+  mkdir -p "$(dirname "${SANDBOX_JSON}")"
+  "${PYTHON_BIN}" "${API_BUILDER}" \
+    --gauge-id "BTEC1" \
+    --reach-id "17682474" \
+    --output "${SANDBOX_JSON}"
+}
+
+if [[ "${legacy_ready}" == "1" ]]; then
+  log_info "Using legacy _sandbox/nws_ensemble_point extractor."
+  if ! run_legacy_pipeline; then
+    keep_stale_and_exit "Legacy extractor failed."
+  fi
+else
+  log_warn "Legacy _sandbox/nws_ensemble_point extractor not found; using API builder fallback."
+  if ! run_api_builder; then
+    keep_stale_and_exit "API builder failed to produce Big Trees forecast JSON."
   fi
 fi
 
 if [[ ! -f "${SANDBOX_JSON}" ]]; then
-  echo "Expected export not found: ${SANDBOX_JSON}" >&2
-  exit 1
+  keep_stale_and_exit "Expected export not found: ${SANDBOX_JSON}"
 fi
 
 mkdir -p "$(dirname "${ASSETS_JSON}")"
