@@ -33,48 +33,17 @@
     const y = [];
     points.forEach((point) => {
       if (!point || !point.t) return;
-      const date = parseDate(point.t);
+      const ts = parseDate(point.t);
       const value = numberOrNull(point.v);
-      if (!date || value === null) return;
-      x.push(date);
+      if (!ts || value === null) return;
+      x.push(ts);
       y.push(value);
     });
     return { x, y };
   }
 
-  function parseDailyTimestamp(value) {
-    if (!value) return null;
-    const raw = String(value).trim();
-    if (!raw) return null;
-    const isoDay = /^\d{4}-\d{2}-\d{2}$/;
-    if (isoDay.test(raw)) {
-      return parseDate(`${raw}T00:00:00Z`);
-    }
-    return parseDate(raw);
-  }
-
-  function parseSimpleCsv(text) {
-    if (typeof text !== 'string' || !text.trim()) return [];
-    const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
-    if (lines.length < 2) return [];
-    const headers = lines[0].split(',').map((value) => String(value || '').trim());
-    const idx = Object.create(null);
-    headers.forEach((name, i) => { idx[name] = i; });
-    if (idx.timestamp === undefined) return [];
-    const rows = [];
-    for (let i = 1; i < lines.length; i += 1) {
-      const cols = lines[i].split(',');
-      const timestamp = cols[idx.timestamp] ? String(cols[idx.timestamp]).trim() : '';
-      if (!timestamp) continue;
-      rows.push({
-        timestamp,
-        daily_avg_ppt: idx.daily_avg_ppt === undefined ? '' : (cols[idx.daily_avg_ppt] || '').trim(),
-        daily_avg_soil_ERA5: idx.daily_avg_soil_ERA5 === undefined ? '' : (cols[idx.daily_avg_soil_ERA5] || '').trim(),
-        daily_avg_soil_NWM_SOIL_M: idx.daily_avg_soil_NWM_SOIL_M === undefined ? '' : (cols[idx.daily_avg_soil_NWM_SOIL_M] || '').trim(),
-        daily_avg_soil_NWM_SOIL_W: idx.daily_avg_soil_NWM_SOIL_W === undefined ? '' : (cols[idx.daily_avg_soil_NWM_SOIL_W] || '').trim()
-      });
-    }
-    return rows;
+  function hasSeries(points) {
+    return Array.isArray(points) && points.length > 0;
   }
 
   function pickCycleMarker(points, initDate, requireAfterInit) {
@@ -90,11 +59,13 @@
       .filter(Boolean)
       .sort((a, b) => a.ts - b.ts);
     if (!parsed.length) return null;
+
     if (requireAfterInit) {
-      const firstAfter = parsed.find((item) => item.ts > initDate);
+      const firstAfter = parsed.find((row) => row.ts > initDate);
       if (firstAfter) return { t: firstAfter.ts.toISOString(), v: firstAfter.value };
     }
-    const firstAtOrAfter = parsed.find((item) => item.ts >= initDate);
+
+    const firstAtOrAfter = parsed.find((row) => row.ts >= initDate);
     if (firstAtOrAfter) return { t: firstAtOrAfter.ts.toISOString(), v: firstAtOrAfter.value };
     return { t: parsed[0].ts.toISOString(), v: parsed[0].value };
   }
@@ -103,13 +74,11 @@
     if (!payload || typeof payload !== 'object') return {};
     const initDate = parseDate(payload.init_time_utc);
     if (!initDate) return {};
-    const observationWindowDays = Math.max(
-      1,
-      numberOrNull(payload.observation_window_days) || 20
-    );
-    const startDate = new Date(initDate.getTime() - observationWindowDays * 24 * 3600 * 1000);
-    const out = {
-      window_days: observationWindowDays,
+
+    const windowDays = Math.max(1, numberOrNull(payload.observation_window_days) || 20);
+    const startDate = new Date(initDate.getTime() - windowDays * 24 * 3600 * 1000);
+    const derived = {
+      window_days: windowDays,
       start_utc: startDate.toISOString(),
       end_utc: initDate.toISOString(),
       precip_proxy_valid_offset_hours: 3,
@@ -119,33 +88,30 @@
 
     const precipLevels = payload.precip && typeof payload.precip === 'object' ? payload.precip : {};
     Object.keys(precipLevels).forEach((level) => {
-      const block = precipLevels[level];
-      if (!block || typeof block !== 'object') return;
-      const marker = pickCycleMarker(block.p50, initDate, true);
-      if (marker) out.precip_f003_proxy[level] = [marker];
+      const marker = pickCycleMarker((precipLevels[level] || {}).p50, initDate, true);
+      if (marker) derived.precip_f003_proxy[level] = [marker];
     });
 
     const soilLevels = payload.soil_moisture && typeof payload.soil_moisture === 'object'
       ? payload.soil_moisture
       : {};
     Object.keys(soilLevels).forEach((level) => {
-      const block = soilLevels[level];
-      if (!block || typeof block !== 'object') return;
-      const marker = pickCycleMarker(block.p50, initDate, false);
-      if (marker) out.soil_f000[level] = [marker];
+      const marker = pickCycleMarker((soilLevels[level] || {}).p50, initDate, false);
+      if (marker) derived.soil_f000[level] = [marker];
     });
-    return out;
+
+    return derived;
   }
 
   function scaleSeries(points, factor) {
     if (!Array.isArray(points)) return [];
-    const scale = Number.isFinite(factor) ? Number(factor) : 1;
+    if (!Number.isFinite(factor)) return [];
     const out = [];
     points.forEach((point) => {
       if (!point || !point.t) return;
       const value = numberOrNull(point.v);
       if (value === null) return;
-      out.push({ t: point.t, v: value * scale });
+      out.push({ t: point.t, v: value * factor });
     });
     return out;
   }
@@ -170,15 +136,15 @@
       .replace(/\s+/g, ' ');
   }
 
-  function resolvePrecipFactorToMm(unitRaw, warnings, sourceLabel, options) {
-    const opts = options || {};
+  function resolvePrecipFactorToMm(unitRaw, warnings, sourceLabel) {
     const unit = normalizeUnitLabel(unitRaw);
     const compact = unit.replace(/\s+/g, '');
+
     if (!unit) {
-      if (opts.assumeEquivalent) return 1;
-      warnings.push(`${sourceLabel}: missing precip units, series hidden`);
-      return null;
+      warnings.push(`${sourceLabel}: missing precip units, assuming mm water-equivalent`);
+      return 1;
     }
+
     if (compact === 'mm' || unit.includes('millimeter') || unit.includes('millimetre')) return 1;
     if (compact === 'cm' || unit.includes('centimeter') || unit.includes('centimetre')) return 10;
     if (compact === 'm' || unit === 'meter' || unit === 'metre') return 1000;
@@ -191,18 +157,15 @@
     ) {
       return 1;
     }
-    if (opts.assumeEquivalent) {
-      warnings.push(`${sourceLabel}: unrecognized precip unit "${unitRaw || 'unknown'}", treated as mm-equivalent`);
-      return 1;
-    }
-    warnings.push(`${sourceLabel}: unrecognized precip unit "${unitRaw || 'unknown'}", series hidden`);
+
+    warnings.push(`${sourceLabel}: unrecognized precip units "${unitRaw || 'unknown'}", hiding series`);
     return null;
   }
 
-  function resolveSoilFactorToFraction(unitRaw, samplePoints, warnings, sourceLabel, options) {
-    const opts = options || {};
+  function resolveSoilFactorToFraction(unitRaw, samplePoints, warnings, sourceLabel) {
     const unit = normalizeUnitLabel(unitRaw);
     const compact = unit.replace(/\s+/g, '');
+
     if (
       compact.includes('proportion') ||
       compact.includes('fraction') ||
@@ -216,88 +179,15 @@
     if (compact.includes('%') || compact.includes('percent')) return 0.01;
 
     const maxAbs = seriesMaxAbs(samplePoints);
-    if (maxAbs === null) return opts.defaultFactor === undefined ? 1 : Number(opts.defaultFactor);
+    if (maxAbs === null) return 1;
     if (maxAbs <= 1.5) return 1;
     if (maxAbs <= 100) {
-      warnings.push(`${sourceLabel}: inferred percent soil units from values and converted to fraction`);
+      warnings.push(`${sourceLabel}: inferred percent units and converted to fraction`);
       return 0.01;
     }
-    warnings.push(`${sourceLabel}: incompatible soil magnitude (max=${maxAbs.toFixed(2)}), series hidden`);
+
+    warnings.push(`${sourceLabel}: incompatible values for fraction units, hiding series`);
     return null;
-  }
-
-  function buildObservedRetrospectiveFromCsv(rows, initDate, observationWindowDays, sourceCsv) {
-    if (!Array.isArray(rows) || !initDate) return null;
-    const startDate = new Date(initDate.getTime() - observationWindowDays * 24 * 3600 * 1000);
-    const filtered = rows
-      .map((row) => {
-        const ts = parseDailyTimestamp(row.timestamp);
-        if (!ts) return null;
-        if (ts < startDate || ts >= initDate) return null;
-        return { ...row, _date: ts };
-      })
-      .filter(Boolean)
-      .sort((a, b) => a._date - b._date);
-    if (!filtered.length) return null;
-
-    function toSeries(column) {
-      const series = [];
-      filtered.forEach((row) => {
-        const num = numberOrNull(row[column]);
-        if (num === null) return;
-        series.push({ t: row._date.toISOString(), v: num });
-      });
-      return series;
-    }
-
-    return {
-      window_days: observationWindowDays,
-      start_utc: startDate.toISOString(),
-      end_utc: initDate.toISOString(),
-      source_csv: sourceCsv,
-      daily_avg_ppt: toSeries('daily_avg_ppt'),
-      daily_avg_soil_ERA5: toSeries('daily_avg_soil_ERA5'),
-      daily_avg_soil_NWM_SOIL_M: toSeries('daily_avg_soil_NWM_SOIL_M'),
-      daily_avg_soil_NWM_SOIL_W: toSeries('daily_avg_soil_NWM_SOIL_W')
-    };
-  }
-
-  function hasObservedRetrospective(payload) {
-    if (!payload || typeof payload !== 'object') return false;
-    const observed = payload.observed_retrospective;
-    if (!observed || typeof observed !== 'object') return false;
-    const keys = [
-      'daily_avg_ppt',
-      'daily_avg_soil_ERA5',
-      'daily_avg_soil_NWM_SOIL_M',
-      'daily_avg_soil_NWM_SOIL_W'
-    ];
-    return keys.some((key) => Array.isArray(observed[key]) && observed[key].length > 0);
-  }
-
-  async function attachObservedRetrospective(container, payload) {
-    if (!payload || typeof payload !== 'object') return payload;
-    if (hasObservedRetrospective(payload)) return payload;
-    const initDate = parseDate(payload.init_time_utc);
-    if (!initDate) return payload;
-    const observationWindowDays = Math.max(
-      1,
-      numberOrNull(container.dataset.observationWindowDays) ||
-        numberOrNull(payload.observation_window_days) ||
-        20
-    );
-    const csvUrl = container.dataset.observedCsvUrl || '/climate_daily_ppt_soil.csv';
-    try {
-      const response = await fetch(buildFetchUrl(csvUrl), { cache: 'no-store' });
-      if (!response.ok) return payload;
-      const text = await response.text();
-      const rows = parseSimpleCsv(text);
-      const observed = buildObservedRetrospectiveFromCsv(rows, initDate, observationWindowDays, csvUrl);
-      if (observed) payload.observed_retrospective = observed;
-    } catch (err) {
-      // Keep panel resilient when optional observed CSV is unavailable.
-    }
-    return payload;
   }
 
   function latestPointDate(pointGroups) {
@@ -318,7 +208,7 @@
     if (!initDate) return null;
     const start = new Date(initDate.getTime() - windowDays * 24 * 3600 * 1000);
     const latest = latestPointDate(pointGroups);
-    const fallbackEnd = new Date(initDate.getTime() + 24 * 3600 * 1000);
+    const fallbackEnd = new Date(initDate.getTime() + 48 * 3600 * 1000);
     const end = latest && latest > initDate ? latest : fallbackEnd;
     return [start, end];
   }
@@ -345,11 +235,13 @@
   function buildLineTrace(points, name, color, dash, options) {
     const series = seriesToXY(points);
     if (!series.x.length) return null;
+
     const opts = options || {};
     const unitSuffix = opts.unit ? ` ${opts.unit}` : '';
     const valueFormat = opts.valueFormat || '.2f';
     const hoverLabel = opts.hoverLabel || name;
     const mode = opts.mode || 'lines';
+
     const trace = {
       x: series.x,
       y: series.y,
@@ -362,13 +254,15 @@
       hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>${hoverLabel}: %{y:${valueFormat}}${unitSuffix}<extra></extra>`,
       showlegend: opts.showlegend === undefined ? true : Boolean(opts.showlegend)
     };
+
     if (mode.indexOf('markers') !== -1) {
       trace.marker = {
         color,
-        size: opts.markerSize || 4.5,
+        size: opts.markerSize || 4.8,
         symbol: opts.markerSymbol || 'circle-open'
       };
     }
+
     return trace;
   }
 
@@ -377,17 +271,16 @@
     return {
       text: styles.getPropertyValue('--text-color').trim() || '#1f2933',
       grid: styles.getPropertyValue('--border-color').trim() || '#e2e8f0',
-      accent: styles.getPropertyValue('--accent-color').trim() || '#1b63c6',
+      accent: styles.getPropertyValue('--accent-color').trim() || '#1d4ed8',
       muted: styles.getPropertyValue('--text-subtle').trim() || '#64748b',
       surface: styles.getPropertyValue('--surface-1').trim() || '#ffffff'
     };
   }
 
-  function layout(title, yTitle, colors, options) {
+  function layout(yTitle, colors, options) {
     const opts = options || {};
-    const hasTitle = typeof title === 'string' && title.trim().length > 0;
     const chartLayout = {
-      margin: { l: 60, r: 20, t: hasTitle ? 42 : 20, b: 52 },
+      margin: { l: 62, r: 20, t: 22, b: 56 },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
       font: { color: colors.text, family: 'Source Sans Pro, Helvetica, Arial, sans-serif' },
@@ -413,22 +306,24 @@
       yaxis: {
         title: yTitle,
         gridcolor: colors.grid,
+        zeroline: opts.showZeroLine === undefined ? true : Boolean(opts.showZeroLine),
+        zerolinecolor: colors.grid,
         showline: true,
         linecolor: colors.grid,
-        automargin: true
+        automargin: true,
+        rangemode: opts.yRangeMode || 'normal'
       },
       legend: {
         orientation: 'h',
-        y: opts.legendY === undefined ? 1.14 : opts.legendY,
+        y: opts.legendY === undefined ? 1.18 : opts.legendY,
         x: 0,
+        xanchor: 'left',
         font: { size: 11, color: colors.text },
         itemclick: 'toggle',
         itemdoubleclick: 'toggleothers'
       }
     };
-    if (hasTitle) {
-      chartLayout.title = { text: title, font: { size: 15, color: colors.text }, x: 0.01, xanchor: 'left' };
-    }
+
     if (Array.isArray(opts.xRange) && opts.xRange.length === 2) {
       chartLayout.xaxis.range = opts.xRange;
     }
@@ -453,7 +348,7 @@
           xref: 'x',
           x: opts.initTime,
           yref: 'paper',
-          y: 1.03,
+          y: 1.035,
           text: 'Forecast init',
           showarrow: false,
           font: { size: 11, color: colors.muted },
@@ -462,6 +357,7 @@
         }
       ];
     }
+
     return chartLayout;
   }
 
@@ -470,8 +366,17 @@
     return match ? Number(match[1]) : 999;
   }
 
+  function countContextPoints(block) {
+    if (!block || typeof block !== 'object') return 0;
+    return Object.values(block).reduce((acc, series) => {
+      if (!Array.isArray(series)) return acc;
+      return acc + series.length;
+    }, 0);
+  }
+
   function setStatus(el, payload, warnings) {
     if (!el) return;
+
     const generated = payload ? formatDate(payload.generated_at_utc) : '--';
     const initTime = payload ? formatDate(payload.init_time_utc) : '--';
     const members = payload && Number.isFinite(Number(payload.member_count))
@@ -480,67 +385,346 @@
     const missing = payload && Array.isArray(payload.missing_levels) && payload.missing_levels.length
       ? `Missing layers: ${payload.missing_levels.join(', ')}`
       : 'All configured layers resolved';
+
     const retroWindowDays = payload && Number.isFinite(Number(payload.observation_window_days))
       ? Number(payload.observation_window_days)
       : null;
-    const observed = payload && payload.observed_retrospective && typeof payload.observed_retrospective === 'object'
-      ? payload.observed_retrospective
-      : null;
-    const observedPptCount = observed && Array.isArray(observed.daily_avg_ppt) ? observed.daily_avg_ppt.length : 0;
-    const observedEra5Count = observed && Array.isArray(observed.daily_avg_soil_ERA5) ? observed.daily_avg_soil_ERA5.length : 0;
-    const observedNwmMCount = observed && Array.isArray(observed.daily_avg_soil_NWM_SOIL_M) ? observed.daily_avg_soil_NWM_SOIL_M.length : 0;
-    const observedNwmWCount = observed && Array.isArray(observed.daily_avg_soil_NWM_SOIL_W) ? observed.daily_avg_soil_NWM_SOIL_W.length : 0;
+
     const analysisContext = payload && payload.gefs_analysis_context && typeof payload.gefs_analysis_context === 'object'
       ? payload.gefs_analysis_context
-      : null;
-    const analysisPrecipBlock = analysisContext && analysisContext.precip_f003_proxy && typeof analysisContext.precip_f003_proxy === 'object'
-      ? analysisContext.precip_f003_proxy
       : {};
-    const analysisSoilBlock = analysisContext && analysisContext.soil_f000 && typeof analysisContext.soil_f000 === 'object'
-      ? analysisContext.soil_f000
+    const analysisPrecipCount = countContextPoints(analysisContext.precip_f003_proxy || {});
+    const analysisSoilCount = countContextPoints(analysisContext.soil_f000 || {});
+
+    const precipLevels = payload && payload.precip && typeof payload.precip === 'object' ? payload.precip : {};
+    const precipSurface = precipLevels.surface || precipLevels[Object.keys(precipLevels)[0]] || {};
+    const forecastPrecipCount = Array.isArray(precipSurface.p50) ? precipSurface.p50.length : 0;
+    const soilLevels = payload && payload.soil_moisture && typeof payload.soil_moisture === 'object'
+      ? payload.soil_moisture
       : {};
-    const analysisPrecipCount = Object.values(analysisPrecipBlock)
-      .reduce((acc, series) => acc + (Array.isArray(series) ? series.length : 0), 0);
-    const analysisSoilCount = Object.values(analysisSoilBlock)
-      .reduce((acc, series) => acc + (Array.isArray(series) ? series.length : 0), 0);
+    const forecastSoilCount = Object.values(soilLevels).reduce((acc, levelBlock) => {
+      if (!levelBlock || typeof levelBlock !== 'object' || !Array.isArray(levelBlock.p50)) return acc;
+      return acc + levelBlock.p50.length;
+    }, 0);
+
     const warningParts = Array.isArray(warnings)
-      ? warnings.filter((msg) => typeof msg === 'string' && msg.trim().length > 0)
-      : (typeof warnings === 'string' && warnings.trim().length > 0 ? [warnings] : []);
+      ? Array.from(new Set(warnings.filter((msg) => typeof msg === 'string' && msg.trim().length > 0)))
+      : [];
+
     const retroText = retroWindowDays ? `Retrospective window: ${retroWindowDays}d` : '';
-    const observedText = `Obs points (ppt/ERA5/NWM_M/NWM_W): ${observedPptCount}/${observedEra5Count}/${observedNwmMCount}/${observedNwmWCount}`;
-    const analysisText = `GEFS analysis pts (ppt_f003/soil_f000): ${analysisPrecipCount}/${analysisSoilCount}`;
+    const pointText = `GEFS points (forecast ppt/soil | analysis ppt/soil): ${forecastPrecipCount}/${forecastSoilCount} | ${analysisPrecipCount}/${analysisSoilCount}`;
+    const modeText = 'Context mode: GEFS-only (PRISM/ERA5 overlays disabled)';
     const warningText = warningParts.length ? ` | ${warningParts.join(' | ')}` : '';
-    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${retroText ? ` | ${retroText}` : ''} | ${observedText} | ${analysisText}${warningText}`;
+
+    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${retroText ? ` | ${retroText}` : ''} | ${pointText} | ${modeText}${warningText}`;
     el.classList.toggle('plot-status--error', warningParts.length > 0);
   }
 
   function buildFetchUrl(baseUrl) {
     const url = new URL(baseUrl, window.location.origin);
-    // Bust browser/proxy caches so periodic refresh checks latest artifact.
     url.searchParams.set('_ts', String(Date.now()));
     return url.toString();
+  }
+
+  function renderPrecipChart(precipEl, payload, initDate, observationWindowDays, colors, statusWarnings) {
+    const precipLevels = payload.precip || {};
+    const precipLevelName = precipLevels.surface ? 'surface' : Object.keys(precipLevels)[0];
+    const precipLevel = precipLevelName ? precipLevels[precipLevelName] : null;
+
+    if (!precipLevel || typeof precipLevel !== 'object') {
+      Plotly.purge(precipEl);
+      statusWarnings.push('Missing GEFS precipitation block');
+      return;
+    }
+
+    const precipFactor = resolvePrecipFactorToMm(
+      precipLevel.units || '',
+      statusWarnings,
+      'GEFS precipitation'
+    );
+    if (precipFactor === null) {
+      Plotly.purge(precipEl);
+      return;
+    }
+
+    const forecast = {
+      p10: scaleSeries(precipLevel.p10, precipFactor),
+      p50: scaleSeries(precipLevel.p50, precipFactor),
+      p90: scaleSeries(precipLevel.p90, precipFactor),
+      mean: scaleSeries(precipLevel.mean, precipFactor)
+    };
+
+    const retrospective = payload.retrospective || {};
+    const retroRaw = ((retrospective.precip || {})[precipLevelName]) || null;
+    const retro = retroRaw
+      ? {
+        p10: scaleSeries(retroRaw.p10, precipFactor),
+        p50: scaleSeries(retroRaw.p50, precipFactor),
+        p90: scaleSeries(retroRaw.p90, precipFactor),
+        mean: scaleSeries(retroRaw.mean, precipFactor)
+      }
+      : null;
+
+    const analysisContext = payload.gefs_analysis_context || {};
+    const analysis = scaleSeries(((analysisContext.precip_f003_proxy || {})[precipLevelName]) || [], precipFactor);
+
+    const traces = [];
+
+    if (retro && (hasSeries(retro.p10) || hasSeries(retro.p50) || hasSeries(retro.p90))) {
+      const retroBand = buildBandTrace(
+        retro.p10,
+        retro.p90,
+        'Retrospective p10-p90',
+        'rgba(100,116,139,0.18)',
+        { showLegend: true, legendGroup: 'precip_retro' }
+      );
+      if (retroBand) traces.push(retroBand);
+
+      const retroP50 = buildLineTrace(
+        retro.p50,
+        'Retrospective p50',
+        '#475569',
+        'dot',
+        {
+          width: 1.5,
+          unit: 'mm',
+          valueFormat: '.2f',
+          hoverLabel: 'Retrospective p50',
+          legendGroup: 'precip_retro'
+        }
+      );
+      if (retroP50) traces.push(retroP50);
+    }
+
+    if (hasSeries(analysis)) {
+      const analysisTrace = buildLineTrace(
+        analysis,
+        'GEFS f003 analysis proxy',
+        '#334155',
+        'dot',
+        {
+          width: 1.8,
+          opacity: 0.92,
+          mode: analysis.length <= 6 ? 'markers+lines' : 'lines+markers',
+          markerSize: 6.8,
+          markerSymbol: 'diamond',
+          unit: 'mm',
+          valueFormat: '.2f',
+          hoverLabel: 'GEFS f003 analysis proxy',
+          legendGroup: 'precip_analysis'
+        }
+      );
+      if (analysisTrace) traces.push(analysisTrace);
+    }
+
+    const band = buildBandTrace(
+      forecast.p10,
+      forecast.p90,
+      'GEFS p10-p90',
+      'rgba(30,64,175,0.17)',
+      { showLegend: true, legendGroup: 'precip_forecast' }
+    );
+    if (band) traces.push(band);
+
+    const meanTrace = buildLineTrace(
+      forecast.mean,
+      'GEFS mean',
+      '#ea580c',
+      'dash',
+      {
+        width: 1.85,
+        unit: 'mm',
+        valueFormat: '.2f',
+        hoverLabel: 'GEFS mean',
+        legendGroup: 'precip_forecast'
+      }
+    );
+    if (meanTrace) traces.push(meanTrace);
+
+    const p50Trace = buildLineTrace(
+      forecast.p50,
+      'GEFS p50',
+      '#1d4ed8',
+      'solid',
+      {
+        width: 2.6,
+        unit: 'mm',
+        valueFormat: '.2f',
+        hoverLabel: 'GEFS p50',
+        legendGroup: 'precip_forecast'
+      }
+    );
+    if (p50Trace) traces.push(p50Trace);
+
+    if (!traces.length) {
+      Plotly.purge(precipEl);
+      statusWarnings.push('No valid precipitation traces to render');
+      return;
+    }
+
+    const xRange = buildXRange(
+      initDate,
+      observationWindowDays,
+      [analysis, forecast.p10, forecast.p50, forecast.p90, forecast.mean, retro && retro.p10, retro && retro.p50, retro && retro.p90]
+    );
+
+    Plotly.react(
+      precipEl,
+      traces,
+      layout('APCP (mm, water equivalent)', colors, {
+        xRange,
+        initTime: initDate,
+        yTickFormat: '.1f',
+        yRangeMode: 'tozero',
+        legendY: 1.19,
+        showZeroLine: true
+      }),
+      { responsive: true, displayModeBar: false }
+    );
+  }
+
+  function renderSoilChart(soilEl, payload, initDate, observationWindowDays, colors, statusWarnings) {
+    const levels = Object.keys(payload.soil_moisture || {}).sort((a, b) => levelSortKey(a) - levelSortKey(b));
+    if (!levels.length) {
+      Plotly.purge(soilEl);
+      statusWarnings.push('Missing GEFS soil moisture block');
+      return;
+    }
+
+    const palette = ['#1d4ed8', '#0284c7', '#16a34a', '#f59e0b'];
+    const analysisColor = '#475569';
+    const traces = [];
+    const pointGroups = [];
+    const analysisSoilBlock = (payload.gefs_analysis_context || {}).soil_f000 || {};
+    const retrospective = payload.retrospective || {};
+
+    levels.forEach((level, idx) => {
+      const block = payload.soil_moisture[level];
+      if (!block || typeof block !== 'object') return;
+
+      const factor = resolveSoilFactorToFraction(
+        block.units || '',
+        block.p50,
+        statusWarnings,
+        `GEFS SOILW ${level}`
+      );
+      if (factor === null) return;
+
+      const forecast = {
+        p10: scaleSeries(block.p10, factor),
+        p50: scaleSeries(block.p50, factor),
+        p90: scaleSeries(block.p90, factor)
+      };
+
+      const analysis = scaleSeries((analysisSoilBlock[level]) || [], factor);
+      if (hasSeries(analysis)) {
+        const analysisTrace = buildLineTrace(
+          analysis,
+          idx === 0 ? 'GEFS f000 analysis history' : `GEFS f000 analysis · ${level}`,
+          analysisColor,
+          'dot',
+          {
+            width: 1.25,
+            opacity: 0.9,
+            mode: analysis.length <= 6 ? 'markers+lines' : 'lines+markers',
+            markerSize: 5.6,
+            markerSymbol: 'circle',
+            showlegend: idx === 0,
+            unit: 'm3/m3',
+            valueFormat: '.3f',
+            hoverLabel: `GEFS f000 analysis · ${level}`,
+            legendGroup: 'soil_analysis'
+          }
+        );
+        if (analysisTrace) traces.push(analysisTrace);
+      }
+
+      const retroRaw = ((retrospective.soil_moisture || {})[level]) || null;
+      const retro = retroRaw ? scaleSeries(retroRaw.p50, factor) : [];
+      if (hasSeries(retro)) {
+        const retroTrace = buildLineTrace(
+          retro,
+          idx === 0 ? 'Retrospective p50' : `Retrospective p50 · ${level}`,
+          '#64748b',
+          'dot',
+          {
+            width: 1.35,
+            opacity: 0.7,
+            showlegend: idx === 0,
+            unit: 'm3/m3',
+            valueFormat: '.3f',
+            hoverLabel: `Retrospective p50 · ${level}`,
+            legendGroup: 'soil_retro'
+          }
+        );
+        if (retroTrace) traces.push(retroTrace);
+      }
+
+      const band = buildBandTrace(
+        forecast.p10,
+        forecast.p90,
+        `${level} p10-p90`,
+        `rgba(14,165,233,${0.07 + idx * 0.02})`,
+        { showLegend: false, legendGroup: `soil_forecast_${idx}` }
+      );
+      if (band) traces.push(band);
+
+      const soilP50 = buildLineTrace(
+        forecast.p50,
+        `GEFS p50 · ${level}`,
+        palette[idx % palette.length],
+        'solid',
+        {
+          width: 2.05,
+          unit: 'm3/m3',
+          valueFormat: '.3f',
+          hoverLabel: `GEFS p50 · ${level}`,
+          legendGroup: `soil_forecast_${idx}`
+        }
+      );
+      if (soilP50) traces.push(soilP50);
+
+      pointGroups.push(analysis, retro, forecast.p10, forecast.p50, forecast.p90);
+    });
+
+    if (!traces.length) {
+      Plotly.purge(soilEl);
+      statusWarnings.push('No valid soil traces to render');
+      return;
+    }
+
+    const xRange = buildXRange(initDate, observationWindowDays, pointGroups);
+    Plotly.react(
+      soilEl,
+      traces,
+      layout('SOILW (m3/m3)', colors, {
+        xRange,
+        initTime: initDate,
+        yTickFormat: '.2f',
+        legendY: 1.22,
+        showZeroLine: false
+      }),
+      { responsive: true, displayModeBar: false }
+    );
   }
 
   function renderPanel(container, payload) {
     const precipEl = container.querySelector('.gefs-forecast-precip');
     const soilEl = container.querySelector('.gefs-forecast-soil');
     const statusEl = container.querySelector('.gefs-forecast-status');
+
     const colors = getThemeColors();
     const initDate = parseDate(payload.init_time_utc);
     const observationWindowDays = Math.max(
       1,
-      numberOrNull(container.dataset.observationWindowDays) ||
-        numberOrNull(payload.observation_window_days) ||
-        20
+      numberOrNull(container.dataset.observationWindowDays) || numberOrNull(payload.observation_window_days) || 20
     );
+
     if (!payload.gefs_analysis_context || typeof payload.gefs_analysis_context !== 'object') {
       payload.gefs_analysis_context = deriveAnalysisContextFromPayload(payload);
     }
-    const retrospective = payload.retrospective || {};
-    const observedRetro = payload.observed_retrospective || {};
-    const gefsAnalysisContext = payload.gefs_analysis_context || {};
-    const statusWarnings = [];
 
+    const statusWarnings = [];
     const staleHours = numberOrNull(container.dataset.staleHours) ?? numberOrNull(payload.stale_after_hours) ?? 12;
     const generatedDate = parseDate(payload.generated_at_utc);
     if (generatedDate) {
@@ -548,331 +732,15 @@
       if (ageHours > staleHours) statusWarnings.push(`Data may be stale (${ageHours.toFixed(1)}h old)`);
     }
 
-    const precipLevels = payload.precip || {};
-    const precipLevelName = precipLevels.surface ? 'surface' : Object.keys(precipLevels)[0];
-    const precipLevel = precipLevelName ? precipLevels[precipLevelName] : null;
-    if (precipEl && precipLevel) {
-      const traces = [];
-      const precipDisplayUnit = 'mm';
-      const precipFactor = resolvePrecipFactorToMm(
-        precipLevel.units || '',
-        statusWarnings,
-        'GEFS precipitation',
-        { assumeEquivalent: true }
-      );
-      const safePrecipFactor = precipFactor === null ? 1 : precipFactor;
-      const observedPrecipRaw = observedRetro.daily_avg_ppt;
-      const observedPrecip = scaleSeries(observedPrecipRaw, 1);
-      const hasObservedPrecip = observedPrecip.length > 0;
-      const retroPrecipRaw = ((retrospective.precip || {})[precipLevelName]) || null;
-      const retroPrecip = retroPrecipRaw
-        ? {
-          p10: scaleSeries(retroPrecipRaw.p10, safePrecipFactor),
-          p50: scaleSeries(retroPrecipRaw.p50, safePrecipFactor),
-          p90: scaleSeries(retroPrecipRaw.p90, safePrecipFactor),
-          mean: scaleSeries(retroPrecipRaw.mean, safePrecipFactor)
-        }
-        : null;
-      const analysisPrecipRaw = ((gefsAnalysisContext.precip_f003_proxy || {})[precipLevelName]) || null;
-      const analysisPrecip = scaleSeries(analysisPrecipRaw, safePrecipFactor);
-      let analysisPrecipTrace = null;
-      if (hasObservedPrecip) {
-        const obsTrace = buildLineTrace(
-          observedPrecip,
-          'Observed PRISM',
-          '#0f766e',
-          'solid',
-          { width: 2.3, unit: precipDisplayUnit, valueFormat: '.2f', hoverLabel: 'Observed PRISM' }
-        );
-        if (obsTrace) traces.push(obsTrace);
-      } else if (retroPrecip) {
-        const retroBand = buildBandTrace(
-          retroPrecip.p10,
-          retroPrecip.p90,
-          'Retrospective p10-p90',
-          'rgba(100,116,139,0.16)',
-          { showLegend: true, legendGroup: 'precip_retro' }
-        );
-        if (retroBand) traces.push(retroBand);
-        const retroP50 = buildLineTrace(
-          retroPrecip.p50,
-          'Retrospective p50',
-          '#475569',
-          'dash',
-          {
-            width: 1.8,
-            unit: precipDisplayUnit,
-            valueFormat: '.2f',
-            hoverLabel: 'Retrospective p50',
-            legendGroup: 'precip_retro'
-          }
-        );
-        if (retroP50) traces.push(retroP50);
-        const retroMean = buildLineTrace(
-          retroPrecip.mean,
-          'Retrospective mean',
-          '#64748b',
-          'dot',
-          {
-            width: 1.6,
-            unit: precipDisplayUnit,
-            valueFormat: '.2f',
-            hoverLabel: 'Retrospective mean',
-            legendGroup: 'precip_retro'
-          }
-        );
-        if (retroMean) traces.push(retroMean);
-      }
-      if (Array.isArray(analysisPrecip) && analysisPrecip.length) {
-        analysisPrecipTrace = buildLineTrace(
-          analysisPrecip,
-          'GEFS f003 (0-3h acc) by cycle',
-          '#334155',
-          'dot',
-          {
-            width: 1.7,
-            opacity: 0.95,
-            mode: analysisPrecip.length <= 3 ? 'markers' : 'lines+markers',
-            markerSize: 8,
-            markerSymbol: 'diamond',
-            unit: precipDisplayUnit,
-            valueFormat: '.2f',
-            hoverLabel: 'GEFS f003 (0-3h acc) by cycle',
-            legendGroup: 'precip_analysis'
-          }
-        );
-      }
-      const band = buildBandTrace(
-        scaleSeries(precipLevel.p10, safePrecipFactor),
-        scaleSeries(precipLevel.p90, safePrecipFactor),
-        'GEFS p10-p90',
-        'rgba(29,78,216,0.15)',
-        { showLegend: true, legendGroup: 'precip_forecast' }
-      );
-      if (band) traces.push(band);
-      const p50Trace = buildLineTrace(
-        scaleSeries(precipLevel.p50, safePrecipFactor),
-        'GEFS p50',
-        colors.accent,
-        'solid',
-        {
-          width: 2.2,
-          unit: precipDisplayUnit,
-          valueFormat: '.2f',
-          hoverLabel: 'GEFS p50',
-          legendGroup: 'precip_forecast'
-        }
-      );
-      if (p50Trace) traces.push(p50Trace);
-      const meanTrace = buildLineTrace(
-        scaleSeries(precipLevel.mean, safePrecipFactor),
-        'GEFS mean',
-        '#ea580c',
-        'dash',
-        {
-          width: 1.9,
-          unit: precipDisplayUnit,
-          valueFormat: '.2f',
-          hoverLabel: 'GEFS mean',
-          legendGroup: 'precip_forecast'
-        }
-      );
-      if (meanTrace) traces.push(meanTrace);
-      if (analysisPrecipTrace) traces.push(analysisPrecipTrace);
-      const precipXRange = buildXRange(
-        initDate,
-        observationWindowDays,
-        [
-          observedPrecip,
-          analysisPrecip,
-          scaleSeries(precipLevel.p10, safePrecipFactor),
-          scaleSeries(precipLevel.p50, safePrecipFactor),
-          scaleSeries(precipLevel.p90, safePrecipFactor),
-          scaleSeries(precipLevel.mean, safePrecipFactor),
-          retroPrecip && retroPrecip.p10, retroPrecip && retroPrecip.p50,
-          retroPrecip && retroPrecip.p90, retroPrecip && retroPrecip.mean
-        ]
-      );
-      Plotly.react(
-        precipEl,
-        traces,
-        layout(
-          '',
-          'APCP (mm, water equivalent)',
-          colors,
-          { xRange: precipXRange, initTime: initDate, yTickFormat: '.1f', legendY: 1.16 }
-        ),
-        { responsive: true, displayModeBar: false }
-      );
-    }
-
-    if (soilEl) {
-      const levels = Object.keys(payload.soil_moisture || {}).sort((a, b) => levelSortKey(a) - levelSortKey(b));
-      const palette = ['#1d4ed8', '#0284c7', '#16a34a', '#f59e0b', '#dc2626'];
-      const traces = [];
-      const overlayTraces = [];
-      const pointGroups = [];
-      const analysisSoilBlock = gefsAnalysisContext.soil_f000 || {};
-      const soilDisplayUnit = 'm3/m3';
-      const observedSoilEra5Raw = observedRetro.daily_avg_soil_ERA5;
-      const observedSoilNwmMRaw = observedRetro.daily_avg_soil_NWM_SOIL_M;
-      const observedSoilNwmWRaw = observedRetro.daily_avg_soil_NWM_SOIL_W;
-      const observedSoilEra5Factor = resolveSoilFactorToFraction(
-        '',
-        observedSoilEra5Raw,
-        statusWarnings,
-        'Observed ERA5 soil moisture',
-        { defaultFactor: 1 }
-      );
-      const observedSoilNwmMFactor = resolveSoilFactorToFraction(
-        '',
-        observedSoilNwmMRaw,
-        statusWarnings,
-        'Observed NWM SOIL_M',
-        { defaultFactor: 1 }
-      );
-      const observedSoilNwmWFactor = resolveSoilFactorToFraction(
-        '',
-        observedSoilNwmWRaw,
-        statusWarnings,
-        'Observed NWM SOIL_W',
-        { defaultFactor: 1 }
-      );
-      const observedSoilEra5 = observedSoilEra5Factor === null ? [] : scaleSeries(observedSoilEra5Raw, observedSoilEra5Factor);
-      const observedSoilNwmM = observedSoilNwmMFactor === null ? [] : scaleSeries(observedSoilNwmMRaw, observedSoilNwmMFactor);
-      const observedSoilNwmW = observedSoilNwmWFactor === null ? [] : scaleSeries(observedSoilNwmWRaw, observedSoilNwmWFactor);
-      const hasObservedSoil = [observedSoilEra5, observedSoilNwmM, observedSoilNwmW]
-        .some((series) => series.length > 0);
-      const obsEra5Trace = buildLineTrace(
-        observedSoilEra5,
-        'Observed ERA5 swvl1',
-        '#0f766e',
-        'solid',
-        { width: 2.2, unit: soilDisplayUnit, valueFormat: '.3f', hoverLabel: 'Observed ERA5 swvl1', legendGroup: 'soil_obs' }
-      );
-      if (obsEra5Trace) traces.push(obsEra5Trace);
-      const obsNwmMTrace = buildLineTrace(
-        observedSoilNwmM,
-        'Observed NWM SOIL_M',
-        '#7c3aed',
-        'solid',
-        { width: 1.8, unit: soilDisplayUnit, valueFormat: '.3f', hoverLabel: 'Observed NWM SOIL_M', legendGroup: 'soil_obs' }
-      );
-      if (obsNwmMTrace) traces.push(obsNwmMTrace);
-      const obsNwmWTrace = buildLineTrace(
-        observedSoilNwmW,
-        'Observed NWM SOIL_W',
-        '#be185d',
-        'solid',
-        { width: 1.8, unit: soilDisplayUnit, valueFormat: '.3f', hoverLabel: 'Observed NWM SOIL_W', legendGroup: 'soil_obs' }
-      );
-      if (obsNwmWTrace) traces.push(obsNwmWTrace);
-      pointGroups.push(observedSoilEra5, observedSoilNwmM, observedSoilNwmW);
-      levels.forEach((level, idx) => {
-        const block = payload.soil_moisture[level];
-        if (!block || typeof block !== 'object') return;
-        const soilFactor = resolveSoilFactorToFraction(
-          block.units || '',
-          block.p50,
-          statusWarnings,
-          `GEFS SOILW ${level}`,
-          { defaultFactor: 1 }
-        );
-        if (soilFactor === null) return;
-        const analysisLevel = scaleSeries((analysisSoilBlock || {})[level], soilFactor);
-        const retroLevelRaw = ((retrospective.soil_moisture || {})[level]) || null;
-        const retroLevel = retroLevelRaw
-          ? { p50: scaleSeries(retroLevelRaw.p50, soilFactor) }
-          : null;
-        if (Array.isArray(analysisLevel) && analysisLevel.length) {
-          const analysisTrace = buildLineTrace(
-            analysisLevel,
-            idx === 0 ? 'GEFS f000 analysis (history)' : `GEFS f000 analysis · ${level}`,
-            palette[idx % palette.length],
-            'dot',
-            {
-              width: 1.3,
-              opacity: 0.9,
-              mode: analysisLevel.length <= 3 ? 'markers' : 'lines+markers',
-              markerSize: 6.2,
-              markerSymbol: 'circle',
-              showlegend: idx === 0,
-              unit: soilDisplayUnit,
-              valueFormat: '.3f',
-              hoverLabel: `GEFS f000 analysis · ${level}`,
-              legendGroup: 'soil_analysis'
-            }
-          );
-          if (analysisTrace) overlayTraces.push(analysisTrace);
-          pointGroups.push(analysisLevel);
-        }
-        if (!hasObservedSoil && retroLevel && retroLevel.p50) {
-          const retroTrace = buildLineTrace(
-            retroLevel.p50,
-            `Retrospective p50 · ${level}`,
-            '#64748b',
-            'dot',
-            {
-              width: 1.5,
-              opacity: 0.7,
-              showlegend: idx === 0,
-              unit: soilDisplayUnit,
-              valueFormat: '.3f',
-              hoverLabel: `Retrospective p50 · ${level}`,
-              legendGroup: 'soil_retro'
-            }
-          );
-          if (retroTrace) traces.push(retroTrace);
-          pointGroups.push(retroLevel.p50);
-        }
-        const band = buildBandTrace(
-          scaleSeries(block.p10, soilFactor),
-          scaleSeries(block.p90, soilFactor),
-          `${level} p10-p90`,
-          `rgba(14,165,233,${0.07 + idx * 0.02})`,
-          { showLegend: false, legendGroup: `soil_${idx}` }
-        );
-        if (band) traces.push(band);
-        const soilP50 = buildLineTrace(
-          scaleSeries(block.p50, soilFactor),
-          `GEFS p50 · ${level}`,
-          palette[idx % palette.length],
-          'solid',
-          {
-            width: 1.95,
-            unit: soilDisplayUnit,
-            valueFormat: '.3f',
-            hoverLabel: `GEFS p50 · ${level}`,
-            legendGroup: `soil_${idx}`
-          }
-        );
-        if (soilP50) traces.push(soilP50);
-        pointGroups.push(
-          scaleSeries(block.p10, soilFactor),
-          scaleSeries(block.p50, soilFactor),
-          scaleSeries(block.p90, soilFactor)
-        );
-      });
-      traces.push(...overlayTraces);
-      const soilXRange = buildXRange(initDate, observationWindowDays, pointGroups);
-      Plotly.react(
-        soilEl,
-        traces,
-        layout(
-          '',
-          'SOILW (m3/m3)',
-          colors,
-          { xRange: soilXRange, initTime: initDate, yTickFormat: '.2f', legendY: 1.18 }
-        ),
-        { responsive: true, displayModeBar: false }
-      );
-    }
+    if (precipEl) renderPrecipChart(precipEl, payload, initDate, observationWindowDays, colors, statusWarnings);
+    if (soilEl) renderSoilChart(soilEl, payload, initDate, observationWindowDays, colors, statusWarnings);
 
     setStatus(statusEl, payload, statusWarnings);
   }
 
   async function initOne(container) {
     if (!window.Plotly) return;
+
     const statusEl = container.querySelector('.gefs-forecast-status');
     const url = container.dataset.gefsUrl || '/assets/data/forecasts/gefs_big_trees_latest.json';
     const refreshMinutes = Math.max(1, numberOrNull(container.dataset.refreshMin) || 60);
@@ -885,9 +753,8 @@
       try {
         const response = await fetch(buildFetchUrl(url), { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        let payload = await response.json();
+        const payload = await response.json();
         if (!payload || typeof payload !== 'object') throw new Error('Invalid JSON payload');
-        payload = await attachObservedRetrospective(container, payload);
         renderPanel(container, payload);
       } catch (err) {
         if (statusEl) {

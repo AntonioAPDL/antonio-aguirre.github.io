@@ -515,6 +515,14 @@ def parse_args() -> argparse.Namespace:
         default=320,
         help="Max historical commits to scan for GEFS analysis context backfill.",
     )
+    parser.add_argument(
+        "--include-observed-retrospective",
+        action="store_true",
+        help=(
+            "Include PRISM/ERA5/NWM observed retrospective payload from climate_daily_ppt_soil.csv. "
+            "Default is disabled for GEFS-only panel context."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -591,7 +599,7 @@ def main() -> int:
         observation_window_days=int(max(1, args.observation_window_days)),
     )
     init_for_window = _parse_iso(payload.get("init_time_utc"))
-    if init_for_window is not None:
+    if args.include_observed_retrospective and init_for_window is not None:
         payload["observed_retrospective"] = _build_observed_retrospective_payload(
             climate_csv_path=(repo_root / "climate_daily_ppt_soil.csv"),
             init_time_utc=init_for_window,
@@ -624,12 +632,14 @@ def main() -> int:
         print(f"analysis_context_precip_points={precip_ctx_points}")
         print(f"analysis_context_soil_points={soil_ctx_points}")
     print(f"analysis_history_payloads={len(history_payloads)}")
-    obs = payload.get("observed_retrospective", {})
-    if isinstance(obs, dict):
-        print(f"observed_ppt_points={len(obs.get('daily_avg_ppt', []))}")
-        print(f"observed_soil_era5_points={len(obs.get('daily_avg_soil_ERA5', []))}")
-        print(f"observed_soil_nwm_m_points={len(obs.get('daily_avg_soil_NWM_SOIL_M', []))}")
-        print(f"observed_soil_nwm_w_points={len(obs.get('daily_avg_soil_NWM_SOIL_W', []))}")
+    print(f"include_observed_retrospective={bool(args.include_observed_retrospective)}")
+    if args.include_observed_retrospective:
+        obs = payload.get("observed_retrospective", {})
+        if isinstance(obs, dict):
+            print(f"observed_ppt_points={len(obs.get('daily_avg_ppt', []))}")
+            print(f"observed_soil_era5_points={len(obs.get('daily_avg_soil_ERA5', []))}")
+            print(f"observed_soil_nwm_m_points={len(obs.get('daily_avg_soil_NWM_SOIL_M', []))}")
+            print(f"observed_soil_nwm_w_points={len(obs.get('daily_avg_soil_NWM_SOIL_W', []))}")
     return 0
 
 

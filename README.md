@@ -138,14 +138,11 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - `retrospective.start_utc`, `retrospective.end_utc`
 - `retrospective.precip.<level>.{p10,p50,p90,mean}`
 - `retrospective.soil_moisture.<level>.p50`
-- `observed_retrospective.start_utc`, `observed_retrospective.end_utc`
-- `observed_retrospective.daily_avg_ppt` (from PRISM combined climate CSV)
-- `observed_retrospective.daily_avg_soil_ERA5`
-- `observed_retrospective.daily_avg_soil_NWM_SOIL_M`
-- `observed_retrospective.daily_avg_soil_NWM_SOIL_W`
 - `gefs_analysis_context.precip_f003_proxy.<level>` (GEFS cycle-history analysis proxy, plotted)
 - `gefs_analysis_context.soil_f000.<level>` (GEFS cycle-history analysis, plotted)
 - Plot units are harmonized by panel logic (`APCP` in mm water-equivalent; `SOILW` in m3/m3)
+- PRISM/ERA5 observed overlays are intentionally disabled in the panel (GEFS-only context mode)
+- Exporter default is GEFS-only; observed payload is opt-in with `--include-observed-retrospective`
 
 Panel override:
 
@@ -200,7 +197,7 @@ Logs are written under `logs/climate_updates/` and `latest.log` points to the ne
 The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
 
 - `.github/workflows/update_climate_series.yml`
-  - cadence: every 6 hours (`17 */6 * * *`)
+  - cadence: disabled (manual `workflow_dispatch` only)
   - updates and commits:
     - `prism_precipitation_santa_cruz_1987_2023.csv`
     - `soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv`
