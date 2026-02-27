@@ -89,6 +89,152 @@ def _merge_series_window(
     return [{"t": ts.isoformat(), "v": value} for ts, value in ordered]
 
 
+def _point_list(points: Any) -> List[Tuple[dt.datetime, float]]:
+    out: List[Tuple[dt.datetime, float]] = []
+    if not isinstance(points, list):
+        return out
+    for point in points:
+        if not isinstance(point, dict):
+            continue
+        ts = _parse_iso(point.get("t"))
+        if ts is None:
+            continue
+        try:
+            value = float(point.get("v"))
+        except (TypeError, ValueError):
+            continue
+        out.append((ts, value))
+    out.sort(key=lambda item: item[0])
+    return out
+
+
+def _select_cycle_marker(points: Any, init_time_utc: dt.datetime, require_after_init: bool) -> Optional[Dict[str, float]]:
+    parsed = _point_list(points)
+    if not parsed:
+        return None
+    if require_after_init:
+        for ts, value in parsed:
+            if ts > init_time_utc:
+                return {"t": ts.isoformat(), "v": value}
+        for ts, value in parsed:
+            if ts >= init_time_utc:
+                return {"t": ts.isoformat(), "v": value}
+    else:
+        for ts, value in parsed:
+            if ts >= init_time_utc:
+                return {"t": ts.isoformat(), "v": value}
+    ts, value = parsed[0]
+    return {"t": ts.isoformat(), "v": value}
+
+
+def _extract_cycle_analysis_points(payload: Any) -> Dict[str, Dict[str, List[Dict[str, float]]]]:
+    out: Dict[str, Dict[str, List[Dict[str, float]]]] = {
+        "soil_f000": {},
+        "precip_f003_proxy": {},
+    }
+    if not isinstance(payload, dict):
+        return out
+    init_time = _parse_iso(payload.get("init_time_utc"))
+    if init_time is None:
+        return out
+
+    soil_levels = payload.get("soil_moisture")
+    if isinstance(soil_levels, dict):
+        for level_name, level_block in soil_levels.items():
+            if not isinstance(level_block, dict):
+                continue
+            marker = _select_cycle_marker(level_block.get("p50"), init_time, require_after_init=False)
+            if marker:
+                out["soil_f000"][str(level_name)] = [marker]
+
+    precip_levels = payload.get("precip")
+    if isinstance(precip_levels, dict):
+        for level_name, level_block in precip_levels.items():
+            if not isinstance(level_block, dict):
+                continue
+            marker = _select_cycle_marker(level_block.get("p50"), init_time, require_after_init=True)
+            if marker:
+                out["precip_f003_proxy"][str(level_name)] = [marker]
+
+    return out
+
+
+def _merge_context_series(
+    carry_points: Any,
+    prior_cycle_points: Any,
+    current_cycle_points: Any,
+    start_utc: dt.datetime,
+    end_utc: dt.datetime,
+) -> List[Dict[str, float]]:
+    merged = _series_in_window(carry_points, start_utc, end_utc)
+    merged.update(_series_in_window(prior_cycle_points, start_utc, end_utc))
+    merged.update(_series_in_window(current_cycle_points, start_utc, end_utc))
+    ordered = sorted(merged.values(), key=lambda item: item[0])
+    return [{"t": ts.isoformat(), "v": value} for ts, value in ordered]
+
+
+def _build_gefs_analysis_context_payload(
+    current_payload: Dict[str, Any],
+    prior_payload: Optional[Dict[str, Any]],
+    observation_window_days: int,
+) -> Dict[str, Any]:
+    init_time = _parse_iso(current_payload.get("init_time_utc"))
+    if init_time is None:
+        return {}
+
+    start_time = init_time - dt.timedelta(days=max(1, int(observation_window_days)))
+    # Keep soil context strictly up to init. Precip proxy may include f003 from the current cycle.
+    soil_end = init_time + dt.timedelta(minutes=1)
+    precip_end = init_time + dt.timedelta(hours=3, minutes=1)
+
+    prior_payload = prior_payload or {}
+    prior_context = prior_payload.get("gefs_analysis_context") if isinstance(prior_payload, dict) else {}
+    if not isinstance(prior_context, dict):
+        prior_context = {}
+
+    prior_cycle = _extract_cycle_analysis_points(prior_payload)
+    current_cycle = _extract_cycle_analysis_points(current_payload)
+
+    context: Dict[str, Any] = {
+        "window_days": int(max(1, observation_window_days)),
+        "start_utc": start_time.isoformat(),
+        "end_utc": init_time.isoformat(),
+        "precip_proxy_valid_offset_hours": 3,
+        "precip_f003_proxy": {},
+        "soil_f000": {},
+    }
+
+    precip_levels = set(current_cycle["precip_f003_proxy"].keys())
+    precip_levels.update((prior_context.get("precip_f003_proxy") or {}).keys())
+    precip_levels.update(prior_cycle["precip_f003_proxy"].keys())
+    for level_name in sorted(str(level) for level in precip_levels):
+        merged = _merge_context_series(
+            carry_points=(prior_context.get("precip_f003_proxy") or {}).get(level_name, []),
+            prior_cycle_points=prior_cycle["precip_f003_proxy"].get(level_name, []),
+            current_cycle_points=current_cycle["precip_f003_proxy"].get(level_name, []),
+            start_utc=start_time,
+            end_utc=precip_end,
+        )
+        if merged:
+            context["precip_f003_proxy"][level_name] = merged
+
+    soil_levels = set(current_cycle["soil_f000"].keys())
+    soil_levels.update((prior_context.get("soil_f000") or {}).keys())
+    soil_levels.update(prior_cycle["soil_f000"].keys())
+    for level_name in sorted(str(level) for level in soil_levels):
+        merged = _merge_context_series(
+            carry_points=(prior_context.get("soil_f000") or {}).get(level_name, []),
+            prior_cycle_points=prior_cycle["soil_f000"].get(level_name, []),
+            current_cycle_points=current_cycle["soil_f000"].get(level_name, []),
+            start_utc=start_time,
+            end_utc=soil_end,
+        )
+        if merged:
+            context["soil_f000"][level_name] = merged
+
+    return context
+
+
 def _build_retrospective_payload(
     current_payload: Dict[str, Any],
     prior_payload: Optional[Dict[str, Any]],
@@ -328,6 +474,11 @@ def main() -> int:
     default_prior_path = repo_root / "assets/data/forecasts/gefs_big_trees_latest.json"
     prior_path = Path(args.prior_web_json) if args.prior_web_json else default_prior_path
     prior_payload = _load_optional_json(prior_path)
+    payload["gefs_analysis_context"] = _build_gefs_analysis_context_payload(
+        current_payload=payload,
+        prior_payload=prior_payload,
+        observation_window_days=int(max(1, args.observation_window_days)),
+    )
     payload["retrospective"] = _build_retrospective_payload(
         current_payload=payload,
         prior_payload=prior_payload,
@@ -354,6 +505,18 @@ def main() -> int:
         f"retrospective_points="
         f"{sum(len(v.get('p50', [])) for v in (payload.get('retrospective', {}).get('soil_moisture', {}) or {}).values())}"
     )
+    context = payload.get("gefs_analysis_context", {})
+    if isinstance(context, dict):
+        precip_ctx = context.get("precip_f003_proxy", {})
+        soil_ctx = context.get("soil_f000", {})
+        precip_ctx_points = 0
+        soil_ctx_points = 0
+        if isinstance(precip_ctx, dict):
+            precip_ctx_points = sum(len(points) for points in precip_ctx.values() if isinstance(points, list))
+        if isinstance(soil_ctx, dict):
+            soil_ctx_points = sum(len(points) for points in soil_ctx.values() if isinstance(points, list))
+        print(f"analysis_context_precip_points={precip_ctx_points}")
+        print(f"analysis_context_soil_points={soil_ctx_points}")
     obs = payload.get("observed_retrospective", {})
     if isinstance(obs, dict):
         print(f"observed_ppt_points={len(obs.get('daily_avg_ppt', []))}")

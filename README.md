@@ -128,6 +128,9 @@ Behavior:
 - Renders two Plotly charts:
   - APCP band (`p10-p90`) + `p50` + mean
   - SOILW depth-level medians (`p50`) with optional uncertainty bands
+- Adds GEFS cycle-context traces:
+  - precipitation `f003` (`0-3h` accumulation) proxy by cycle
+  - soil `f000` analysis value by cycle
 - Adds retrospective context from prior GEFS cycles and shows a fixed 20-day pre-forecast window
 - Displays metadata and freshness warning if stale
 - Degrades gracefully when JSON is missing/invalid
@@ -143,6 +146,8 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - `observed_retrospective.daily_avg_soil_ERA5`
 - `observed_retrospective.daily_avg_soil_NWM_SOIL_M`
 - `observed_retrospective.daily_avg_soil_NWM_SOIL_W`
+- `gefs_analysis_context.precip_f003_proxy.<level>` (cycle history of `f003` APCP)
+- `gefs_analysis_context.soil_f000.<level>` (cycle history of `f000` SOILW)
 
 Panel override:
 

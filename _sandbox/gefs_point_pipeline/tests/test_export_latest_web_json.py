@@ -11,8 +11,10 @@ if str(ROOT) not in sys.path:
 import datetime as dt
 
 from export_latest_web_json import (  # noqa: E402
+    _build_gefs_analysis_context_payload,
     _build_observed_retrospective_payload,
     _build_retrospective_payload,
+    _extract_cycle_analysis_points,
 )
 
 
@@ -151,3 +153,73 @@ def test_observed_retrospective_empty_when_missing_file(tmp_path: Path) -> None:
     )
     assert payload["daily_avg_ppt"] == []
     assert payload["daily_avg_soil_ERA5"] == []
+
+
+def test_extract_cycle_analysis_points_selects_soil_f000_and_precip_f003_proxy() -> None:
+    payload = {
+        "init_time_utc": "2026-02-24T00:00:00+00:00",
+        "precip": {
+            "surface": {
+                "p50": [
+                    _point("2026-02-24T00:00:00+00:00", 0.0),
+                    _point("2026-02-24T03:00:00+00:00", 1.2),
+                    _point("2026-02-24T06:00:00+00:00", 2.4),
+                ]
+            }
+        },
+        "soil_moisture": {
+            "0-0.1 m below ground": {
+                "p50": [
+                    _point("2026-02-24T00:00:00+00:00", 0.31),
+                    _point("2026-02-24T03:00:00+00:00", 0.32),
+                ]
+            }
+        },
+    }
+
+    extracted = _extract_cycle_analysis_points(payload)
+    assert extracted["soil_f000"]["0-0.1 m below ground"][0]["t"] == "2026-02-24T00:00:00+00:00"
+    assert extracted["soil_f000"]["0-0.1 m below ground"][0]["v"] == 0.31
+    assert extracted["precip_f003_proxy"]["surface"][0]["t"] == "2026-02-24T03:00:00+00:00"
+    assert extracted["precip_f003_proxy"]["surface"][0]["v"] == 1.2
+
+
+def test_gefs_analysis_context_rolls_prior_and_current_cycle_markers() -> None:
+    current_payload = {
+        "init_time_utc": "2026-02-24T00:00:00+00:00",
+        "precip": {"surface": {"p50": [_point("2026-02-24T03:00:00+00:00", 1.4)]}},
+        "soil_moisture": {"0-0.1 m below ground": {"p50": [_point("2026-02-24T00:00:00+00:00", 0.35)]}},
+    }
+    prior_payload = {
+        "init_time_utc": "2026-02-23T18:00:00+00:00",
+        "precip": {"surface": {"p50": [_point("2026-02-23T21:00:00+00:00", 1.1)]}},
+        "soil_moisture": {"0-0.1 m below ground": {"p50": [_point("2026-02-23T18:00:00+00:00", 0.33)]}},
+        "gefs_analysis_context": {
+            "precip_f003_proxy": {"surface": [_point("2026-02-10T03:00:00+00:00", 0.8)]},
+            "soil_f000": {"0-0.1 m below ground": [_point("2026-02-10T00:00:00+00:00", 0.29)]},
+        },
+    }
+
+    context = _build_gefs_analysis_context_payload(
+        current_payload=current_payload,
+        prior_payload=prior_payload,
+        observation_window_days=20,
+    )
+
+    assert context["window_days"] == 20
+    assert context["start_utc"] == "2026-02-04T00:00:00+00:00"
+    assert context["end_utc"] == "2026-02-24T00:00:00+00:00"
+
+    precip_points = context["precip_f003_proxy"]["surface"]
+    assert [point["t"] for point in precip_points] == [
+        "2026-02-10T03:00:00+00:00",
+        "2026-02-23T21:00:00+00:00",
+        "2026-02-24T03:00:00+00:00",
+    ]
+
+    soil_points = context["soil_f000"]["0-0.1 m below ground"]
+    assert [point["t"] for point in soil_points] == [
+        "2026-02-10T00:00:00+00:00",
+        "2026-02-23T18:00:00+00:00",
+        "2026-02-24T00:00:00+00:00",
+    ]
