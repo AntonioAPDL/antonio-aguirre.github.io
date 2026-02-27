@@ -292,7 +292,7 @@
       },
       xaxis: {
         type: 'date',
-        title: 'Valid time (UTC)',
+        title: 'Date (UTC)',
         gridcolor: colors.grid,
         showline: true,
         linecolor: colors.grid,
@@ -349,7 +349,7 @@
           x: opts.initTime,
           yref: 'paper',
           y: 1.035,
-          text: 'Forecast init',
+          text: 'Forecast start',
           showarrow: false,
           font: { size: 11, color: colors.muted },
           xanchor: 'left',
@@ -366,12 +366,53 @@
     return match ? Number(match[1]) : 999;
   }
 
-  function countContextPoints(block) {
-    if (!block || typeof block !== 'object') return 0;
-    return Object.values(block).reduce((acc, series) => {
-      if (!Array.isArray(series)) return acc;
-      return acc + series.length;
-    }, 0);
+  function estimateForecastHorizonText(payload) {
+    if (!payload || typeof payload !== 'object') return 'forecast ahead';
+    const initDate = parseDate(payload.init_time_utc);
+    if (!initDate) return 'forecast ahead';
+
+    const pointGroups = [];
+    const precipLevels = payload.precip && typeof payload.precip === 'object' ? payload.precip : {};
+    const precipLevelName = precipLevels.surface ? 'surface' : Object.keys(precipLevels)[0];
+    const precipLevel = precipLevelName ? precipLevels[precipLevelName] : null;
+    if (precipLevel && Array.isArray(precipLevel.p50)) pointGroups.push(precipLevel.p50);
+
+    const soilLevels = payload.soil_moisture && typeof payload.soil_moisture === 'object'
+      ? payload.soil_moisture
+      : {};
+    Object.values(soilLevels).forEach((levelBlock) => {
+      if (levelBlock && typeof levelBlock === 'object' && Array.isArray(levelBlock.p50)) {
+        pointGroups.push(levelBlock.p50);
+      }
+    });
+
+    const forecastEnd = latestPointDate(pointGroups);
+    if (!forecastEnd || forecastEnd <= initDate) return 'forecast ahead';
+
+    const horizonHours = (forecastEnd.getTime() - initDate.getTime()) / (1000 * 3600);
+    if (horizonHours < 24) return `about ${Math.round(horizonHours)} hours ahead`;
+    return `about ${Math.round(horizonHours / 24)} days ahead`;
+  }
+
+  function summarizeStatusWarnings(warnings) {
+    const cleaned = Array.isArray(warnings)
+      ? Array.from(new Set(warnings.filter((msg) => typeof msg === 'string' && msg.trim().length > 0)))
+      : [];
+    if (!cleaned.length) return [];
+
+    const out = [];
+    let hasSeriesIssue = false;
+    cleaned.forEach((msg) => {
+      if (msg.startsWith('Update appears delayed')) {
+        out.push(msg);
+      } else {
+        hasSeriesIssue = true;
+      }
+    });
+    if (hasSeriesIssue) {
+      out.push('Some lines are temporarily unavailable while data refreshes.');
+    }
+    return out;
   }
 
   function setStatus(el, payload, warnings) {
@@ -382,41 +423,21 @@
     const members = payload && Number.isFinite(Number(payload.member_count))
       ? Number(payload.member_count)
       : '--';
-    const missing = payload && Array.isArray(payload.missing_levels) && payload.missing_levels.length
-      ? `Missing layers: ${payload.missing_levels.join(', ')}`
-      : 'All configured layers resolved';
 
     const retroWindowDays = payload && Number.isFinite(Number(payload.observation_window_days))
       ? Number(payload.observation_window_days)
       : null;
-
-    const analysisContext = payload && payload.gefs_analysis_context && typeof payload.gefs_analysis_context === 'object'
-      ? payload.gefs_analysis_context
-      : {};
-    const analysisPrecipCount = countContextPoints(analysisContext.precip_f003_proxy || {});
-    const analysisSoilCount = countContextPoints(analysisContext.soil_f000 || {});
-
-    const precipLevels = payload && payload.precip && typeof payload.precip === 'object' ? payload.precip : {};
-    const precipSurface = precipLevels.surface || precipLevels[Object.keys(precipLevels)[0]] || {};
-    const forecastPrecipCount = Array.isArray(precipSurface.p50) ? precipSurface.p50.length : 0;
-    const soilLevels = payload && payload.soil_moisture && typeof payload.soil_moisture === 'object'
-      ? payload.soil_moisture
-      : {};
-    const forecastSoilCount = Object.values(soilLevels).reduce((acc, levelBlock) => {
-      if (!levelBlock || typeof levelBlock !== 'object' || !Array.isArray(levelBlock.p50)) return acc;
-      return acc + levelBlock.p50.length;
-    }, 0);
-
-    const warningParts = Array.isArray(warnings)
-      ? Array.from(new Set(warnings.filter((msg) => typeof msg === 'string' && msg.trim().length > 0)))
-      : [];
-
-    const retroText = retroWindowDays ? `Retrospective window: ${retroWindowDays}d` : '';
-    const pointText = `GEFS points (forecast ppt/soil | analysis ppt/soil): ${forecastPrecipCount}/${forecastSoilCount} | ${analysisPrecipCount}/${analysisSoilCount}`;
-    const modeText = 'Context mode: GEFS-only (PRISM/ERA5 overlays disabled)';
+    const horizonText = estimateForecastHorizonText(payload);
+    const warningParts = summarizeStatusWarnings(warnings);
+    const missingLayers = payload && Array.isArray(payload.missing_levels) ? payload.missing_levels : [];
+    const layerText = missingLayers.length ? 'Some soil depth layers are currently unavailable.' : '';
+    const coverageText = retroWindowDays
+      ? `Coverage: last ${retroWindowDays} days + ${horizonText}`
+      : `Coverage: ${horizonText}`;
     const warningText = warningParts.length ? ` | ${warningParts.join(' | ')}` : '';
+    const layerWarningText = layerText ? ` | ${layerText}` : '';
 
-    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${retroText ? ` | ${retroText}` : ''} | ${pointText} | ${modeText}${warningText}`;
+    el.textContent = `Updated: ${generated} | Forecast start: ${initTime} | Ensemble members: ${members} | ${coverageText}${layerWarningText}${warningText}`;
     el.classList.toggle('plot-status--error', warningParts.length > 0);
   }
 
@@ -433,7 +454,7 @@
 
     if (!precipLevel || typeof precipLevel !== 'object') {
       Plotly.purge(precipEl);
-      statusWarnings.push('Missing GEFS precipitation block');
+      statusWarnings.push('Precipitation data is temporarily unavailable.');
       return;
     }
 
@@ -474,7 +495,7 @@
       const retroBand = buildBandTrace(
         retro.p10,
         retro.p90,
-        'Retrospective p10-p90',
+        'Recent range (10-90%)',
         'rgba(100,116,139,0.18)',
         { showLegend: true, legendGroup: 'precip_retro' }
       );
@@ -482,14 +503,14 @@
 
       const retroP50 = buildLineTrace(
         retro.p50,
-        'Retrospective p50',
+        'Recent median',
         '#475569',
         'dot',
         {
           width: 1.5,
           unit: 'mm',
           valueFormat: '.2f',
-          hoverLabel: 'Retrospective p50',
+          hoverLabel: 'Recent median',
           legendGroup: 'precip_retro'
         }
       );
@@ -499,7 +520,7 @@
     if (hasSeries(analysis)) {
       const analysisTrace = buildLineTrace(
         analysis,
-        'GEFS f003 analysis proxy',
+        'Recent cycle values',
         '#334155',
         'dot',
         {
@@ -510,7 +531,7 @@
           markerSymbol: 'diamond',
           unit: 'mm',
           valueFormat: '.2f',
-          hoverLabel: 'GEFS f003 analysis proxy',
+          hoverLabel: 'Recent cycle values',
           legendGroup: 'precip_analysis'
         }
       );
@@ -520,7 +541,7 @@
     const band = buildBandTrace(
       forecast.p10,
       forecast.p90,
-      'GEFS p10-p90',
+      'Forecast range (10-90%)',
       'rgba(30,64,175,0.17)',
       { showLegend: true, legendGroup: 'precip_forecast' }
     );
@@ -528,14 +549,14 @@
 
     const meanTrace = buildLineTrace(
       forecast.mean,
-      'GEFS mean',
+      'Forecast average',
       '#ea580c',
       'dash',
       {
         width: 1.85,
         unit: 'mm',
         valueFormat: '.2f',
-        hoverLabel: 'GEFS mean',
+        hoverLabel: 'Forecast average',
         legendGroup: 'precip_forecast'
       }
     );
@@ -543,14 +564,14 @@
 
     const p50Trace = buildLineTrace(
       forecast.p50,
-      'GEFS p50',
+      'Forecast median',
       '#1d4ed8',
       'solid',
       {
         width: 2.6,
         unit: 'mm',
         valueFormat: '.2f',
-        hoverLabel: 'GEFS p50',
+        hoverLabel: 'Forecast median',
         legendGroup: 'precip_forecast'
       }
     );
@@ -558,7 +579,7 @@
 
     if (!traces.length) {
       Plotly.purge(precipEl);
-      statusWarnings.push('No valid precipitation traces to render');
+      statusWarnings.push('Precipitation lines are temporarily unavailable.');
       return;
     }
 
@@ -571,7 +592,7 @@
     Plotly.react(
       precipEl,
       traces,
-      layout('APCP (mm, water equivalent)', colors, {
+      layout('Precipitation (mm)', colors, {
         xRange,
         initTime: initDate,
         yTickFormat: '.1f',
@@ -587,7 +608,7 @@
     const levels = Object.keys(payload.soil_moisture || {}).sort((a, b) => levelSortKey(a) - levelSortKey(b));
     if (!levels.length) {
       Plotly.purge(soilEl);
-      statusWarnings.push('Missing GEFS soil moisture block');
+      statusWarnings.push('Soil moisture data is temporarily unavailable.');
       return;
     }
 
@@ -620,7 +641,7 @@
       if (hasSeries(analysis)) {
         const analysisTrace = buildLineTrace(
           analysis,
-          idx === 0 ? 'GEFS f000 analysis history' : `GEFS f000 analysis · ${level}`,
+          idx === 0 ? 'Recent cycle values' : `Recent cycle · ${level}`,
           levelColor,
           'dot',
           {
@@ -632,7 +653,7 @@
             showlegend: idx === 0,
             unit: 'm3/m3',
             valueFormat: '.3f',
-            hoverLabel: `GEFS f000 analysis · ${level}`,
+            hoverLabel: `Recent cycle · ${level}`,
             legendGroup: 'soil_analysis'
           }
         );
@@ -644,7 +665,7 @@
       if (hasSeries(retro)) {
         const retroTrace = buildLineTrace(
           retro,
-          idx === 0 ? 'Retrospective p50' : `Retrospective p50 · ${level}`,
+          idx === 0 ? 'Recent median' : `Recent median · ${level}`,
           '#64748b',
           'dot',
           {
@@ -653,7 +674,7 @@
             showlegend: idx === 0,
             unit: 'm3/m3',
             valueFormat: '.3f',
-            hoverLabel: `Retrospective p50 · ${level}`,
+            hoverLabel: `Recent median · ${level}`,
             legendGroup: 'soil_retro'
           }
         );
@@ -671,14 +692,14 @@
 
       const soilP50 = buildLineTrace(
         forecast.p50,
-        `GEFS p50 · ${level}`,
+        `Forecast median · ${level}`,
         levelColor,
         'solid',
         {
           width: 2.05,
           unit: 'm3/m3',
           valueFormat: '.3f',
-          hoverLabel: `GEFS p50 · ${level}`,
+          hoverLabel: `Forecast median · ${level}`,
           legendGroup: `soil_forecast_${idx}`
         }
       );
@@ -689,7 +710,7 @@
 
     if (!traces.length) {
       Plotly.purge(soilEl);
-      statusWarnings.push('No valid soil traces to render');
+      statusWarnings.push('Soil moisture lines are temporarily unavailable.');
       return;
     }
 
@@ -697,7 +718,7 @@
     Plotly.react(
       soilEl,
       traces,
-      layout('SOILW (m3/m3)', colors, {
+      layout('Soil moisture (m3/m3)', colors, {
         xRange,
         initTime: initDate,
         yTickFormat: '.2f',
@@ -729,7 +750,7 @@
     const generatedDate = parseDate(payload.generated_at_utc);
     if (generatedDate) {
       const ageHours = (Date.now() - generatedDate.getTime()) / (1000 * 3600);
-      if (ageHours > staleHours) statusWarnings.push(`Data may be stale (${ageHours.toFixed(1)}h old)`);
+      if (ageHours > staleHours) statusWarnings.push(`Update appears delayed (${ageHours.toFixed(1)} hours old).`);
     }
 
     if (precipEl) renderPrecipChart(precipEl, payload, initDate, observationWindowDays, colors, statusWarnings);
@@ -758,7 +779,7 @@
         renderPanel(container, payload);
       } catch (err) {
         if (statusEl) {
-          statusEl.textContent = `GEFS forecast unavailable (${err.message || 'unknown error'})`;
+          statusEl.textContent = 'Forecast data is temporarily unavailable. Please check back soon.';
           statusEl.classList.add('plot-status--error');
         }
         const precipEl = container.querySelector('.gefs-forecast-precip');
