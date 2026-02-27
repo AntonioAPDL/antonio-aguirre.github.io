@@ -77,66 +77,6 @@
     return rows;
   }
 
-  function pickCycleMarker(points, initDate, requireAfterInit) {
-    if (!Array.isArray(points) || !initDate) return null;
-    const parsed = points
-      .map((point) => {
-        if (!point || !point.t) return null;
-        const ts = parseDate(point.t);
-        const value = numberOrNull(point.v);
-        if (!ts || value === null) return null;
-        return { ts, value };
-      })
-      .filter(Boolean)
-      .sort((a, b) => a.ts - b.ts);
-    if (!parsed.length) return null;
-    if (requireAfterInit) {
-      const firstAfter = parsed.find((item) => item.ts > initDate);
-      if (firstAfter) return { t: firstAfter.ts.toISOString(), v: firstAfter.value };
-    }
-    const firstAtOrAfter = parsed.find((item) => item.ts >= initDate);
-    if (firstAtOrAfter) return { t: firstAtOrAfter.ts.toISOString(), v: firstAtOrAfter.value };
-    return { t: parsed[0].ts.toISOString(), v: parsed[0].value };
-  }
-
-  function deriveAnalysisContextFromPayload(payload) {
-    if (!payload || typeof payload !== 'object') return {};
-    const initDate = parseDate(payload.init_time_utc);
-    if (!initDate) return {};
-    const observationWindowDays = Math.max(
-      1,
-      numberOrNull(payload.observation_window_days) || 20
-    );
-    const startDate = new Date(initDate.getTime() - observationWindowDays * 24 * 3600 * 1000);
-    const out = {
-      window_days: observationWindowDays,
-      start_utc: startDate.toISOString(),
-      end_utc: initDate.toISOString(),
-      precip_proxy_valid_offset_hours: 3,
-      precip_f003_proxy: {},
-      soil_f000: {}
-    };
-
-    const precipLevels = payload.precip && typeof payload.precip === 'object' ? payload.precip : {};
-    Object.keys(precipLevels).forEach((level) => {
-      const block = precipLevels[level];
-      if (!block || typeof block !== 'object') return;
-      const marker = pickCycleMarker(block.p50, initDate, true);
-      if (marker) out.precip_f003_proxy[level] = [marker];
-    });
-
-    const soilLevels = payload.soil_moisture && typeof payload.soil_moisture === 'object'
-      ? payload.soil_moisture
-      : {};
-    Object.keys(soilLevels).forEach((level) => {
-      const block = soilLevels[level];
-      if (!block || typeof block !== 'object') return;
-      const marker = pickCycleMarker(block.p50, initDate, false);
-      if (marker) out.soil_f000[level] = [marker];
-    });
-    return out;
-  }
-
   function buildObservedRetrospectiveFromCsv(rows, initDate, observationWindowDays, sourceCsv) {
     if (!Array.isArray(rows) || !initDate) return null;
     const startDate = new Date(initDate.getTime() - observationWindowDays * 24 * 3600 * 1000);
@@ -401,23 +341,9 @@
     const observedEra5Count = observed && Array.isArray(observed.daily_avg_soil_ERA5) ? observed.daily_avg_soil_ERA5.length : 0;
     const observedNwmMCount = observed && Array.isArray(observed.daily_avg_soil_NWM_SOIL_M) ? observed.daily_avg_soil_NWM_SOIL_M.length : 0;
     const observedNwmWCount = observed && Array.isArray(observed.daily_avg_soil_NWM_SOIL_W) ? observed.daily_avg_soil_NWM_SOIL_W.length : 0;
-    const analysisContext = payload && payload.gefs_analysis_context && typeof payload.gefs_analysis_context === 'object'
-      ? payload.gefs_analysis_context
-      : null;
-    const analysisPrecipBlock = analysisContext && analysisContext.precip_f003_proxy && typeof analysisContext.precip_f003_proxy === 'object'
-      ? analysisContext.precip_f003_proxy
-      : {};
-    const analysisSoilBlock = analysisContext && analysisContext.soil_f000 && typeof analysisContext.soil_f000 === 'object'
-      ? analysisContext.soil_f000
-      : {};
-    const analysisPrecipCount = Object.values(analysisPrecipBlock)
-      .reduce((acc, series) => acc + (Array.isArray(series) ? series.length : 0), 0);
-    const analysisSoilCount = Object.values(analysisSoilBlock)
-      .reduce((acc, series) => acc + (Array.isArray(series) ? series.length : 0), 0);
     const retroText = retroWindowDays ? `Retrospective window: ${retroWindowDays}d` : '';
     const observedText = `Obs points (ppt/ERA5/NWM_M/NWM_W): ${observedPptCount}/${observedEra5Count}/${observedNwmMCount}/${observedNwmWCount}`;
-    const analysisText = `GEFS cycle ctx (ppt_f003/soil_f000): ${analysisPrecipCount}/${analysisSoilCount}`;
-    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${retroText ? ` | ${retroText}` : ''} | ${observedText} | ${analysisText}${warning ? ` | ${warning}` : ''}`;
+    el.textContent = `Init: ${initTime} | Generated: ${generated} | Members: ${members} | ${missing}${retroText ? ` | ${retroText}` : ''} | ${observedText}${warning ? ` | ${warning}` : ''}`;
     el.classList.toggle('plot-status--error', Boolean(warning));
   }
 
@@ -440,12 +366,8 @@
         numberOrNull(payload.observation_window_days) ||
         20
     );
-    if (!payload.gefs_analysis_context || typeof payload.gefs_analysis_context !== 'object') {
-      payload.gefs_analysis_context = deriveAnalysisContextFromPayload(payload);
-    }
     const retrospective = payload.retrospective || {};
     const observedRetro = payload.observed_retrospective || {};
-    const gefsAnalysisContext = payload.gefs_analysis_context || {};
 
     const staleHours = numberOrNull(container.dataset.staleHours) ?? numberOrNull(payload.stale_after_hours) ?? 12;
     let staleWarning = '';
@@ -465,8 +387,6 @@
       const observedPrecip = observedRetro.daily_avg_ppt;
       const hasObservedPrecip = Array.isArray(observedPrecip) && observedPrecip.length > 0;
       const retroPrecip = ((retrospective.precip || {})[precipLevelName]) || null;
-      const analysisPrecip = ((gefsAnalysisContext.precip_f003_proxy || {})[precipLevelName]) || null;
-      let analysisPrecipTrace = null;
       if (hasObservedPrecip) {
         const obsTrace = buildLineTrace(
           observedPrecip,
@@ -514,25 +434,6 @@
         );
         if (retroMean) traces.push(retroMean);
       }
-      if (Array.isArray(analysisPrecip) && analysisPrecip.length) {
-        analysisPrecipTrace = buildLineTrace(
-          analysisPrecip,
-          'GEFS f003 (0-3h acc) by cycle',
-          '#334155',
-          'dot',
-          {
-            width: 1.7,
-            opacity: 0.95,
-            mode: analysisPrecip.length <= 3 ? 'markers' : 'lines+markers',
-            markerSize: 8,
-            markerSymbol: 'diamond',
-            unit: precipUnits,
-            valueFormat: '.2f',
-            hoverLabel: 'GEFS f003 (0-3h acc) by cycle',
-            legendGroup: 'precip_analysis'
-          }
-        );
-      }
       const band = buildBandTrace(
         precipLevel.p10,
         precipLevel.p90,
@@ -569,13 +470,11 @@
         }
       );
       if (meanTrace) traces.push(meanTrace);
-      if (analysisPrecipTrace) traces.push(analysisPrecipTrace);
       const precipXRange = buildXRange(
         initDate,
         observationWindowDays,
         [
           observedPrecip,
-          analysisPrecip,
           precipLevel.p10, precipLevel.p50, precipLevel.p90, precipLevel.mean,
           retroPrecip && retroPrecip.p10, retroPrecip && retroPrecip.p50,
           retroPrecip && retroPrecip.p90, retroPrecip && retroPrecip.mean
@@ -598,9 +497,7 @@
       const levels = Object.keys(payload.soil_moisture || {}).sort((a, b) => levelSortKey(a) - levelSortKey(b));
       const palette = ['#1d4ed8', '#0284c7', '#16a34a', '#f59e0b', '#dc2626'];
       const traces = [];
-      const overlayTraces = [];
       const pointGroups = [];
-      const analysisSoilBlock = gefsAnalysisContext.soil_f000 || {};
       const observedSoilEra5 = observedRetro.daily_avg_soil_ERA5;
       const observedSoilNwmM = observedRetro.daily_avg_soil_NWM_SOIL_M;
       const observedSoilNwmW = observedRetro.daily_avg_soil_NWM_SOIL_W;
@@ -633,29 +530,7 @@
       pointGroups.push(observedSoilEra5, observedSoilNwmM, observedSoilNwmW);
       levels.forEach((level, idx) => {
         const block = payload.soil_moisture[level];
-        const analysisLevel = analysisSoilBlock[level];
         const retroLevel = ((retrospective.soil_moisture || {})[level]) || null;
-        if (Array.isArray(analysisLevel) && analysisLevel.length) {
-          const analysisTrace = buildLineTrace(
-            analysisLevel,
-            idx === 0 ? 'GEFS f000 analysis (history)' : `GEFS f000 analysis · ${level}`,
-            palette[idx % palette.length],
-            'dot',
-            {
-              width: 1.3,
-              opacity: 0.9,
-              mode: analysisLevel.length <= 3 ? 'markers' : 'lines+markers',
-              markerSize: 6.2,
-              markerSymbol: 'circle',
-              showlegend: idx === 0,
-              valueFormat: '.3f',
-              hoverLabel: `GEFS f000 analysis · ${level}`,
-              legendGroup: 'soil_analysis'
-            }
-          );
-          if (analysisTrace) overlayTraces.push(analysisTrace);
-          pointGroups.push(analysisLevel);
-        }
         if (!hasObservedSoil && retroLevel && retroLevel.p50) {
           const retroTrace = buildLineTrace(
             retroLevel.p50,
@@ -697,7 +572,6 @@
         if (soilP50) traces.push(soilP50);
         pointGroups.push(block.p10, block.p50, block.p90);
       });
-      traces.push(...overlayTraces);
       const soilXRange = buildXRange(initDate, observationWindowDays, pointGroups);
       Plotly.react(
         soilEl,
