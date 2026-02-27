@@ -254,6 +254,80 @@ def _load_payload_history_from_git(
     return payloads
 
 
+def _best_series_for_window(
+    context_block: Any,
+    start_utc: dt.datetime,
+    end_utc: dt.datetime,
+) -> List[Dict[str, float]]:
+    if not isinstance(context_block, dict):
+        return []
+    best_series: List[Dict[str, float]] = []
+    best_count = -1
+    for series in context_block.values():
+        windowed = _series_in_window(series, start_utc, end_utc)
+        count = len(windowed)
+        if count > best_count:
+            best_count = count
+            best_series = series if isinstance(series, list) else []
+    return best_series
+
+
+def _series_has_sufficient_window_coverage(
+    points: Any,
+    start_utc: dt.datetime,
+    end_utc: dt.datetime,
+    min_points: int,
+    edge_tolerance_hours: int = 9,
+) -> bool:
+    windowed = _series_in_window(points, start_utc, end_utc)
+    if len(windowed) < max(1, int(min_points)):
+        return False
+    ordered = sorted(windowed.values(), key=lambda item: item[0])
+    if not ordered:
+        return False
+    first_ts = ordered[0][0]
+    last_ts = ordered[-1][0]
+    if first_ts > (start_utc + dt.timedelta(hours=edge_tolerance_hours)):
+        return False
+    if last_ts < (end_utc - dt.timedelta(hours=edge_tolerance_hours)):
+        return False
+    return True
+
+
+def _prior_context_sufficient_for_window(
+    prior_payload: Optional[Dict[str, Any]],
+    window_days: int,
+    start_utc: dt.datetime,
+    precip_end_utc: dt.datetime,
+    soil_end_utc: dt.datetime,
+) -> bool:
+    if not isinstance(prior_payload, dict):
+        return False
+    context = prior_payload.get("gefs_analysis_context")
+    if not isinstance(context, dict):
+        return False
+    precip_block = context.get("precip_f003_proxy")
+    soil_block = context.get("soil_f000")
+    if not isinstance(precip_block, dict) or not isinstance(soil_block, dict):
+        return False
+
+    expected_cycles = max(8, int(max(1, window_days) * 4))
+    min_points = max(8, int(round(expected_cycles * 0.75)))
+
+    precip_series = _best_series_for_window(precip_block, start_utc, precip_end_utc)
+    soil_series = _best_series_for_window(soil_block, start_utc, soil_end_utc)
+    if not precip_series or not soil_series:
+        return False
+
+    precip_ok = _series_has_sufficient_window_coverage(
+        precip_series, start_utc, precip_end_utc, min_points=min_points
+    )
+    soil_ok = _series_has_sufficient_window_coverage(
+        soil_series, start_utc, soil_end_utc, min_points=min_points
+    )
+    return precip_ok and soil_ok
+
+
 def _build_gefs_analysis_context_payload(
     current_payload: Dict[str, Any],
     prior_payload: Optional[Dict[str, Any]],
@@ -581,7 +655,26 @@ def main() -> int:
     prior_path = Path(args.prior_web_json) if args.prior_web_json else default_prior_path
     prior_payload = _load_optional_json(prior_path)
     history_payloads: List[Dict[str, Any]] = []
-    if prior_path.exists():
+    history_scan_reason = "prior_context_sufficient"
+    observation_window_days = int(max(1, args.observation_window_days))
+    init_for_context = _parse_iso(payload.get("init_time_utc"))
+    needs_history_scan = True
+    if init_for_context is not None and prior_path.exists():
+        start_time = init_for_context - dt.timedelta(days=observation_window_days)
+        soil_end = init_for_context + dt.timedelta(minutes=1)
+        precip_end = init_for_context + dt.timedelta(hours=3, minutes=1)
+        needs_history_scan = not _prior_context_sufficient_for_window(
+            prior_payload=prior_payload,
+            window_days=observation_window_days,
+            start_utc=start_time,
+            precip_end_utc=precip_end,
+            soil_end_utc=soil_end,
+        )
+        history_scan_reason = "backfill_needed" if needs_history_scan else "prior_context_sufficient"
+    else:
+        history_scan_reason = "missing_prior_payload_or_init"
+
+    if prior_path.exists() and needs_history_scan:
         history_payloads = _load_payload_history_from_git(
             repo_root=repo_root,
             tracked_json_path=prior_path,
@@ -590,20 +683,20 @@ def main() -> int:
     payload["gefs_analysis_context"] = _build_gefs_analysis_context_payload(
         current_payload=payload,
         prior_payload=prior_payload,
-        observation_window_days=int(max(1, args.observation_window_days)),
+        observation_window_days=observation_window_days,
         history_payloads=history_payloads,
     )
     payload["retrospective"] = _build_retrospective_payload(
         current_payload=payload,
         prior_payload=prior_payload,
-        observation_window_days=int(max(1, args.observation_window_days)),
+        observation_window_days=observation_window_days,
     )
     init_for_window = _parse_iso(payload.get("init_time_utc"))
     if args.include_observed_retrospective and init_for_window is not None:
         payload["observed_retrospective"] = _build_observed_retrospective_payload(
             climate_csv_path=(repo_root / "climate_daily_ppt_soil.csv"),
             init_time_utc=init_for_window,
-            observation_window_days=int(max(1, args.observation_window_days)),
+            observation_window_days=observation_window_days,
         )
 
     out_path = Path(args.out) if args.out else (repo_root / cfg.output.web_out_dir / cfg.output.web_filename)
@@ -632,6 +725,7 @@ def main() -> int:
         print(f"analysis_context_precip_points={precip_ctx_points}")
         print(f"analysis_context_soil_points={soil_ctx_points}")
     print(f"analysis_history_payloads={len(history_payloads)}")
+    print(f"analysis_history_scan_reason={history_scan_reason}")
     print(f"include_observed_retrospective={bool(args.include_observed_retrospective)}")
     if args.include_observed_retrospective:
         obs = payload.get("observed_retrospective", {})

@@ -15,6 +15,7 @@ from export_latest_web_json import (  # noqa: E402
     _build_observed_retrospective_payload,
     _build_retrospective_payload,
     _extract_cycle_analysis_points,
+    _prior_context_sufficient_for_window,
 )
 
 
@@ -271,3 +272,51 @@ def test_gefs_analysis_context_backfills_from_history_payloads() -> None:
         "2026-02-23T18:00:00+00:00",
         "2026-02-24T00:00:00+00:00",
     ]
+
+
+def test_prior_context_sufficient_for_window_true_with_dense_cycle_points() -> None:
+    start = dt.datetime(2026, 2, 7, 0, 0, tzinfo=dt.timezone.utc)
+    init = dt.datetime(2026, 2, 27, 0, 0, tzinfo=dt.timezone.utc)
+    precip_points = [
+        _point((start + dt.timedelta(hours=3 + 6 * i)).isoformat(), float(i % 7))
+        for i in range(81)
+    ]
+    soil_points = [
+        _point((start + dt.timedelta(hours=6 * i)).isoformat(), 0.25 + 0.001 * i)
+        for i in range(81)
+    ]
+    prior_payload = {
+        "gefs_analysis_context": {
+            "precip_f003_proxy": {"surface": precip_points},
+            "soil_f000": {"0-0.1 m below ground": soil_points},
+        }
+    }
+
+    ok = _prior_context_sufficient_for_window(
+        prior_payload=prior_payload,
+        window_days=20,
+        start_utc=start,
+        precip_end_utc=init + dt.timedelta(hours=3, minutes=1),
+        soil_end_utc=init + dt.timedelta(minutes=1),
+    )
+    assert ok is True
+
+
+def test_prior_context_sufficient_for_window_false_when_sparse() -> None:
+    start = dt.datetime(2026, 2, 7, 0, 0, tzinfo=dt.timezone.utc)
+    init = dt.datetime(2026, 2, 27, 0, 0, tzinfo=dt.timezone.utc)
+    prior_payload = {
+        "gefs_analysis_context": {
+            "precip_f003_proxy": {"surface": [_point("2026-02-26T03:00:00+00:00", 0.2)]},
+            "soil_f000": {"0-0.1 m below ground": [_point("2026-02-26T00:00:00+00:00", 0.3)]},
+        }
+    }
+
+    ok = _prior_context_sufficient_for_window(
+        prior_payload=prior_payload,
+        window_days=20,
+        start_utc=start,
+        precip_end_utc=init + dt.timedelta(hours=3, minutes=1),
+        soil_end_utc=init + dt.timedelta(minutes=1),
+    )
+    assert ok is False

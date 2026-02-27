@@ -143,6 +143,7 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - Plot units are harmonized by panel logic (`APCP` in mm water-equivalent; `SOILW` in m3/m3)
 - PRISM/ERA5 observed overlays are intentionally disabled in the panel (GEFS-only context mode)
 - Exporter default is GEFS-only; observed payload is opt-in with `--include-observed-retrospective`
+- Exporter uses a history-scan guard: skips git-history backfill when prior 20-day GEFS context is already complete
 
 Panel override:
 
@@ -211,6 +212,9 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
   - cadence: every 3 hours (`0 */3 * * *`)
   - updates and commits:
     - `assets/data/forecasts/gefs_big_trees_latest.json`
+  - fail-fast checks in `scripts/update_big_trees_gefs_forecast.sh` ensure:
+    - latest init is not stale
+    - 20-day GEFS analysis context coverage remains dense and current
   - race guards:
     - hard sync to latest `origin/main` before processing
     - rebase-conflict-safe push (concurrent updates are skipped without failing the job)
