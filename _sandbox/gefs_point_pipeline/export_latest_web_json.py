@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -161,22 +162,103 @@ def _extract_cycle_analysis_points(payload: Any) -> Dict[str, Dict[str, List[Dic
 
 def _merge_context_series(
     carry_points: Any,
+    history_points: Any,
     prior_cycle_points: Any,
     current_cycle_points: Any,
     start_utc: dt.datetime,
     end_utc: dt.datetime,
 ) -> List[Dict[str, float]]:
     merged = _series_in_window(carry_points, start_utc, end_utc)
+    merged.update(_series_in_window(history_points, start_utc, end_utc))
     merged.update(_series_in_window(prior_cycle_points, start_utc, end_utc))
     merged.update(_series_in_window(current_cycle_points, start_utc, end_utc))
     ordered = sorted(merged.values(), key=lambda item: item[0])
     return [{"t": ts.isoformat(), "v": value} for ts, value in ordered]
 
 
+def _collect_cycle_context_from_payloads(
+    payloads: List[Dict[str, Any]],
+    start_utc: dt.datetime,
+    precip_end_utc: dt.datetime,
+    soil_end_utc: dt.datetime,
+) -> Dict[str, Dict[str, List[Dict[str, float]]]]:
+    precip: Dict[str, Dict[str, Tuple[dt.datetime, float]]] = {}
+    soil: Dict[str, Dict[str, Tuple[dt.datetime, float]]] = {}
+    for payload in payloads:
+        cycle = _extract_cycle_analysis_points(payload)
+        for level_name, points in cycle.get("precip_f003_proxy", {}).items():
+            level_key = str(level_name)
+            bucket = precip.setdefault(level_key, {})
+            bucket.update(_series_in_window(points, start_utc, precip_end_utc))
+        for level_name, points in cycle.get("soil_f000", {}).items():
+            level_key = str(level_name)
+            bucket = soil.setdefault(level_key, {})
+            bucket.update(_series_in_window(points, start_utc, soil_end_utc))
+
+    def _to_sorted_points(
+        mapping: Dict[str, Dict[str, Tuple[dt.datetime, float]]]
+    ) -> Dict[str, List[Dict[str, float]]]:
+        out: Dict[str, List[Dict[str, float]]] = {}
+        for level_name, ts_map in mapping.items():
+            ordered = sorted(ts_map.values(), key=lambda item: item[0])
+            if not ordered:
+                continue
+            out[level_name] = [{"t": ts.isoformat(), "v": value} for ts, value in ordered]
+        return out
+
+    return {
+        "precip_f003_proxy": _to_sorted_points(precip),
+        "soil_f000": _to_sorted_points(soil),
+    }
+
+
+def _load_payload_history_from_git(
+    repo_root: Path,
+    tracked_json_path: Path,
+    max_commits: int,
+) -> List[Dict[str, Any]]:
+    try:
+        rel_path = tracked_json_path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except ValueError:
+        return []
+
+    rev_cmd = [
+        "git",
+        "-C",
+        str(repo_root),
+        "rev-list",
+        f"--max-count={max(1, int(max_commits))}",
+        "HEAD",
+        "--",
+        rel_path,
+    ]
+    rev_proc = subprocess.run(rev_cmd, capture_output=True, text=True, check=False)
+    if rev_proc.returncode != 0:
+        return []
+    hashes = [line.strip() for line in rev_proc.stdout.splitlines() if line.strip()]
+    if not hashes:
+        return []
+
+    payloads: List[Dict[str, Any]] = []
+    for rev in reversed(hashes):
+        show_cmd = ["git", "-C", str(repo_root), "show", f"{rev}:{rel_path}"]
+        show_proc = subprocess.run(show_cmd, capture_output=True, text=True, check=False)
+        if show_proc.returncode != 0 or not show_proc.stdout.strip():
+            continue
+        try:
+            data = json.loads(show_proc.stdout)
+        except Exception:
+            continue
+        if isinstance(data, dict):
+            payloads.append(data)
+    return payloads
+
+
 def _build_gefs_analysis_context_payload(
     current_payload: Dict[str, Any],
     prior_payload: Optional[Dict[str, Any]],
     observation_window_days: int,
+    history_payloads: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     init_time = _parse_iso(current_payload.get("init_time_utc"))
     if init_time is None:
@@ -194,6 +276,12 @@ def _build_gefs_analysis_context_payload(
 
     prior_cycle = _extract_cycle_analysis_points(prior_payload)
     current_cycle = _extract_cycle_analysis_points(current_payload)
+    history_cycle = _collect_cycle_context_from_payloads(
+        payloads=history_payloads or [],
+        start_utc=start_time,
+        precip_end_utc=precip_end,
+        soil_end_utc=soil_end,
+    )
 
     context: Dict[str, Any] = {
         "window_days": int(max(1, observation_window_days)),
@@ -207,9 +295,11 @@ def _build_gefs_analysis_context_payload(
     precip_levels = set(current_cycle["precip_f003_proxy"].keys())
     precip_levels.update((prior_context.get("precip_f003_proxy") or {}).keys())
     precip_levels.update(prior_cycle["precip_f003_proxy"].keys())
+    precip_levels.update(history_cycle["precip_f003_proxy"].keys())
     for level_name in sorted(str(level) for level in precip_levels):
         merged = _merge_context_series(
             carry_points=(prior_context.get("precip_f003_proxy") or {}).get(level_name, []),
+            history_points=history_cycle["precip_f003_proxy"].get(level_name, []),
             prior_cycle_points=prior_cycle["precip_f003_proxy"].get(level_name, []),
             current_cycle_points=current_cycle["precip_f003_proxy"].get(level_name, []),
             start_utc=start_time,
@@ -221,9 +311,11 @@ def _build_gefs_analysis_context_payload(
     soil_levels = set(current_cycle["soil_f000"].keys())
     soil_levels.update((prior_context.get("soil_f000") or {}).keys())
     soil_levels.update(prior_cycle["soil_f000"].keys())
+    soil_levels.update(history_cycle["soil_f000"].keys())
     for level_name in sorted(str(level) for level in soil_levels):
         merged = _merge_context_series(
             carry_points=(prior_context.get("soil_f000") or {}).get(level_name, []),
+            history_points=history_cycle["soil_f000"].get(level_name, []),
             prior_cycle_points=prior_cycle["soil_f000"].get(level_name, []),
             current_cycle_points=current_cycle["soil_f000"].get(level_name, []),
             start_utc=start_time,
@@ -417,6 +509,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional override output JSON path.",
     )
+    parser.add_argument(
+        "--analysis-history-max-commits",
+        type=int,
+        default=320,
+        help="Max historical commits to scan for GEFS analysis context backfill.",
+    )
     return parser.parse_args()
 
 
@@ -474,10 +572,18 @@ def main() -> int:
     default_prior_path = repo_root / "assets/data/forecasts/gefs_big_trees_latest.json"
     prior_path = Path(args.prior_web_json) if args.prior_web_json else default_prior_path
     prior_payload = _load_optional_json(prior_path)
+    history_payloads: List[Dict[str, Any]] = []
+    if prior_path.exists():
+        history_payloads = _load_payload_history_from_git(
+            repo_root=repo_root,
+            tracked_json_path=prior_path,
+            max_commits=int(max(1, args.analysis_history_max_commits)),
+        )
     payload["gefs_analysis_context"] = _build_gefs_analysis_context_payload(
         current_payload=payload,
         prior_payload=prior_payload,
         observation_window_days=int(max(1, args.observation_window_days)),
+        history_payloads=history_payloads,
     )
     payload["retrospective"] = _build_retrospective_payload(
         current_payload=payload,
@@ -517,6 +623,7 @@ def main() -> int:
             soil_ctx_points = sum(len(points) for points in soil_ctx.values() if isinstance(points, list))
         print(f"analysis_context_precip_points={precip_ctx_points}")
         print(f"analysis_context_soil_points={soil_ctx_points}")
+    print(f"analysis_history_payloads={len(history_payloads)}")
     obs = payload.get("observed_retrospective", {})
     if isinstance(obs, dict):
         print(f"observed_ppt_points={len(obs.get('daily_avg_ppt', []))}")

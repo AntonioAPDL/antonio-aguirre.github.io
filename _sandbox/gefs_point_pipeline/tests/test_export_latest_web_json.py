@@ -223,3 +223,51 @@ def test_gefs_analysis_context_rolls_prior_and_current_cycle_markers() -> None:
         "2026-02-23T18:00:00+00:00",
         "2026-02-24T00:00:00+00:00",
     ]
+
+
+def test_gefs_analysis_context_backfills_from_history_payloads() -> None:
+    current_payload = {
+        "init_time_utc": "2026-02-24T00:00:00+00:00",
+        "precip": {"surface": {"p50": [_point("2026-02-24T03:00:00+00:00", 1.4)]}},
+        "soil_moisture": {"0-0.1 m below ground": {"p50": [_point("2026-02-24T00:00:00+00:00", 0.35)]}},
+    }
+    prior_payload = {
+        "init_time_utc": "2026-02-23T18:00:00+00:00",
+        "precip": {"surface": {"p50": [_point("2026-02-23T21:00:00+00:00", 1.1)]}},
+        "soil_moisture": {"0-0.1 m below ground": {"p50": [_point("2026-02-23T18:00:00+00:00", 0.33)]}},
+    }
+    history_payloads = [
+        {
+            "init_time_utc": "2026-02-20T00:00:00+00:00",
+            "precip": {"surface": {"p50": [_point("2026-02-20T03:00:00+00:00", 0.8)]}},
+            "soil_moisture": {"0-0.1 m below ground": {"p50": [_point("2026-02-20T00:00:00+00:00", 0.3)]}},
+        },
+        {
+            "init_time_utc": "2026-02-21T00:00:00+00:00",
+            "precip": {"surface": {"p50": [_point("2026-02-21T03:00:00+00:00", 0.9)]}},
+            "soil_moisture": {"0-0.1 m below ground": {"p50": [_point("2026-02-21T00:00:00+00:00", 0.31)]}},
+        },
+    ]
+
+    context = _build_gefs_analysis_context_payload(
+        current_payload=current_payload,
+        prior_payload=prior_payload,
+        observation_window_days=20,
+        history_payloads=history_payloads,
+    )
+
+    precip_points = context["precip_f003_proxy"]["surface"]
+    assert [point["t"] for point in precip_points] == [
+        "2026-02-20T03:00:00+00:00",
+        "2026-02-21T03:00:00+00:00",
+        "2026-02-23T21:00:00+00:00",
+        "2026-02-24T03:00:00+00:00",
+    ]
+
+    soil_points = context["soil_f000"]["0-0.1 m below ground"]
+    assert [point["t"] for point in soil_points] == [
+        "2026-02-20T00:00:00+00:00",
+        "2026-02-21T00:00:00+00:00",
+        "2026-02-23T18:00:00+00:00",
+        "2026-02-24T00:00:00+00:00",
+    ]
