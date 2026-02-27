@@ -216,6 +216,14 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
   - cadence: every 3 hours (`0 */3 * * *`)
   - updates and commits:
     - `assets/data/forecasts/gefs_big_trees_latest.json`
+  - race guards:
+    - hard sync to latest `origin/main` before processing
+    - rebase-conflict-safe push (concurrent updates are skipped without failing the job)
+
+- `.github/workflows/backfill_gefs_analysis_context.yml` (manual)
+  - one-time/manual bootstrap for GEFS cycle-analysis context
+  - backfills missing `f003` precip proxy and `f000` soil markers over a target window (default 20 days)
+  - rewrites latest full GEFS payload at the end so forecast panel remains complete
 
 Required repository secrets for ERA5 updates:
 

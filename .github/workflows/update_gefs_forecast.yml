@@ -20,6 +20,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
+
+      - name: Sync to latest main
+        run: |
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -38,6 +45,7 @@ jobs:
 
       - name: Commit and push if changed
         run: |
+          set -euo pipefail
           if git diff --quiet -- assets/data/forecasts/gefs_big_trees_latest.json; then
             echo "No changes to commit."
             exit 0
@@ -50,5 +58,12 @@ jobs:
             exit 0
           fi
           git commit -m "chore: update GEFS Big Trees forecast"
-          git pull --rebase origin main
-          git push
+          if ! git pull --rebase origin main; then
+            echo "Concurrent update caused rebase conflict; skipping this run."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push; then
+            echo "Push rejected (likely concurrent update); skipping this run."
+            exit 0
+          fi

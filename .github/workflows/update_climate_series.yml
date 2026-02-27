@@ -21,6 +21,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
+
+      - name: Sync to latest main
+        run: |
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -102,8 +109,17 @@ jobs:
           fi
 
           git commit -m "chore: update climate point series"
-          git pull --rebase origin main
-          git push
+          if ! git pull --rebase origin main; then
+            echo "Concurrent update caused rebase conflict; skipping climate push."
+            git rebase --abort || true
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          if ! git push; then
+            echo "Push rejected (likely concurrent update); skipping climate push."
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
           echo "changed=true" >> "${GITHUB_OUTPUT}"
 
       - name: Trigger GEFS refresh
@@ -111,9 +127,35 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const workflowId = "update_gefs_forecast.yml";
+            const list = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflowId,
+              branch: "main",
+              per_page: 20
+            });
+            const active = list.data.workflow_runs.find((run) =>
+              run.status === "queued" || run.status === "in_progress" || run.status === "waiting" || run.status === "pending"
+            );
+            if (active) {
+              core.info(`Skipping dispatch: GEFS run already active (${active.id}).`);
+              return;
+            }
+            const latestSuccess = list.data.workflow_runs.find(
+              (run) => run.status === "completed" && run.conclusion === "success"
+            );
+            if (latestSuccess) {
+              const ageMs = Date.now() - Date.parse(latestSuccess.updated_at);
+              const maxFreshMs = 90 * 60 * 1000;
+              if (ageMs >= 0 && ageMs < maxFreshMs) {
+                core.info(`Skipping dispatch: latest successful GEFS run is recent (${Math.round(ageMs / 60000)} min ago).`);
+                return;
+              }
+            }
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: "update_gefs_forecast.yml",
+              workflow_id: workflowId,
               ref: "main"
             });

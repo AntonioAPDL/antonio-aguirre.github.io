@@ -1,0 +1,95 @@
+name: Backfill GEFS analysis context
+
+on:
+  workflow_dispatch:
+    inputs:
+      window_days:
+        description: "Analysis window length in days"
+        required: true
+        default: "20"
+      max_cycles:
+        description: "Maximum 6-hour cycles to attempt"
+        required: true
+        default: "160"
+      strict_mode:
+        description: "Fail if context is short of the full window (1=yes, 0=no)"
+        required: true
+        default: "1"
+      start_cycle_utc:
+        description: "Optional ISO UTC start cycle (e.g., 2026-02-07T00:00:00Z)"
+        required: false
+        default: ""
+      end_cycle_utc:
+        description: "Optional ISO UTC end cycle"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-gefs-forecast
+  cancel-in-progress: false
+
+jobs:
+  backfill-gefs-analysis-context:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Sync to latest main
+        run: |
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install GEFS dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r _sandbox/gefs_point_pipeline/requirements.txt
+
+      - name: Run GEFS analysis backfill
+        env:
+          WINDOW_DAYS: ${{ github.event.inputs.window_days }}
+          MAX_CYCLES: ${{ github.event.inputs.max_cycles }}
+          STRICT_MODE: ${{ github.event.inputs.strict_mode }}
+          START_CYCLE_UTC: ${{ github.event.inputs.start_cycle_utc }}
+          END_CYCLE_UTC: ${{ github.event.inputs.end_cycle_utc }}
+        run: |
+          chmod +x scripts/backfill_gefs_analysis_context.sh
+          scripts/backfill_gefs_analysis_context.sh
+
+      - name: Commit and push if changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- assets/data/forecasts/gefs_big_trees_latest.json; then
+            echo "No GEFS asset changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/data/forecasts/gefs_big_trees_latest.json
+          if git diff --cached --quiet; then
+            echo "No staged GEFS asset changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: backfill GEFS analysis context"
+          if ! git pull --rebase origin main; then
+            echo "Concurrent update caused rebase conflict; skipping push."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push; then
+            echo "Push rejected (likely concurrent update); skipping push."
+            exit 0
+          fi
