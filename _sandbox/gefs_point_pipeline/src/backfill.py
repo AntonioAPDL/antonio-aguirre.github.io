@@ -3,8 +3,11 @@ from __future__ import annotations
 import concurrent.futures
 import dataclasses
 import datetime as dt
+import fcntl
 import json
 import math
+import os
+import re
 import tempfile
 import time
 import traceback
@@ -16,11 +19,12 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from .config import load_pipeline_config, load_point_config
 from .cycle import CYCLE_HOURS, cycle_tag, discover_latest_complete_cycle
 from .runner import RunOptions, run_pipeline
-from .storage import ensure_dir, read_manifest
+from .storage import ensure_dir, prune_failed_runs, read_manifest
 
 
 CYCLE_STEP_HOURS = 6
 GEFS_EARLIEST_INIT_UTC = dt.datetime(2017, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
+FAILED_CYCLE_RE = re.compile(r"^\.failed_(\d{8}_\d{2})_[A-Za-z0-9]+$")
 
 
 @dataclass(frozen=True)
@@ -40,6 +44,10 @@ class BackfillOptions:
     progress_every: int
     run_label: str
     run_profile: str
+    retry_failed_only: bool = False
+    cleanup_stale_tmp_hours: float = 6.0
+    keep_failed_dirs: int = 200
+    wait_for_lock: bool = False
 
 
 @dataclass(frozen=True)
@@ -56,6 +64,12 @@ class WorkerInput:
     retry_backoff_sec: Optional[float]
     force: bool
     run_profile: str
+
+
+@dataclass(frozen=True)
+class LockHandle:
+    path: Path
+    fd: int
 
 
 @dataclass(frozen=True)
@@ -174,6 +188,103 @@ def _history_paths(history_root: Path) -> Dict[str, Path]:
         "state": root / "state",
         "logs": root / "logs",
     }
+
+
+def _read_json(path: Path) -> Dict[str, Any]:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _acquire_lock(
+    lock_path: Path,
+    run_id: str,
+    run_label: str,
+    wait_for_lock: bool,
+) -> Tuple[Optional[LockHandle], Dict[str, Any]]:
+    ensure_dir(lock_path.parent)
+    fd = os.open(str(lock_path), os.O_RDWR | os.O_CREAT, 0o664)
+    try:
+        flags = fcntl.LOCK_EX
+        if not wait_for_lock:
+            flags |= fcntl.LOCK_NB
+        fcntl.flock(fd, flags)
+    except BlockingIOError:
+        existing = _read_json(lock_path)
+        os.close(fd)
+        return None, existing
+
+    payload = {
+        "run_id": run_id,
+        "run_label": run_label,
+        "pid": int(os.getpid()),
+        "acquired_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+    }
+    os.ftruncate(fd, 0)
+    os.write(fd, json.dumps(payload).encode("utf-8"))
+    os.fsync(fd)
+    return LockHandle(path=lock_path, fd=fd), payload
+
+
+def _release_lock(handle: Optional[LockHandle]) -> None:
+    if handle is None:
+        return
+    try:
+        fcntl.flock(handle.fd, fcntl.LOCK_UN)
+    except Exception:
+        pass
+    try:
+        os.close(handle.fd)
+    except OSError:
+        pass
+
+
+def _cleanup_stale_temp_dirs(cycles_root: Path, older_than_hours: float) -> List[str]:
+    if older_than_hours <= 0:
+        return []
+    if not cycles_root.exists():
+        return []
+
+    cutoff = time.time() - (float(older_than_hours) * 3600.0)
+    deleted: List[str] = []
+    for entry in cycles_root.iterdir():
+        if not entry.is_dir() or not entry.name.startswith(".tmp_"):
+            continue
+        try:
+            mtime = entry.stat().st_mtime
+        except OSError:
+            continue
+        if mtime > cutoff:
+            continue
+        for sub in sorted(entry.rglob("*"), reverse=True):
+            try:
+                if sub.is_file() or sub.is_symlink():
+                    sub.unlink(missing_ok=True)  # type: ignore[arg-type]
+                elif sub.is_dir():
+                    sub.rmdir()
+            except Exception:
+                pass
+        try:
+            entry.rmdir()
+            deleted.append(entry.name)
+        except Exception:
+            pass
+    return sorted(deleted)
+
+
+def _failed_cycle_tags(cycles_root: Path) -> set[str]:
+    tags: set[str] = set()
+    if not cycles_root.exists():
+        return tags
+    for entry in cycles_root.iterdir():
+        if not entry.is_dir():
+            continue
+        match = FAILED_CYCLE_RE.match(entry.name)
+        if not match:
+            continue
+        tags.add(match.group(1))
+    return tags
 
 
 def _existing_successful_tags(cycles_root: Path) -> set[str]:
@@ -364,77 +475,63 @@ def run_backfill(options: BackfillOptions) -> Dict[str, Any]:
     status_path = history_paths["state"] / "backfill_status.json"
     benchmark_path = history_paths["state"] / f"{run_id}_benchmark.json"
     failures_path = history_paths["logs"] / f"{run_id}_failures.jsonl"
+    lock_path = history_paths["state"] / "backfill.lock"
 
-    all_cycles = iter_cycle_times(options.start_init_utc, options.end_init_utc)
-    existing_success = _existing_successful_tags(history_paths["cycles"]) if not options.force else set()
-    queued = [cycle for cycle in all_cycles if cycle_tag(cycle) not in existing_success]
-
-    started_utc = dt.datetime.now(dt.timezone.utc)
-    started_perf = time.perf_counter()
-    _write_json_atomic(
-        status_path,
-        _progress_payload(
-            run_id=run_id,
-            run_label=options.run_label,
-            state="running",
-            started_utc=started_utc,
-            updated_utc=started_utc,
-            start_init_utc=options.start_init_utc,
-            end_init_utc=options.end_init_utc,
-            total_cycles=len(all_cycles),
-            queued_cycles=len(queued),
-            pre_skipped_success=len(all_cycles) - len(queued),
-            success_count=0,
-            failed_count=0,
-            skipped_existing_count=0,
-            completed_count=0,
-            wall_seconds=0.0,
-            history_paths=history_paths,
-            failure_log_path=failures_path,
-            workers=options.workers,
-            cycle_max_workers=options.cycle_max_workers,
-        ),
+    lock_handle, lock_meta = _acquire_lock(
+        lock_path=lock_path,
+        run_id=run_id,
+        run_label=options.run_label,
+        wait_for_lock=bool(options.wait_for_lock),
     )
-
-    cycle_results: List[CycleResult] = []
-    success_count = 0
-    failed_count = 0
-    skipped_existing_count = 0
-
-    if not queued:
-        completed_utc = dt.datetime.now(dt.timezone.utc)
-        summary = {
+    if lock_handle is None:
+        return {
             "run_id": run_id,
+            "run_label": options.run_label,
             "run_profile": options.run_profile,
-            "state": "completed",
-            "started_utc": started_utc.isoformat(),
-            "completed_utc": completed_utc.isoformat(),
-            "window": {
-                "start_init_utc": options.start_init_utc.isoformat(),
-                "end_init_utc": options.end_init_utc.isoformat(),
-            },
-            "total_cycles": len(all_cycles),
-            "queued_cycles": 0,
-            "pre_skipped_success_cycles": len(all_cycles),
-            "success_cycles": 0,
-            "failed_cycles": 0,
-            "skipped_existing_cycles": 0,
-            "timing_summary": _timing_summary(cycle_results),
+            "state": "skipped_locked",
+            "lock_path": str(lock_path),
+            "locked_by": lock_meta,
+            "started_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         }
-        _write_json_atomic(benchmark_path, summary)
+
+    stale_tmp_deleted: List[str] = []
+    deleted_failed_dirs: List[str] = []
+
+    try:
+        stale_tmp_deleted = _cleanup_stale_temp_dirs(
+            history_paths["cycles"],
+            older_than_hours=float(options.cleanup_stale_tmp_hours),
+        )
+
+        all_cycles = iter_cycle_times(options.start_init_utc, options.end_init_utc)
+        existing_success = _existing_successful_tags(history_paths["cycles"]) if not options.force else set()
+        if options.retry_failed_only:
+            failed_tags = _failed_cycle_tags(history_paths["cycles"])
+            queued = [
+                cycle
+                for cycle in all_cycles
+                if cycle_tag(cycle) in failed_tags
+                and (options.force or cycle_tag(cycle) not in existing_success)
+            ]
+        else:
+            queued = [cycle for cycle in all_cycles if cycle_tag(cycle) not in existing_success]
+        queued = sorted(queued)
+
+        started_utc = dt.datetime.now(dt.timezone.utc)
+        started_perf = time.perf_counter()
         _write_json_atomic(
             status_path,
             _progress_payload(
                 run_id=run_id,
                 run_label=options.run_label,
-                state="completed",
+                state="running",
                 started_utc=started_utc,
-                updated_utc=completed_utc,
+                updated_utc=started_utc,
                 start_init_utc=options.start_init_utc,
                 end_init_utc=options.end_init_utc,
                 total_cycles=len(all_cycles),
-                queued_cycles=0,
-                pre_skipped_success=len(all_cycles),
+                queued_cycles=len(queued),
+                pre_skipped_success=len(all_cycles) - len(queued),
                 success_count=0,
                 failed_count=0,
                 skipped_existing_count=0,
@@ -446,106 +543,95 @@ def run_backfill(options: BackfillOptions) -> Dict[str, Any]:
                 cycle_max_workers=options.cycle_max_workers,
             ),
         )
-        return summary
 
-    worker_inputs = [
-        WorkerInput(
-            repo_root=str(options.repo_root),
-            gefs_config=str(options.gefs_config),
-            points_config=str(options.points_config),
-            point_id=options.point_id,
-            init_time_utc=cycle.isoformat(),
-            runs_root=str(history_paths["cycles"]),
-            web_out_dir=str(history_paths["root"] / "web_unused"),
-            cycle_max_workers=max(1, int(options.cycle_max_workers)),
-            retries=options.retries,
-            retry_backoff_sec=options.retry_backoff_sec,
-            force=bool(options.force),
-            run_profile=str(options.run_profile),
-        )
-        for cycle in queued
-    ]
+        cycle_results: List[CycleResult] = []
+        success_count = 0
+        failed_count = 0
+        skipped_existing_count = 0
 
-    try:
-        with concurrent.futures.ProcessPoolExecutor(max_workers=max(1, int(options.workers))) as pool:
-            future_map = {
-                pool.submit(_run_cycle_worker, worker): worker.init_time_utc for worker in worker_inputs
+        if not queued:
+            completed_utc = dt.datetime.now(dt.timezone.utc)
+            summary = {
+                "run_id": run_id,
+                "run_profile": options.run_profile,
+                "run_mode": "retry_failed_only" if options.retry_failed_only else "window_backfill",
+                "state": "completed",
+                "started_utc": started_utc.isoformat(),
+                "completed_utc": completed_utc.isoformat(),
+                "window": {
+                    "start_init_utc": options.start_init_utc.isoformat(),
+                    "end_init_utc": options.end_init_utc.isoformat(),
+                },
+                "total_cycles": len(all_cycles),
+                "queued_cycles": 0,
+                "pre_skipped_success_cycles": len(all_cycles),
+                "success_cycles": 0,
+                "failed_cycles": 0,
+                "skipped_existing_cycles": 0,
+                "timing_summary": _timing_summary(cycle_results),
+                "stale_tmp_deleted": stale_tmp_deleted,
+                "deleted_failed_dirs": deleted_failed_dirs,
             }
-            pending = set(future_map.keys())
-            heartbeat_sec = 30.0
+            _write_json_atomic(benchmark_path, summary)
+            _write_json_atomic(
+                status_path,
+                _progress_payload(
+                    run_id=run_id,
+                    run_label=options.run_label,
+                    state="completed",
+                    started_utc=started_utc,
+                    updated_utc=completed_utc,
+                    start_init_utc=options.start_init_utc,
+                    end_init_utc=options.end_init_utc,
+                    total_cycles=len(all_cycles),
+                    queued_cycles=0,
+                    pre_skipped_success=len(all_cycles),
+                    success_count=0,
+                    failed_count=0,
+                    skipped_existing_count=0,
+                    completed_count=0,
+                    wall_seconds=0.0,
+                    history_paths=history_paths,
+                    failure_log_path=failures_path,
+                    workers=options.workers,
+                    cycle_max_workers=options.cycle_max_workers,
+                ),
+            )
+            return summary
 
-            while pending:
-                done, pending = concurrent.futures.wait(
-                    pending,
-                    timeout=heartbeat_sec,
-                    return_when=concurrent.futures.FIRST_COMPLETED,
-                )
-                if not done:
-                    updated_utc = dt.datetime.now(dt.timezone.utc)
-                    _write_json_atomic(
-                        status_path,
-                        _progress_payload(
-                            run_id=run_id,
-                            run_label=options.run_label,
-                            state="running",
-                            started_utc=started_utc,
-                            updated_utc=updated_utc,
-                            start_init_utc=options.start_init_utc,
-                            end_init_utc=options.end_init_utc,
-                            total_cycles=len(all_cycles),
-                            queued_cycles=len(queued),
-                            pre_skipped_success=len(all_cycles) - len(queued),
-                            success_count=success_count,
-                            failed_count=failed_count,
-                            skipped_existing_count=skipped_existing_count,
-                            completed_count=len(cycle_results),
-                            wall_seconds=time.perf_counter() - started_perf,
-                            history_paths=history_paths,
-                            failure_log_path=failures_path,
-                            workers=options.workers,
-                            cycle_max_workers=options.cycle_max_workers,
-                        ),
+        worker_inputs = [
+            WorkerInput(
+                repo_root=str(options.repo_root),
+                gefs_config=str(options.gefs_config),
+                points_config=str(options.points_config),
+                point_id=options.point_id,
+                init_time_utc=cycle.isoformat(),
+                runs_root=str(history_paths["cycles"]),
+                web_out_dir=str(history_paths["root"] / "web_unused"),
+                cycle_max_workers=max(1, int(options.cycle_max_workers)),
+                retries=options.retries,
+                retry_backoff_sec=options.retry_backoff_sec,
+                force=bool(options.force),
+                run_profile=str(options.run_profile),
+            )
+            for cycle in queued
+        ]
+
+        try:
+            with concurrent.futures.ProcessPoolExecutor(max_workers=max(1, int(options.workers))) as pool:
+                future_map = {
+                    pool.submit(_run_cycle_worker, worker): worker.init_time_utc for worker in worker_inputs
+                }
+                pending = set(future_map.keys())
+                heartbeat_sec = 30.0
+
+                while pending:
+                    done, pending = concurrent.futures.wait(
+                        pending,
+                        timeout=heartbeat_sec,
+                        return_when=concurrent.futures.FIRST_COMPLETED,
                     )
-                    continue
-
-                for future in done:
-                    try:
-                        result = future.result()
-                    except Exception as exc:  # pragma: no cover
-                        init_time_utc = future_map[future]
-                        result = CycleResult(
-                            init_time_utc=init_time_utc,
-                            run_tag=cycle_tag(to_utc(dt.datetime.fromisoformat(init_time_utc))),
-                            status="failed",
-                            elapsed_sec=0.0,
-                            run_dir="",
-                            manifest_path="",
-                            bytes_downloaded=0,
-                            timing_seconds={},
-                            error=str(exc),
-                            traceback=traceback.format_exc(),
-                        )
-
-                    cycle_results.append(result)
-                    if result.status == "success":
-                        success_count += 1
-                    elif result.status == "skipped_existing":
-                        skipped_existing_count += 1
-                    else:
-                        failed_count += 1
-                        _append_jsonl(
-                            failures_path,
-                            {
-                                "run_id": run_id,
-                                "init_time_utc": result.init_time_utc,
-                                "run_tag": result.run_tag,
-                                "error": result.error,
-                                "traceback": result.traceback,
-                            },
-                        )
-
-                    index = len(cycle_results)
-                    if index % max(1, options.progress_every) == 0 or index == len(worker_inputs):
+                    if not done:
                         updated_utc = dt.datetime.now(dt.timezone.utc)
                         _write_json_atomic(
                             status_path,
@@ -563,7 +649,7 @@ def run_backfill(options: BackfillOptions) -> Dict[str, Any]:
                                 success_count=success_count,
                                 failed_count=failed_count,
                                 skipped_existing_count=skipped_existing_count,
-                                completed_count=index,
+                                completed_count=len(cycle_results),
                                 wall_seconds=time.perf_counter() - started_perf,
                                 history_paths=history_paths,
                                 failure_log_path=failures_path,
@@ -571,16 +657,165 @@ def run_backfill(options: BackfillOptions) -> Dict[str, Any]:
                                 cycle_max_workers=options.cycle_max_workers,
                             ),
                         )
-    except KeyboardInterrupt:  # pragma: no cover
-        updated_utc = dt.datetime.now(dt.timezone.utc)
+                        continue
+
+                    for future in done:
+                        try:
+                            result = future.result()
+                        except Exception as exc:  # pragma: no cover
+                            init_time_utc = future_map[future]
+                            result = CycleResult(
+                                init_time_utc=init_time_utc,
+                                run_tag=cycle_tag(to_utc(dt.datetime.fromisoformat(init_time_utc))),
+                                status="failed",
+                                elapsed_sec=0.0,
+                                run_dir="",
+                                manifest_path="",
+                                bytes_downloaded=0,
+                                timing_seconds={},
+                                error=str(exc),
+                                traceback=traceback.format_exc(),
+                            )
+
+                        cycle_results.append(result)
+                        if result.status == "success":
+                            success_count += 1
+                        elif result.status == "skipped_existing":
+                            skipped_existing_count += 1
+                        else:
+                            failed_count += 1
+                            _append_jsonl(
+                                failures_path,
+                                {
+                                    "run_id": run_id,
+                                    "init_time_utc": result.init_time_utc,
+                                    "run_tag": result.run_tag,
+                                    "error": result.error,
+                                    "traceback": result.traceback,
+                                },
+                            )
+
+                        index = len(cycle_results)
+                        if index % max(1, options.progress_every) == 0 or index == len(worker_inputs):
+                            updated_utc = dt.datetime.now(dt.timezone.utc)
+                            _write_json_atomic(
+                                status_path,
+                                _progress_payload(
+                                    run_id=run_id,
+                                    run_label=options.run_label,
+                                    state="running",
+                                    started_utc=started_utc,
+                                    updated_utc=updated_utc,
+                                    start_init_utc=options.start_init_utc,
+                                    end_init_utc=options.end_init_utc,
+                                    total_cycles=len(all_cycles),
+                                    queued_cycles=len(queued),
+                                    pre_skipped_success=len(all_cycles) - len(queued),
+                                    success_count=success_count,
+                                    failed_count=failed_count,
+                                    skipped_existing_count=skipped_existing_count,
+                                    completed_count=index,
+                                    wall_seconds=time.perf_counter() - started_perf,
+                                    history_paths=history_paths,
+                                    failure_log_path=failures_path,
+                                    workers=options.workers,
+                                    cycle_max_workers=options.cycle_max_workers,
+                                ),
+                            )
+        except KeyboardInterrupt:  # pragma: no cover
+            updated_utc = dt.datetime.now(dt.timezone.utc)
+            _write_json_atomic(
+                status_path,
+                _progress_payload(
+                    run_id=run_id,
+                    run_label=options.run_label,
+                    state="aborted",
+                    started_utc=started_utc,
+                    updated_utc=updated_utc,
+                    start_init_utc=options.start_init_utc,
+                    end_init_utc=options.end_init_utc,
+                    total_cycles=len(all_cycles),
+                    queued_cycles=len(queued),
+                    pre_skipped_success=len(all_cycles) - len(queued),
+                    success_count=success_count,
+                    failed_count=failed_count,
+                    skipped_existing_count=skipped_existing_count,
+                    completed_count=len(cycle_results),
+                    wall_seconds=time.perf_counter() - started_perf,
+                    history_paths=history_paths,
+                    failure_log_path=failures_path,
+                    workers=options.workers,
+                    cycle_max_workers=options.cycle_max_workers,
+                ),
+            )
+            raise
+
+        if options.keep_failed_dirs >= 0:
+            deleted_failed_dirs = prune_failed_runs(
+                history_paths["cycles"],
+                keep_failed_runs=int(options.keep_failed_dirs),
+            )
+
+        completed_utc = dt.datetime.now(dt.timezone.utc)
+        wall_seconds = time.perf_counter() - started_perf
+        cycles_per_hour = float((len(cycle_results) / wall_seconds) * 3600.0) if wall_seconds > 0 else 0.0
+
+        pilot_timing = _timing_summary(cycle_results)
+        full_cycle_count = count_cycles_inclusive(GEFS_EARLIEST_INIT_UTC, options.end_init_utc)
+        estimated_full_hours = float(full_cycle_count / cycles_per_hour) if cycles_per_hour > 0 else 0.0
+
+        summary = {
+            "run_id": run_id,
+            "run_label": options.run_label,
+            "run_profile": options.run_profile,
+            "run_mode": "retry_failed_only" if options.retry_failed_only else "window_backfill",
+            "state": "completed",
+            "started_utc": started_utc.isoformat(),
+            "completed_utc": completed_utc.isoformat(),
+            "window": {
+                "start_init_utc": options.start_init_utc.isoformat(),
+                "end_init_utc": options.end_init_utc.isoformat(),
+            },
+            "workers_processes": int(options.workers),
+            "workers_threads_per_cycle": int(options.cycle_max_workers),
+            "total_cycles": int(len(all_cycles)),
+            "queued_cycles": int(len(queued)),
+            "pre_skipped_success_cycles": int(len(all_cycles) - len(queued)),
+            "success_cycles": int(success_count),
+            "failed_cycles": int(failed_count),
+            "skipped_existing_cycles": int(skipped_existing_count),
+            "wall_seconds": float(wall_seconds),
+            "throughput_cycles_per_hour": cycles_per_hour,
+            "timing_summary": pilot_timing,
+            "bytes_downloaded_total": int(sum(result.bytes_downloaded for result in cycle_results)),
+            "stale_tmp_deleted": stale_tmp_deleted,
+            "deleted_failed_dirs": deleted_failed_dirs,
+            "estimated_full_backfill": {
+                "start_init_utc": GEFS_EARLIEST_INIT_UTC.isoformat(),
+                "end_init_utc": options.end_init_utc.isoformat(),
+                "cycle_count": int(full_cycle_count),
+                "estimated_hours_at_measured_rate": estimated_full_hours,
+            },
+            "paths": {
+                "history_root": str(history_paths["root"]),
+                "cycles_root": str(history_paths["cycles"]),
+                "state_root": str(history_paths["state"]),
+                "logs_root": str(history_paths["logs"]),
+                "status_path": str(status_path),
+                "benchmark_path": str(benchmark_path),
+                "failure_log_path": str(failures_path),
+                "lock_path": str(lock_path),
+            },
+        }
+        _write_json_atomic(benchmark_path, summary)
         _write_json_atomic(
             status_path,
             _progress_payload(
                 run_id=run_id,
                 run_label=options.run_label,
-                state="aborted",
+                state="completed",
                 started_utc=started_utc,
-                updated_utc=updated_utc,
+                updated_utc=completed_utc,
                 start_init_utc=options.start_init_utc,
                 end_init_utc=options.end_init_utc,
                 total_cycles=len(all_cycles),
@@ -590,85 +825,13 @@ def run_backfill(options: BackfillOptions) -> Dict[str, Any]:
                 failed_count=failed_count,
                 skipped_existing_count=skipped_existing_count,
                 completed_count=len(cycle_results),
-                wall_seconds=time.perf_counter() - started_perf,
+                wall_seconds=wall_seconds,
                 history_paths=history_paths,
                 failure_log_path=failures_path,
                 workers=options.workers,
                 cycle_max_workers=options.cycle_max_workers,
             ),
         )
-        raise
-
-    completed_utc = dt.datetime.now(dt.timezone.utc)
-    wall_seconds = time.perf_counter() - started_perf
-    cycles_per_hour = float((len(cycle_results) / wall_seconds) * 3600.0) if wall_seconds > 0 else 0.0
-
-    pilot_timing = _timing_summary(cycle_results)
-    full_cycle_count = count_cycles_inclusive(GEFS_EARLIEST_INIT_UTC, options.end_init_utc)
-    estimated_full_hours = float(full_cycle_count / cycles_per_hour) if cycles_per_hour > 0 else 0.0
-
-    summary = {
-        "run_id": run_id,
-        "run_label": options.run_label,
-        "run_profile": options.run_profile,
-        "state": "completed",
-        "started_utc": started_utc.isoformat(),
-        "completed_utc": completed_utc.isoformat(),
-        "window": {
-            "start_init_utc": options.start_init_utc.isoformat(),
-            "end_init_utc": options.end_init_utc.isoformat(),
-        },
-        "workers_processes": int(options.workers),
-        "workers_threads_per_cycle": int(options.cycle_max_workers),
-        "total_cycles": int(len(all_cycles)),
-        "queued_cycles": int(len(queued)),
-        "pre_skipped_success_cycles": int(len(all_cycles) - len(queued)),
-        "success_cycles": int(success_count),
-        "failed_cycles": int(failed_count),
-        "skipped_existing_cycles": int(skipped_existing_count),
-        "wall_seconds": float(wall_seconds),
-        "throughput_cycles_per_hour": cycles_per_hour,
-        "timing_summary": pilot_timing,
-        "bytes_downloaded_total": int(sum(result.bytes_downloaded for result in cycle_results)),
-        "estimated_full_backfill": {
-            "start_init_utc": GEFS_EARLIEST_INIT_UTC.isoformat(),
-            "end_init_utc": options.end_init_utc.isoformat(),
-            "cycle_count": int(full_cycle_count),
-            "estimated_hours_at_measured_rate": estimated_full_hours,
-        },
-        "paths": {
-            "history_root": str(history_paths["root"]),
-            "cycles_root": str(history_paths["cycles"]),
-            "state_root": str(history_paths["state"]),
-            "logs_root": str(history_paths["logs"]),
-            "status_path": str(status_path),
-            "benchmark_path": str(benchmark_path),
-            "failure_log_path": str(failures_path),
-        },
-    }
-    _write_json_atomic(benchmark_path, summary)
-    _write_json_atomic(
-        status_path,
-        _progress_payload(
-            run_id=run_id,
-            run_label=options.run_label,
-            state="completed",
-            started_utc=started_utc,
-            updated_utc=completed_utc,
-            start_init_utc=options.start_init_utc,
-            end_init_utc=options.end_init_utc,
-            total_cycles=len(all_cycles),
-            queued_cycles=len(queued),
-            pre_skipped_success=len(all_cycles) - len(queued),
-            success_count=success_count,
-            failed_count=failed_count,
-            skipped_existing_count=skipped_existing_count,
-            completed_count=len(cycle_results),
-            wall_seconds=wall_seconds,
-            history_paths=history_paths,
-            failure_log_path=failures_path,
-            workers=options.workers,
-            cycle_max_workers=options.cycle_max_workers,
-        ),
-    )
-    return summary
+        return summary
+    finally:
+        _release_lock(lock_handle)

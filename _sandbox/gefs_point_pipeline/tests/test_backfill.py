@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import datetime as dt
+import os
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -13,6 +15,8 @@ if str(ROOT) not in sys.path:
 
 from src.backfill import (  # noqa: E402
     GEFS_EARLIEST_INIT_UTC,
+    _cleanup_stale_temp_dirs,
+    _failed_cycle_tags,
     count_cycles_inclusive,
     iter_cycle_times,
     pilot_start_for_days,
@@ -58,3 +62,34 @@ def test_resolve_window_rejects_pilot_plus_explicit() -> None:
             end_init_utc=None,
             pilot_days=7,
         )
+
+
+def test_failed_cycle_tags_extracts_unique_tags(tmp_path: Path) -> None:
+    cycles = tmp_path / "cycles"
+    cycles.mkdir(parents=True, exist_ok=True)
+    (cycles / ".failed_20260223_06_aaa111").mkdir()
+    (cycles / ".failed_20260223_06_bbb222").mkdir()
+    (cycles / ".failed_20260223_12_ccc333").mkdir()
+    (cycles / "20260223_18").mkdir()
+    tags = _failed_cycle_tags(cycles)
+    assert tags == {"20260223_06", "20260223_12"}
+
+
+def test_cleanup_stale_temp_dirs_removes_old_only(tmp_path: Path) -> None:
+    cycles = tmp_path / "cycles"
+    cycles.mkdir(parents=True, exist_ok=True)
+    old_tmp = cycles / ".tmp_20260223_06_deadbeef"
+    new_tmp = cycles / ".tmp_20260224_00_feedface"
+    old_tmp.mkdir()
+    new_tmp.mkdir()
+    (old_tmp / "old.bin").write_text("x", encoding="utf-8")
+    (new_tmp / "new.bin").write_text("x", encoding="utf-8")
+
+    now = time.time()
+    os.utime(old_tmp, (now - 3 * 3600, now - 3 * 3600))
+    os.utime(new_tmp, (now, now))
+
+    deleted = _cleanup_stale_temp_dirs(cycles, older_than_hours=1)
+    assert old_tmp.name in deleted
+    assert not old_tmp.exists()
+    assert new_tmp.exists()

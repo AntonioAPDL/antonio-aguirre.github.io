@@ -93,17 +93,48 @@ python run_backfill.py \
   --cycle-max-workers 2
 ```
 
+Retry only failed cycles in a window:
+
+```bash
+python run_backfill.py \
+  --start-init 2017-01-01T00:00:00Z \
+  --retry-failed-only
+```
+
 Artifacts are written under `data/_sandbox_gefs/history/`:
 
 - `cycles/<YYYYMMDD_HH>/` per-cycle compact parquet + manifest
 - `state/backfill_status.json` live progress snapshot
 - `state/<run_id>_benchmark.json` benchmark/timing summary
 - `logs/<run_id>_failures.jsonl` structured failures for retry/debug
+- `state/backfill.lock` concurrency lock metadata
 
 Backfill runs are resumable:
 
 - existing successful cycle directories are skipped by default
 - use `--force` to re-run all cycles in the target window
+- `--retry-failed-only` reprocesses only `.failed_*` cycles
+- stale `.tmp_*` dirs are cleaned before each run (default `--cleanup-stale-tmp-hours 6`)
+- lock protection prevents overlapping runs (`--wait-for-lock` optional)
+
+## Daemon Mode (No Live Monitoring Needed)
+
+Use `run_backfill_daemon.py` to keep the history continuously updated in the background:
+
+```bash
+python run_backfill_daemon.py \
+  --full-start-init 2017-01-01T00:00:00Z \
+  --incremental-pilot-days 3 \
+  --sleep-seconds 21600 \
+  --workers 2 \
+  --cycle-max-workers 4
+```
+
+Daemon state artifacts:
+
+- `data/_sandbox_gefs/history/state/daemon_status.json`
+- `data/_sandbox_gefs/history/state/daemon_runs.jsonl`
+- `data/_sandbox_gefs/history/state/backfill_status.json`
 
 Retention controls (in `config/gefs.yaml`):
 

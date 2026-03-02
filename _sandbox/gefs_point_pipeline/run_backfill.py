@@ -111,6 +111,28 @@ def parse_args() -> argparse.Namespace:
         choices=["full", "smoke"],
         help="Cycle extraction profile. Use smoke for faster benchmarking.",
     )
+    parser.add_argument(
+        "--retry-failed-only",
+        action="store_true",
+        help="Only process cycles that currently have .failed_* history entries.",
+    )
+    parser.add_argument(
+        "--cleanup-stale-tmp-hours",
+        type=float,
+        default=6.0,
+        help="Delete stale .tmp_* cycle dirs older than this many hours before each run.",
+    )
+    parser.add_argument(
+        "--keep-failed-dirs",
+        type=int,
+        default=200,
+        help="Retain this many .failed_* cycle dirs (global) after each run.",
+    )
+    parser.add_argument(
+        "--wait-for-lock",
+        action="store_true",
+        help="Wait for lock if another backfill run is active. Default is skip-locked.",
+    )
     parser.add_argument("--force", action="store_true", help="Re-run cycles even if already successful.")
     parser.add_argument(
         "--run-label",
@@ -164,6 +186,10 @@ def main() -> int:
         progress_every=max(1, int(args.progress_every)),
         run_label=str(args.run_label),
         run_profile=str(args.run_profile),
+        retry_failed_only=bool(args.retry_failed_only),
+        cleanup_stale_tmp_hours=float(args.cleanup_stale_tmp_hours),
+        keep_failed_dirs=int(args.keep_failed_dirs),
+        wait_for_lock=bool(args.wait_for_lock),
     )
     summary = run_backfill(options)
     print(json.dumps(summary, indent=2))
