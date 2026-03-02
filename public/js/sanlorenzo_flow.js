@@ -480,7 +480,7 @@
       name: 'Observed',
       showlegend: true,
       legendrank: 10,
-      line: { color: colors.line, width: 2.6 },
+      line: { color: colors.line, width: 1.8 },
       marker: {
         color: colors.line,
         size: 2.8,
