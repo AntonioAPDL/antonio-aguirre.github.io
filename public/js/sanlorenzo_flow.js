@@ -483,7 +483,7 @@
       line: { color: colors.line, width: 2.6 },
       marker: {
         color: colors.line,
-        size: 4,
+        size: 2.8,
         symbol: 'circle',
         line: { width: 0 }
       },
