@@ -21,6 +21,12 @@
   const STORAGE_VERSION = 3;
   const CFS_TO_CMS = 0.0283168466;
   const CMS_TO_CFS = 1 / CFS_TO_CMS;
+  const FORECAST_START_MARKER_STYLE = {
+    color: '#111827',
+    width: 1.4,
+    dash: 'dash',
+    label: 'Forecast start'
+  };
 
   const instances = [];
 
@@ -191,9 +197,9 @@
           y0: 0,
           y1: 1,
           line: {
-            color: (colors && colors.grid) || '#94a3b8',
-            width: 1.3,
-            dash: 'dash'
+            color: FORECAST_START_MARKER_STYLE.color,
+            width: FORECAST_START_MARKER_STYLE.width,
+            dash: FORECAST_START_MARKER_STYLE.dash
           }
         }
       ],
@@ -205,11 +211,11 @@
           y: 1,
           xanchor: 'left',
           yanchor: 'bottom',
-          text: 'Forecast start',
+          text: FORECAST_START_MARKER_STYLE.label,
           showarrow: false,
           font: {
             size: 11,
-            color: (colors && colors.text) || '#1f2933'
+            color: FORECAST_START_MARKER_STYLE.color
           },
           bgcolor: 'rgba(255, 255, 255, 0.6)',
           bordercolor: 'rgba(255, 255, 255, 0.0)',

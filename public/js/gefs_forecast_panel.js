@@ -3,6 +3,12 @@
 
   if (window.__gefsForecastPanelInitialized) return;
   window.__gefsForecastPanelInitialized = true;
+  const FORECAST_START_MARKER_STYLE = {
+    color: '#111827',
+    width: 1.4,
+    dash: 'dash',
+    label: 'Forecast start'
+  };
 
   function parseDate(value) {
     if (!value) return null;
@@ -337,6 +343,44 @@
     };
   }
 
+  function buildForecastStartMarker(initTime) {
+    if (!initTime) return { shapes: [], annotations: [] };
+    return {
+      shapes: [
+        {
+          type: 'line',
+          xref: 'x',
+          yref: 'paper',
+          x0: initTime,
+          x1: initTime,
+          y0: 0,
+          y1: 1,
+          line: {
+            color: FORECAST_START_MARKER_STYLE.color,
+            width: FORECAST_START_MARKER_STYLE.width,
+            dash: FORECAST_START_MARKER_STYLE.dash
+          }
+        }
+      ],
+      annotations: [
+        {
+          xref: 'x',
+          x: initTime,
+          yref: 'paper',
+          y: 1,
+          text: FORECAST_START_MARKER_STYLE.label,
+          showarrow: false,
+          font: { size: 11, color: FORECAST_START_MARKER_STYLE.color },
+          xanchor: 'left',
+          yanchor: 'bottom',
+          bgcolor: 'rgba(255, 255, 255, 0.6)',
+          bordercolor: 'rgba(255, 255, 255, 0.0)',
+          borderpad: 2
+        }
+      ]
+    };
+  }
+
   function layout(yTitle, colors, options) {
     const opts = options || {};
     const chartLayout = {
@@ -391,31 +435,9 @@
       chartLayout.yaxis.tickformat = opts.yTickFormat;
     }
     if (opts.initTime) {
-      chartLayout.shapes = [
-        {
-          type: 'line',
-          xref: 'x',
-          yref: 'paper',
-          x0: opts.initTime,
-          x1: opts.initTime,
-          y0: 0,
-          y1: 1,
-          line: { color: colors.muted, width: 1, dash: 'dot' }
-        }
-      ];
-      chartLayout.annotations = [
-        {
-          xref: 'x',
-          x: opts.initTime,
-          yref: 'paper',
-          y: 1.035,
-          text: 'Forecast start',
-          showarrow: false,
-          font: { size: 11, color: colors.muted },
-          xanchor: 'left',
-          yanchor: 'bottom'
-        }
-      ];
+      const marker = buildForecastStartMarker(opts.initTime);
+      chartLayout.shapes = marker.shapes;
+      chartLayout.annotations = marker.annotations;
     }
 
     return chartLayout;
