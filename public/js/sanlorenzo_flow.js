@@ -19,6 +19,8 @@
   const MAX_BACKOFF_MS = 60 * 60 * 1000;
   const MIN_CACHE_AGE_MS = 30 * 60 * 1000;
   const STORAGE_VERSION = 3;
+  const CFS_TO_CMS = 0.0283168466;
+  const CMS_TO_CFS = 1 / CFS_TO_CMS;
 
   const instances = [];
 
@@ -66,14 +68,214 @@
 
   function normalizeUnits(unitCode) {
     if (!unitCode) return unitCode;
-    const normalized = unitCode.toLowerCase();
+    const normalized = String(unitCode).trim().toLowerCase();
     if (normalized === 'ft3/s' || normalized === 'ft^3/s' || normalized === 'ft3s-1') {
       return 'cfs';
+    }
+    if (normalized === 'm3/s' || normalized === 'm^3/s' || normalized === 'm3 s-1' ||
+        normalized === 'm^3 s-1' || normalized === 'cms') {
+      return 'cms';
     }
     if (normalized === 'ft') {
       return 'ft';
     }
     return unitCode;
+  }
+
+  function normalizeUnitCandidates(rawUnits) {
+    const out = [];
+    const pushIfValid = (candidate) => {
+      const norm = normalizeUnits(candidate);
+      if (norm === 'cfs' || norm === 'cms') {
+        out.push(norm);
+      }
+    };
+
+    if (Array.isArray(rawUnits)) {
+      rawUnits.forEach((item) => pushIfValid(item));
+    } else {
+      pushIfValid(rawUnits);
+    }
+    return Array.from(new Set(out));
+  }
+
+  function convertFlowUnits(value, fromUnits, toUnits) {
+    if (!Number.isFinite(value)) return NaN;
+    const from = normalizeUnits(fromUnits);
+    const to = normalizeUnits(toUnits);
+    if (!from || !to) return NaN;
+    if (from === to) return value;
+    if (from === 'cfs' && to === 'cms') return value * CFS_TO_CMS;
+    if (from === 'cms' && to === 'cfs') return value * CMS_TO_CFS;
+    return NaN;
+  }
+
+  function parseFlowSeries(series, fromUnits, toUnits, logAxis) {
+    if (!Array.isArray(series) || !series.length) return [];
+    const out = [];
+    series.forEach((row) => {
+      if (!row || typeof row !== 'object') return;
+      const timestamp = new Date(row.t);
+      if (Number.isNaN(timestamp.getTime())) return;
+      const rawValue = Number(row.v);
+      if (!Number.isFinite(rawValue)) return;
+      const converted = convertFlowUnits(rawValue, fromUnits, toUnits);
+      if (!Number.isFinite(converted)) return;
+      if (logAxis && converted <= 0) return;
+      out.push({ x: timestamp, y: converted });
+    });
+    out.sort((a, b) => a.x - b.x);
+    return out;
+  }
+
+  function createBandTraces(p10Points, p90Points, p50Points, label, unitLabel, colorLine, colorBand, legendRank) {
+    const traces = [];
+    const p10Ready = Array.isArray(p10Points) && p10Points.length;
+    const p90Ready = Array.isArray(p90Points) && p90Points.length;
+    const p50Ready = Array.isArray(p50Points) && p50Points.length;
+
+    if (p10Ready && p90Ready) {
+      traces.push({
+        x: p90Points.map((p) => p.x),
+        y: p90Points.map((p) => p.y),
+        type: 'scatter',
+        mode: 'lines',
+        line: { width: 0, color: colorBand },
+        hoverinfo: 'skip',
+        showlegend: false,
+        legendgroup: label
+      });
+      traces.push({
+        x: p10Points.map((p) => p.x),
+        y: p10Points.map((p) => p.y),
+        type: 'scatter',
+        mode: 'lines',
+        line: { width: 0, color: colorBand },
+        fill: 'tonexty',
+        fillcolor: colorBand,
+        name: `${label} p10-p90`,
+        legendrank: legendRank,
+        legendgroup: label,
+        hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>${label} p10-p90: %{y:.2f} ${unitLabel}<extra></extra>`
+      });
+    }
+
+    if (p50Ready) {
+      traces.push({
+        x: p50Points.map((p) => p.x),
+        y: p50Points.map((p) => p.y),
+        type: 'scatter',
+        mode: 'lines',
+        name: `${label} p50`,
+        legendrank: legendRank + 1,
+        legendgroup: label,
+        line: { color: colorLine, width: 2.0 },
+        hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>${label} p50: %{y:.2f} ${unitLabel}<extra></extra>`
+      });
+    }
+    return traces;
+  }
+
+  function buildForecastOverlay(payload, observedUnits, logAxis) {
+    const traces = [];
+    const extentPoints = [];
+    const noteParts = [];
+    let warning = null;
+
+    if (!payload || typeof payload !== 'object') {
+      return { traces, extentPoints, note: null, warning: null };
+    }
+    const ranges = payload.ranges && typeof payload.ranges === 'object' ? payload.ranges : null;
+    if (!ranges) {
+      return { traces, extentPoints, note: null, warning: null };
+    }
+
+    const observedFlowUnits = normalizeUnits(observedUnits);
+    if (observedFlowUnits !== 'cfs' && observedFlowUnits !== 'cms') {
+      return {
+        traces,
+        extentPoints,
+        note: null,
+        warning: 'Forecast overlay skipped: unsupported observed discharge units.'
+      };
+    }
+
+    const forecastUnitCandidates = normalizeUnitCandidates(payload.units);
+    let forecastUnits = null;
+    if (forecastUnitCandidates.includes(observedFlowUnits)) {
+      forecastUnits = observedFlowUnits;
+    } else if (forecastUnitCandidates.length) {
+      forecastUnits = forecastUnitCandidates[0];
+      if (forecastUnits !== observedFlowUnits) {
+        noteParts.push(`Forecast converted from ${forecastUnits} to ${observedFlowUnits}`);
+      }
+    } else {
+      warning = 'Forecast overlay skipped: forecast units missing or unsupported.';
+      return { traces, extentPoints, note: null, warning };
+    }
+
+    const medium = ranges.medium_range && typeof ranges.medium_range === 'object' ? ranges.medium_range : {};
+    const longRange = ranges.long_range && typeof ranges.long_range === 'object' ? ranges.long_range : {};
+    const shortRange = ranges.short && typeof ranges.short === 'object' ? ranges.short : {};
+
+    const mediumP10 = parseFlowSeries(medium.p10, forecastUnits, observedFlowUnits, logAxis);
+    const mediumP50 = parseFlowSeries(medium.p50, forecastUnits, observedFlowUnits, logAxis);
+    const mediumP90 = parseFlowSeries(medium.p90, forecastUnits, observedFlowUnits, logAxis);
+    const longP10 = parseFlowSeries(longRange.p10, forecastUnits, observedFlowUnits, logAxis);
+    const longP50 = parseFlowSeries(longRange.p50, forecastUnits, observedFlowUnits, logAxis);
+    const longP90 = parseFlowSeries(longRange.p90, forecastUnits, observedFlowUnits, logAxis);
+    const shortDeterministic = parseFlowSeries(shortRange.deterministic, forecastUnits, observedFlowUnits, logAxis);
+
+    traces.push(
+      ...createBandTraces(
+        mediumP10,
+        mediumP90,
+        mediumP50,
+        'NWS medium',
+        observedFlowUnits,
+        '#5844c6',
+        'rgba(88, 68, 198, 0.18)',
+        20
+      ),
+      ...createBandTraces(
+        longP10,
+        longP90,
+        longP50,
+        'NWS long',
+        observedFlowUnits,
+        '#6f2d91',
+        'rgba(111, 45, 145, 0.16)',
+        30
+      )
+    );
+
+    if (shortDeterministic.length) {
+      traces.push({
+        x: shortDeterministic.map((p) => p.x),
+        y: shortDeterministic.map((p) => p.y),
+        type: 'scatter',
+        mode: 'lines',
+        name: 'NWS short deterministic',
+        legendrank: 19,
+        legendgroup: 'NWS short',
+        line: { color: '#2f2a67', width: 1.6, dash: 'dash' },
+        hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>NWS short: %{y:.2f} ${observedFlowUnits}<extra></extra>`
+      });
+    }
+
+    [mediumP10, mediumP50, mediumP90, longP10, longP50, longP90, shortDeterministic].forEach((series) => {
+      series.forEach((point) => extentPoints.push(point));
+    });
+
+    if (traces.length) {
+      noteParts.unshift('NWS ensemble overlay active');
+    }
+    return {
+      traces,
+      extentPoints,
+      note: noteParts.length ? noteParts.join(' • ') : null,
+      warning
+    };
   }
 
   function getThemeColors() {
@@ -406,6 +608,8 @@
       const floodMinor = parseOptionalNumber(dataset.floodMinorCfs || dataset.thresholdMinor);
       const floodModerate = parseOptionalNumber(dataset.floodModerateCfs || dataset.thresholdModerate);
       const floodMajor = parseOptionalNumber(dataset.floodMajorCfs || dataset.thresholdMajor);
+      const defaultForecastUrl = mode === 'discharge' ? '/assets/data/forecasts/big_trees_latest.json' : '';
+      const forecastUrlRaw = (dataset.forecastUrl || defaultForecastUrl || '').trim();
       return {
         siteId: dataset.site,
         parameterCd: parameterCd,
@@ -420,6 +624,7 @@
         thresholdMinor: floodMinor,
         thresholdModerate: floodModerate,
         thresholdMajor: floodMajor,
+        forecastUrl: forecastUrlRaw,
         logY: logY,
         observationWindowDays: observationWindowDays,
         futureHorizonHours: Number.isFinite(futureHorizonHoursRaw)
@@ -595,7 +800,7 @@
       return [start, end];
     }
 
-    renderPlot({ points, siteName, units, lastObs, lastRefresh }, options = {}) {
+    renderPlot({ points, siteName, units, lastObs, lastRefresh, forecastPayload }, options = {}) {
       if (!window.Plotly) {
         this.setStatus({ warning: 'Plotly failed to load.' });
         return;
@@ -603,6 +808,7 @@
 
       const colors = getThemeColors();
       const logAxis = this.config.logY;
+      const displayUnits = normalizeUnits(units);
       const usablePoints = logAxis
         ? points.filter((point) => Number.isFinite(point.y) && point.y > 0)
         : points.slice();
@@ -612,7 +818,12 @@
         return;
       }
 
-      const extent = getDataExtent(usablePoints, logAxis);
+      const forecastOverlay = (this.config.mode === 'discharge')
+        ? buildForecastOverlay(forecastPayload, displayUnits, logAxis)
+        : { traces: [], extentPoints: [], note: null, warning: null };
+
+      const extentCandidates = usablePoints.concat(forecastOverlay.extentPoints || []);
+      const extent = getDataExtent(extentCandidates, logAxis);
       let yMin = Number.isFinite(this.config.yMin) ? this.config.yMin : extent && extent.min;
       let yMax = Number.isFinite(this.config.yMax) ? this.config.yMax : extent && extent.max;
 
@@ -625,15 +836,16 @@
       }
 
       const yRange = Number.isFinite(yMin) && Number.isFinite(yMax) ? [yMin, yMax] : null;
-      const displayUnits = normalizeUnits(units);
       const yTitleBase = displayUnits ? `${this.config.yLabel} (${displayUnits})` : this.config.yLabel;
       const yTitle = logAxis ? `${yTitleBase} (log scale)` : yTitleBase;
       const threshold = buildThresholdShapes(this.config, colors, yRange);
       const xRange = this.resolveTimelineWindow(lastObs);
+      const baseTrace = buildTrace(usablePoints, displayUnits, colors);
+      const traces = [baseTrace].concat(forecastOverlay.traces || []);
 
       Plotly.react(
         this.chartEl,
-        [buildTrace(usablePoints, displayUnits, colors)],
+        traces,
         buildLayout(yTitle, colors, yRange, threshold.shapes, logAxis, threshold.annotations, xRange),
         { responsive: true, displayModeBar: false }
       );
@@ -649,13 +861,23 @@
         siteName,
         units: displayUnits,
         lastObs,
-        lastRefresh
+        lastRefresh,
+        forecastPayload
       };
 
       this.updateAriaLabel(siteName);
       this.setLoadedState(true);
       if (!options.silentStatus) {
-        this.setStatus({ siteName, units, lastObs, lastRefresh, note: options.note });
+        const notes = [options.note, forecastOverlay.note].filter(Boolean).join(' • ');
+        const warning = options.warning || forecastOverlay.warning || null;
+        this.setStatus({
+          siteName,
+          units: displayUnits,
+          lastObs,
+          lastRefresh,
+          note: notes || undefined,
+          warning: warning || undefined
+        });
       }
     }
 
@@ -832,6 +1054,36 @@
       }
     }
 
+    async fetchForecastPayload(signal) {
+      if (this.config.mode !== 'discharge' || !this.config.forecastUrl) {
+        return { payload: null, warning: null };
+      }
+
+      try {
+        const response = await fetch(this.config.forecastUrl, {
+          cache: 'no-store',
+          signal
+        });
+        if (!response.ok) {
+          return {
+            payload: null,
+            warning: `Forecast overlay unavailable (${response.status}).`
+          };
+        }
+        const payload = await response.json();
+        if (!payload || typeof payload !== 'object') {
+          return { payload: null, warning: 'Forecast overlay unavailable (invalid JSON payload).' };
+        }
+        return { payload, warning: null };
+      } catch (err) {
+        if (err && err.name === 'AbortError') {
+          throw err;
+        }
+        console.warn('[usgs-iv] forecast overlay fetch failed', err);
+        return { payload: null, warning: 'Forecast overlay unavailable (fetch failed).' };
+      }
+    }
+
     /**
      * Fetch USGS data and render the Plotly chart.
      */
@@ -840,11 +1092,10 @@
       this.inFlight = true;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.config.timeoutMs);
-      let response = null;
       this.abortController = controller;
 
       try {
-        response = await fetch(buildUrl(this.config), {
+        const response = await fetch(buildUrl(this.config), {
           cache: 'no-store',
           signal: controller.signal
         });
@@ -866,8 +1117,18 @@
         const units = series.variable && series.variable.unit && series.variable.unit.unitCode;
         const lastObs = points[points.length - 1].x;
         const lastRefresh = new Date();
+        const forecastResult = await this.fetchForecastPayload(controller.signal);
 
-        this.renderPlot({ points, siteName, units, lastObs, lastRefresh });
+        this.renderPlot({
+          points,
+          siteName,
+          units,
+          lastObs,
+          lastRefresh,
+          forecastPayload: forecastResult.payload
+        }, {
+          note: forecastResult.warning || undefined
+        });
         this.saveCache({ points, siteName, units });
         this.scheduleNext(true);
       } catch (err) {
