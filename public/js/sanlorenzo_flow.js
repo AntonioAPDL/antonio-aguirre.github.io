@@ -176,6 +176,49 @@
     return traces;
   }
 
+  function buildForecastStartMarker(forecastStart, colors) {
+    if (!(forecastStart instanceof Date) || Number.isNaN(forecastStart.getTime())) {
+      return { shapes: [], annotations: [] };
+    }
+    return {
+      shapes: [
+        {
+          type: 'line',
+          xref: 'x',
+          x0: forecastStart,
+          x1: forecastStart,
+          yref: 'paper',
+          y0: 0,
+          y1: 1,
+          line: {
+            color: (colors && colors.grid) || '#94a3b8',
+            width: 1.3,
+            dash: 'dash'
+          }
+        }
+      ],
+      annotations: [
+        {
+          xref: 'x',
+          x: forecastStart,
+          yref: 'paper',
+          y: 1,
+          xanchor: 'left',
+          yanchor: 'bottom',
+          text: 'Forecast start',
+          showarrow: false,
+          font: {
+            size: 11,
+            color: (colors && colors.text) || '#1f2933'
+          },
+          bgcolor: 'rgba(255, 255, 255, 0.6)',
+          bordercolor: 'rgba(255, 255, 255, 0.0)',
+          borderpad: 2
+        }
+      ]
+    };
+  }
+
   function buildForecastOverlay(payload, observedUnits, logAxis) {
     const traces = [];
     const extentPoints = [];
@@ -183,11 +226,11 @@
     let warning = null;
 
     if (!payload || typeof payload !== 'object') {
-      return { traces, extentPoints, note: null, warning: null };
+      return { traces, extentPoints, note: null, warning: null, forecastStart: null };
     }
     const ranges = payload.ranges && typeof payload.ranges === 'object' ? payload.ranges : null;
     if (!ranges) {
-      return { traces, extentPoints, note: null, warning: null };
+      return { traces, extentPoints, note: null, warning: null, forecastStart: null };
     }
 
     const observedFlowUnits = normalizeUnits(observedUnits);
@@ -196,7 +239,8 @@
         traces,
         extentPoints,
         note: null,
-        warning: 'Forecast overlay skipped: unsupported observed discharge units.'
+        warning: 'Forecast overlay skipped: unsupported observed discharge units.',
+        forecastStart: null
       };
     }
 
@@ -211,7 +255,7 @@
       }
     } else {
       warning = 'Forecast overlay skipped: forecast units missing or unsupported.';
-      return { traces, extentPoints, note: null, warning };
+      return { traces, extentPoints, note: null, warning, forecastStart: null };
     }
 
     const medium = ranges.medium_range && typeof ranges.medium_range === 'object' ? ranges.medium_range : {};
@@ -223,6 +267,16 @@
     const longP10 = parseFlowSeries(longRange.p10, forecastUnits, observedFlowUnits, logAxis);
     const longP50 = parseFlowSeries(longRange.p50, forecastUnits, observedFlowUnits, logAxis);
     const longP90 = parseFlowSeries(longRange.p90, forecastUnits, observedFlowUnits, logAxis);
+    const ensembleSeries = [mediumP10, mediumP50, mediumP90, longP10, longP50, longP90];
+    let forecastStart = null;
+    ensembleSeries.forEach((series) => {
+      if (!Array.isArray(series) || !series.length) return;
+      const first = series[0].x;
+      if (!(first instanceof Date) || Number.isNaN(first.getTime())) return;
+      if (!forecastStart || first < forecastStart) {
+        forecastStart = first;
+      }
+    });
 
     traces.push(
       ...createBandTraces(
@@ -258,7 +312,8 @@
       traces,
       extentPoints,
       note: noteParts.length ? noteParts.join(' • ') : null,
-      warning
+      warning,
+      forecastStart
     };
   }
 
@@ -823,14 +878,17 @@
       const yTitleBase = displayUnits ? `${this.config.yLabel} (${displayUnits})` : this.config.yLabel;
       const yTitle = logAxis ? `${yTitleBase} (log scale)` : yTitleBase;
       const threshold = buildThresholdShapes(this.config, colors, yRange);
+      const forecastStartMarker = buildForecastStartMarker(forecastOverlay.forecastStart, colors);
       const xRange = this.resolveTimelineWindow(lastObs);
       const baseTrace = buildTrace(usablePoints, displayUnits, colors);
       const traces = [baseTrace].concat(forecastOverlay.traces || []);
+      const allShapes = (threshold.shapes || []).concat(forecastStartMarker.shapes || []);
+      const allAnnotations = (threshold.annotations || []).concat(forecastStartMarker.annotations || []);
 
       Plotly.react(
         this.chartEl,
         traces,
-        buildLayout(yTitle, colors, yRange, threshold.shapes, logAxis, threshold.annotations, xRange),
+        buildLayout(yTitle, colors, yRange, allShapes, logAxis, allAnnotations, xRange),
         { responsive: true, displayModeBar: false }
       );
 
