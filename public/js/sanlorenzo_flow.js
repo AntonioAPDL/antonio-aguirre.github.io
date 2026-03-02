@@ -255,7 +255,7 @@
         traces,
         extentPoints,
         note: null,
-        warning: 'Forecast overlay skipped: unsupported observed discharge units.',
+        warning: 'Forecast guidance is temporarily unavailable.',
         forecastStart: null
       };
     }
@@ -266,11 +266,8 @@
       forecastUnits = observedFlowUnits;
     } else if (forecastUnitCandidates.length) {
       forecastUnits = forecastUnitCandidates[0];
-      if (forecastUnits !== observedFlowUnits) {
-        noteParts.push(`Forecast converted from ${forecastUnits} to ${observedFlowUnits}`);
-      }
     } else {
-      warning = 'Forecast overlay skipped: forecast units missing or unsupported.';
+      warning = 'Forecast guidance is temporarily unavailable.';
       return { traces, extentPoints, note: null, warning, forecastStart: null };
     }
 
@@ -321,9 +318,7 @@
       series.forEach((point) => extentPoints.push(point));
     });
 
-    if (traces.length) {
-      noteParts.unshift('NWS ensemble overlay active');
-    }
+    if (traces.length) noteParts.unshift('Includes forecast guidance');
     return {
       traces,
       extentPoints,
@@ -1134,12 +1129,12 @@
         if (!response.ok) {
           return {
             payload: null,
-            warning: `Forecast overlay unavailable (${response.status}).`
+            warning: 'Forecast guidance is temporarily unavailable.'
           };
         }
         const payload = await response.json();
         if (!payload || typeof payload !== 'object') {
-          return { payload: null, warning: 'Forecast overlay unavailable (invalid JSON payload).' };
+          return { payload: null, warning: 'Forecast guidance is temporarily unavailable.' };
         }
         return { payload, warning: null };
       } catch (err) {
@@ -1147,7 +1142,7 @@
           throw err;
         }
         console.warn('[usgs-iv] forecast overlay fetch failed', err);
-        return { payload: null, warning: 'Forecast overlay unavailable (fetch failed).' };
+        return { payload: null, warning: 'Forecast guidance is temporarily unavailable.' };
       }
     }
 

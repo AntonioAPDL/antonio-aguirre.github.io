@@ -56,7 +56,7 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
       Real-Time Monitoring: San Lorenzo River Discharge
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> Live observed discharge at Big Trees (last 20 days), plus a forecast-length forward window for visual alignment with the GEFS panels.
+      <strong>Note:</strong> This chart combines recent observed river flow at Big Trees with the latest forecast guidance to show near-term conditions.
     </div>
     <div class="usgs-iv-plot"
          data-site="11160500"
@@ -74,27 +74,29 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
          data-flood-minor-cfs=""
          data-flood-moderate-cfs=""
          data-flood-major-cfs="">
-      <div class="plot-status" role="status" aria-live="polite">Loading data...</div>
+      <div class="plot-status" role="status" aria-live="polite">Loading river flow data...</div>
       <div class="plot-stage plot-iframe" role="img" aria-label="San Lorenzo River discharge plot">
         <div class="plot-skeleton" aria-hidden="true">
           <div class="plot-skeleton__spinner"></div>
-          <div class="plot-skeleton__text">Loading latest observations...</div>
+          <div class="plot-skeleton__text">Loading latest river conditions...</div>
         </div>
         <div class="usgs-iv-plot__chart"></div>
       </div>
       <div class="plot-caption">
-        Data source:
+        Data sources:
         <a href="https://waterservices.usgs.gov/" target="_blank" rel="noopener noreferrer">USGS NWIS IV</a>
+        and
+        <a href="https://api.water.noaa.gov/" target="_blank" rel="noopener noreferrer">NOAA NWS/NWM APIs</a>
       </div>
     </div>
   </div>
 
   <div class="plot-container">
     <h2 class="section-heading">
-      GEFS Point Forecast: Precipitation and Soil Moisture
+      GEFS Forecasts Near Big Trees: Precipitation and Soil Moisture
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> Updated automatically throughout the day. Charts show recent conditions and the latest ensemble outlook near USGS Big Trees (<code>11160500</code>).
+      <strong>Note:</strong> Updated automatically throughout the day. These charts show recent local conditions and the latest GEFS forecast range.
     </div>
     <div class="gefs-forecast-panel"
          data-gefs-url="/assets/data/forecasts/gefs_big_trees_latest.json"
@@ -102,12 +104,12 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
          data-observation-window-days="20"
          data-stale-hours="12">
       <div class="plot-status gefs-forecast-status" role="status" aria-live="polite">
-        Loading GEFS forecast...
+        Loading GEFS forecast charts...
       </div>
       <section class="gefs-chart-card">
         <div class="gefs-chart-card__head">
           <h3>Precipitation Forecast</h3>
-          <p>Recent precipitation context and the latest forecast spread for the days ahead.</p>
+          <p>Recent precipitation and the expected forecast range for the coming days.</p>
         </div>
         <div class="plot-stage plot-iframe" role="img" aria-label="GEFS precipitation forecast">
           <div class="gefs-forecast-precip"></div>
@@ -116,7 +118,7 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
       <section class="gefs-chart-card">
         <div class="gefs-chart-card__head">
           <h3>Soil Moisture Forecast</h3>
-          <p>Recent soil moisture context and forecast by depth layer.</p>
+          <p>Recent soil moisture and forecast conditions by soil depth.</p>
         </div>
         <div class="plot-stage plot-iframe" role="img" aria-label="GEFS soil moisture forecast">
           <div class="gefs-forecast-soil"></div>
