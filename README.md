@@ -98,8 +98,8 @@ The plot can overlay forecast guidance from a tracked JSON artifact:
 
 - **Artifact:** `assets/data/forecasts/big_trees_latest.json` (tracked in git)
 - **Update script:** `scripts/update_big_trees_forecast.sh`
-- **Included series:** NWPS analysis/short deterministic + NWM medium/long quantiles (`p10/p50/p90`) when available
-- **Plot overlay behavior:** USGS observed discharge remains the base trace; NWS ensemble guidance is overlaid as medium/long `p10-p90` bands plus `p50` lines, with short deterministic when present.
+- **Included series:** JSON may include NWPS analysis/short deterministic plus NWM medium/long quantiles (`p10/p50/p90`); the USGS panel overlay uses ensemble quantiles (medium/long) only.
+- **Plot overlay behavior:** USGS observed discharge remains the base trace; NWS ensemble guidance is overlaid as medium/long `p10-p90` bands plus `p50` lines.
 - **Unit harmonization:** forecast series are unit-normalized and converted (`cfs`/`cms`) to match the observed USGS discharge axis before plotting.
 - **TODO:** HEFS ensembles once location_id lookup is resolved
 - **Fallback behavior:** if `_sandbox/nws_ensemble_point` is absent, updater builds JSON directly from NOAA NWPS APIs.

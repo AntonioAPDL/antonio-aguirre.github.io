@@ -216,7 +216,6 @@
 
     const medium = ranges.medium_range && typeof ranges.medium_range === 'object' ? ranges.medium_range : {};
     const longRange = ranges.long_range && typeof ranges.long_range === 'object' ? ranges.long_range : {};
-    const shortRange = ranges.short && typeof ranges.short === 'object' ? ranges.short : {};
 
     const mediumP10 = parseFlowSeries(medium.p10, forecastUnits, observedFlowUnits, logAxis);
     const mediumP50 = parseFlowSeries(medium.p50, forecastUnits, observedFlowUnits, logAxis);
@@ -224,7 +223,6 @@
     const longP10 = parseFlowSeries(longRange.p10, forecastUnits, observedFlowUnits, logAxis);
     const longP50 = parseFlowSeries(longRange.p50, forecastUnits, observedFlowUnits, logAxis);
     const longP90 = parseFlowSeries(longRange.p90, forecastUnits, observedFlowUnits, logAxis);
-    const shortDeterministic = parseFlowSeries(shortRange.deterministic, forecastUnits, observedFlowUnits, logAxis);
 
     traces.push(
       ...createBandTraces(
@@ -249,21 +247,7 @@
       )
     );
 
-    if (shortDeterministic.length) {
-      traces.push({
-        x: shortDeterministic.map((p) => p.x),
-        y: shortDeterministic.map((p) => p.y),
-        type: 'scatter',
-        mode: 'lines',
-        name: 'NWS short deterministic',
-        legendrank: 19,
-        legendgroup: 'NWS short',
-        line: { color: '#2f2a67', width: 1.6, dash: 'dash' },
-        hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>NWS short: %{y:.2f} ${observedFlowUnits}<extra></extra>`
-      });
-    }
-
-    [mediumP10, mediumP50, mediumP90, longP10, longP50, longP90, shortDeterministic].forEach((series) => {
+    [mediumP10, mediumP50, mediumP90, longP10, longP50, longP90].forEach((series) => {
       series.forEach((point) => extentPoints.push(point));
     });
 
