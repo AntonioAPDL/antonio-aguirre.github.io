@@ -24,6 +24,7 @@ from .storage import ensure_dir, prune_failed_runs, read_manifest
 
 CYCLE_STEP_HOURS = 6
 GEFS_EARLIEST_INIT_UTC = dt.datetime(2017, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
+GEFS_AWS_AVAILABLE_FROM_UTC = dt.datetime(2020, 10, 1, 0, 0, tzinfo=dt.timezone.utc)
 FAILED_CYCLE_RE = re.compile(r"^\.failed_(\d{8}_\d{2})_[A-Za-z0-9]+$")
 
 
@@ -145,25 +146,35 @@ def discover_latest_complete_init(cfg_path: Path) -> dt.datetime:
     return to_utc(selection.init_time_utc)
 
 
+def _availability_start_for_config(cfg_path: Path) -> dt.datetime:
+    cfg = load_pipeline_config(cfg_path)
+    floor = GEFS_EARLIEST_INIT_UTC
+    sources = {str(src).strip().lower() for src in cfg.source_priority}
+    if str(cfg.model).strip().lower() == "gefs" and "aws" in sources:
+        floor = max(floor, GEFS_AWS_AVAILABLE_FROM_UTC)
+    return floor
+
+
 def resolve_backfill_window(
     cfg_path: Path,
     start_init_utc: Optional[dt.datetime],
     end_init_utc: Optional[dt.datetime],
     pilot_days: Optional[int],
 ) -> Tuple[dt.datetime, dt.datetime]:
+    availability_floor = _availability_start_for_config(cfg_path)
     if pilot_days is not None and (start_init_utc is not None or end_init_utc is not None):
         raise ValueError("Use either pilot_days or explicit start/end window, not both")
 
     if pilot_days is not None:
         end = discover_latest_complete_init(cfg_path)
         start = pilot_start_for_days(end, pilot_days)
-        start = max(start, GEFS_EARLIEST_INIT_UTC)
+        start = max(start, availability_floor)
         return start, end
 
-    start = to_utc(start_init_utc or GEFS_EARLIEST_INIT_UTC)
+    start = to_utc(start_init_utc or availability_floor)
     end = to_utc(end_init_utc or discover_latest_complete_init(cfg_path))
-    if start < GEFS_EARLIEST_INIT_UTC:
-        start = GEFS_EARLIEST_INIT_UTC
+    if start < availability_floor:
+        start = availability_floor
     return require_cycle_alignment(start), require_cycle_alignment(end)
 
 

@@ -95,12 +95,18 @@ def _resolve_path(repo_root: Path, path: Path) -> Path:
 
 
 def _retry_call(func, retries: int, backoff_sec: float) -> Any:
+    def _is_non_retryable(exc: Exception) -> bool:
+        text = str(exc)
+        return "No index file was found for None" in text
+
     last: Optional[Exception] = None
     for attempt in range(1, retries + 1):
         try:
             return func()
         except Exception as exc:
             last = exc
+            if _is_non_retryable(exc):
+                raise
             if attempt >= retries:
                 break
             wait = backoff_sec * (2 ** (attempt - 1))

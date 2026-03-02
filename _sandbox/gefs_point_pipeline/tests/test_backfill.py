@@ -14,7 +14,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.backfill import (  # noqa: E402
+    GEFS_AWS_AVAILABLE_FROM_UTC,
     GEFS_EARLIEST_INIT_UTC,
+    _availability_start_for_config,
     _cleanup_stale_temp_dirs,
     _failed_cycle_tags,
     count_cycles_inclusive,
@@ -44,6 +46,9 @@ def test_pilot_start_for_days_returns_exact_cycle_count() -> None:
 def test_resolve_window_pilot_clamps_to_gefs_start(monkeypatch: pytest.MonkeyPatch) -> None:
     fake_latest = dt.datetime(2017, 1, 2, 0, 0, tzinfo=dt.timezone.utc)
     monkeypatch.setattr("src.backfill.discover_latest_complete_init", lambda cfg_path: fake_latest)
+    monkeypatch.setattr(
+        "src.backfill._availability_start_for_config", lambda cfg_path: GEFS_EARLIEST_INIT_UTC
+    )
     start, end = resolve_backfill_window(
         cfg_path=Path("/tmp/gefs.yaml"),
         start_init_utc=None,
@@ -54,7 +59,10 @@ def test_resolve_window_pilot_clamps_to_gefs_start(monkeypatch: pytest.MonkeyPat
     assert start == GEFS_EARLIEST_INIT_UTC
 
 
-def test_resolve_window_rejects_pilot_plus_explicit() -> None:
+def test_resolve_window_rejects_pilot_plus_explicit(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "src.backfill._availability_start_for_config", lambda cfg_path: GEFS_EARLIEST_INIT_UTC
+    )
     with pytest.raises(ValueError):
         resolve_backfill_window(
             cfg_path=Path("/tmp/gefs.yaml"),
@@ -62,6 +70,32 @@ def test_resolve_window_rejects_pilot_plus_explicit() -> None:
             end_init_utc=None,
             pilot_days=7,
         )
+
+
+def test_availability_start_for_aws_gefs(tmp_path: Path) -> None:
+    cfg_path = tmp_path / "gefs.yaml"
+    cfg_path.write_text(
+        """
+source_priority: ["aws"]
+model: "gefs"
+products_try: ["atmos.5"]
+members: ["c00"]
+lead_hours:
+  start: 0
+  end: 3
+  step: 3
+variables:
+  precip:
+    canonical_name: "APCP"
+    search_strings: ["APCP"]
+runtime: {}
+output: {}
+qc: {}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    assert _availability_start_for_config(cfg_path) == GEFS_AWS_AVAILABLE_FROM_UTC
 
 
 def test_failed_cycle_tags_extracts_unique_tags(tmp_path: Path) -> None:

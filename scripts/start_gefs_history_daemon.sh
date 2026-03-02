@@ -38,7 +38,7 @@ fi
 cd "${PIPELINE_DIR}"
 
 DEFAULT_ARGS=(
-  --full-start-init 2017-01-01T00:00:00Z
+  --full-start-init 2020-10-01T00:00:00Z
   --incremental-pilot-days 3
   --sleep-seconds 21600
   --catchup-every-hours 24

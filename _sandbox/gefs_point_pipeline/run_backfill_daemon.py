@@ -134,7 +134,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--full-start-init",
-        default="2017-01-01T00:00:00Z",
+        default="2020-10-01T00:00:00Z",
         help="Historical catchup start init UTC.",
     )
     parser.add_argument(

@@ -154,6 +154,7 @@ Background historical GEFS updater (no live monitoring):
 - `scripts/status_gefs_history_daemon.sh`
 - `scripts/install_gefs_history_daemon_cron.sh` (optional `@reboot` + 30-minute watchdog install)
 - launcher prefers a detached `tmux` session (`gefs_history_daemon`) when available
+- for `source_priority: ["aws"]`, history catchup starts from `2020-10-01T00:00:00Z`
 
 The daemon writes status to:
 

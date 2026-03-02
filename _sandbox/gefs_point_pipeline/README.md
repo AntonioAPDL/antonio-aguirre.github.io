@@ -84,11 +84,11 @@ Fast smoke benchmark (same window logic, reduced members/leads):
 python run_backfill.py --pilot-days 7 --run-profile smoke --workers 2 --cycle-max-workers 2
 ```
 
-Full historical build (2017-01-01 to latest complete cycle):
+Full historical build (AWS GEFS availability window to latest complete cycle):
 
 ```bash
 python run_backfill.py \
-  --start-init 2017-01-01T00:00:00Z \
+  --start-init 2020-10-01T00:00:00Z \
   --workers 4 \
   --cycle-max-workers 2
 ```
@@ -97,9 +97,12 @@ Retry only failed cycles in a window:
 
 ```bash
 python run_backfill.py \
-  --start-init 2017-01-01T00:00:00Z \
+  --start-init 2020-10-01T00:00:00Z \
   --retry-failed-only
 ```
+
+Note: for `source_priority: ["aws"]`, historical GEFS point backfill is clamped to
+`2020-10-01T00:00:00Z` to avoid unavailable pre-publication cycles.
 
 Artifacts are written under `data/_sandbox_gefs/history/`:
 
@@ -123,7 +126,7 @@ Use `run_backfill_daemon.py` to keep the history continuously updated in the bac
 
 ```bash
 python run_backfill_daemon.py \
-  --full-start-init 2017-01-01T00:00:00Z \
+  --full-start-init 2020-10-01T00:00:00Z \
   --incremental-pilot-days 3 \
   --sleep-seconds 21600 \
   --workers 2 \
