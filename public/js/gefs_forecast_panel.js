@@ -213,6 +213,66 @@
     return [start, end];
   }
 
+  function collectForecastPointGroups(payload) {
+    const pointGroups = [];
+    if (!payload || typeof payload !== 'object') return pointGroups;
+
+    const collectBlock = (block) => {
+      if (!block || typeof block !== 'object') return;
+      ['p10', 'p50', 'p90', 'mean'].forEach((key) => {
+        if (Array.isArray(block[key])) pointGroups.push(block[key]);
+      });
+    };
+
+    const precipLevels = payload.precip && typeof payload.precip === 'object' ? payload.precip : {};
+    Object.values(precipLevels).forEach((levelBlock) => collectBlock(levelBlock));
+
+    const soilLevels = payload.soil_moisture && typeof payload.soil_moisture === 'object'
+      ? payload.soil_moisture
+      : {};
+    Object.values(soilLevels).forEach((levelBlock) => collectBlock(levelBlock));
+    return pointGroups;
+  }
+
+  function computeForecastHorizonHours(payload, initDate) {
+    if (!payload || !initDate) return null;
+    const forecastEnd = latestPointDate(collectForecastPointGroups(payload));
+    if (!forecastEnd || forecastEnd <= initDate) return null;
+    const hours = (forecastEnd.getTime() - initDate.getTime()) / (1000 * 3600);
+    return Number.isFinite(hours) && hours >= 0 ? hours : null;
+  }
+
+  function publishTimelineWindow(payload, observationWindowDays) {
+    const initDate = parseDate(payload && payload.init_time_utc);
+    if (!initDate) return;
+
+    const horizonHours = computeForecastHorizonHours(payload, initDate);
+    if (!Number.isFinite(horizonHours)) return;
+
+    const normalizedWindowDays = Math.max(1, numberOrNull(observationWindowDays) || 20);
+    const detail = {
+      source: 'gefs-forecast-panel',
+      initTimeUtc: initDate.toISOString(),
+      observationWindowDays: normalizedWindowDays,
+      forecastHorizonHours: horizonHours,
+      publishedAtUtc: new Date().toISOString()
+    };
+
+    const prior = window.__gefsTimelineWindow && typeof window.__gefsTimelineWindow === 'object'
+      ? window.__gefsTimelineWindow
+      : null;
+    const sameWindow = prior
+      && prior.initTimeUtc === detail.initTimeUtc
+      && Number(prior.observationWindowDays) === detail.observationWindowDays
+      && Math.abs(Number(prior.forecastHorizonHours) - detail.forecastHorizonHours) < 0.05;
+    if (sameWindow) return;
+
+    window.__gefsTimelineWindow = detail;
+    if (typeof window.CustomEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('gefs:timeline-window', { detail }));
+    }
+  }
+
   function buildBandTrace(low, high, name, color, options) {
     const opts = options || {};
     const lower = seriesToXY(low);
@@ -371,25 +431,8 @@
     const initDate = parseDate(payload.init_time_utc);
     if (!initDate) return 'forecast ahead';
 
-    const pointGroups = [];
-    const precipLevels = payload.precip && typeof payload.precip === 'object' ? payload.precip : {};
-    const precipLevelName = precipLevels.surface ? 'surface' : Object.keys(precipLevels)[0];
-    const precipLevel = precipLevelName ? precipLevels[precipLevelName] : null;
-    if (precipLevel && Array.isArray(precipLevel.p50)) pointGroups.push(precipLevel.p50);
-
-    const soilLevels = payload.soil_moisture && typeof payload.soil_moisture === 'object'
-      ? payload.soil_moisture
-      : {};
-    Object.values(soilLevels).forEach((levelBlock) => {
-      if (levelBlock && typeof levelBlock === 'object' && Array.isArray(levelBlock.p50)) {
-        pointGroups.push(levelBlock.p50);
-      }
-    });
-
-    const forecastEnd = latestPointDate(pointGroups);
-    if (!forecastEnd || forecastEnd <= initDate) return 'forecast ahead';
-
-    const horizonHours = (forecastEnd.getTime() - initDate.getTime()) / (1000 * 3600);
+    const horizonHours = computeForecastHorizonHours(payload, initDate);
+    if (!Number.isFinite(horizonHours) || horizonHours <= 0) return 'forecast ahead';
     if (horizonHours < 24) return `about ${Math.round(horizonHours)} hours ahead`;
     return `about ${Math.round(horizonHours / 24)} days ahead`;
   }
@@ -744,6 +787,8 @@
     if (!payload.gefs_analysis_context || typeof payload.gefs_analysis_context !== 'object') {
       payload.gefs_analysis_context = deriveAnalysisContextFromPayload(payload);
     }
+
+    publishTimelineWindow(payload, observationWindowDays);
 
     const statusWarnings = [];
     const staleHours = numberOrNull(container.dataset.staleHours) ?? numberOrNull(payload.stale_after_hours) ?? 12;

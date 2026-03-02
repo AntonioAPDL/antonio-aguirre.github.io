@@ -56,14 +56,16 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
       Real-Time Monitoring: San Lorenzo River Discharge
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> Live observed discharge at Big Trees (last 30 days).
+      <strong>Note:</strong> Live observed discharge at Big Trees (last 20 days), plus a forecast-length forward window for visual alignment with the GEFS panels.
     </div>
     <div class="usgs-iv-plot"
          data-site="11160500"
          data-mode="discharge"
-         data-period="P30D"
+         data-period="P20D"
          data-refresh-min="15"
          data-timeout-sec="20"
+         data-observation-window-days="20"
+         data-future-horizon-hours="240"
          data-y-min="0"
          data-y-max="2000"
          data-title="San Lorenzo River Discharge"

@@ -270,31 +270,41 @@ button:focus-visible {
 }
 
 .plot-container {
-  margin: calc(var(--space-section) + 0.5rem) auto;
-  max-width: 900px;
-  padding: 1.5rem;
+  margin: calc(var(--space-section) + 0.25rem) auto;
+  max-width: 920px;
+  padding: 1.15rem;
   box-shadow: var(--shadow-lg);
 }
 
+.plot-container .section-heading {
+  margin-bottom: 0.55rem;
+}
+
 .note-box {
-  margin: 1rem auto;
+  margin: 0.65rem auto 0.85rem;
   max-width: 800px;
   text-align: left;
-  padding: 1rem;
+  padding: 0.72rem 0.9rem;
   background-color: var(--note-bg);
-  border-left: 6px solid var(--note-border);
+  border-left: 5px solid var(--note-border);
   border-radius: var(--radius-md);
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 0.94rem;
+  line-height: 1.45;
   color: var(--note-text);
 }
 
 .plot-iframe {
   width: 100%;
-  height: 65vh;
+  height: 58vh;
   border: none;
   box-shadow: var(--shadow-sm);
   border-radius: var(--radius-md);
+}
+
+.usgs-iv-plot .plot-iframe,
+.gefs-forecast-panel .plot-iframe {
+  height: 44vh;
+  min-height: 280px;
 }
 
 #loading {
@@ -304,14 +314,14 @@ button:focus-visible {
 }
 
 .plot-status {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--info-text);
-  margin: 0.75rem 0 1rem;
+  margin: 0.65rem 0 0.85rem;
   text-align: left;
   background-color: var(--info-bg);
   border: 1px solid var(--info-border);
   border-radius: var(--radius-md);
-  padding: 0.5rem 0.75rem;
+  padding: 0.45rem 0.65rem;
 }
 
 .plot-status--error {
@@ -330,13 +340,13 @@ body.dark-theme .plot-status__title {
 }
 
 .plot-status__meta {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: var(--info-text);
 }
 
 .plot-status__warning {
   margin-top: 0.4rem;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: var(--info-warning);
 }
 
@@ -346,14 +356,45 @@ body.dark-theme .plot-status__title {
   background-color: var(--surface-1);
 }
 
+.usgs-iv-plot {
+  margin-top: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  background: var(--gefs-card-bg);
+  box-shadow: var(--gefs-card-shadow);
+  overflow: hidden;
+}
+
+.usgs-iv-plot .plot-status {
+  margin: 0;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.74rem 0.9rem 0.55rem;
+  background: var(--gefs-head-bg);
+}
+
+.usgs-iv-plot .plot-stage {
+  border-top: 0;
+  background:
+    var(--gefs-plot-bg),
+    repeating-linear-gradient(
+      0deg,
+      var(--gefs-plot-grid) 0px,
+      var(--gefs-plot-grid) 1px,
+      transparent 1px,
+      transparent 30px
+    );
+}
+
+.usgs-iv-plot .plot-caption {
+  margin-top: 0;
+  padding: 0.52rem 0.9rem 0.75rem;
+}
+
 .usgs-iv-plot__chart {
   width: 100%;
   height: 100%;
-}
-
-.gefs-forecast-panel .plot-iframe {
-  height: 46vh;
-  min-height: 300px;
 }
 
 .gefs-forecast-precip,
@@ -367,7 +408,7 @@ body.dark-theme .plot-status__title {
 }
 
 .gefs-chart-card {
-  margin-top: 1rem;
+  margin-top: 0.82rem;
   border: 1px solid var(--border-color);
   border-radius: 14px;
   background: var(--gefs-card-bg);
@@ -376,22 +417,22 @@ body.dark-theme .plot-status__title {
 }
 
 .gefs-chart-card__head {
-  padding: 0.86rem 1rem 0.52rem;
+  padding: 0.74rem 0.9rem 0.46rem;
   background: var(--gefs-head-bg);
 }
 
 .gefs-chart-card__head h3 {
   margin: 0;
-  font-size: 1.04rem;
+  font-size: 1rem;
   letter-spacing: 0.01em;
   line-height: 1.3;
   color: var(--text-color);
 }
 
 .gefs-chart-card__head p {
-  margin: 0.32rem 0 0;
-  font-size: 0.87rem;
-  line-height: 1.42;
+  margin: 0.24rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.4;
   color: var(--text-subtle);
 }
 
@@ -439,8 +480,8 @@ body.dark-theme .plot-status__title {
 }
 
 .plot-caption {
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
+  margin-top: 0.62rem;
+  font-size: 0.86rem;
   color: var(--text-subtle);
   text-align: left;
 }
@@ -467,11 +508,12 @@ body.dark-theme .plot-status__title {
     height: 120px;
   }
   .plot-iframe {
-    height: 50vh;
+    height: 46vh;
   }
+  .usgs-iv-plot .plot-iframe,
   .gefs-forecast-panel .plot-iframe {
-    height: 48vh;
-    min-height: 250px;
+    height: 46vh;
+    min-height: 230px;
   }
 }
 

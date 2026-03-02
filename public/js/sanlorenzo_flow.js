@@ -7,11 +7,13 @@
   window.__usgsIvPlotInitialized = true;
 
   const DEFAULTS = {
-    period: 'P30D',
+    period: 'P20D',
     refreshMin: 15,
     timeoutSec: 20,
     mode: 'discharge',
-    logY: false
+    logY: false,
+    observationWindowDays: 20,
+    futureHorizonHours: 240
   };
   const ENDPOINT_BASE = 'https://waterservices.usgs.gov/nwis/iv/';
   const MAX_BACKOFF_MS = 60 * 60 * 1000;
@@ -79,7 +81,8 @@
     return {
       text: styles.getPropertyValue('--text-color').trim() || '#1f2933',
       grid: styles.getPropertyValue('--border-color').trim() || '#e2e8f0',
-      line: styles.getPropertyValue('--accent-color').trim() || '#1b63c6'
+      line: styles.getPropertyValue('--accent-color').trim() || '#1b63c6',
+      surface: styles.getPropertyValue('--surface-1').trim() || '#ffffff'
     };
   }
 
@@ -150,6 +153,9 @@
       title: yTitle,
       gridcolor: colors.grid,
       zerolinecolor: colors.grid,
+      showline: true,
+      linecolor: colors.grid,
+      automargin: true,
       type: logAxis ? 'log' : 'linear'
     };
 
@@ -164,11 +170,18 @@
     }
 
     const xaxis = {
-      title: 'Date',
+      title: 'Date (UTC)',
       type: 'date',
       gridcolor: colors.grid,
       zerolinecolor: colors.grid,
-      tickformat: '%b %d'
+      tickformat: '%b %d',
+      showline: true,
+      linecolor: colors.grid,
+      showspikes: true,
+      spikemode: 'across',
+      spikesnap: 'cursor',
+      spikedash: 'dot',
+      automargin: true
     };
 
     if (Array.isArray(xRange) && xRange[0] && xRange[1]) {
@@ -179,6 +192,12 @@
       margin: { l: 60, r: 20, t: 20, b: 50 },
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
+      hovermode: 'x unified',
+      hoverlabel: {
+        bgcolor: colors.surface,
+        bordercolor: colors.grid,
+        font: { color: colors.text, size: 11 }
+      },
       shapes: shapes || [],
       annotations: annotations || [],
       font: {
@@ -201,7 +220,7 @@
       showlegend: true,
       legendrank: 10,
       line: { color: colors.line, width: 2.6 },
-      hovertemplate: `%{x}<br>%{y:.2f}${unitLabel}<br>Observed<extra></extra>`
+      hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>Observed: %{y:.2f}${unitLabel}<extra></extra>`
     };
   }
 
@@ -370,6 +389,13 @@
       const dataset = container.dataset || {};
       const refreshMin = parseNumber(dataset.refreshMin, DEFAULTS.refreshMin);
       const timeoutSec = parseNumber(dataset.timeoutSec, DEFAULTS.timeoutSec);
+      const observationWindowDays = clampNumber(
+        parseNumber(dataset.observationWindowDays, DEFAULTS.observationWindowDays),
+        1,
+        120,
+        DEFAULTS.observationWindowDays
+      );
+      const futureHorizonHoursRaw = parseOptionalNumber(dataset.futureHorizonHours);
       const modeRaw = (dataset.mode || DEFAULTS.mode).toLowerCase();
       const mode = modeRaw === 'stage' ? 'stage' : 'discharge';
       const logY = parseBoolean(dataset.logY, DEFAULTS.logY);
@@ -394,7 +420,11 @@
         thresholdMinor: floodMinor,
         thresholdModerate: floodModerate,
         thresholdMajor: floodMajor,
-        logY: logY
+        logY: logY,
+        observationWindowDays: observationWindowDays,
+        futureHorizonHours: Number.isFinite(futureHorizonHoursRaw)
+          ? clampNumber(futureHorizonHoursRaw, 0, 720, DEFAULTS.futureHorizonHours)
+          : null
       };
     }
 
@@ -525,6 +555,46 @@
       this.stageEl.setAttribute('aria-label', baseTitle);
     }
 
+    resolveTimelineWindow(lastObs) {
+      const obsDate = lastObs instanceof Date ? lastObs : new Date(lastObs);
+      if (Number.isNaN(obsDate.getTime())) {
+        return null;
+      }
+
+      const sharedWindow = window.__gefsTimelineWindow && typeof window.__gefsTimelineWindow === 'object'
+        ? window.__gefsTimelineWindow
+        : null;
+
+      let observationWindowDays = this.config.observationWindowDays;
+      if ((!Number.isFinite(observationWindowDays) || observationWindowDays <= 0) && sharedWindow) {
+        const sharedDays = Number(sharedWindow.observationWindowDays);
+        if (Number.isFinite(sharedDays) && sharedDays > 0) {
+          observationWindowDays = sharedDays;
+        }
+      }
+      if (!Number.isFinite(observationWindowDays) || observationWindowDays <= 0) {
+        observationWindowDays = DEFAULTS.observationWindowDays;
+      }
+
+      let futureHorizonHours = this.config.futureHorizonHours;
+      if ((!Number.isFinite(futureHorizonHours) || futureHorizonHours < 0) && sharedWindow) {
+        const sharedHours = Number(sharedWindow.forecastHorizonHours);
+        if (Number.isFinite(sharedHours) && sharedHours >= 0) {
+          futureHorizonHours = sharedHours;
+        }
+      }
+      if (!Number.isFinite(futureHorizonHours) || futureHorizonHours < 0) {
+        futureHorizonHours = DEFAULTS.futureHorizonHours;
+      }
+
+      const start = new Date(obsDate.getTime() - observationWindowDays * 24 * 60 * 60 * 1000);
+      const end = new Date(obsDate.getTime() + futureHorizonHours * 60 * 60 * 1000);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+        return null;
+      }
+      return [start, end];
+    }
+
     renderPlot({ points, siteName, units, lastObs, lastRefresh }, options = {}) {
       if (!window.Plotly) {
         this.setStatus({ warning: 'Plotly failed to load.' });
@@ -559,11 +629,12 @@
       const yTitleBase = displayUnits ? `${this.config.yLabel} (${displayUnits})` : this.config.yLabel;
       const yTitle = logAxis ? `${yTitleBase} (log scale)` : yTitleBase;
       const threshold = buildThresholdShapes(this.config, colors, yRange);
+      const xRange = this.resolveTimelineWindow(lastObs);
 
       Plotly.react(
         this.chartEl,
         [buildTrace(usablePoints, displayUnits, colors)],
-        buildLayout(yTitle, colors, yRange, threshold.shapes, logAxis, threshold.annotations),
+        buildLayout(yTitle, colors, yRange, threshold.shapes, logAxis, threshold.annotations, xRange),
         { responsive: true, displayModeBar: false }
       );
 
@@ -596,6 +667,17 @@
         this.renderPlot(this.lastRenderData, { silentStatus: true });
       } catch (err) {
         console.warn('[usgs-iv] Failed to rerender for theme update', err);
+      }
+    }
+
+    rerenderForTimeline() {
+      if (!this.lastRenderData || !Array.isArray(this.lastRenderData.points) || !this.lastRenderData.points.length) {
+        return;
+      }
+      try {
+        this.renderPlot(this.lastRenderData, { silentStatus: true });
+      } catch (err) {
+        console.warn('[usgs-iv] Failed to rerender for timeline update', err);
       }
     }
 
@@ -843,6 +925,10 @@
 
     window.addEventListener('offline', () => {
       instances.forEach((instance) => instance.handleError(createError('offline', 'Offline')));
+    });
+
+    window.addEventListener('gefs:timeline-window', () => {
+      instances.forEach((instance) => instance.rerenderForTimeline());
     });
 
     let themeRerenderTimer = null;
