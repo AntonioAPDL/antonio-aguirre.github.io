@@ -476,11 +476,17 @@
       x: points.map((p) => p.x),
       y: points.map((p) => p.y),
       type: 'scatter',
-      mode: 'lines',
+      mode: 'lines+markers',
       name: 'Observed',
       showlegend: true,
       legendrank: 10,
       line: { color: colors.line, width: 2.6 },
+      marker: {
+        color: colors.line,
+        size: 4,
+        symbol: 'circle',
+        line: { width: 0 }
+      },
       hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>Observed: %{y:.2f}${unitLabel}<extra></extra>`
     };
   }
