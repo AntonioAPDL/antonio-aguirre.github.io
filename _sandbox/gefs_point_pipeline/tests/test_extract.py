@@ -11,7 +11,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.extract import extract_point_value, normalize_lon180  # noqa: E402
+from src.extract import (  # noqa: E402
+    extract_point_value,
+    extract_point_value_from_grib_message,
+    normalize_lon180,
+)
 
 
 def test_normalize_lon180() -> None:
@@ -63,3 +67,30 @@ def test_extract_point_value_selects_depth_layer_by_level_label() -> None:
     )
     assert np.isfinite(out.value)
     assert 0.4 <= out.value < 0.5
+
+
+class _FakeGribMessage:
+    def __init__(self, values, lat2d, lon2d):
+        self.values = values
+        self._lat2d = lat2d
+        self._lon2d = lon2d
+        self.units = "kg m**-2"
+        self.shortName = "tp"
+
+    def latlons(self):
+        return self._lat2d, self._lon2d
+
+
+def test_extract_point_value_from_grib_message() -> None:
+    lat2d = np.array([[37.0, 37.0], [37.5, 37.5]])
+    lon2d = np.array([[237.8, 238.3], [237.8, 238.3]])
+    values = np.array([[np.nan, 5.0], [8.0, 12.0]])
+    message = _FakeGribMessage(values=values, lat2d=lat2d, lon2d=lon2d)
+    out = extract_point_value_from_grib_message(
+        grib_message=message,
+        target_lat=37.04,
+        target_lon=-122.07,
+        search_max_km=200.0,
+    )
+    assert np.isfinite(out.value)
+    assert out.value in {5.0, 8.0, 12.0}

@@ -3,7 +3,8 @@ from __future__ import annotations
 import datetime as dt
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from typing import Any, Dict, List, Sequence, Tuple
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from .config import PipelineConfig
 from .herbie_adapter import inventory_frame, make_herbie
@@ -45,18 +46,24 @@ def _member_has_inventory(
     fxx: int,
     source_priority: Sequence[str],
     attempts: int = 3,
+    save_dir: Optional[Path] = None,
 ) -> bool:
     import time
 
     for idx in range(attempts):
         try:
+            make_kwargs: Dict[str, Any] = {
+                "init_time_utc": init_time_utc,
+                "model": model,
+                "product": product,
+                "member": member,
+                "fxx": fxx,
+                "source_priority": list(source_priority),
+            }
+            if save_dir is not None:
+                make_kwargs["save_dir"] = save_dir
             handle = make_herbie(
-                init_time_utc=init_time_utc,
-                model=model,
-                product=product,
-                member=member,
-                fxx=fxx,
-                source_priority=list(source_priority),
+                **make_kwargs
             )
             inv = inventory_frame(handle)
             return not inv.empty
@@ -70,6 +77,7 @@ def _member_has_inventory(
 def discover_latest_complete_cycle(
     cfg: PipelineConfig,
     now_utc: dt.datetime,
+    save_dir: Optional[Path] = None,
 ) -> CycleSelection:
     candidates = build_candidate_cycles(now_utc, cfg.runtime.candidate_lookback_hours)
     sentinel_product = cfg.products_try[0]
@@ -79,9 +87,19 @@ def discover_latest_complete_cycle(
 
     candidate_notes: List[Dict[str, Any]] = []
 
+    inventory_kwargs: Dict[str, Any] = {}
+    if save_dir is not None:
+        inventory_kwargs["save_dir"] = save_dir
+
     for candidate in candidates:
         f0_ok = _member_has_inventory(
-            candidate, cfg.model, sentinel_product, sentinel_member, 0, cfg.source_priority
+            candidate,
+            cfg.model,
+            sentinel_product,
+            sentinel_member,
+            0,
+            cfg.source_priority,
+            **inventory_kwargs,
         )
         fend_ok = _member_has_inventory(
             candidate,
@@ -90,6 +108,7 @@ def discover_latest_complete_cycle(
             sentinel_member,
             end_lead,
             cfg.source_priority,
+            **inventory_kwargs,
         )
         if not (f0_ok and fend_ok):
             candidate_notes.append(
@@ -116,6 +135,7 @@ def discover_latest_complete_cycle(
                     member,
                     probe_lead,
                     cfg.source_priority,
+                    **inventory_kwargs,
                 ): member
                 for member in cfg.members
             }

@@ -3,7 +3,8 @@ from __future__ import annotations
 import datetime as dt
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
@@ -68,6 +69,7 @@ def _probe_fxx_candidates(cfg: PipelineConfig) -> List[int]:
 def _load_inventory_cache(
     cfg: PipelineConfig,
     init_time_utc: dt.datetime,
+    save_dir: Optional[Path] = None,
 ) -> Tuple[Dict[Tuple[str, int], pd.DataFrame], List[Dict[str, Any]]]:
     attempts: List[Dict[str, Any]] = []
     cache: Dict[Tuple[str, int], pd.DataFrame] = {}
@@ -76,13 +78,18 @@ def _load_inventory_cache(
         for fxx in _probe_fxx_candidates(cfg):
             key = (product, fxx)
             try:
+                make_kwargs: Dict[str, Any] = {
+                    "init_time_utc": init_time_utc,
+                    "model": cfg.model,
+                    "product": product,
+                    "member": probe_member,
+                    "fxx": fxx,
+                    "source_priority": cfg.source_priority,
+                }
+                if save_dir is not None:
+                    make_kwargs["save_dir"] = save_dir
                 handle = make_herbie(
-                    init_time_utc=init_time_utc,
-                    model=cfg.model,
-                    product=product,
-                    member=probe_member,
-                    fxx=fxx,
-                    source_priority=cfg.source_priority,
+                    **make_kwargs
                 )
                 inv = inventory_frame(handle)
             except Exception as exc:
@@ -229,8 +236,13 @@ def _resolve_layered_variable(
 def resolve_product_and_fields(
     cfg: PipelineConfig,
     init_time_utc: dt.datetime,
+    save_dir: Optional[Path] = None,
 ) -> Tuple[List[ResolvedField], Dict[str, Any]]:
-    inv_cache, inventory_attempts = _load_inventory_cache(cfg, init_time_utc)
+    inv_cache, inventory_attempts = _load_inventory_cache(
+        cfg,
+        init_time_utc,
+        save_dir=save_dir,
+    )
     variable_attempts: List[Dict[str, Any]] = []
     resolved_fields: List[ResolvedField] = []
     missing_variables: List[str] = []

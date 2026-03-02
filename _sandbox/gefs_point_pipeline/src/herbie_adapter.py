@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import Any, Dict, List
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
@@ -26,6 +27,7 @@ def make_herbie(
     member: str,
     fxx: int,
     source_priority: List[str],
+    save_dir: Optional[Union[Path, str]] = None,
 ) -> Any:
     kwargs: Dict[str, Any] = {
         "model": model,
@@ -36,6 +38,8 @@ def make_herbie(
         "overwrite": False,
         "verbose": False,
     }
+    if save_dir is not None:
+        kwargs["save_dir"] = str(save_dir)
     for candidate in (
         kwargs,
         {k: v for k, v in kwargs.items() if k != "verbose"},
@@ -65,10 +69,12 @@ def inventory_frame(handle: Any) -> pd.DataFrame:
 
 def xarray_subset(handle: Any, search_string: str) -> Any:
     for method in (
-        lambda: handle.xarray(searchString=search_string, remove_grib=False),
-        lambda: handle.xarray(search_string, remove_grib=False),
+        lambda: handle.xarray(searchString=search_string, remove_grib=True),
+        lambda: handle.xarray(search_string, remove_grib=True),
         lambda: handle.xarray(searchString=search_string),
         lambda: handle.xarray(search_string),
+        lambda: handle.xarray(searchString=search_string, remove_grib=False),
+        lambda: handle.xarray(search_string, remove_grib=False),
     ):
         try:
             return method()

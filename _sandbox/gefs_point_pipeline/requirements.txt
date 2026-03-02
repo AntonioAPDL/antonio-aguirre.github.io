@@ -5,3 +5,4 @@ pyarrow>=15.0
 xarray>=2024.1
 herbie-data>=2024.3.0
 cfgrib>=0.9.10
+pygrib>=2.1.6

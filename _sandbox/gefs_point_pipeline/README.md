@@ -68,6 +68,43 @@ Full profile only:
 - `data/_sandbox_gefs/runs/latest_init.txt`
 - `data/_sandbox_gefs/runs/latest` symlink (best effort)
 
+## Historical Backfill (Point-Only, No Raw Retention)
+
+Use `run_backfill.py` to build compact per-cycle point history across many cycles.
+
+Pilot benchmark for last 7 days:
+
+```bash
+python run_backfill.py --pilot-days 7 --workers 2 --cycle-max-workers 2
+```
+
+Fast smoke benchmark (same window logic, reduced members/leads):
+
+```bash
+python run_backfill.py --pilot-days 7 --run-profile smoke --workers 2 --cycle-max-workers 2
+```
+
+Full historical build (2017-01-01 to latest complete cycle):
+
+```bash
+python run_backfill.py \
+  --start-init 2017-01-01T00:00:00Z \
+  --workers 4 \
+  --cycle-max-workers 2
+```
+
+Artifacts are written under `data/_sandbox_gefs/history/`:
+
+- `cycles/<YYYYMMDD_HH>/` per-cycle compact parquet + manifest
+- `state/backfill_status.json` live progress snapshot
+- `state/<run_id>_benchmark.json` benchmark/timing summary
+- `logs/<run_id>_failures.jsonl` structured failures for retry/debug
+
+Backfill runs are resumable:
+
+- existing successful cycle directories are skipped by default
+- use `--force` to re-run all cycles in the target window
+
 Retention controls (in `config/gefs.yaml`):
 
 - `runtime.keep_cycles` (full successful runs, default `1`)

@@ -169,3 +169,53 @@ def extract_point_value(
         "No non-NaN gridpoint found within search_max_km="
         f"{search_max_km}. nearest_distance_km={nearest_distance:.3f}"
     )
+
+
+def extract_point_value_from_grib_message(
+    grib_message: Any,
+    target_lat: float,
+    target_lon: float,
+    search_max_km: float,
+) -> PointExtraction:
+    values = np.asarray(grib_message.values)
+    lat2d, lon2d = grib_message.latlons()
+    lat2d = np.asarray(lat2d)
+    lon2d = np.asarray(lon2d)
+    if values.shape != lat2d.shape or values.shape != lon2d.shape:
+        raise ValueError(
+            f"GRIB field/grid shape mismatch: values={values.shape} lat={lat2d.shape} lon={lon2d.shape}"
+        )
+
+    lon180 = np.vectorize(normalize_lon180)(lon2d)
+    target_lon180 = normalize_lon180(target_lon)
+    distances = haversine_km(lat2d, lon180, target_lat, target_lon180)
+    flat_idx = np.argsort(distances, axis=None)
+
+    first_idx = flat_idx[0]
+    fallback = False
+    for rank, idx in enumerate(flat_idx):
+        r, c = np.unravel_index(int(idx), values.shape)
+        dist = float(distances[r, c])
+        if dist > search_max_km:
+            break
+        value = values[r, c]
+        if np.isnan(value):
+            continue
+        if rank > 0:
+            fallback = True
+        return PointExtraction(
+            value=float(value),
+            grid_lat=float(lat2d[r, c]),
+            grid_lon=float(normalize_lon180(float(lon2d[r, c]))),
+            distance_km=dist,
+            used_fallback_point=fallback,
+            units=str(getattr(grib_message, "units", "")),
+            source_var=str(getattr(grib_message, "shortName", "")),
+        )
+
+    r0, c0 = np.unravel_index(int(first_idx), values.shape)
+    nearest_distance = float(distances[r0, c0])
+    raise ValueError(
+        "No non-NaN gridpoint found within search_max_km="
+        f"{search_max_km}. nearest_distance_km={nearest_distance:.3f}"
+    )

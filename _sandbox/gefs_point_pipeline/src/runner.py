@@ -6,20 +6,23 @@ import json
 import logging
 import math
 import os
+import re
 import shutil
 import traceback
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+from time import perf_counter
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import pandas as pd
+import pygrib
 
 from .config import PipelineConfig, PointConfig, config_fingerprint
 from .cycle import CycleSelection, cycle_tag, discover_latest_complete_cycle
-from .extract import PointExtraction, extract_point_value
-from .herbie_adapter import make_herbie, xarray_subset
+from .extract import PointExtraction, extract_point_value_from_grib_message
+from .herbie_adapter import download_subset, make_herbie
 from .inventory import ResolvedField, resolve_product_and_fields
 from .qc import run_qc
 from .schema import validate_member_schema, validate_summary_schema
@@ -46,6 +49,8 @@ class RunOptions:
     smoke: bool
     run_profile: str
     explicit_init_time_utc: Optional[dt.datetime]
+    herbie_save_dir: Optional[Path] = None
+    disable_pruning: bool = False
 
 
 @dataclass(frozen=True)
@@ -149,7 +154,11 @@ def _determine_cycle(
                 "init_time_utc": options.explicit_init_time_utc.isoformat(),
             },
         )
-    selected = discover_latest_complete_cycle(cfg, _utcnow())
+    selected = discover_latest_complete_cycle(
+        cfg,
+        _utcnow(),
+        save_dir=options.herbie_save_dir,
+    )
     return selected
 
 
@@ -245,6 +254,80 @@ def _record_counts_by_variable_level(df: pd.DataFrame) -> Dict[str, int]:
     return out
 
 
+def _parse_soil_level_bounds(level_label: str) -> Optional[Tuple[float, float]]:
+    match = re.search(r"([0-9.]+)\s*-\s*([0-9.]+)\s*m", str(level_label))
+    if not match:
+        return None
+    lo = float(match.group(1))
+    hi = float(match.group(2))
+    if lo > hi:
+        lo, hi = hi, lo
+    return lo, hi
+
+
+def _grib_depth_bounds_m(message: Any) -> Optional[Tuple[float, float]]:
+    try:
+        first = float(message["scaledValueOfFirstFixedSurface"]) * (
+            10.0 ** (-float(message["scaleFactorOfFirstFixedSurface"]))
+        )
+        second = float(message["scaledValueOfSecondFixedSurface"]) * (
+            10.0 ** (-float(message["scaleFactorOfSecondFixedSurface"]))
+        )
+    except Exception:
+        return None
+    lo = min(first, second)
+    hi = max(first, second)
+    return lo, hi
+
+
+def _message_matches_field(message: Any, field: ResolvedField) -> bool:
+    canonical = field.canonical_name.upper()
+    short_name = str(getattr(message, "shortName", "")).upper()
+    name = str(getattr(message, "name", "")).upper()
+
+    if canonical == "APCP":
+        return short_name in {"APCP", "TP"} or "PRECIP" in name
+
+    if canonical == "SOILW":
+        if short_name not in {"SOILW"} and "SOIL" not in name:
+            return False
+        desired_bounds = _parse_soil_level_bounds(field.level_label)
+        if desired_bounds is None:
+            return True
+        message_bounds = _grib_depth_bounds_m(message)
+        if message_bounds is None:
+            return True
+        tol = 0.051
+        return (
+            abs(message_bounds[0] - desired_bounds[0]) <= tol
+            and abs(message_bounds[1] - desired_bounds[1]) <= tol
+        )
+
+    return short_name == canonical or canonical in name
+
+
+def _select_grib_message(messages: Sequence[Any], field: ResolvedField) -> Optional[Any]:
+    matches = [message for message in messages if _message_matches_field(message, field)]
+    if not matches:
+        return None
+    if len(matches) == 1:
+        return matches[0]
+
+    desired_bounds = _parse_soil_level_bounds(field.level_label)
+    if field.canonical_name.upper() == "SOILW" and desired_bounds is not None:
+        scored: List[Tuple[float, Any]] = []
+        for message in matches:
+            bounds = _grib_depth_bounds_m(message)
+            if bounds is None:
+                continue
+            score = abs(bounds[0] - desired_bounds[0]) + abs(bounds[1] - desired_bounds[1])
+            scored.append((score, message))
+        if scored:
+            scored.sort(key=lambda item: item[0])
+            return scored[0][1]
+    return matches[0]
+
+
 def _resolved_field_signature(fields: Sequence[ResolvedField]) -> List[str]:
     signature = [
         f"{field.product}|{field.canonical_name}|{field.level_label}|{field.search_string}"
@@ -286,6 +369,7 @@ def _extract_member_lead(
     fields: Sequence[ResolvedField],
     cfg: PipelineConfig,
     point: PointConfig,
+    save_dir: Optional[Path] = None,
 ) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
     rows: List[Dict[str, Any]] = []
     bytes_by_file: Dict[str, int] = {}
@@ -301,36 +385,41 @@ def _extract_member_lead(
         fields_by_product.setdefault(field.product, []).append(field)
 
     for product, product_fields in fields_by_product.items():
+        subset_path = ""
+        grib_handle: Optional[Any] = None
         combined_search = "|".join(sorted({field.search_string for field in product_fields}))
-        handle = make_herbie(
-            init_time_utc=init_time_utc,
-            model=cfg.model,
-            product=product,
-            member=member,
-            fxx=lead_hour,
-            source_priority=cfg.source_priority,
-        )
+        make_kwargs: Dict[str, Any] = {
+            "init_time_utc": init_time_utc,
+            "model": cfg.model,
+            "product": product,
+            "member": member,
+            "fxx": lead_hour,
+            "source_priority": cfg.source_priority,
+        }
+        if save_dir is not None:
+            make_kwargs["save_dir"] = save_dir
+        handle = make_herbie(**make_kwargs)
         try:
             result = _retry_call(
-                lambda: xarray_subset(handle, combined_search),
+                lambda: download_subset(handle, combined_search),
                 retries=cfg.runtime.retries,
                 backoff_sec=cfg.runtime.retry_backoff_sec,
             )
-            datasets = _normalize_xarray_result(result)
-            _collect_bytes((_local_grib_path(ds) for ds in datasets), bytes_by_file)
+            subset_path = str(result)
+            _collect_bytes([subset_path], bytes_by_file)
+            grib_handle = pygrib.open(subset_path)
+            messages = [grib_handle.message(i) for i in range(1, int(grib_handle.messages) + 1)]
             for field in product_fields:
-                matched_ds = _dataset_for_field(datasets, field)
-                if matched_ds is None:
+                matched_message = _select_grib_message(messages, field)
+                if matched_message is None:
                     raise ValueError(
-                        f"No dataset matched field {field.canonical_name}:{field.level_label}"
+                        f"No GRIB message matched field {field.canonical_name}:{field.level_label}"
                     )
-                point_value: PointExtraction = extract_point_value(
-                    dataset=matched_ds,
-                    canonical_name=field.canonical_name,
+                point_value: PointExtraction = extract_point_value_from_grib_message(
+                    grib_message=matched_message,
                     target_lat=point.lat,
                     target_lon=point.lon,
                     search_max_km=point.search_max_km,
-                    level_label=field.level_label,
                 )
                 rows.append(
                     {
@@ -351,7 +440,7 @@ def _extract_member_lead(
                         "source": "aws",
                         "search_string": field.search_string,
                         "descriptor": field.descriptor,
-                        "file_ref": _local_grib_path(matched_ds),
+                        "file_ref": subset_path,
                         "error": "",
                     }
                 )
@@ -381,8 +470,19 @@ def _extract_member_lead(
                     }
                 )
         finally:
-            if "datasets" in locals():
-                _close_datasets(datasets)
+            if grib_handle is not None:
+                try:
+                    grib_handle.close()
+                except Exception:
+                    pass
+            for candidate in (subset_path, f"{subset_path}.idx"):
+                if not candidate:
+                    continue
+                try:
+                    if os.path.exists(candidate):
+                        os.remove(candidate)
+                except OSError:
+                    pass
 
     return rows, bytes_by_file
 
@@ -394,6 +494,7 @@ def _extract_all_rows(
     fields: Sequence[ResolvedField],
     cfg: PipelineConfig,
     point: PointConfig,
+    save_dir: Optional[Path] = None,
 ) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
     tasks = [(member, lead) for member in members for lead in leads]
     rows: List[Dict[str, Any]] = []
@@ -402,7 +503,14 @@ def _extract_all_rows(
     with ThreadPoolExecutor(max_workers=max(1, cfg.runtime.max_workers)) as pool:
         future_map = {
             pool.submit(
-                _extract_member_lead, init_time_utc, member, lead, fields, cfg, point
+                _extract_member_lead,
+                init_time_utc,
+                member,
+                lead,
+                fields,
+                cfg,
+                point,
+                save_dir,
             ): (member, lead)
             for member, lead in tasks
         }
@@ -505,9 +613,17 @@ def run_pipeline(
         effective_runtime = dataclasses.replace(
             cfg.runtime, require_member_count=len(members)
         )
-        effective_cfg = dataclasses.replace(cfg, runtime=effective_runtime)
+        effective_qc = dataclasses.replace(
+            cfg.qc,
+            nan_tolerance=max(float(cfg.qc.nan_tolerance), 0.10),
+        )
+        effective_cfg = dataclasses.replace(cfg, runtime=effective_runtime, qc=effective_qc)
 
-    fields, resolution = resolve_product_and_fields(effective_cfg, cycle.init_time_utc)
+    fields, resolution = resolve_product_and_fields(
+        effective_cfg,
+        cycle.init_time_utc,
+        save_dir=options.herbie_save_dir,
+    )
     existing_manifest = read_manifest(manifest_path)
     if (
         run_dir.exists()
@@ -555,6 +671,8 @@ def run_pipeline(
     )
 
     try:
+        total_timer = perf_counter()
+        extract_timer = perf_counter()
         rows, bytes_by_file = _extract_all_rows(
             init_time_utc=cycle.init_time_utc,
             members=members,
@@ -562,13 +680,19 @@ def run_pipeline(
             fields=fields,
             cfg=effective_cfg,
             point=point,
+            save_dir=options.herbie_save_dir,
         )
+        extract_elapsed = perf_counter() - extract_timer
+
+        transform_timer = perf_counter()
         member_df = _normalize_dataframe(pd.DataFrame(rows))
         member_df = validate_member_schema(member_df, effective_cfg.runtime.schema_version)
 
         summary_df = build_ensemble_summary(member_df)
         summary_df = validate_summary_schema(summary_df, effective_cfg.runtime.schema_version)
+        transform_elapsed = perf_counter() - transform_timer
 
+        qc_timer = perf_counter()
         expected_rows = _expected_row_count(fields, members, leads)
         qc = run_qc(
             member_df,
@@ -580,10 +704,12 @@ def run_pipeline(
         )
         if not qc.get("pass", False):
             raise RuntimeError(f"QC failed: {json.dumps(qc, indent=2)}")
+        qc_elapsed = perf_counter() - qc_timer
 
         bytes_downloaded = int(sum(bytes_by_file.values()))
         completed = _utcnow()
 
+        total_elapsed = perf_counter() - total_timer
         manifest = dict(base_manifest)
         manifest.update(
             {
@@ -599,38 +725,53 @@ def run_pipeline(
                 "downloaded_files_count": int(len(bytes_by_file)),
                 "record_counts_by_variable_level": _record_counts_by_variable_level(member_df),
                 "qc": qc,
+                "timing_seconds": {
+                    "extract": round(extract_elapsed, 3),
+                    "transform": round(transform_elapsed, 3),
+                    "qc": round(qc_elapsed, 3),
+                    "total": round(total_elapsed, 3),
+                },
                 "deleted_runs": [],
                 "deleted_failed_runs": [],
+                "retention_disabled": bool(options.disable_pruning),
             }
         )
 
         logs.append(f"bytes_downloaded={bytes_downloaded}")
+        logs.append(f"timing_extract_sec={extract_elapsed:.3f}")
+        logs.append(f"timing_transform_sec={transform_elapsed:.3f}")
+        logs.append(f"timing_qc_sec={qc_elapsed:.3f}")
+        logs.append(f"timing_total_sec={total_elapsed:.3f}")
         logs.append("pruned_runs=pending")
         logs.append("pruned_failed_runs=pending")
         logs.append(f"run_completed_utc={completed.isoformat()}")
 
+        write_timer = perf_counter()
         write_run_outputs(temp_dir, member_df, summary_df, manifest, logs)
         publish_run(temp_dir, run_dir, force=overwrite_existing)
+        write_elapsed = perf_counter() - write_timer
 
         deleted: List[str] = []
         deleted_failed: List[str] = []
-        if profile == "full":
-            update_latest_pointer(runs_root, effective_cfg.runtime.latest_pointer_name, run_tag)
-            deleted = prune_old_runs(runs_root, effective_cfg.runtime.keep_cycles, protected=[run_tag])
-            deleted_failed = prune_failed_runs(
-                runs_root, keep_failed_runs=effective_cfg.runtime.keep_failed_runs
-            )
-        else:
-            deleted = prune_old_runs(
-                runs_root, effective_cfg.runtime.keep_smoke_runs, protected=[run_tag]
-            )
-            deleted_failed = prune_failed_runs(
-                runs_root, keep_failed_runs=effective_cfg.runtime.keep_failed_runs
-            )
+        if not options.disable_pruning:
+            if profile == "full":
+                update_latest_pointer(runs_root, effective_cfg.runtime.latest_pointer_name, run_tag)
+                deleted = prune_old_runs(runs_root, effective_cfg.runtime.keep_cycles, protected=[run_tag])
+                deleted_failed = prune_failed_runs(
+                    runs_root, keep_failed_runs=effective_cfg.runtime.keep_failed_runs
+                )
+            else:
+                deleted = prune_old_runs(
+                    runs_root, effective_cfg.runtime.keep_smoke_runs, protected=[run_tag]
+                )
+                deleted_failed = prune_failed_runs(
+                    runs_root, keep_failed_runs=effective_cfg.runtime.keep_failed_runs
+                )
 
         latest_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         latest_manifest["deleted_runs"] = deleted
         latest_manifest["deleted_failed_runs"] = deleted_failed
+        latest_manifest["timing_seconds"]["publish_and_retention"] = round(write_elapsed, 3)
         manifest_path.write_text(json.dumps(latest_manifest, indent=2), encoding="utf-8")
 
         log_path = run_dir / "run.log"
