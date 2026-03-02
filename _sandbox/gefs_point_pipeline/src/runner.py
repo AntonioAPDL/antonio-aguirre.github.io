@@ -404,8 +404,9 @@ def _extract_member_lead(
         }
         if save_dir is not None:
             make_kwargs["save_dir"] = save_dir
-        handle = make_herbie(**make_kwargs)
+        product_rows: List[Dict[str, Any]] = []
         try:
+            handle = make_herbie(**make_kwargs)
             result = _retry_call(
                 lambda: download_subset(handle, combined_search),
                 retries=cfg.runtime.retries,
@@ -427,7 +428,7 @@ def _extract_member_lead(
                     target_lon=point.lon,
                     search_max_km=point.search_max_km,
                 )
-                rows.append(
+                product_rows.append(
                     {
                         "site_id": point.usgs_site,
                         "init_time_utc": init_time_utc,
@@ -450,6 +451,7 @@ def _extract_member_lead(
                         "error": "",
                     }
                 )
+            rows.extend(product_rows)
         except Exception as exc:
             for field in product_fields:
                 rows.append(

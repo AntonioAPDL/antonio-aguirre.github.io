@@ -11,16 +11,67 @@ WEB_JSON="${REPO_ROOT}/data/_sandbox_gefs/web/gefs_big_trees_latest.json"
 ASSET_JSON="${REPO_ROOT}/assets/data/forecasts/gefs_big_trees_latest.json"
 OBS_WINDOW_DAYS="${OBS_WINDOW_DAYS:-20}"
 ANALYSIS_HISTORY_MAX_COMMITS="${ANALYSIS_HISTORY_MAX_COMMITS:-240}"
+ALLOW_STALE_ON_ERROR="${GEFS_FORECAST_ALLOW_STALE_ON_ERROR:-0}"
+
+log_warn() { echo "[WARN] $*" >&2; }
+log_error() { echo "[ERROR] $*" >&2; }
+
+gh_warn() {
+  local message="$*"
+  if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+    echo "::warning::${message}"
+  else
+    log_warn "${message}"
+  fi
+}
+
+print_asset_metadata() {
+  python - <<'PY'
+import json
+from pathlib import Path
+
+path = Path("assets/data/forecasts/gefs_big_trees_latest.json")
+if not path.exists():
+    print("[WARN] existing asset is missing:", path)
+    raise SystemExit(0)
+try:
+    data = json.loads(path.read_text(encoding="utf-8"))
+except Exception as exc:
+    print("[WARN] existing asset is not valid JSON:", path, exc)
+    raise SystemExit(0)
+print("[INFO] using existing GEFS asset:", path)
+print("[INFO] generated_at_utc:", data.get("generated_at_utc"))
+print("[INFO] init_time_utc:", data.get("init_time_utc"))
+print("[INFO] member_count:", data.get("member_count"))
+PY
+}
+
+keep_stale_and_exit() {
+  local reason="$1"
+  if [[ "${ALLOW_STALE_ON_ERROR}" == "1" ]] && [[ -f "${ASSET_JSON}" ]]; then
+    gh_warn "${reason}"
+    gh_warn "Keeping tracked GEFS asset without update: ${ASSET_JSON}"
+    print_asset_metadata
+    exit 0
+  fi
+  log_error "${reason}"
+  if [[ "${ALLOW_STALE_ON_ERROR}" != "1" ]]; then
+    log_error "Set GEFS_FORECAST_ALLOW_STALE_ON_ERROR=1 to allow stale-asset fallback."
+  elif [[ ! -f "${ASSET_JSON}" ]]; then
+    log_error "Stale fallback was requested but no prior asset exists at ${ASSET_JSON}."
+  fi
+  exit 1
+}
 
 cd "${REPO_ROOT}"
 
 if [[ ! -f "${RUNNER}" ]]; then
-  echo "Runner not found at ${RUNNER}" >&2
+  log_error "Runner not found at ${RUNNER}"
   exit 1
 fi
 
 if [[ ! -f "${EXPORTER}" ]]; then
-  echo "Exporter not found at ${EXPORTER}" >&2
+  log_error "Exporter not found at ${EXPORTER}"
   exit 1
 fi
 
@@ -33,32 +84,34 @@ if ! python - <<'PY' 2>/dev/null
 import pandas, numpy, yaml, xarray, herbie, cfgrib  # noqa: F401
 PY
 then
-  echo "Missing Python dependencies for GEFS pipeline." >&2
+  log_error "Missing Python dependencies for GEFS pipeline."
   echo "Install with:" >&2
   echo "  cd _sandbox/gefs_point_pipeline && python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt" >&2
   exit 1
 fi
 
-python "${RUNNER}" --gefs-config "${CFG}" --profile full --log-level INFO
-python "${EXPORTER}" \
-  --gefs-config "${CFG}" \
-  --observation-window-days "${OBS_WINDOW_DAYS}" \
-  --analysis-history-max-commits "${ANALYSIS_HISTORY_MAX_COMMITS}"
-
-if [[ ! -f "${WEB_JSON}" ]]; then
-  echo "Expected web export not found: ${WEB_JSON}" >&2
-  exit 1
+if ! python "${RUNNER}" --gefs-config "${CFG}" --profile full --log-level INFO; then
+  keep_stale_and_exit "GEFS runner failed."
 fi
 
-mkdir -p "$(dirname "${ASSET_JSON}")"
-cp "${WEB_JSON}" "${ASSET_JSON}"
+if ! python "${EXPORTER}" \
+  --gefs-config "${CFG}" \
+  --observation-window-days "${OBS_WINDOW_DAYS}" \
+  --analysis-history-max-commits "${ANALYSIS_HISTORY_MAX_COMMITS}"; then
+  keep_stale_and_exit "GEFS exporter failed."
+fi
 
-python - <<'PY'
+if [[ ! -f "${WEB_JSON}" ]]; then
+  keep_stale_and_exit "Expected web export not found: ${WEB_JSON}"
+fi
+
+if ! GEFS_VALIDATE_PATH="${WEB_JSON}" python - <<'PY'
 import json
 from datetime import datetime, timedelta, timezone
+import os
 from pathlib import Path
 
-path = Path("assets/data/forecasts/gefs_big_trees_latest.json")
+path = Path(os.environ.get("GEFS_VALIDATE_PATH", "assets/data/forecasts/gefs_big_trees_latest.json"))
 data = json.loads(path.read_text(encoding="utf-8"))
 print("GEFS file:", path)
 print("generated_at_utc:", data.get("generated_at_utc"))
@@ -170,3 +223,11 @@ if errors:
     raise SystemExit(1)
 print("validation_status=ok")
 PY
+then
+  keep_stale_and_exit "GEFS validation failed for freshly exported payload."
+fi
+
+mkdir -p "$(dirname "${ASSET_JSON}")"
+cp "${WEB_JSON}" "${ASSET_JSON}"
+
+print_asset_metadata
