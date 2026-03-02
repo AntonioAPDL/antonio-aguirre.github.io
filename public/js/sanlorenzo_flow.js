@@ -21,6 +21,16 @@
   const STORAGE_VERSION = 3;
   const CFS_TO_CMS = 0.0283168466;
   const CMS_TO_CFS = 1 / CFS_TO_CMS;
+  const PLOT_LAYOUT_STYLE = {
+    margin: { l: 60, r: 20, t: 24, b: 52 },
+    legend: {
+      orientation: 'h',
+      y: 1.18,
+      x: 0,
+      xanchor: 'left',
+      fontSize: 11
+    }
+  };
   const FORECAST_START_MARKER_STYLE = {
     color: '#111827',
     width: 1.4,
@@ -436,7 +446,7 @@
     }
 
     return {
-      margin: { l: 60, r: 20, t: 20, b: 50 },
+      margin: PLOT_LAYOUT_STYLE.margin,
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
       hovermode: 'x unified',
@@ -450,6 +460,15 @@
       font: {
         color: colors.text,
         family: 'Source Sans Pro, Helvetica, Arial, sans-serif'
+      },
+      legend: {
+        orientation: PLOT_LAYOUT_STYLE.legend.orientation,
+        y: PLOT_LAYOUT_STYLE.legend.y,
+        x: PLOT_LAYOUT_STYLE.legend.x,
+        xanchor: PLOT_LAYOUT_STYLE.legend.xanchor,
+        font: { size: PLOT_LAYOUT_STYLE.legend.fontSize, color: colors.text },
+        itemclick: 'toggle',
+        itemdoubleclick: 'toggleothers'
       },
       xaxis: xaxis,
       yaxis: yaxis

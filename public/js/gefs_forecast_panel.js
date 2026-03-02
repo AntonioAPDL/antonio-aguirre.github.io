@@ -3,6 +3,16 @@
 
   if (window.__gefsForecastPanelInitialized) return;
   window.__gefsForecastPanelInitialized = true;
+  const PLOT_LAYOUT_STYLE = {
+    margin: { l: 60, r: 20, t: 24, b: 52 },
+    legend: {
+      orientation: 'h',
+      y: 1.18,
+      x: 0,
+      xanchor: 'left',
+      fontSize: 11
+    }
+  };
   const FORECAST_START_MARKER_STYLE = {
     color: '#111827',
     width: 1.4,
@@ -384,7 +394,7 @@
   function layout(yTitle, colors, options) {
     const opts = options || {};
     const chartLayout = {
-      margin: { l: 62, r: 20, t: 22, b: 56 },
+      margin: PLOT_LAYOUT_STYLE.margin,
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: 'rgba(0,0,0,0)',
       font: { color: colors.text, family: 'Source Sans Pro, Helvetica, Arial, sans-serif' },
@@ -418,11 +428,11 @@
         rangemode: opts.yRangeMode || 'normal'
       },
       legend: {
-        orientation: 'h',
-        y: opts.legendY === undefined ? 1.18 : opts.legendY,
-        x: 0,
-        xanchor: 'left',
-        font: { size: 11, color: colors.text },
+        orientation: PLOT_LAYOUT_STYLE.legend.orientation,
+        y: opts.legendY === undefined ? PLOT_LAYOUT_STYLE.legend.y : opts.legendY,
+        x: PLOT_LAYOUT_STYLE.legend.x,
+        xanchor: PLOT_LAYOUT_STYLE.legend.xanchor,
+        font: { size: PLOT_LAYOUT_STYLE.legend.fontSize, color: colors.text },
         itemclick: 'toggle',
         itemdoubleclick: 'toggleothers'
       }
@@ -662,7 +672,6 @@
         initTime: initDate,
         yTickFormat: '.1f',
         yRangeMode: 'tozero',
-        legendY: 1.19,
         showZeroLine: true
       }),
       { responsive: true, displayModeBar: false }
@@ -787,7 +796,6 @@
         xRange,
         initTime: initDate,
         yTickFormat: '.2f',
-        legendY: 1.22,
         showZeroLine: false
       }),
       { responsive: true, displayModeBar: false }
