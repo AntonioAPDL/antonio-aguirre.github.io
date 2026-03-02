@@ -147,6 +147,20 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - Exporter default is GEFS-only; observed payload is opt-in with `--include-observed-retrospective`
 - Exporter uses a history-scan guard: skips git-history backfill when prior 20-day GEFS context is already complete
 
+Background historical GEFS updater (no live monitoring):
+
+- `scripts/start_gefs_history_daemon.sh`
+- `scripts/stop_gefs_history_daemon.sh`
+- `scripts/status_gefs_history_daemon.sh`
+- `scripts/install_gefs_history_daemon_cron.sh` (optional `@reboot` + 30-minute watchdog install)
+- launcher prefers a detached `tmux` session (`gefs_history_daemon`) when available
+
+The daemon writes status to:
+
+- `data/_sandbox_gefs/history/state/daemon_status.json`
+- `data/_sandbox_gefs/history/state/backfill_status.json`
+- `data/_sandbox_gefs/history/state/daemon_runs.jsonl`
+
 Panel override:
 
 - `data-observation-window-days` (defaults to `20` if omitted)

@@ -135,6 +135,16 @@ Daemon state artifacts:
 - `data/_sandbox_gefs/history/state/daemon_status.json`
 - `data/_sandbox_gefs/history/state/daemon_runs.jsonl`
 - `data/_sandbox_gefs/history/state/backfill_status.json`
+- `data/_sandbox_gefs/history/state/daemon.lock` (single-instance lock metadata)
+- `data/_sandbox_gefs/history/state/daemon.pid`
+
+Operational wrappers from repo root:
+
+- `scripts/start_gefs_history_daemon.sh`
+- `scripts/stop_gefs_history_daemon.sh`
+- `scripts/status_gefs_history_daemon.sh`
+- `scripts/install_gefs_history_daemon_cron.sh` (`@reboot` + `*/30` watchdog)
+- start wrapper prefers detached `tmux` session `gefs_history_daemon`
 
 Retention controls (in `config/gefs.yaml`):
 

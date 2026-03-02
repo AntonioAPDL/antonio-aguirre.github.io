@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import atexit
 import argparse
 import datetime as dt
+import fcntl
 import json
 import logging
+import os
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 
 SCRIPT_PATH = Path(__file__).resolve()
@@ -40,6 +43,67 @@ def _append_jsonl(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(payload, sort_keys=True) + "\n")
+
+
+def _read_json(path: Path) -> Dict[str, Any]:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _acquire_daemon_lock(
+    lock_path: Path,
+    *,
+    run_label: str,
+    wait_for_lock: bool,
+) -> Tuple[Optional[int], Dict[str, Any]]:
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(lock_path), os.O_RDWR | os.O_CREAT, 0o664)
+    try:
+        flags = fcntl.LOCK_EX
+        if not wait_for_lock:
+            flags |= fcntl.LOCK_NB
+        fcntl.flock(fd, flags)
+    except BlockingIOError:
+        existing = _read_json(lock_path)
+        os.close(fd)
+        return None, existing
+
+    payload = {
+        "pid": int(os.getpid()),
+        "run_label": run_label,
+        "started_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+    }
+    os.ftruncate(fd, 0)
+    os.write(fd, json.dumps(payload, indent=2).encode("utf-8"))
+    os.fsync(fd)
+    return fd, payload
+
+
+def _release_daemon_lock(lock_fd: Optional[int]) -> None:
+    if lock_fd is None:
+        return
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+    finally:
+        os.close(lock_fd)
+
+
+def _write_pid_atomic(path: Path, pid: int) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(f"{int(pid)}\n", encoding="utf-8")
+    tmp.replace(path)
+
+
+def _remove_pid_if_owner(path: Path, pid: int) -> None:
+    try:
+        current = int(path.read_text(encoding="utf-8").strip())
+    except Exception:
+        current = -1
+    if current == int(pid):
+        path.unlink(missing_ok=True)
 
 
 def parse_args() -> argparse.Namespace:
@@ -131,6 +195,11 @@ def parse_args() -> argparse.Namespace:
         "--run-label",
         default="gefs_history_daemon",
         help="Label for daemon-generated backfill runs.",
+    )
+    parser.add_argument(
+        "--wait-for-lock",
+        action="store_true",
+        help="Wait for daemon lock if another daemon instance is active.",
     )
     parser.add_argument(
         "--log-level",
@@ -237,6 +306,30 @@ def main() -> int:
     state_root.mkdir(parents=True, exist_ok=True)
     status_path = state_root / "daemon_status.json"
     runs_log_path = state_root / "daemon_runs.jsonl"
+    lock_path = state_root / "daemon.lock"
+    pid_path = state_root / "daemon.pid"
+
+    lock_fd, lock_meta = _acquire_daemon_lock(
+        lock_path,
+        run_label=str(args.run_label),
+        wait_for_lock=bool(args.wait_for_lock),
+    )
+    if lock_fd is None:
+        _write_json_atomic(
+            status_path,
+            {
+                "daemon_state": "already_running",
+                "updated_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+                "lock_path": str(lock_path),
+                "locked_by": lock_meta,
+            },
+        )
+        logging.warning("daemon lock busy: %s", lock_meta)
+        return 0
+
+    atexit.register(_release_daemon_lock, lock_fd)
+    _write_pid_atomic(pid_path, os.getpid())
+    atexit.register(_remove_pid_if_owner, pid_path, os.getpid())
 
     full_start = _parse_dt(args.full_start_init)
     if full_start is None:
@@ -252,6 +345,8 @@ def main() -> int:
             "daemon_state": "running",
             "started_utc": started_utc.isoformat(),
             "updated_utc": started_utc.isoformat(),
+            "pid": int(os.getpid()),
+            "lock_path": str(lock_path),
             "sleep_seconds": int(args.sleep_seconds),
             "catchup_every_hours": int(args.catchup_every_hours),
             "full_start_init_utc": full_start.isoformat(),
@@ -263,85 +358,111 @@ def main() -> int:
     sleep_seconds = max(60, int(args.sleep_seconds))
     catchup_every_hours = max(1, int(args.catchup_every_hours))
 
-    while True:
-        now = dt.datetime.now(dt.timezone.utc)
-        do_catchup = (
-            last_catchup is None
-            or (now - last_catchup) >= dt.timedelta(hours=catchup_every_hours)
-        )
+    try:
+        while True:
+            now = dt.datetime.now(dt.timezone.utc)
+            do_catchup = (
+                last_catchup is None
+                or (now - last_catchup) >= dt.timedelta(hours=catchup_every_hours)
+            )
 
-        if do_catchup:
-            catchup_start, catchup_end = resolve_backfill_window(
+            if do_catchup:
+                catchup_start, catchup_end = resolve_backfill_window(
+                    cfg_path=Path(args.gefs_config),
+                    start_init_utc=full_start,
+                    end_init_utc=None,
+                    pilot_days=None,
+                )
+                _run_one_phase(
+                    phase_name="catchup_full",
+                    repo_root=repo_root,
+                    args=args,
+                    history_root=history_root,
+                    start_init_utc=catchup_start,
+                    end_init_utc=catchup_end,
+                    retry_failed_only=False,
+                    status_path=status_path,
+                    runs_log_path=runs_log_path,
+                )
+                _run_one_phase(
+                    phase_name="catchup_retry_failed",
+                    repo_root=repo_root,
+                    args=args,
+                    history_root=history_root,
+                    start_init_utc=catchup_start,
+                    end_init_utc=catchup_end,
+                    retry_failed_only=True,
+                    status_path=status_path,
+                    runs_log_path=runs_log_path,
+                )
+                last_catchup = dt.datetime.now(dt.timezone.utc)
+
+            inc_start, inc_end = resolve_backfill_window(
                 cfg_path=Path(args.gefs_config),
-                start_init_utc=full_start,
+                start_init_utc=None,
                 end_init_utc=None,
-                pilot_days=None,
+                pilot_days=int(args.incremental_pilot_days),
             )
             _run_one_phase(
-                phase_name="catchup_full",
+                phase_name="incremental_recent",
                 repo_root=repo_root,
                 args=args,
                 history_root=history_root,
-                start_init_utc=catchup_start,
-                end_init_utc=catchup_end,
+                start_init_utc=inc_start,
+                end_init_utc=inc_end,
                 retry_failed_only=False,
                 status_path=status_path,
                 runs_log_path=runs_log_path,
             )
             _run_one_phase(
-                phase_name="catchup_retry_failed",
+                phase_name="incremental_retry_failed",
                 repo_root=repo_root,
                 args=args,
                 history_root=history_root,
-                start_init_utc=catchup_start,
-                end_init_utc=catchup_end,
+                start_init_utc=inc_start,
+                end_init_utc=inc_end,
                 retry_failed_only=True,
                 status_path=status_path,
                 runs_log_path=runs_log_path,
             )
-            last_catchup = dt.datetime.now(dt.timezone.utc)
 
-        inc_start, inc_end = resolve_backfill_window(
-            cfg_path=Path(args.gefs_config),
-            start_init_utc=None,
-            end_init_utc=None,
-            pilot_days=int(args.incremental_pilot_days),
-        )
-        _run_one_phase(
-            phase_name="incremental_recent",
-            repo_root=repo_root,
-            args=args,
-            history_root=history_root,
-            start_init_utc=inc_start,
-            end_init_utc=inc_end,
-            retry_failed_only=False,
-            status_path=status_path,
-            runs_log_path=runs_log_path,
-        )
-        _run_one_phase(
-            phase_name="incremental_retry_failed",
-            repo_root=repo_root,
-            args=args,
-            history_root=history_root,
-            start_init_utc=inc_start,
-            end_init_utc=inc_end,
-            retry_failed_only=True,
-            status_path=status_path,
-            runs_log_path=runs_log_path,
-        )
-
-        next_wake = dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=sleep_seconds)
+            next_wake = dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=sleep_seconds)
+            _write_json_atomic(
+                status_path,
+                {
+                    "daemon_state": "sleeping",
+                    "updated_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+                    "pid": int(os.getpid()),
+                    "next_wake_utc": next_wake.isoformat(),
+                    "sleep_seconds": sleep_seconds,
+                    "last_catchup_utc": last_catchup.isoformat() if last_catchup else "",
+                },
+            )
+            time.sleep(sleep_seconds)
+    except KeyboardInterrupt:
+        logging.info("daemon interrupted by signal/keyboard")
         _write_json_atomic(
             status_path,
             {
-                "daemon_state": "sleeping",
+                "daemon_state": "stopped",
                 "updated_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
-                "next_wake_utc": next_wake.isoformat(),
-                "sleep_seconds": sleep_seconds,
-                "last_catchup_utc": last_catchup.isoformat() if last_catchup else "",
+                "pid": int(os.getpid()),
+                "reason": "interrupt",
             },
         )
-        time.sleep(sleep_seconds)
+        return 0
+    except Exception as exc:  # pragma: no cover
+        logging.exception("daemon crashed")
+        _write_json_atomic(
+            status_path,
+            {
+                "daemon_state": "error",
+                "updated_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+                "pid": int(os.getpid()),
+                "error": str(exc),
+            },
+        )
+        return 1
 
 
 if __name__ == "__main__":
