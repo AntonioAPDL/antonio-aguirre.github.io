@@ -795,7 +795,7 @@
       const floodMajor = parseOptionalNumber(dataset.floodMajorCfs || dataset.thresholdMajor);
       const defaultForecastUrl = mode === 'discharge' ? '/assets/data/forecasts/big_trees_latest.json' : '';
       const forecastUrlRaw = (dataset.forecastUrl || defaultForecastUrl || '').trim();
-      const defaultQdesnUrl = mode === 'discharge' ? '/assets/data/forecasts/big_trees_qdesn_latest.json' : '';
+      const defaultQdesnUrl = '';
       const qdesnUrlRaw = (dataset.qdesnUrl || defaultQdesnUrl || '').trim();
       return {
         siteId: dataset.site,
