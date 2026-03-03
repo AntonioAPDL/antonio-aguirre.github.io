@@ -192,6 +192,19 @@
     return traces;
   }
 
+  function filterSeriesToXRange(points, xRange) {
+    if (!Array.isArray(points) || !points.length) return [];
+    if (!Array.isArray(xRange) || xRange.length !== 2) return points.slice();
+    const start = xRange[0] instanceof Date ? xRange[0].getTime() : NaN;
+    const end = xRange[1] instanceof Date ? xRange[1].getTime() : NaN;
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return points.slice();
+    return points.filter((point) => {
+      if (!point || !(point.x instanceof Date) || Number.isNaN(point.x.getTime())) return false;
+      const x = point.x.getTime();
+      return x >= start && x <= end;
+    });
+  }
+
   function buildForecastStartMarker(forecastStart, colors) {
     if (!(forecastStart instanceof Date) || Number.isNaN(forecastStart.getTime())) {
       return { shapes: [], annotations: [] };
@@ -328,7 +341,7 @@
     };
   }
 
-  function buildQdesnOverlay(payload, observedUnits, logAxis) {
+  function buildQdesnOverlay(payload, observedUnits, logAxis, xRange) {
     const traces = [];
     const extentPoints = [];
     let warning = null;
@@ -366,9 +379,18 @@
     const lo95Raw = series.lo95 || series.lower95 || series.p025 || null;
     const hi95Raw = series.hi95 || series.upper95 || series.p975 || null;
 
-    const q50 = parseFlowSeries(q50Raw, modelUnits, observedFlowUnits, logAxis);
-    const lo95 = parseFlowSeries(lo95Raw, modelUnits, observedFlowUnits, logAxis);
-    const hi95 = parseFlowSeries(hi95Raw, modelUnits, observedFlowUnits, logAxis);
+    const q50 = filterSeriesToXRange(
+      parseFlowSeries(q50Raw, modelUnits, observedFlowUnits, logAxis),
+      xRange
+    );
+    const lo95 = filterSeriesToXRange(
+      parseFlowSeries(lo95Raw, modelUnits, observedFlowUnits, logAxis),
+      xRange
+    );
+    const hi95 = filterSeriesToXRange(
+      parseFlowSeries(hi95Raw, modelUnits, observedFlowUnits, logAxis),
+      xRange
+    );
 
     if (Array.isArray(lo95) && lo95.length && Array.isArray(hi95) && hi95.length) {
       traces.push({
@@ -389,10 +411,10 @@
         line: { width: 0, color: 'rgba(15, 118, 110, 0.18)' },
         fill: 'tonexty',
         fillcolor: 'rgba(15, 118, 110, 0.18)',
-        name: 'Q-DESN 95% CI',
+        name: 'Q-DESN 95% interval',
         legendrank: 18,
         legendgroup: 'qdesn',
-        hovertemplate: `%{x|%b %d, %Y}<br>Q-DESN 95% CI: %{y:.2f} ${observedFlowUnits}<extra></extra>`
+        hovertemplate: `%{x|%b %d, %Y}<br>Q-DESN 95% interval: %{y:.2f} ${observedFlowUnits}<extra></extra>`
       });
     }
 
@@ -402,10 +424,10 @@
         y: q50.map((p) => p.y),
         type: 'scatter',
         mode: 'lines',
-        name: 'Q-DESN median',
+        name: 'Q-DESN median (q50)',
         legendrank: 19,
         legendgroup: 'qdesn',
-        line: { color: '#0f766e', width: 2.2, dash: 'solid' },
+        line: { color: '#0f766e', width: 2.4, dash: 'solid' },
         hovertemplate: `%{x|%b %d, %Y}<br>Q-DESN p50: %{y:.2f} ${observedFlowUnits}<extra></extra>`
       });
     }
@@ -421,7 +443,7 @@
     return {
       traces,
       extentPoints,
-      note: traces.length ? 'Includes Q-DESN fit' : null,
+      note: traces.length ? 'Includes Q-DESN q50 with 95% interval' : null,
       warning
     };
   }
@@ -984,11 +1006,12 @@
         return;
       }
 
+      const xRange = this.resolveTimelineWindow(lastObs);
       const forecastOverlay = (this.config.mode === 'discharge')
         ? buildForecastOverlay(forecastPayload, displayUnits, logAxis)
         : { traces: [], extentPoints: [], note: null, warning: null };
       const qdesnOverlay = (this.config.mode === 'discharge')
-        ? buildQdesnOverlay(qdesnPayload, displayUnits, logAxis)
+        ? buildQdesnOverlay(qdesnPayload, displayUnits, logAxis, xRange)
         : { traces: [], extentPoints: [], note: null, warning: null };
 
       const extentCandidates = usablePoints
@@ -1011,7 +1034,6 @@
       const yTitle = logAxis ? `${yTitleBase} (log scale)` : yTitleBase;
       const threshold = buildThresholdShapes(this.config, colors, yRange);
       const forecastStartMarker = buildForecastStartMarker(forecastOverlay.forecastStart, colors);
-      const xRange = this.resolveTimelineWindow(lastObs);
       const baseTrace = buildTrace(usablePoints, displayUnits, colors);
       const traces = [baseTrace]
         .concat(qdesnOverlay.traces || [])
