@@ -328,6 +328,104 @@
     };
   }
 
+  function buildQdesnOverlay(payload, observedUnits, logAxis) {
+    const traces = [];
+    const extentPoints = [];
+    let warning = null;
+
+    if (!payload || typeof payload !== 'object') {
+      return { traces, extentPoints, note: null, warning: null };
+    }
+
+    const observedFlowUnits = normalizeUnits(observedUnits);
+    if (observedFlowUnits !== 'cfs' && observedFlowUnits !== 'cms') {
+      return {
+        traces,
+        extentPoints,
+        note: null,
+        warning: 'Q-DESN fit is temporarily unavailable.'
+      };
+    }
+
+    const series = payload.series && typeof payload.series === 'object' ? payload.series : null;
+    if (!series) {
+      return { traces, extentPoints, note: null, warning: null };
+    }
+
+    const unitCandidates = normalizeUnitCandidates(payload.units);
+    let modelUnits = null;
+    if (unitCandidates.includes(observedFlowUnits)) {
+      modelUnits = observedFlowUnits;
+    } else if (unitCandidates.length) {
+      modelUnits = unitCandidates[0];
+    } else {
+      modelUnits = observedFlowUnits;
+    }
+
+    const q50Raw = series.q50 || series.p50 || series.median || null;
+    const lo95Raw = series.lo95 || series.lower95 || series.p025 || null;
+    const hi95Raw = series.hi95 || series.upper95 || series.p975 || null;
+
+    const q50 = parseFlowSeries(q50Raw, modelUnits, observedFlowUnits, logAxis);
+    const lo95 = parseFlowSeries(lo95Raw, modelUnits, observedFlowUnits, logAxis);
+    const hi95 = parseFlowSeries(hi95Raw, modelUnits, observedFlowUnits, logAxis);
+
+    if (Array.isArray(lo95) && lo95.length && Array.isArray(hi95) && hi95.length) {
+      traces.push({
+        x: hi95.map((p) => p.x),
+        y: hi95.map((p) => p.y),
+        type: 'scatter',
+        mode: 'lines',
+        line: { width: 0, color: 'rgba(15, 118, 110, 0.18)' },
+        hoverinfo: 'skip',
+        showlegend: false,
+        legendgroup: 'qdesn'
+      });
+      traces.push({
+        x: lo95.map((p) => p.x),
+        y: lo95.map((p) => p.y),
+        type: 'scatter',
+        mode: 'lines',
+        line: { width: 0, color: 'rgba(15, 118, 110, 0.18)' },
+        fill: 'tonexty',
+        fillcolor: 'rgba(15, 118, 110, 0.18)',
+        name: 'Q-DESN 95% CI',
+        legendrank: 18,
+        legendgroup: 'qdesn',
+        hovertemplate: `%{x|%b %d, %Y}<br>Q-DESN 95% CI: %{y:.2f} ${observedFlowUnits}<extra></extra>`
+      });
+    }
+
+    if (Array.isArray(q50) && q50.length) {
+      traces.push({
+        x: q50.map((p) => p.x),
+        y: q50.map((p) => p.y),
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Q-DESN median',
+        legendrank: 19,
+        legendgroup: 'qdesn',
+        line: { color: '#0f766e', width: 2.2, dash: 'solid' },
+        hovertemplate: `%{x|%b %d, %Y}<br>Q-DESN p50: %{y:.2f} ${observedFlowUnits}<extra></extra>`
+      });
+    }
+
+    [lo95, q50, hi95].forEach((seriesPoints) => {
+      (seriesPoints || []).forEach((point) => extentPoints.push(point));
+    });
+
+    if (!traces.length) {
+      warning = 'Q-DESN fit is temporarily unavailable.';
+    }
+
+    return {
+      traces,
+      extentPoints,
+      note: traces.length ? 'Includes Q-DESN fit' : null,
+      warning
+    };
+  }
+
   function getThemeColors() {
     const styles = getComputedStyle(document.documentElement);
     return {
@@ -675,6 +773,8 @@
       const floodMajor = parseOptionalNumber(dataset.floodMajorCfs || dataset.thresholdMajor);
       const defaultForecastUrl = mode === 'discharge' ? '/assets/data/forecasts/big_trees_latest.json' : '';
       const forecastUrlRaw = (dataset.forecastUrl || defaultForecastUrl || '').trim();
+      const defaultQdesnUrl = mode === 'discharge' ? '/assets/data/forecasts/big_trees_qdesn_latest.json' : '';
+      const qdesnUrlRaw = (dataset.qdesnUrl || defaultQdesnUrl || '').trim();
       return {
         siteId: dataset.site,
         parameterCd: parameterCd,
@@ -690,6 +790,7 @@
         thresholdModerate: floodModerate,
         thresholdMajor: floodMajor,
         forecastUrl: forecastUrlRaw,
+        qdesnUrl: qdesnUrlRaw,
         logY: logY,
         observationWindowDays: observationWindowDays,
         futureHorizonHours: Number.isFinite(futureHorizonHoursRaw)
@@ -865,7 +966,7 @@
       return [start, end];
     }
 
-    renderPlot({ points, siteName, units, lastObs, lastRefresh, forecastPayload }, options = {}) {
+    renderPlot({ points, siteName, units, lastObs, lastRefresh, forecastPayload, qdesnPayload }, options = {}) {
       if (!window.Plotly) {
         this.setStatus({ warning: 'Plotly failed to load.' });
         return;
@@ -886,8 +987,13 @@
       const forecastOverlay = (this.config.mode === 'discharge')
         ? buildForecastOverlay(forecastPayload, displayUnits, logAxis)
         : { traces: [], extentPoints: [], note: null, warning: null };
+      const qdesnOverlay = (this.config.mode === 'discharge')
+        ? buildQdesnOverlay(qdesnPayload, displayUnits, logAxis)
+        : { traces: [], extentPoints: [], note: null, warning: null };
 
-      const extentCandidates = usablePoints.concat(forecastOverlay.extentPoints || []);
+      const extentCandidates = usablePoints
+        .concat(qdesnOverlay.extentPoints || [])
+        .concat(forecastOverlay.extentPoints || []);
       const extent = getDataExtent(extentCandidates, logAxis);
       let yMin = Number.isFinite(this.config.yMin) ? this.config.yMin : extent && extent.min;
       let yMax = Number.isFinite(this.config.yMax) ? this.config.yMax : extent && extent.max;
@@ -907,7 +1013,9 @@
       const forecastStartMarker = buildForecastStartMarker(forecastOverlay.forecastStart, colors);
       const xRange = this.resolveTimelineWindow(lastObs);
       const baseTrace = buildTrace(usablePoints, displayUnits, colors);
-      const traces = [baseTrace].concat(forecastOverlay.traces || []);
+      const traces = [baseTrace]
+        .concat(qdesnOverlay.traces || [])
+        .concat(forecastOverlay.traces || []);
       const allShapes = (threshold.shapes || []).concat(forecastStartMarker.shapes || []);
       const allAnnotations = (threshold.annotations || []).concat(forecastStartMarker.annotations || []);
 
@@ -930,14 +1038,16 @@
         units: displayUnits,
         lastObs,
         lastRefresh,
-        forecastPayload
+        forecastPayload,
+        qdesnPayload
       };
 
       this.updateAriaLabel(siteName);
       this.setLoadedState(true);
       if (!options.silentStatus) {
-        const notes = [options.note, forecastOverlay.note].filter(Boolean).join(' • ');
-        const warning = options.warning || forecastOverlay.warning || null;
+        const notes = [options.note, qdesnOverlay.note, forecastOverlay.note].filter(Boolean).join(' • ');
+        const warningParts = [options.warning, qdesnOverlay.warning, forecastOverlay.warning].filter(Boolean);
+        const warning = warningParts.length ? Array.from(new Set(warningParts)).join(' • ') : null;
         this.setStatus({
           siteName,
           units: displayUnits,
@@ -1152,6 +1262,36 @@
       }
     }
 
+    async fetchQdesnPayload(signal) {
+      if (this.config.mode !== 'discharge' || !this.config.qdesnUrl) {
+        return { payload: null, warning: null };
+      }
+
+      try {
+        const response = await fetch(this.config.qdesnUrl, {
+          cache: 'no-store',
+          signal
+        });
+        if (!response.ok) {
+          return {
+            payload: null,
+            warning: 'Q-DESN fit is temporarily unavailable.'
+          };
+        }
+        const payload = await response.json();
+        if (!payload || typeof payload !== 'object') {
+          return { payload: null, warning: 'Q-DESN fit is temporarily unavailable.' };
+        }
+        return { payload, warning: null };
+      } catch (err) {
+        if (err && err.name === 'AbortError') {
+          throw err;
+        }
+        console.warn('[usgs-iv] qdesn overlay fetch failed', err);
+        return { payload: null, warning: 'Q-DESN fit is temporarily unavailable.' };
+      }
+    }
+
     /**
      * Fetch USGS data and render the Plotly chart.
      */
@@ -1186,6 +1326,8 @@
         const lastObs = points[points.length - 1].x;
         const lastRefresh = new Date();
         const forecastResult = await this.fetchForecastPayload(controller.signal);
+        const qdesnResult = await this.fetchQdesnPayload(controller.signal);
+        const fetchWarnings = [forecastResult.warning, qdesnResult.warning].filter(Boolean);
 
         this.renderPlot({
           points,
@@ -1193,9 +1335,10 @@
           units,
           lastObs,
           lastRefresh,
-          forecastPayload: forecastResult.payload
+          forecastPayload: forecastResult.payload,
+          qdesnPayload: qdesnResult.payload
         }, {
-          note: forecastResult.warning || undefined
+          warning: fetchWarnings.length ? Array.from(new Set(fetchWarnings)).join(' • ') : undefined
         });
         this.saveCache({ points, siteName, units });
         this.scheduleNext(true);
