@@ -13,7 +13,8 @@
     mode: 'discharge',
     logY: false,
     observationWindowDays: 20,
-    futureHorizonHours: 240
+    futureHorizonHours: 240,
+    dailyAvgMinCoverage: 0.90
   };
   const ENDPOINT_BASE = 'https://waterservices.usgs.gov/nwis/iv/';
   const MAX_BACKOFF_MS = 60 * 60 * 1000;
@@ -126,6 +127,31 @@
     return NaN;
   }
 
+  function colorWithAlpha(color, alpha) {
+    if (typeof color !== 'string') return color;
+    const hex = color.trim();
+    const a = clampNumber(Number(alpha), 0, 1, 1);
+    const shortHex = /^#([0-9a-fA-F]{3})$/;
+    const fullHex = /^#([0-9a-fA-F]{6})$/;
+    if (shortHex.test(hex)) {
+      const m = shortHex.exec(hex);
+      const s = m[1];
+      const r = parseInt(`${s[0]}${s[0]}`, 16);
+      const g = parseInt(`${s[1]}${s[1]}`, 16);
+      const b = parseInt(`${s[2]}${s[2]}`, 16);
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+    if (fullHex.test(hex)) {
+      const m = fullHex.exec(hex);
+      const s = m[1];
+      const r = parseInt(s.slice(0, 2), 16);
+      const g = parseInt(s.slice(2, 4), 16);
+      const b = parseInt(s.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+    return color;
+  }
+
   function parseFlowSeries(series, fromUnits, toUnits, logAxis) {
     if (!Array.isArray(series) || !series.length) return [];
     const out = [];
@@ -203,6 +229,88 @@
       const x = point.x.getTime();
       return x >= start && x <= end;
     });
+  }
+
+  function buildDailyAverageOverlay(points, units, colors, logAxis, xRange, minCoverage) {
+    const traces = [];
+    const extentPoints = [];
+    if (!Array.isArray(points) || points.length < 4) {
+      return { traces, extentPoints, note: null };
+    }
+
+    // Estimate nominal cadence from median positive gap (seconds).
+    const gaps = [];
+    for (let i = 1; i < points.length; i += 1) {
+      const dt = (points[i].x - points[i - 1].x) / 1000;
+      if (Number.isFinite(dt) && dt > 0 && dt <= 6 * 3600) gaps.push(dt);
+    }
+    let stepSeconds = 900;
+    if (gaps.length) {
+      const sorted = gaps.slice().sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      stepSeconds = sorted.length % 2
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+    if (!Number.isFinite(stepSeconds) || stepSeconds <= 0) stepSeconds = 900;
+
+    const expectedPerDay = Math.max(1, Math.min(2000, Math.round(86400 / stepSeconds)));
+    const coverage = clampNumber(minCoverage, 0.5, 1.0, DEFAULTS.dailyAvgMinCoverage);
+    const minPoints = Math.max(1, Math.ceil(expectedPerDay * coverage));
+
+    const byDay = new Map();
+    points.forEach((point) => {
+      if (!point || !(point.x instanceof Date) || Number.isNaN(point.x.getTime())) return;
+      if (!Number.isFinite(point.y)) return;
+      const dayKey = point.x.toISOString().slice(0, 10); // UTC day bucket.
+      const rec = byDay.get(dayKey) || { sum: 0, count: 0 };
+      rec.sum += point.y;
+      rec.count += 1;
+      byDay.set(dayKey, rec);
+    });
+
+    const latestDayKey = points[points.length - 1].x.toISOString().slice(0, 10);
+    const dailyPoints = [];
+    Array.from(byDay.keys()).sort().forEach((dayKey) => {
+      if (dayKey === latestDayKey) return; // keep only complete days
+      const rec = byDay.get(dayKey);
+      if (!rec || rec.count < minPoints) return;
+      const avg = rec.sum / rec.count;
+      if (!Number.isFinite(avg)) return;
+      if (logAxis && avg <= 0) return;
+      // Noon UTC marker keeps the day-level series aligned and legible.
+      dailyPoints.push({ x: new Date(`${dayKey}T12:00:00Z`), y: avg });
+    });
+
+    const dailyInRange = filterSeriesToXRange(dailyPoints, xRange);
+    if (!dailyInRange.length) {
+      return { traces, extentPoints, note: null };
+    }
+
+    const lineColor = colorWithAlpha(colors.line, 0.96);
+    traces.push({
+      x: dailyInRange.map((p) => p.x),
+      y: dailyInRange.map((p) => p.y),
+      type: 'scatter',
+      mode: 'lines+markers',
+      name: 'Daily avg (derived)',
+      legendrank: 11,
+      line: { color: lineColor, width: 2.0 },
+      marker: {
+        color: lineColor,
+        size: 4.2,
+        symbol: 'circle-open',
+        line: { color: lineColor, width: 1.2 }
+      },
+      hovertemplate: `%{x|%b %d, %Y}<br>Daily avg (derived): %{y:.2f} ${units}<extra></extra>`
+    });
+
+    dailyInRange.forEach((point) => extentPoints.push(point));
+    return {
+      traces,
+      extentPoints,
+      note: 'Includes derived daily average (complete days)'
+    };
   }
 
   function buildForecastStartMarker(forecastStart, colors) {
@@ -592,22 +700,24 @@
 
   function buildTrace(points, units, colors) {
     const unitLabel = units ? ` ${units}` : '';
+    const observedColor = colorWithAlpha(colors.line, 0.45);
     return {
       x: points.map((p) => p.x),
       y: points.map((p) => p.y),
       type: 'scatter',
       mode: 'lines+markers',
-      name: 'Observed',
+      name: 'Observed (15-min)',
       showlegend: true,
       legendrank: 10,
-      line: { color: colors.line, width: 0.9 },
+      line: { color: observedColor, width: 0.85 },
       marker: {
-        color: colors.line,
-        size: 2.8,
+        color: observedColor,
+        size: 2.2,
+        opacity: 0.55,
         symbol: 'circle',
         line: { width: 0 }
       },
-      hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>Observed: %{y:.2f}${unitLabel}<extra></extra>`
+      hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>Observed (15-min): %{y:.2f}${unitLabel}<extra></extra>`
     };
   }
 
@@ -783,6 +893,7 @@
         DEFAULTS.observationWindowDays
       );
       const futureHorizonHoursRaw = parseOptionalNumber(dataset.futureHorizonHours);
+      const dailyAvgMinCoverageRaw = parseNumber(dataset.dailyAvgMinCoverage, DEFAULTS.dailyAvgMinCoverage);
       const modeRaw = (dataset.mode || DEFAULTS.mode).toLowerCase();
       const mode = modeRaw === 'stage' ? 'stage' : 'discharge';
       const logY = parseBoolean(dataset.logY, DEFAULTS.logY);
@@ -815,6 +926,7 @@
         qdesnUrl: qdesnUrlRaw,
         logY: logY,
         observationWindowDays: observationWindowDays,
+        dailyAvgMinCoverage: clampNumber(dailyAvgMinCoverageRaw, 0.5, 1.0, DEFAULTS.dailyAvgMinCoverage),
         futureHorizonHours: Number.isFinite(futureHorizonHoursRaw)
           ? clampNumber(futureHorizonHoursRaw, 0, 720, DEFAULTS.futureHorizonHours)
           : null
@@ -1013,8 +1125,19 @@
       const qdesnOverlay = (this.config.mode === 'discharge')
         ? buildQdesnOverlay(qdesnPayload, displayUnits, logAxis, xRange)
         : { traces: [], extentPoints: [], note: null, warning: null };
+      const dailyOverlay = (this.config.mode === 'discharge')
+        ? buildDailyAverageOverlay(
+          usablePoints,
+          displayUnits,
+          colors,
+          logAxis,
+          xRange,
+          this.config.dailyAvgMinCoverage
+        )
+        : { traces: [], extentPoints: [], note: null };
 
       const extentCandidates = usablePoints
+        .concat(dailyOverlay.extentPoints || [])
         .concat(qdesnOverlay.extentPoints || [])
         .concat(forecastOverlay.extentPoints || []);
       const extent = getDataExtent(extentCandidates, logAxis);
@@ -1036,6 +1159,7 @@
       const forecastStartMarker = buildForecastStartMarker(forecastOverlay.forecastStart, colors);
       const baseTrace = buildTrace(usablePoints, displayUnits, colors);
       const traces = [baseTrace]
+        .concat(dailyOverlay.traces || [])
         .concat(qdesnOverlay.traces || [])
         .concat(forecastOverlay.traces || []);
       const allShapes = (threshold.shapes || []).concat(forecastStartMarker.shapes || []);
@@ -1067,7 +1191,9 @@
       this.updateAriaLabel(siteName);
       this.setLoadedState(true);
       if (!options.silentStatus) {
-        const notes = [options.note, qdesnOverlay.note, forecastOverlay.note].filter(Boolean).join(' • ');
+        const notes = [options.note, dailyOverlay.note, qdesnOverlay.note, forecastOverlay.note]
+          .filter(Boolean)
+          .join(' • ');
         const warningParts = [options.warning, qdesnOverlay.warning, forecastOverlay.warning].filter(Boolean);
         const warning = warningParts.length ? Array.from(new Set(warningParts)).join(' • ') : null;
         this.setStatus({
