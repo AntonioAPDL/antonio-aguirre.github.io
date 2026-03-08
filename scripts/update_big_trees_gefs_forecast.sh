@@ -63,6 +63,93 @@ keep_stale_and_exit() {
   exit 1
 }
 
+precheck_existing_asset() {
+  if [[ ! -f "${ASSET_JSON}" ]]; then
+    echo "[INFO] GEFS precheck: existing asset missing; full refresh required."
+    return 0
+  fi
+
+  local output status
+  set +e
+  output="$(
+    GEFS_PRECHECK_ASSET_PATH="${ASSET_JSON}" \
+    GEFS_PRECHECK_CFG_PATH="${CFG}" \
+    GEFS_PRECHECK_PIPELINE_DIR="${PIPELINE_DIR}" \
+    python - <<'PY'
+import datetime as dt
+import json
+import os
+import sys
+from pathlib import Path
+
+
+def parse_iso(value):
+    if not value:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except Exception:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.astimezone(dt.timezone.utc)
+
+
+pipeline_dir = Path(os.environ["GEFS_PRECHECK_PIPELINE_DIR"])
+if str(pipeline_dir) not in sys.path:
+    sys.path.insert(0, str(pipeline_dir))
+
+from src.config import load_pipeline_config
+from src.cycle import discover_latest_complete_cycle
+
+
+asset_path = Path(os.environ["GEFS_PRECHECK_ASSET_PATH"])
+cfg_path = Path(os.environ["GEFS_PRECHECK_CFG_PATH"])
+
+try:
+    asset = json.loads(asset_path.read_text(encoding="utf-8"))
+except Exception as exc:
+    print(f"[WARN] GEFS precheck: could not parse existing asset: {exc}")
+    raise SystemExit(2)
+
+current_init = parse_iso(asset.get("init_time_utc"))
+if current_init is None:
+    print("[WARN] GEFS precheck: existing asset has no valid init_time_utc.")
+    raise SystemExit(3)
+
+cfg = load_pipeline_config(cfg_path)
+latest = discover_latest_complete_cycle(cfg, dt.datetime.now(dt.timezone.utc))
+print(f"[INFO] GEFS precheck latest_complete_init_utc={latest.init_time_utc.isoformat()}")
+print(f"[INFO] GEFS precheck existing_asset_init_utc={current_init.isoformat()}")
+
+if current_init >= latest.init_time_utc:
+    raise SystemExit(10)
+raise SystemExit(0)
+PY
+  )"
+  status=$?
+  set -e
+
+  if [[ -n "${output}" ]]; then
+    echo "${output}"
+  fi
+
+  if [[ ${status} -eq 10 ]]; then
+    echo "[INFO] GEFS precheck: existing asset already matches the latest complete cycle; skipping full refresh."
+    print_asset_metadata
+    exit 0
+  fi
+
+  if [[ ${status} -ne 0 ]]; then
+    echo "[WARN] GEFS precheck failed with status ${status}; continuing with full refresh."
+  else
+    echo "[INFO] GEFS precheck: existing asset is behind latest complete cycle; refreshing."
+  fi
+}
+
 cd "${REPO_ROOT}"
 
 if [[ ! -f "${RUNNER}" ]]; then
@@ -89,6 +176,8 @@ then
   echo "  cd _sandbox/gefs_point_pipeline && python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt" >&2
   exit 1
 fi
+
+precheck_existing_asset
 
 if ! python "${RUNNER}" --gefs-config "${CFG}" --profile full --log-level INFO; then
   keep_stale_and_exit "GEFS runner failed."
