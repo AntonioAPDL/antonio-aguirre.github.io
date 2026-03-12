@@ -19,7 +19,7 @@ PIPELINE_DIR = SCRIPT_PATH.parent
 if str(PIPELINE_DIR) not in sys.path:
     sys.path.insert(0, str(PIPELINE_DIR))
 
-from src.backfill import BackfillOptions, resolve_backfill_window, run_backfill  # noqa: E402
+from src.backfill import BackfillOptions, first_incomplete_cycle, resolve_backfill_window, run_backfill  # noqa: E402
 from src.runner import parse_init_time, setup_logging  # noqa: E402
 
 
@@ -168,6 +168,12 @@ def parse_args() -> argparse.Namespace:
         help="Thread workers per cycle extraction.",
     )
     parser.add_argument(
+        "--catchup-chunk-cycles",
+        type=int,
+        default=0,
+        help="If >0, process at most this many missing historical cycles per catchup pass.",
+    )
+    parser.add_argument(
         "--retries",
         type=int,
         default=None,
@@ -200,6 +206,16 @@ def parse_args() -> argparse.Namespace:
         "--wait-for-lock",
         action="store_true",
         help="Wait for daemon lock if another daemon instance is active.",
+    )
+    parser.add_argument(
+        "--skip-catchup",
+        action="store_true",
+        help="Disable historical catchup passes and only run the rolling incremental phases.",
+    )
+    parser.add_argument(
+        "--skip-incremental",
+        action="store_true",
+        help="Disable rolling incremental phases and only run historical catchup passes.",
     )
     parser.add_argument(
         "--log-level",
@@ -300,8 +316,12 @@ def main() -> int:
     args = parse_args()
     setup_logging(args.log_level)
 
+    if bool(args.skip_catchup) and bool(args.skip_incremental):
+        raise ValueError("Cannot set both --skip-catchup and --skip-incremental")
+
     repo_root = PIPELINE_DIR.parents[1]
     history_root = Path(args.history_root).resolve()
+    cycles_root = history_root / "cycles"
     state_root = history_root / "state"
     state_root.mkdir(parents=True, exist_ok=True)
     status_path = state_root / "daemon_status.json"
@@ -357,13 +377,17 @@ def main() -> int:
     last_catchup: Optional[dt.datetime] = None
     sleep_seconds = max(60, int(args.sleep_seconds))
     catchup_every_hours = max(1, int(args.catchup_every_hours))
+    catchup_chunk_cycles = max(0, int(args.catchup_chunk_cycles))
 
     try:
         while True:
             now = dt.datetime.now(dt.timezone.utc)
             do_catchup = (
+                not bool(args.skip_catchup)
+                and (
                 last_catchup is None
                 or (now - last_catchup) >= dt.timedelta(hours=catchup_every_hours)
+                )
             )
 
             if do_catchup:
@@ -373,58 +397,122 @@ def main() -> int:
                     end_init_utc=None,
                     pilot_days=None,
                 )
+                effective_start = catchup_start
+                effective_end = catchup_end
+                if catchup_chunk_cycles > 0:
+                    next_missing = first_incomplete_cycle(
+                        cycles_root,
+                        catchup_start,
+                        catchup_end,
+                        run_profile="full",
+                    )
+                    if next_missing is None:
+                        completed_utc = dt.datetime.now(dt.timezone.utc)
+                        payload = {
+                            "phase": "catchup_full",
+                            "state": "up_to_date",
+                            "phase_started_utc": completed_utc.isoformat(),
+                            "phase_completed_utc": completed_utc.isoformat(),
+                            "summary": {
+                                "run_label": f"{args.run_label}:catchup_full",
+                                "state": "up_to_date",
+                                "start_init_utc": catchup_start.isoformat(),
+                                "end_init_utc": catchup_end.isoformat(),
+                            },
+                        }
+                        _append_jsonl(runs_log_path, payload)
+                        _write_json_atomic(
+                            status_path,
+                            {
+                                "daemon_state": "running",
+                                "phase": "catchup_full",
+                                "phase_state": "up_to_date",
+                                "updated_utc": completed_utc.isoformat(),
+                                "last_summary": payload["summary"],
+                            },
+                        )
+                    else:
+                        effective_start = next_missing
+                        effective_end = min(
+                            catchup_end,
+                            next_missing + dt.timedelta(hours=6 * (catchup_chunk_cycles - 1)),
+                        )
+                        _run_one_phase(
+                            phase_name="catchup_full",
+                            repo_root=repo_root,
+                            args=args,
+                            history_root=history_root,
+                            start_init_utc=effective_start,
+                            end_init_utc=effective_end,
+                            retry_failed_only=False,
+                            status_path=status_path,
+                            runs_log_path=runs_log_path,
+                        )
+                        _run_one_phase(
+                            phase_name="catchup_retry_failed",
+                            repo_root=repo_root,
+                            args=args,
+                            history_root=history_root,
+                            start_init_utc=effective_start,
+                            end_init_utc=effective_end,
+                            retry_failed_only=True,
+                            status_path=status_path,
+                            runs_log_path=runs_log_path,
+                        )
+                else:
+                    _run_one_phase(
+                        phase_name="catchup_full",
+                        repo_root=repo_root,
+                        args=args,
+                        history_root=history_root,
+                        start_init_utc=catchup_start,
+                        end_init_utc=catchup_end,
+                        retry_failed_only=False,
+                        status_path=status_path,
+                        runs_log_path=runs_log_path,
+                    )
+                    _run_one_phase(
+                        phase_name="catchup_retry_failed",
+                        repo_root=repo_root,
+                        args=args,
+                        history_root=history_root,
+                        start_init_utc=catchup_start,
+                        end_init_utc=catchup_end,
+                        retry_failed_only=True,
+                        status_path=status_path,
+                        runs_log_path=runs_log_path,
+                    )
+                last_catchup = dt.datetime.now(dt.timezone.utc)
+
+            if not bool(args.skip_incremental):
+                inc_start, inc_end = resolve_backfill_window(
+                    cfg_path=Path(args.gefs_config),
+                    start_init_utc=None,
+                    end_init_utc=None,
+                    pilot_days=int(args.incremental_pilot_days),
+                )
                 _run_one_phase(
-                    phase_name="catchup_full",
+                    phase_name="incremental_recent",
                     repo_root=repo_root,
                     args=args,
                     history_root=history_root,
-                    start_init_utc=catchup_start,
-                    end_init_utc=catchup_end,
+                    start_init_utc=inc_start,
+                    end_init_utc=inc_end,
                     retry_failed_only=False,
                     status_path=status_path,
                     runs_log_path=runs_log_path,
                 )
                 _run_one_phase(
-                    phase_name="catchup_retry_failed",
+                    phase_name="incremental_retry_failed",
                     repo_root=repo_root,
                     args=args,
                     history_root=history_root,
-                    start_init_utc=catchup_start,
-                    end_init_utc=catchup_end,
+                    start_init_utc=inc_start,
+                    end_init_utc=inc_end,
                     retry_failed_only=True,
                     status_path=status_path,
                     runs_log_path=runs_log_path,
                 )
-                last_catchup = dt.datetime.now(dt.timezone.utc)
-
-            inc_start, inc_end = resolve_backfill_window(
-                cfg_path=Path(args.gefs_config),
-                start_init_utc=None,
-                end_init_utc=None,
-                pilot_days=int(args.incremental_pilot_days),
-            )
-            _run_one_phase(
-                phase_name="incremental_recent",
-                repo_root=repo_root,
-                args=args,
-                history_root=history_root,
-                start_init_utc=inc_start,
-                end_init_utc=inc_end,
-                retry_failed_only=False,
-                status_path=status_path,
-                runs_log_path=runs_log_path,
-            )
-            _run_one_phase(
-                phase_name="incremental_retry_failed",
-                repo_root=repo_root,
-                args=args,
-                history_root=history_root,
-                start_init_utc=inc_start,
-                end_init_utc=inc_end,
-                retry_failed_only=True,
-                status_path=status_path,
-                runs_log_path=runs_log_path,
-            )
 
             next_wake = dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=sleep_seconds)
             _write_json_atomic(

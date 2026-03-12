@@ -298,17 +298,36 @@ def _failed_cycle_tags(cycles_root: Path) -> set[str]:
     return tags
 
 
-def _existing_successful_tags(cycles_root: Path) -> set[str]:
+def _existing_successful_tags(cycles_root: Path, run_profile: Optional[str] = None) -> set[str]:
     if not cycles_root.exists():
         return set()
     out: set[str] = set()
+    profile_filter = str(run_profile).strip().lower() if run_profile is not None else None
     for run_dir in cycles_root.iterdir():
         if not run_dir.is_dir():
             continue
         manifest = read_manifest(run_dir / "manifest.json")
-        if manifest.get("status") == "success":
-            out.add(run_dir.name)
+        if manifest.get("status") != "success":
+            continue
+        manifest_profile = str(manifest.get("run_profile", "full")).strip().lower()
+        if profile_filter is not None and manifest_profile != profile_filter:
+            continue
+        out.add(run_dir.name)
     return out
+
+
+def first_incomplete_cycle(
+    cycles_root: Path,
+    start_init_utc: dt.datetime,
+    end_init_utc: dt.datetime,
+    *,
+    run_profile: Optional[str] = None,
+) -> Optional[dt.datetime]:
+    success_tags = _existing_successful_tags(cycles_root, run_profile=run_profile)
+    for cycle in iter_cycle_times(start_init_utc, end_init_utc):
+        if cycle_tag(cycle) not in success_tags:
+            return cycle
+    return None
 
 
 def _override_config_for_history(
@@ -515,7 +534,11 @@ def run_backfill(options: BackfillOptions) -> Dict[str, Any]:
         )
 
         all_cycles = iter_cycle_times(options.start_init_utc, options.end_init_utc)
-        existing_success = _existing_successful_tags(history_paths["cycles"]) if not options.force else set()
+        existing_success = (
+            _existing_successful_tags(history_paths["cycles"], run_profile=options.run_profile)
+            if not options.force
+            else set()
+        )
         if options.retry_failed_only:
             failed_tags = _failed_cycle_tags(history_paths["cycles"])
             queued = [

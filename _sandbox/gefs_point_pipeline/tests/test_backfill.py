@@ -18,8 +18,10 @@ from src.backfill import (  # noqa: E402
     GEFS_EARLIEST_INIT_UTC,
     _availability_start_for_config,
     _cleanup_stale_temp_dirs,
+    _existing_successful_tags,
     _failed_cycle_tags,
     count_cycles_inclusive,
+    first_incomplete_cycle,
     iter_cycle_times,
     pilot_start_for_days,
     resolve_backfill_window,
@@ -127,3 +129,49 @@ def test_cleanup_stale_temp_dirs_removes_old_only(tmp_path: Path) -> None:
     assert old_tmp.name in deleted
     assert not old_tmp.exists()
     assert new_tmp.exists()
+
+
+def test_existing_successful_tags_can_filter_by_profile(tmp_path: Path) -> None:
+    cycles = tmp_path / "cycles"
+    cycles.mkdir(parents=True, exist_ok=True)
+    for name, profile in [("20260223_00", "full"), ("20260223_06", "smoke")]:
+        run_dir = cycles / name
+        run_dir.mkdir()
+        (run_dir / "manifest.json").write_text(
+            (
+                '{"status":"success","run_profile":"'
+                + profile
+                + '","members_requested":[],"lead_hours_requested":[],"resolved_fields":[]}'
+            ),
+            encoding="utf-8",
+        )
+
+    assert _existing_successful_tags(cycles) == {"20260223_00", "20260223_06"}
+    assert _existing_successful_tags(cycles, run_profile="full") == {"20260223_00"}
+    assert _existing_successful_tags(cycles, run_profile="smoke") == {"20260223_06"}
+
+
+def test_first_incomplete_cycle_respects_profile(tmp_path: Path) -> None:
+    cycles = tmp_path / "cycles"
+    cycles.mkdir(parents=True, exist_ok=True)
+    for name, profile in [("20260223_00", "full"), ("20260223_06", "smoke")]:
+        run_dir = cycles / name
+        run_dir.mkdir()
+        (run_dir / "manifest.json").write_text(
+            (
+                '{"status":"success","run_profile":"'
+                + profile
+                + '","members_requested":[],"lead_hours_requested":[],"resolved_fields":[]}'
+            ),
+            encoding="utf-8",
+        )
+
+    start = dt.datetime(2026, 2, 23, 0, 0, tzinfo=dt.timezone.utc)
+    end = dt.datetime(2026, 2, 23, 12, 0, tzinfo=dt.timezone.utc)
+
+    assert first_incomplete_cycle(cycles, start, end, run_profile="full") == dt.datetime(
+        2026, 2, 23, 6, 0, tzinfo=dt.timezone.utc
+    )
+    assert first_incomplete_cycle(cycles, start, end, run_profile="smoke") == dt.datetime(
+        2026, 2, 23, 0, 0, tzinfo=dt.timezone.utc
+    )

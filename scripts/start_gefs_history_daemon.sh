@@ -40,10 +40,11 @@ cd "${PIPELINE_DIR}"
 DEFAULT_ARGS=(
   --full-start-init 2020-10-01T00:00:00Z
   --incremental-pilot-days 3
-  --sleep-seconds 21600
-  --catchup-every-hours 24
-  --workers 2
-  --cycle-max-workers 4
+  --sleep-seconds 1800
+  --catchup-every-hours 1
+  --workers 4
+  --cycle-max-workers 8
+  --catchup-chunk-cycles 1
   --run-label gefs_history_daemon
 )
 
