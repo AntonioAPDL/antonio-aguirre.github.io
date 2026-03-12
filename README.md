@@ -140,7 +140,7 @@ The home page now includes a second panel for GEFS point forecasts (precipitatio
 - **Tracked asset:** `assets/data/forecasts/gefs_big_trees_latest.json`
 - **Pipeline source:** `_sandbox/gefs_point_pipeline`
 - **Update script:** `scripts/update_big_trees_gefs_forecast.sh`
-- **Scheduled workflow:** `.github/workflows/update_gefs_forecast.yml` (every 3 hours)
+- **Scheduled workflow:** `.github/workflows/update_gefs_forecast.yml` (4 times/day, aligned to GEFS cycle availability)
 
 Behavior:
 
@@ -247,9 +247,10 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
   - dispatches `update_gefs_forecast.yml` after climate changes are pushed
 
 - `.github/workflows/update_gefs_forecast.yml`
-  - cadence: every 3 hours (`0 */3 * * *`)
+  - cadence: `01:20`, `07:20`, `13:20`, `19:20` UTC (`20 1,7,13,19 * * *`)
   - updates and commits:
     - `assets/data/forecasts/gefs_big_trees_latest.json`
+  - caches pip dependencies and performs a latest-cycle freshness precheck before the heavy full refresh
   - fail-fast checks in `scripts/update_big_trees_gefs_forecast.sh` ensure:
     - latest init is not stale
     - 20-day GEFS analysis context coverage remains dense and current

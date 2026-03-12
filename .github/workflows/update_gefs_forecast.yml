@@ -2,7 +2,10 @@ name: Update GEFS Big Trees forecast
 
 on:
   schedule:
-    - cron: "0 */3 * * *"
+    # GEFS publishes 00/06/12/18 UTC cycles. Running once per cycle, offset from
+    # the cycle hour, avoids paying for duplicate heavy refreshes against the
+    # same init while keeping the homepage panel current.
+    - cron: "20 1,7,13,19 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -32,6 +35,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "_sandbox/gefs_point_pipeline/requirements.txt"
 
       - name: Install GEFS dependencies
         run: |
