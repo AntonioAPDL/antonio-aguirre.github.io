@@ -37,11 +37,24 @@ def parse_target_date(raw: str) -> date:
     return datetime.utcnow().date()
 
 
-def summarize_series(spec: SeriesSpec, target_date: date, stamp_utc: str) -> dict:
+def _format_path(path: Path, root_dir: Path) -> str:
+    try:
+        rel = path.resolve().relative_to(root_dir.resolve())
+    except ValueError:
+        return str(path)
+    return rel.as_posix()
+
+
+def summarize_series(
+    spec: SeriesSpec,
+    target_date: date,
+    stamp_utc: str,
+    root_dir: Path,
+) -> dict:
     if not spec.csv_path.exists():
         return {
             "variable": spec.variable,
-            "csv_path": str(spec.csv_path),
+            "csv_path": _format_path(spec.csv_path, root_dir),
             "rows": "0",
             "min_date": "",
             "max_date": "",
@@ -57,7 +70,7 @@ def summarize_series(spec: SeriesSpec, target_date: date, stamp_utc: str) -> dic
     if "Date" not in df.columns:
         return {
             "variable": spec.variable,
-            "csv_path": str(spec.csv_path),
+            "csv_path": _format_path(spec.csv_path, root_dir),
             "rows": "0",
             "min_date": "",
             "max_date": "",
@@ -74,7 +87,7 @@ def summarize_series(spec: SeriesSpec, target_date: date, stamp_utc: str) -> dic
     if valid.empty:
         return {
             "variable": spec.variable,
-            "csv_path": str(spec.csv_path),
+            "csv_path": _format_path(spec.csv_path, root_dir),
             "rows": "0",
             "min_date": "",
             "max_date": "",
@@ -103,7 +116,7 @@ def summarize_series(spec: SeriesSpec, target_date: date, stamp_utc: str) -> dic
 
     return {
         "variable": spec.variable,
-        "csv_path": str(spec.csv_path),
+        "csv_path": _format_path(spec.csv_path, root_dir),
         "rows": str(rows),
         "min_date": min_date.isoformat(),
         "max_date": max_date.isoformat(),
@@ -171,7 +184,7 @@ def main() -> int:
     ]
 
     stamp_utc = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-    rows = [summarize_series(spec, target_date, stamp_utc) for spec in specs]
+    rows = [summarize_series(spec, target_date, stamp_utc, root_dir) for spec in specs]
     write_output(output_csv, rows)
 
     print(f"[OK] wrote status CSV: {output_csv}")
