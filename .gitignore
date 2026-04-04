@@ -50,6 +50,11 @@ _sandbox/*
 !_sandbox/gefs_point_pipeline/**
 data/_sandbox_nwm/
 data/_sandbox_nws/
+data/_sandbox_gefs/
+data/_sandbox_qdesn/
+data/_local_qdesn_diagnostics/
+assets/data/forecasts/big_trees_qdesn_q05_latest.json
+assets/data/forecasts/big_trees_qdesn_q95_latest.json
 .python-version
 __pycache__/
 .pytest_cache/
