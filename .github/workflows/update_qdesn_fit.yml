@@ -2,7 +2,7 @@ name: Update Big Trees QDESN fit
 
 on:
   schedule:
-    - cron: "30 */6 * * *"
+    - cron: "30 15 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -22,6 +22,22 @@ jobs:
         env:
           BIG_TREES_QDESN_ALLOW_STALE_ON_ERROR: "1"
           BIG_TREES_QDESN_INSTALL_EXDQLM: "1"
+          BIG_TREES_QDESN_START_DATE: "1990-01-01"
+          BIG_TREES_QDESN_LOCAL_TZ: "America/Los_Angeles"
+          BIG_TREES_QDESN_IV_RECENT_DAYS: "90"
+          BIG_TREES_QDESN_IV_MIN_COVERAGE: "0.90"
+          BIG_TREES_QDESN_WARM_START_N: "2500"
+          BIG_TREES_QDESN_WINDOW_DAYS: "20"
+          BIG_TREES_QDESN_ND_DRAWS: "1000"
+          BIG_TREES_QDESN_CHUNK_SIZE: "250"
+          BIG_TREES_QDESN_VB_MAX_ITER: "35"
+          BIG_TREES_QDESN_VB_N_SAMP_XI: "50"
+          BIG_TREES_QDESN_ONLINE_MAXIT_SIGMAGAM: "250"
+          BIG_TREES_QDESN_ONLINE_M: "20"
+          BIG_TREES_QDESN_ONLINE_K: "80"
+          BIG_TREES_QDESN_ONLINE_W: "60"
+          BIG_TREES_QDESN_ONLINE_L_LOC: "1"
+          BIG_TREES_QDESN_ONLINE_WINDOW_PASSES: "0"
         run: |
           chmod +x scripts/update_big_trees_qdesn_fit.sh
           scripts/update_big_trees_qdesn_fit.sh
