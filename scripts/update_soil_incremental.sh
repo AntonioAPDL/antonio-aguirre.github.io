@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARGET_END_DATE="${1:-$(date -u +%Y-%m-%d)}"
+ERA5_LAG_DAYS="${ERA5_LAG_DAYS:-5}"
 CSV_PATH="${ROOT_DIR}/soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv"
 TMP_DIR="${ROOT_DIR}/soil_moisture_data/.tmp_era5_incremental_$$"
 TMP_DAILY="${ROOT_DIR}/soil_moisture_data/.soil_daily_incremental_${TARGET_END_DATE}_$$.csv"
@@ -13,6 +14,34 @@ mkdir -p "${ROOT_DIR}/soil_moisture_data"
 
 if [[ ! -x "${PYTHON_BIN}" ]]; then
   PYTHON_BIN="$(command -v python3)"
+fi
+
+if [[ -n "${ERA5_LAG_DAYS}" ]]; then
+  MAX_END_DATE="$(
+    "${PYTHON_BIN}" - <<'PY' "${ERA5_LAG_DAYS}"
+import sys
+from datetime import datetime, timedelta, timezone
+
+raw = sys.argv[1]
+try:
+    lag_days = int(raw)
+except Exception:
+    lag_days = 0
+
+if lag_days <= 0:
+    print("")
+    raise SystemExit(0)
+
+today = datetime.now(timezone.utc).date()
+max_date = today - timedelta(days=lag_days)
+print(max_date.isoformat())
+PY
+  )"
+
+  if [[ -n "${MAX_END_DATE}" && "${TARGET_END_DATE}" > "${MAX_END_DATE}" ]]; then
+    echo "[INFO] Capping ERA5 target end date from ${TARGET_END_DATE} to ${MAX_END_DATE} (ERA5_LAG_DAYS=${ERA5_LAG_DAYS})"
+    TARGET_END_DATE="${MAX_END_DATE}"
+  fi
 fi
 
 START_DATE="$(
