@@ -67,3 +67,4 @@ prism_data_work/
 soil_moisture_data/.tmp_*/
 soil_moisture_data/.soil_daily_incremental_*.csv
 logs/climate_updates/
+logs/site_updates/
