@@ -60,9 +60,9 @@ runtime:
   candidate_lookback_hours: 60
   representative_fxx: 0
   completeness_probe_fxx: 3
-  max_workers: 8
+  max_workers: 4
   retries: 3
-  retry_backoff_sec: 1.5
+  retry_backoff_sec: 3
   keep_cycles: 1
   keep_failed_runs: 3
   keep_smoke_runs: 5
