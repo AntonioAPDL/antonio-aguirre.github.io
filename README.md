@@ -90,7 +90,7 @@ Supported attributes:
 - `data-y-min`, `data-y-max` (optional fixed Y-axis range)
 - `data-threshold-minor`, `data-threshold-moderate`, `data-threshold-major` (horizontal threshold lines + shaded regions)
 - `data-forecast-url` (optional forecast overlay JSON; defaults to `/assets/data/forecasts/big_trees_latest.json`)
-- `data-qdesn-url` (optional QDESN overlay JSON; defaults to `/assets/data/forecasts/big_trees_qdesn_latest.json`)
+- `data-qdesn-url` (optional QDESN overlay JSON; currently disabled on the site; omit to keep it off)
 - `data-flood-minor-cfs`, `data-flood-moderate-cfs`, `data-flood-major-cfs` (discharge-only thresholds; optional)
 
 ### Forecast overlay (NWS/NWM)
@@ -116,20 +116,7 @@ If the forecast JSON is missing, the plot still renders observations only and lo
 
 ### QDESN overlay (median + 95% CI)
 
-The discharge panel can also overlay a lag-only QDESN fit (median and 95% credible interval):
-
-- **Artifact:** `assets/data/forecasts/big_trees_qdesn_latest.json` (tracked in git)
-- **Builder:** `scripts/build_big_trees_qdesn_overlay.R`
-- **Updater:** `scripts/update_big_trees_qdesn_fit.sh`
-- **Scheduled workflow:** `.github/workflows/update_qdesn_fit.yml` (every 6 hours)
-- **Model mode:** online VB-LD (`p0=0.50`) with RHS beta prior, no external covariates
-- **Payload:** windowed `q50`, `lo95`, `hi95` points in discharge units (`cfs`)
-
-To update manually:
-
-```bash
-scripts/update_big_trees_qdesn_fit.sh
-```
+The QDESN discharge overlay is currently disabled on the site and the scheduled workflow is off. The artifacts and updater remain in the repo for future re-enable.
 
 ## GEFS forecast panel (new, additive)
 
@@ -184,10 +171,10 @@ Panel override:
 
 - `data-observation-window-days` (defaults to `20` if omitted)
 
-The USGS discharge panel in `public/js/sanlorenzo_flow.js` now supports two optional overlays:
+The USGS discharge panel in `public/js/sanlorenzo_flow.js` supports optional overlays:
 
 - NWS/NWM forecast overlay (`data-forecast-url`)
-- QDESN fit overlay (`data-qdesn-url`)
+- QDESN fit overlay (`data-qdesn-url`, currently disabled)
 
 ## Climate Data Automation (PRISM + ERA5 + NWM retro soil)
 

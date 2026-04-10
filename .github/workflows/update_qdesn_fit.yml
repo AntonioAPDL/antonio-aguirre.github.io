@@ -1,8 +1,6 @@
 name: Update Big Trees QDESN fit
 
 on:
-  schedule:
-    - cron: "30 15 * * *"
   workflow_dispatch: {}
 
 permissions:
