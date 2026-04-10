@@ -5,11 +5,13 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="${REPO_ROOT}/logs/site_updates"
 RUN_STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 RUN_LOG="${LOG_DIR}/run_${RUN_STAMP}.log"
+RUN_LOCK="${LOG_DIR}/run.lock"
 
 RUN_CLIMATE="${RUN_CLIMATE:-1}"
 RUN_GEFS="${RUN_GEFS:-1}"
 RUN_NWS="${RUN_NWS:-1}"
 RUN_QDESN="${RUN_QDESN:-1}"
+CLIMATE_TIMEOUT_SEC="${CLIMATE_TIMEOUT_SEC:-1800}"
 
 ALLOW_DIRTY="${ALLOW_DIRTY:-0}"
 ALLOW_STALE_ON_ERROR="${ALLOW_STALE_ON_ERROR:-1}"
@@ -23,6 +25,12 @@ mkdir -p "${LOG_DIR}"
 log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
 
 cd "${REPO_ROOT}"
+
+exec 9>"${RUN_LOCK}"
+if ! flock -n 9; then
+  log "[INFO] Another site update is already running; skipping."
+  exit 0
+fi
 
 if [[ "${ALLOW_DIRTY}" != "1" ]]; then
   if ! git diff --quiet || ! git diff --cached --quiet; then
@@ -46,9 +54,16 @@ overall_rc=0
 
 if [[ "${RUN_CLIMATE}" == "1" ]]; then
   log "[INFO] Running climate updates..."
-  if ! "${REPO_ROOT}/scripts/run_climate_updates_cron.sh" >>"${RUN_LOG}" 2>&1; then
-    log "[WARN] Climate update failed (see log). Continuing."
-    overall_rc=1
+  if command -v timeout >/dev/null && [[ "${CLIMATE_TIMEOUT_SEC}" -gt 0 ]]; then
+    if ! timeout "${CLIMATE_TIMEOUT_SEC}" "${REPO_ROOT}/scripts/run_climate_updates_cron.sh" >>"${RUN_LOG}" 2>&1; then
+      log "[WARN] Climate update failed or timed out (see log). Continuing."
+      overall_rc=1
+    fi
+  else
+    if ! "${REPO_ROOT}/scripts/run_climate_updates_cron.sh" >>"${RUN_LOG}" 2>&1; then
+      log "[WARN] Climate update failed (see log). Continuing."
+      overall_rc=1
+    fi
   fi
 fi
 
