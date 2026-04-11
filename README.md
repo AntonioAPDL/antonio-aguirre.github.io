@@ -223,7 +223,7 @@ Logs are written under `logs/climate_updates/` and `latest.log` points to the ne
 The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
 
 - `.github/workflows/update_climate_series.yml`
-  - cadence: disabled (manual `workflow_dispatch` only)
+  - cadence: every 6 hours at minute 17 UTC (`17 */6 * * *`) plus manual `workflow_dispatch`
   - updates and commits:
     - `prism_precipitation_santa_cruz_1987_2023.csv`
     - `soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv`
@@ -231,6 +231,7 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
     - `soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.meta.json`
     - `climate_series_status.csv`
     - `climate_daily_ppt_soil.csv`
+  - incremental PRISM/ERA5 updaters probe backward to the latest available provider date instead of failing the whole run on a too-recent request
   - dispatches `update_gefs_forecast.yml` after climate changes are pushed
 
 - `.github/workflows/update_gefs_forecast.yml`
@@ -249,6 +250,10 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
   - one-time/manual bootstrap for GEFS cycle-analysis context
   - backfills missing `f003` precip proxy and `f000` soil markers over a target window (default 20 days)
   - rewrites latest full GEFS payload at the end so forecast panel remains complete
+
+- `.github/workflows/verify_site_build.yml`
+  - runs `bundle exec jekyll build --trace` on pushes to `main` and on manual dispatch
+  - catches site-build regressions in GitHub Actions before Netlify production publishes stale pages
 
 Required repository secrets for ERA5 updates:
 

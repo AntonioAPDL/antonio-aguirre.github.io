@@ -18,6 +18,34 @@ if [[ ! -x "${PYTHON_BIN}" ]]; then
   PYTHON_BIN="$(command -v python3)"
 fi
 
+shift_date_back_one_day() {
+  "${PYTHON_BIN}" - <<'PY' "$1"
+import sys
+from datetime import timedelta
+
+import pandas as pd
+
+print((pd.Timestamp(sys.argv[1]).date() - timedelta(days=1)).isoformat())
+PY
+}
+
+count_csv_rows() {
+  "${PYTHON_BIN}" - <<'PY' "$1"
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+path = Path(sys.argv[1])
+if not path.exists():
+    print(0)
+    raise SystemExit(0)
+
+df = pd.read_csv(path)
+print(len(df.index))
+PY
+}
+
 START_DATE="$(
 "${PYTHON_BIN}" - <<'PY' "${CSV_PATH}"
 import sys
@@ -59,13 +87,41 @@ fi
 
 "${RSCRIPT_BIN}" --vanilla -e "if (!requireNamespace('prism', quietly=TRUE)) install.packages('prism', repos='https://cloud.r-project.org')"
 
-"${RSCRIPT_BIN}" --vanilla "${ROOT_DIR}/scripts/build_prism_ppt_point_series.R" \
-  --start-date "${START_DATE}" \
-  --end-date "${TARGET_END_DATE}" \
-  --resolution "4km" \
-  --download-dir "${DOWNLOAD_DIR}" \
-  --output-csv "${TMP_OUT}" \
-  --stop-on-unavailable
+ATTEMPT_END_DATE="${TARGET_END_DATE}"
+FOUND_ROWS=0
+
+while [[ ! "${ATTEMPT_END_DATE}" < "${START_DATE}" ]]; do
+  rm -f "${TMP_OUT}"
+
+  "${RSCRIPT_BIN}" --vanilla "${ROOT_DIR}/scripts/build_prism_ppt_point_series.R" \
+    --start-date "${START_DATE}" \
+    --end-date "${ATTEMPT_END_DATE}" \
+    --resolution "4km" \
+    --download-dir "${DOWNLOAD_DIR}" \
+    --output-csv "${TMP_OUT}" \
+    --stop-on-unavailable
+
+  ROW_COUNT="$(count_csv_rows "${TMP_OUT}")"
+  if [[ "${ROW_COUNT}" -gt 0 ]]; then
+    TARGET_END_DATE="${ATTEMPT_END_DATE}"
+    FOUND_ROWS=1
+    break
+  fi
+
+  if [[ "${ATTEMPT_END_DATE}" == "${START_DATE}" ]]; then
+    break
+  fi
+
+  NEXT_END_DATE="$(shift_date_back_one_day "${ATTEMPT_END_DATE}")"
+  echo "[INFO] No PRISM rows available through ${ATTEMPT_END_DATE}; retrying with ${NEXT_END_DATE}."
+  ATTEMPT_END_DATE="${NEXT_END_DATE}"
+done
+
+if [[ "${FOUND_ROWS}" != "1" ]]; then
+  rm -f "${TMP_OUT}"
+  echo "[INFO] No new PRISM rows are available yet after probing back to ${START_DATE}."
+  exit 0
+fi
 
 "${PYTHON_BIN}" - <<'PY' "${CSV_PATH}" "${TMP_OUT}" "${TARGET_END_DATE}"
 import sys

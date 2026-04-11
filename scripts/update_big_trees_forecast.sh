@@ -30,12 +30,24 @@ gh_warn() {
 
 cd "${REPO_ROOT}"
 
-if command -v python >/dev/null 2>&1; then
-  PYTHON_BIN="python"
+if [[ -n "${PYTHON_BIN:-}" ]]; then
+  :
 elif command -v python3 >/dev/null 2>&1; then
   PYTHON_BIN="python3"
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_BIN="python"
 else
-  log_error "Python interpreter not found on PATH (checked: python, python3)."
+  log_error "Python interpreter not found on PATH (checked: python3, python)."
+  exit 3
+fi
+
+if ! "${PYTHON_BIN}" - <<'PY' >/dev/null 2>&1
+import sys
+
+raise SystemExit(0 if sys.version_info >= (3, 8) else 1)
+PY
+then
+  log_error "Big Trees forecast updater requires Python 3.8+ (selected: ${PYTHON_BIN})."
   exit 3
 fi
 

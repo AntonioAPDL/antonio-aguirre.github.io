@@ -1,8 +1,8 @@
 name: Update climate series
 
 on:
-  # Automatic climate-series cron disabled: GEFS panel now runs GEFS-only context.
-  # Keep manual trigger for ad-hoc maintenance runs.
+  schedule:
+    - cron: "17 */6 * * *"
   workflow_dispatch: {}
 
 permissions:
