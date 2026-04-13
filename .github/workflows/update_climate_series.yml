@@ -2,7 +2,7 @@ name: Update climate series
 
 on:
   schedule:
-    - cron: "17 */6 * * *"
+    - cron: "17 */8 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -121,41 +121,3 @@ jobs:
             exit 0
           fi
           echo "changed=true" >> "${GITHUB_OUTPUT}"
-
-      - name: Trigger GEFS refresh
-        if: steps.commit.outputs.changed == 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const workflowId = "update_gefs_forecast.yml";
-            const list = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: workflowId,
-              branch: "main",
-              per_page: 20
-            });
-            const active = list.data.workflow_runs.find((run) =>
-              run.status === "queued" || run.status === "in_progress" || run.status === "waiting" || run.status === "pending"
-            );
-            if (active) {
-              core.info(`Skipping dispatch: GEFS run already active (${active.id}).`);
-              return;
-            }
-            const latestSuccess = list.data.workflow_runs.find(
-              (run) => run.status === "completed" && run.conclusion === "success"
-            );
-            if (latestSuccess) {
-              const ageMs = Date.now() - Date.parse(latestSuccess.updated_at);
-              const maxFreshMs = 90 * 60 * 1000;
-              if (ageMs >= 0 && ageMs < maxFreshMs) {
-                core.info(`Skipping dispatch: latest successful GEFS run is recent (${Math.round(ageMs / 60000)} min ago).`);
-                return;
-              }
-            }
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: workflowId,
-              ref: "main"
-            });

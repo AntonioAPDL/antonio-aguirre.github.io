@@ -2,10 +2,9 @@ name: Update GEFS Big Trees forecast
 
 on:
   schedule:
-    # GEFS publishes 00/06/12/18 UTC cycles. Running once per cycle, offset from
-    # the cycle hour, avoids paying for duplicate heavy refreshes against the
-    # same init while keeping the homepage panel current.
-    - cron: "20 1,7,13,19 * * *"
+    # GEFS publishes 00/06/12/18 UTC cycles. To cut production deploy volume,
+    # run every 8 hours and target the freshest completed 00/06/12 UTC cycles.
+    - cron: "20 1,9,17 * * *"
   workflow_dispatch: {}
 
 permissions:

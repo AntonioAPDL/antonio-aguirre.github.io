@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="${ROOT_DIR}/logs/climate_updates"
 RUNNER="${ROOT_DIR}/scripts/run_climate_updates_cron.sh"
-CRON_SCHEDULE="${1:-17 */6 * * *}"
+CRON_SCHEDULE="${1:-17 */8 * * *}"
 BEGIN_MARKER="# >>> antonio-website climate updates >>>"
 END_MARKER="# <<< antonio-website climate updates <<<"
 

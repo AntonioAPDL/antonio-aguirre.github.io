@@ -204,7 +204,7 @@ Main scripts:
 - `scripts/run_climate_updates_cron.sh`
 - `scripts/install_climate_update_cron.sh`
 
-Install cron (default every 6h at minute 17):
+Install cron (default every 8h at minute 17):
 
 ```bash
 scripts/install_climate_update_cron.sh
@@ -222,8 +222,13 @@ Logs are written under `logs/climate_updates/` and `latest.log` points to the ne
 
 The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
 
+- `.github/workflows/update_forecast.yml`
+  - cadence: every 8 hours on the hour UTC (`0 */8 * * *`) plus manual `workflow_dispatch`
+  - updates and commits:
+    - `assets/data/forecasts/big_trees_latest.json`
+
 - `.github/workflows/update_climate_series.yml`
-  - cadence: every 6 hours at minute 17 UTC (`17 */6 * * *`) plus manual `workflow_dispatch`
+  - cadence: every 8 hours at minute 17 UTC (`17 */8 * * *`) plus manual `workflow_dispatch`
   - updates and commits:
     - `prism_precipitation_santa_cruz_1987_2023.csv`
     - `soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv`
@@ -232,10 +237,9 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
     - `climate_series_status.csv`
     - `climate_daily_ppt_soil.csv`
   - incremental PRISM/ERA5 updaters probe backward to the latest available provider date instead of failing the whole run on a too-recent request
-  - dispatches `update_gefs_forecast.yml` after climate changes are pushed
 
 - `.github/workflows/update_gefs_forecast.yml`
-  - cadence: `01:20`, `07:20`, `13:20`, `19:20` UTC (`20 1,7,13,19 * * *`)
+  - cadence: `01:20`, `09:20`, `17:20` UTC (`20 1,9,17 * * *`)
   - updates and commits:
     - `assets/data/forecasts/gefs_big_trees_latest.json`
   - caches pip dependencies and performs a latest-cycle freshness precheck before the heavy full refresh
