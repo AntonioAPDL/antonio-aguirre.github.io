@@ -24,10 +24,10 @@ description: "Background, research focus, and interests of Antonio Aguirre."
     <h2 class="section-heading">Ongoing Projects</h2>
     <ul class="about-list">
       <li>
-        <strong>Quantile-Based Forecast Correction:</strong> Bayesian correction and synthesis of river flow forecasts (submitted to <em>Environmetrics</em>).
+        <strong>Quantile-Based Forecast Correction:</strong> Bayesian correction and synthesis of river flow forecasts (manuscript in revision).
       </li>
       <li>
-        <strong>Deep ESN Forecasting:</strong> Deep Echo State Networks for nonlinear dynamics and short-term prediction.
+        <strong>Q-DESN Forecasting:</strong> Working paper on Bayesian quantile readouts for fixed Deep Echo State Network features.
       </li>
       <li>
         <strong>Scalable Bayesian Inference:</strong> Variational Bayes and Sequential Monte Carlo for real-time updating in operational settings.
@@ -65,7 +65,7 @@ description: "Background, research focus, and interests of Antonio Aguirre."
         <strong>Graduate Student Instructor:</strong> Data Visualization (STAT 80B), Spring 2025.
       </li>
       <li>
-        <strong>Teaching Assistant:</strong> Led discussion sections and supported statistics and probability courses (2021-present).
+        <strong>Teaching Assistant:</strong> Supported Probability Theory, Classical and Bayesian Inference, Statistics, and related courses (2021-present).
       </li>
       <li>
         <strong>TA Training Program:</strong> Co-organize workshops on inclusive teaching and active learning.

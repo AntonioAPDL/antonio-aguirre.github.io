@@ -24,18 +24,29 @@ description: "Research on Bayesian time series forecasting, quantile modeling, a
     <h2>Current Projects</h2>
     <ul>
       <li><strong>Quantile-Based Forecast Correction:</strong> Bayesian correction and synthesis of river flow forecasts using proper scoring rules.</li>
-      <li><strong>Deep ESN Forecasting:</strong> Deep Echo State Networks for nonlinear dynamics and short-term prediction.</li>
+      <li><strong>Q-DESN Forecasting:</strong> Bayesian quantile readouts for fixed Deep Echo State Network features.</li>
       <li><strong>Scalable Inference:</strong> Variational Bayes and Sequential Monte Carlo for real-time updating in dynamic systems.</li>
     </ul>
   </div>
 
   <!-- Selected Publications -->
   <div class="publication-section">
-    <h2>Selected Publications</h2>
+    <h2>Selected Publications &amp; Working Papers</h2>
     <ul>
       <li>
+        Aguirre, A., Barata, R., Prado, R., Sansó, B.
+        <em>exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models</em>.
+        Manuscript submitted to the <em>Journal of Statistical Software</em>; companion R package available on
+        <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer">CRAN</a>.
+      </li>
+      <li>
+        Aguirre, A., Prado, R., Sansó, B.
+        <em>Bayesian Quantile Readouts for Fixed Deep Echo State Networks</em>.
+        Working paper in progress.
+      </li>
+      <li>
         Aguirre, A., Sansó, B., Prado, R. <em>A Bayesian Quantile-Based Correction and Synthesis of River Flow Forecasts</em>.
-        Submitted to Environmetrics (Dec 2024).
+        Manuscript in revision.
       </li>
       <li>
         Aguirre, A., Lobato, I.N. (2024). <em>Evidence of Non-Fundamentalness in OECD Capital Stocks</em>.
