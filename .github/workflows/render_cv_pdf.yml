@@ -1,0 +1,75 @@
+name: Render CV PDF
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "cv/**"
+      - "scripts/render_cv.sh"
+      - ".github/workflows/render_cv_pdf.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: render-cv-pdf
+  cancel-in-progress: false
+
+jobs:
+  render-cv-pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Sync to latest main
+        run: |
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+      - name: Install TeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            latexmk \
+            texlive-fonts-recommended \
+            texlive-latex-base \
+            texlive-latex-extra \
+            texlive-latex-recommended
+
+      - name: Render CV PDF
+        run: scripts/render_cv.sh
+
+      - name: Verify rendered PDF is current
+        run: scripts/render_cv.sh --check
+
+      - name: Commit and push if changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- files/cv/antonio-aguirre-cv.pdf files/cv/cv.pdf; then
+            echo "No CV PDF changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add files/cv/antonio-aguirre-cv.pdf files/cv/cv.pdf
+          if git diff --cached --quiet; then
+            echo "No staged CV PDF changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: render CV PDF"
+          if ! git pull --rebase origin main; then
+            echo "Concurrent update caused rebase conflict; skipping CV PDF push."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push; then
+            echo "Push rejected (likely concurrent update); skipping CV PDF push."
+            exit 0
+          fi

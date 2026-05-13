@@ -39,6 +39,30 @@ Notes:
 - `public/`: theme assets and custom styles
 - `files/`: PDFs and images
 
+## CV source and PDF publishing
+
+The website CV is maintained from LaTeX source and published as a tracked PDF.
+
+- Source: `cv/antonio_aguirre_cv.tex`
+- Canonical website PDF: `files/cv/antonio-aguirre-cv.pdf`
+- Legacy PDF alias: `files/cv/cv.pdf`
+- CV page link: `cv.html`
+
+To update the CV:
+
+```bash
+# 1. Edit the LaTeX source.
+$EDITOR cv/antonio_aguirre_cv.tex
+
+# 2. Render the website PDFs.
+scripts/render_cv.sh
+
+# 3. Verify the committed PDFs match the source.
+scripts/render_cv.sh --check
+```
+
+`scripts/render_cv.sh` uses `latexmk`, `pdflatex`, or `tectonic`, in that order. The GitHub Actions workflow `.github/workflows/render_cv_pdf.yml` can also render and commit the PDFs from `main` when the CV source changes, or from a manual dispatch.
+
 ## San Lorenzo River live USGS plot
 
 The home page includes a client-side Plotly chart of USGS instantaneous values for the San Lorenzo River (site 11160500). It is fully static and runs in the browser, with a mode toggle for stage or discharge.

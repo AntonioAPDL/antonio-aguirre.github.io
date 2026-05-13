@@ -1,0 +1,171 @@
+\documentclass[10pt,letterpaper]{article}
+
+\ifdefined\pdfinfoomitdate
+  \pdfinfoomitdate=1
+\fi
+\ifdefined\pdftrailerid
+  \pdftrailerid{}
+\fi
+
+% -------------------- Packages --------------------
+\usepackage[margin=0.65in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[scaled=0.95]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{array}
+\usepackage{tabularx}
+
+% -------------------- Style --------------------
+\definecolor{navy}{HTML}{12304A}
+\definecolor{textgray}{HTML}{333333}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=navy,
+  urlcolor=navy,
+  pdftitle={Antonio Aguirre CV},
+  pdfauthor={Antonio Aguirre},
+  pdfsubject={Curriculum vitae}
+}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlist[itemize]{leftmargin=1.2em, itemsep=2pt, topsep=3pt, parsep=0pt, partopsep=0pt}
+
+\titleformat{\section}
+  {\large\bfseries\color{navy}}
+  {}{0pt}{}[\vspace{2pt}\titlerule]
+\titlespacing*{\section}{0pt}{10pt}{5pt}
+
+\newcommand{\entry}[4]{%
+  \textbf{#1} \hfill #2\\
+  \textit{#3} \hfill \textit{#4}\\[-2pt]
+}
+
+\newcommand{\educationentry}[3]{%
+  \textbf{#1} \hfill #2\\
+  #3\\[-1pt]
+}
+
+\newcommand{\pubentry}[3]{%
+  \textbf{#1}\\
+  \textit{#2}\\
+  #3\\[4pt]
+}
+
+\newcommand{\contactsep}{\enspace\textbar\enspace}
+
+\begin{document}
+\color{textgray}
+
+% -------------------- Header --------------------
+\begin{center}
+  {\LARGE\bfseries\color{navy} Antonio Aguirre}\\[4pt]
+  Santa Cruz, CA\contactsep +1 (831) 515-9264\contactsep \href{mailto:antonio.agprz@gmail.com}{antonio.agprz@gmail.com}\contactsep \href{mailto:jaguir26@ucsc.edu}{jaguir26@ucsc.edu}\\
+  \href{https://antonio-aguirre.com}{antonio-aguirre.com}\contactsep \href{https://github.com/antonioapdl}{github.com/antonioapdl}\contactsep \href{https://linkedin.com/in/antonioapdl}{linkedin.com/in/antonioapdl}
+\end{center}
+
+% -------------------- Summary --------------------
+\section*{Summary}
+Ph.D. candidate in Statistics with experience in Bayesian modeling, time series forecasting, uncertainty quantification, and scalable inference. Industry background across finance, sensor analytics, and research computing, with strong Python/R/Linux/Git workflows and a focus on reproducible analysis, diagnostics, and decision-facing reporting.
+
+% -------------------- Education --------------------
+\section*{Education}
+\educationentry{Ph.D. in Statistics, University of California, Santa Cruz}{Expected Aug. 2026}{Research: Bayesian time series, quantile modeling, forecast correction and synthesis, scalable variational Bayes inference. GPA: 3.82/4.00.}
+\educationentry{M.Sc. in Economics, Instituto Tecnol\'ogico Aut\'onomo de M\'exico (ITAM)}{2018--2020}{Mexico City, Mexico}
+\educationentry{B.Sc. in Applied Mathematics, Instituto Tecnol\'ogico Aut\'onomo de M\'exico (ITAM)}{2014--2018}{Mexico City, Mexico}
+
+% -------------------- Experience --------------------
+\section*{Industry \& Professional Experience}
+
+\entry{Delos Financial Technologies, San Rafael, CA (Remote)}{May 2025--Sep. 2025}{Quantitative Researcher (Contract)}{Python, Git, Bash, C++, AWS, Stan}
+\begin{itemize}
+  \item Built evaluation notebooks for goodness-of-fit, residual diagnostics, and cohort-level reporting to standardize model comparison.
+  \item Implemented and validated baseline and extended model variants, refactoring interfaces for consistent parameterization and downstream plotting.
+  \item Automated backtests and experiment runs on AWS with versioned outputs to improve reproducibility and reviewability.
+  \item Investigated numerical stability issues and proposed mitigation strategies for forecasting workflows.
+\end{itemize}
+
+\entry{NeatLeaf Inc., Scotts Valley, CA}{May 2021--Sep. 2022}{Data Analyst}{Python, SQL, Git, Bash, Linux, C++, DBeaver}
+\begin{itemize}
+  \item Built data pipelines for real-time greenhouse microclimate telemetry and downstream analytics.
+  \item Developed spatiotemporal statistical models for air anomaly detection and delivered actionable diagnostics.
+  \item Analyzed robot performance and sensor calibration to improve data quality and system reliability.
+\end{itemize}
+
+\entry{Banco de M\'exico (BANXICO), Mexico City, Mexico}{Aug. 2018--Dec. 2019}{Data Analyst}{Python, R, SQL, Git}
+\begin{itemize}
+  \item Built data pipelines for banknote image datasets used in operational monitoring and model development.
+  \item Developed statistical and machine learning models for anomaly classification and diagnostic evaluation.
+  \item Built forecasting prototypes for financial volumes and tools for model selection and performance tracking.
+\end{itemize}
+
+\entry{UCSC Statistics Department, Santa Cruz, CA}{Feb. 2024--Present}{Computer Systems Coordinator}{Linux, Bash, Python/R, Networking, User Support}
+\begin{itemize}
+  \item Administer Linux servers supporting faculty and graduate research, including upgrades, storage, software stacks, and incident resolution.
+  \item Built automation scripts and internal documentation for onboarding, resource usage, and reproducible compute workflows.
+  \item Coordinated with central IT on infrastructure planning and served as the primary technical contact for departmental computing support.
+\end{itemize}
+
+% -------------------- Publications & Presentations --------------------
+\section*{Selected Publications \& Presentations}
+\pubentry{Aguirre, A., \& Lobato, I. N.}{Evidence of non-fundamentalness in OECD capital stocks.}{\textit{Empirical Economics} 67, 761--772 (2024). \href{https://doi.org/10.1007/s00181-024-02564-5}{doi:10.1007/s00181-024-02564-5}}
+
+\pubentry{Aguirre, A., Sans\'o, B., \& Prado, R.}{Bayesian Quantile-Based Correction and Synthesis of River Flow Forecasts.}{Manuscript in revision.}
+
+\pubentry{ISBA World Meeting 2026, Nagoya, Japan}{Poster presentation accepted: ``Bayesian Quantile-Based Correction and Synthesis of River Flow Forecasts.''}{Scheduled poster session: July 1, 2026.}
+
+\pubentry{LACSC-TIES-EnviBayes-EnvrASA 2026, Mexico City, Mexico}{Invited-session abstract submitted as a 2026 EnviBayes Student Paper Competition winner.}{EnviBayes competition-winners invited session.}
+
+% -------------------- Awards --------------------
+\section*{Awards, Fellowships \& Competitive Funding}
+\begin{itemize}
+  \item \textbf{ISBA 2026 Junior Researcher Travel Award}, International Society for Bayesian Analysis / National Science Foundation, 2026 (\$1,000).
+  \item \textbf{EnviBayes Student Paper Competition Winner}, International Society for Bayesian Analysis, 2026 (\$250 award).
+  \item \textbf{UCSC Statistics Department Conference Travel Award}, 2026 (\$1,000).
+  \item \textbf{UCSC Summer Research Fellowship}, UCSC Statistics, 2024.
+  \item \textbf{UC Regents Fellowship}, UCSC Statistics, 2021.
+  \item \textbf{TLC Graduate Pedagogy Fellowship Certificate}, Center for Innovations in Teaching and Learning, 2023--2024.
+  \item \textbf{Baill\`eres Fellowship}, ITAM B.Sc., 2014--2018.
+  \item \textbf{Baill\`eres Fellowship}, ITAM M.Sc., 2018--2020.
+\end{itemize}
+
+% -------------------- Teaching --------------------
+\section*{Teaching \& Mentoring}
+\entry{University of California, Santa Cruz}{2021--Present}{Teaching Assistant / Graduate Student Instructor}{Statistics and Probability}
+\begin{itemize}
+  \item Supported or taught courses in probability theory, introductory statistics, Bayesian inference, and data visualization.
+  \item Graduate Student Instructor for \textit{Data Visualization (STAT 80B)}, Spring 2025.
+  \item Designed worksheets, grading rubrics, and discussion materials; supported instruction across lower- and upper-division courses.
+\end{itemize}
+
+\entry{ASA DataFest, Fresno, CA}{Apr. 2023}{Mentor}{R, Python}
+\begin{itemize}
+  \item Mentored student teams on modeling and visualization and provided structured technical feedback.
+\end{itemize}
+
+% -------------------- Professional Development --------------------
+\section*{Professional Development}
+\begin{itemize}
+  \item \textbf{Summer Institute in Statistical Genetics (SISG)}, University of Washington / NSF, 2022.
+  \item \textbf{Summer Institute in Statistics and Modeling in Infectious Diseases (SISMID)}, University of Washington / NSF, 2022.
+  \item \textbf{Fundamentals of Causal Inference (with R)}, ASA / Genentech, 2023.
+  \item \textbf{Professional Communication Certificate Program (PCCP)}, UCSC Extension, 2021.
+\end{itemize}
+
+% -------------------- Skills --------------------
+\section*{Technical Skills}
+\begin{tabularx}{\linewidth}{>{\bfseries}p{0.18\linewidth}X}
+Programming & Python, R, SQL, C/C++, Bash, Git, \LaTeX \\
+Methods & Bayesian inference, time series forecasting, quantile modeling, model and variable selection, variational inference, diagnostics, calibration \\
+Tools & AWS (EC2, EMR, S3), Linux, Stan, Tableau \\
+Languages & English, Spanish, German \\
+\end{tabularx}
+
+\end{document}
