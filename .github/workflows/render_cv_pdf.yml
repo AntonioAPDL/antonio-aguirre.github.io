@@ -38,16 +38,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             latexmk \
+            poppler-utils \
             texlive-fonts-recommended \
             texlive-latex-base \
             texlive-latex-extra \
             texlive-latex-recommended
 
-      - name: Render CV PDF
-        run: scripts/render_cv.sh
-
-      - name: Verify rendered PDF is current
-        run: scripts/render_cv.sh --check
+      - name: Render CV PDF if needed
+        run: |
+          if scripts/render_cv.sh --check; then
+            echo "CV PDFs already match the source content."
+          else
+            scripts/render_cv.sh
+            scripts/render_cv.sh --check
+          fi
 
       - name: Commit and push if changed
         run: |

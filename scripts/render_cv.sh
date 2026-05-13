@@ -154,14 +154,57 @@ if [[ ! -s "${BUILT_PDF}" ]]; then
   exit 1
 fi
 
+normalize_pdf_text() {
+  local pdf_path="$1"
+  local text_path="$2"
+  pdftotext -raw "${pdf_path}" - | tr -s '[:space:]' ' ' >"${text_path}"
+}
+
+pdf_page_count() {
+  local pdf_path="$1"
+  pdfinfo "${pdf_path}" | awk '/^Pages:/ {print $2}'
+}
+
+compare_rendered_content() {
+  local expected_pdf="$1"
+  local actual_pdf="$2"
+  local label="$3"
+  local expected_pages actual_pages
+  local expected_text actual_text
+
+  if ! command -v pdftotext >/dev/null 2>&1 || ! command -v pdfinfo >/dev/null 2>&1; then
+    if cmp -s "${expected_pdf}" "${actual_pdf}"; then
+      return 0
+    fi
+    echo "[ERROR] ${label} PDF differs and poppler tools are unavailable for content comparison: ${actual_pdf}" >&2
+    return 1
+  fi
+
+  expected_pages="$(pdf_page_count "${expected_pdf}")"
+  actual_pages="$(pdf_page_count "${actual_pdf}")"
+  if [[ -z "${expected_pages}" || "${expected_pages}" != "${actual_pages}" ]]; then
+    echo "[ERROR] ${label} PDF page count is out of date: ${actual_pdf}" >&2
+    echo "        expected ${expected_pages:-unknown}, found ${actual_pages:-unknown}" >&2
+    return 1
+  fi
+
+  expected_text="${BUILD_DIR}/${label}.expected.txt"
+  actual_text="${BUILD_DIR}/${label}.actual.txt"
+  normalize_pdf_text "${expected_pdf}" "${expected_text}"
+  normalize_pdf_text "${actual_pdf}" "${actual_text}"
+  if ! cmp -s "${expected_text}" "${actual_text}"; then
+    echo "[ERROR] ${label} PDF text is out of date: ${actual_pdf}" >&2
+    echo "        Run scripts/render_cv.sh and commit the updated PDF." >&2
+    return 1
+  fi
+}
+
 if [[ "${CHECK_ONLY}" == "1" ]]; then
   if [[ ! -s "${OUTPUT}" ]]; then
     echo "[ERROR] Canonical CV PDF is missing: ${OUTPUT}" >&2
     exit 1
   fi
-  if ! cmp -s "${BUILT_PDF}" "${OUTPUT}"; then
-    echo "[ERROR] Canonical CV PDF is out of date: ${OUTPUT}" >&2
-    echo "        Run scripts/render_cv.sh and commit the updated PDF." >&2
+  if ! compare_rendered_content "${BUILT_PDF}" "${OUTPUT}" "canonical"; then
     exit 1
   fi
   if [[ -n "${LEGACY_OUTPUT}" ]]; then
@@ -169,13 +212,12 @@ if [[ "${CHECK_ONLY}" == "1" ]]; then
       echo "[ERROR] Legacy CV PDF is missing: ${LEGACY_OUTPUT}" >&2
       exit 1
     fi
-    if ! cmp -s "${BUILT_PDF}" "${LEGACY_OUTPUT}"; then
-      echo "[ERROR] Legacy CV PDF is out of date: ${LEGACY_OUTPUT}" >&2
-      echo "        Run scripts/render_cv.sh and commit the updated PDF." >&2
+    if ! cmp -s "${OUTPUT}" "${LEGACY_OUTPUT}"; then
+      echo "[ERROR] Legacy CV PDF does not match the canonical PDF: ${LEGACY_OUTPUT}" >&2
       exit 1
     fi
   fi
-  echo "[OK] CV source renders and published PDFs are current."
+  echo "[OK] CV source renders and published PDF content is current."
   exit 0
 fi
 

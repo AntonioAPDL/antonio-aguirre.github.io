@@ -8,7 +8,7 @@
 \fi
 
 % -------------------- Packages --------------------
-\usepackage[margin=0.65in]{geometry}
+\usepackage[margin=0.62in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[scaled=0.95]{helvet}
@@ -36,12 +36,12 @@
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0pt}
-\setlist[itemize]{leftmargin=1.2em, itemsep=2pt, topsep=3pt, parsep=0pt, partopsep=0pt}
+\setlist[itemize]{leftmargin=1.2em, itemsep=1.5pt, topsep=2pt, parsep=0pt, partopsep=0pt}
 
 \titleformat{\section}
   {\large\bfseries\color{navy}}
   {}{0pt}{}[\vspace{2pt}\titlerule]
-\titlespacing*{\section}{0pt}{10pt}{5pt}
+\titlespacing*{\section}{0pt}{8pt}{4pt}
 
 \newcommand{\entry}[4]{%
   \textbf{#1} \hfill #2\\
@@ -56,7 +56,7 @@
 \newcommand{\pubentry}[3]{%
   \textbf{#1}\\
   \textit{#2}\\
-  #3\\[4pt]
+  #3\\[3pt]
 }
 
 \newcommand{\contactsep}{\enspace\textbar\enspace}
@@ -118,6 +118,8 @@ Ph.D. candidate in Statistics with experience in Bayesian modeling, time series 
 \pubentry{Aguirre, A., \& Lobato, I. N.}{Evidence of non-fundamentalness in OECD capital stocks.}{\textit{Empirical Economics} 67, 761--772 (2024). \href{https://doi.org/10.1007/s00181-024-02564-5}{doi:10.1007/s00181-024-02564-5}}
 
 \pubentry{Aguirre, A., Sans\'o, B., \& Prado, R.}{Bayesian Quantile-Based Correction and Synthesis of River Flow Forecasts.}{Manuscript in revision.}
+
+\pubentry{Aguirre, A., Barata, R., Prado, R., \& Sans\'o, B.}{\href{https://CRAN.R-project.org/package=exdqlm}{\texttt{exdqlm}: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models}.}{Manuscript submitted to the \textit{Journal of Statistical Software}; companion R package available on CRAN, version 0.4.0.}
 
 \pubentry{ISBA World Meeting 2026, Nagoya, Japan}{Poster presentation accepted: ``Bayesian Quantile-Based Correction and Synthesis of River Flow Forecasts.''}{Scheduled poster session: July 1, 2026.}
 
