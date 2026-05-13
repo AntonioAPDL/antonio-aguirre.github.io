@@ -207,6 +207,6 @@ This script:
 GitHub Actions workflow:
 
 - `.github/workflows/update_gefs_forecast.yml`
-- schedule: every 3 hours (`0 */3 * * *`)
+- schedule: `01:20`, `09:20`, and `17:20` UTC (`20 1,9,17 * * *`)
 - overlap protection via `concurrency`
 - commits only the GEFS asset when content changed
