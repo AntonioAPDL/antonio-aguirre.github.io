@@ -3,7 +3,7 @@
 ## Decision
 - GEFS homepage panel uses **GEFS-only context**.
 - PRISM/ERA5 observed retrospective overlays are disabled.
-- Automated climate-series cron updates are disabled for this panel path.
+- Automated climate-series updates remain decoupled from the GEFS panel. They can stay scheduled for the standalone canonical CSV products without being plotted in the panel.
 
 ## Why
 - Direct side-by-side overlays created misleading visual comparisons due to data semantics mismatch:
@@ -15,7 +15,7 @@
 - Frontend no longer fetches or plots `observed_retrospective` for GEFS charts.
 - GEFS exporter no longer emits `observed_retrospective` unless explicitly requested with:
   - `--include-observed-retrospective`
-- `.github/workflows/update_climate_series.yml` cron trigger removed (manual dispatch kept).
+- `.github/workflows/update_climate_series.yml` may remain scheduled because it maintains separate climate CSV artifacts; the GEFS panel ignores those artifacts by default.
 
 ## Re-enable path (future)
 - If we want external observed overlays again, do it with explicit harmonization:

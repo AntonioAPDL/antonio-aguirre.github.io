@@ -15,6 +15,22 @@ This repository contains the source for antonio-aguirre.com, built with Jekyll a
    ```
 4. Visit `http://localhost:4000`.
 
+## Verification
+
+Useful checks before committing site or data-pipeline changes:
+
+```bash
+python3 scripts/check_site_integrity.py
+_sandbox/gefs_point_pipeline/.venv/bin/python -m pytest _sandbox/gefs_point_pipeline/tests
+bundle exec jekyll build --trace
+```
+
+Notes:
+
+- `scripts/check_site_integrity.py` validates generated CSV schemas, JSON assets, YAML config/workflows when PyYAML is available, local asset references, and unresolved conflict markers.
+- The Jekyll build requires Ruby from `.ruby-version` plus Bundler `2.5.23` from `Gemfile.lock`.
+- The GEFS tests use the sandbox virtualenv described in `_sandbox/gefs_point_pipeline/README.md`.
+
 ## Structure
 
 - `index.html`, `about.md`, `research.md`, `teaching.html`, `software.md`, `blog.html`, `cv.html`, `contact.md`: main pages
@@ -127,7 +143,7 @@ The home page now includes a second panel for GEFS point forecasts (precipitatio
 - **Tracked asset:** `assets/data/forecasts/gefs_big_trees_latest.json`
 - **Pipeline source:** `_sandbox/gefs_point_pipeline`
 - **Update script:** `scripts/update_big_trees_gefs_forecast.sh`
-- **Scheduled workflow:** `.github/workflows/update_gefs_forecast.yml` (4 times/day, aligned to GEFS cycle availability)
+- **Scheduled workflow:** `.github/workflows/update_gefs_forecast.yml` (3 times/day at `01:20`, `09:20`, and `17:20` UTC, aligned to completed GEFS cycles)
 
 Behavior:
 
@@ -151,6 +167,7 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - PRISM/ERA5 observed overlays are intentionally disabled in the panel (GEFS-only context mode)
 - Exporter default is GEFS-only; observed payload is opt-in with `--include-observed-retrospective`
 - Exporter uses a history-scan guard: skips git-history backfill when prior 20-day GEFS context is already complete
+- The standalone climate CSV automation remains scheduled, but its PRISM/ERA5/NWM products are not plotted on the GEFS panel unless observed retrospective export is explicitly re-enabled.
 
 Background historical GEFS updater (no live monitoring):
 
@@ -186,6 +203,8 @@ This repo includes a cron-safe climate stack that keeps canonical point series a
 - `climate_daily_ppt_soil.csv`
 - `climate_series_status.csv`
 
+`climate_series_status.csv` is the source of truth for provider coverage. PRISM and ERA5 are expected to trail real time by provider lag. The tracked NWM retrospective v3.0 source is historical and currently provider-limited to 2023 data; the wrapper rechecks upstream availability periodically instead of attempting a heavy full extraction on every scheduled run.
+
 Fixed point:
 
 - latitude `37.0443931`
@@ -218,6 +237,11 @@ scripts/run_climate_updates_cron.sh
 
 Logs are written under `logs/climate_updates/` and `latest.log` points to the newest run log.
 
+NWM retrospective controls:
+
+- `NWM_RETRO_PROVIDER_RECHECK_DAYS` controls how often the wrapper reruns the heavy extraction when the prior metadata shows the upstream retrospective source is provider-limited before the target date. Default: `30`.
+- `NWM_RETRO_FORCE_REFRESH=1` bypasses the provider-limited skip and forces a refresh attempt.
+
 ### GitHub Actions Automation
 
 The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
@@ -226,6 +250,9 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
   - cadence: every 8 hours on the hour UTC (`0 */8 * * *`) plus manual `workflow_dispatch`
   - updates and commits:
     - `assets/data/forecasts/big_trees_latest.json`
+  - race guards:
+    - hard sync to latest `origin/main` before processing
+    - rebase-conflict-safe push (concurrent updates are skipped without failing the job)
 
 - `.github/workflows/update_climate_series.yml`
   - cadence: every 8 hours at minute 17 UTC (`17 */8 * * *`) plus manual `workflow_dispatch`
@@ -254,6 +281,12 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
   - one-time/manual bootstrap for GEFS cycle-analysis context
   - backfills missing `f003` precip proxy and `f000` soil markers over a target window (default 20 days)
   - rewrites latest full GEFS payload at the end so forecast panel remains complete
+
+- `.github/workflows/update_qdesn_fit.yml` (manual)
+  - disabled by default from the homepage, but kept for future QDESN overlay refreshes
+  - updates and commits:
+    - `assets/data/forecasts/big_trees_qdesn_latest.json`
+  - uses the same hard-sync and rebase-safe push pattern as the other generated-asset workflows
 
 - `.github/workflows/verify_site_build.yml`
   - runs `bundle exec jekyll build --trace` on pushes to `main` and on manual dispatch
