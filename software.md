@@ -65,6 +65,110 @@ description: "Overview of software projects and tools in development."
     </div>
   </section>
 
+  <section class="software-samples" aria-label="Selected open-access code samples">
+    <div class="software-samples__header">
+      <p class="software-kicker">Open-Access Samples</p>
+      <h2>Selected Code</h2>
+      <p>
+        A small, curated sample of public code from my research software work. These examples highlight documented
+        R interfaces, numerical C++ kernels, diagnostics, and tests; more samples will be added as active projects
+        mature into public release branches.
+      </p>
+    </div>
+
+    <div class="software-sample-grid">
+      <article class="software-sample">
+        <div class="software-sample__icon"><i class="fab fa-r-project" aria-hidden="true"></i></div>
+        <h3>Laplace-Delta VB Engine</h3>
+        <p>
+          Dynamic Bayesian quantile state-space inference with documented controls, warm starts, diagnostics,
+          and posterior predictive output.
+        </p>
+        <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/R/exdqlmLDVB.R" target="_blank" rel="noopener noreferrer">
+          <span>View R source</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-sample">
+        <div class="software-sample__icon"><i class="fab fa-r-project" aria-hidden="true"></i></div>
+        <h3>Posterior Simulation</h3>
+        <p>
+          MCMC workflow for exDQLM posterior sampling, including VB initialization paths and dynamic model controls.
+        </p>
+        <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/R/exdqlmMCMC.R" target="_blank" rel="noopener noreferrer">
+          <span>View R source</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-sample">
+        <div class="software-sample__icon"><i class="fas fa-layer-group" aria-hidden="true"></i></div>
+        <h3>Quantile Synthesis</h3>
+        <p>
+          Post-processing for separately fitted quantile models, using isotonic correction and monotone rearrangement
+          to produce coherent predictive summaries.
+        </p>
+        <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/R/quantileSynthesis.R" target="_blank" rel="noopener noreferrer">
+          <span>View R source</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-sample">
+        <div class="software-sample__icon"><i class="fas fa-microchip" aria-hidden="true"></i></div>
+        <h3>exAL Numerics</h3>
+        <p>
+          Rcpp/Boost implementation of extended asymmetric Laplace distribution utilities, including stable
+          parameter-bound calculations.
+        </p>
+        <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/src/exAL.cpp" target="_blank" rel="noopener noreferrer">
+          <span>View C++ source</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-sample">
+        <div class="software-sample__icon"><i class="fas fa-wave-square" aria-hidden="true"></i></div>
+        <h3>Kalman &amp; FFBS Kernels</h3>
+        <p>
+          C++ acceleration for state updates and forward-filtering backward-sampling routines used by dynamic
+          quantile workflows.
+        </p>
+        <a href="https://github.com/AntonioAPDL/exdqlm/tree/main/src" target="_blank" rel="noopener noreferrer">
+          <span>Browse C++ kernels</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-sample">
+        <div class="software-sample__icon"><i class="fas fa-vial" aria-hidden="true"></i></div>
+        <h3>Regression Tests</h3>
+        <p>
+          Focused tests for diagnostics, exAL utilities, synthesis behavior, and package-level reproducibility contracts.
+        </p>
+        <a href="https://github.com/AntonioAPDL/exdqlm/tree/main/tests/testthat" target="_blank" rel="noopener noreferrer">
+          <span>Browse tests</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+    </div>
+
+    <div class="software-github-cta">
+      <div>
+        <h3>Explore More on GitHub</h3>
+        <p>
+          My public repositories are open access and include research software, reproducible manuscript workflows,
+          teaching materials, and active statistical-computing prototypes.
+        </p>
+      </div>
+      <a class="software-button" href="https://github.com/AntonioAPDL" target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-github" aria-hidden="true"></i>
+        <span>Visit GitHub</span>
+      </a>
+    </div>
+  </section>
+
   <section class="software-note">
     <h2>Publication Track</h2>
     <p>
@@ -72,7 +176,7 @@ description: "Overview of software projects and tools in development."
       has been submitted to the <em>Journal of Statistical Software</em>. The reproducible manuscript workflow tracks the current
       package-development branch, while the public package release is available on CRAN.
     </p>
-    <p class="software-updated">Last updated: May 13, 2026</p>
+    <p class="software-updated">Last updated: May 14, 2026</p>
   </section>
 
   <section class="language-software" aria-label="Software stack">

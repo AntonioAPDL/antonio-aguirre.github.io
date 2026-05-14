@@ -812,7 +812,10 @@ body.dark-theme .plot-status__title {
 
 .software-feature p,
 .software-note p,
-.software-capability p {
+.software-capability p,
+.software-samples__header p,
+.software-sample p,
+.software-github-cta p {
   font-size: 1.05rem;
   color: var(--text-muted);
   line-height: 1.7;
@@ -887,6 +890,100 @@ body.dark-theme .plot-status__title {
   margin: 0 0 0.45rem;
 }
 
+.software-samples {
+  margin: 1.75rem 0;
+  padding: 1.45rem 0 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.software-samples__header {
+  max-width: 760px;
+  margin-bottom: 1rem;
+}
+
+.software-samples__header h2,
+.software-github-cta h3 {
+  color: var(--text-color);
+  font-size: clamp(1.35rem, 1.1rem + 0.75vw, 1.8rem);
+  line-height: 1.25;
+  margin: 0 0 0.6rem;
+}
+
+.software-sample-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.software-sample {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-1);
+  box-shadow: var(--shadow-sm);
+}
+
+.software-sample__icon {
+  display: inline-grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  place-items: center;
+  margin-bottom: 0.7rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--info-bg);
+  color: var(--accent-color);
+}
+
+.software-sample h3 {
+  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+  color: var(--text-color);
+  font-size: 1.05rem;
+  margin: 0 0 0.45rem;
+}
+
+.software-sample p {
+  margin-bottom: 0.8rem;
+}
+
+.software-sample a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: auto;
+  color: var(--accent-color);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.software-sample a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.software-github-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-2);
+}
+
+.software-github-cta h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.35rem;
+}
+
+.software-github-cta p {
+  margin-bottom: 0;
+}
+
 .software-note {
   margin: 1.2rem 0;
   padding: 1rem 1.1rem;
@@ -945,6 +1042,7 @@ body.dark-theme .plot-status__title {
   }
 
   .software-capability-grid,
+  .software-sample-grid,
   .software-stack {
     grid-template-columns: 1fr;
   }
@@ -956,6 +1054,11 @@ body.dark-theme .plot-status__title {
 
   .software-button {
     width: 100%;
+  }
+
+  .software-github-cta {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 
