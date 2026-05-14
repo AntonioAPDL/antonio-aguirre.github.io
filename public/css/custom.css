@@ -734,6 +734,42 @@ body.dark-theme .plot-status__title {
   line-height: 1.75;
 }
 
+.software-overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1.45rem 0 1.2rem;
+}
+
+.software-overview-item {
+  min-height: 100%;
+  padding: 0.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-1);
+  box-shadow: var(--shadow-sm);
+}
+
+.software-overview-item i {
+  color: var(--accent-color);
+  font-size: 1.2rem;
+  margin-bottom: 0.55rem;
+}
+
+.software-overview-item h3 {
+  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+  color: var(--text-color);
+  font-size: 1rem;
+  margin: 0 0 0.35rem;
+}
+
+.software-overview-item p {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
 .software-feature {
   display: grid;
   grid-template-columns: minmax(150px, 0.36fr) minmax(0, 1fr);
@@ -796,8 +832,7 @@ body.dark-theme .plot-status__title {
   font-weight: 700;
 }
 
-.software-feature h2,
-.software-note h2 {
+.software-feature h2 {
   color: var(--text-color);
   font-size: clamp(1.35rem, 1.1rem + 0.8vw, 1.85rem);
   line-height: 1.25;
@@ -810,8 +845,6 @@ body.dark-theme .plot-status__title {
 }
 
 .software-feature p,
-.software-note p,
-.software-capability p,
 .software-samples__header p,
 .software-project p,
 .software-sample p,
@@ -819,6 +852,49 @@ body.dark-theme .plot-status__title {
   font-size: 1.05rem;
   color: var(--text-muted);
   line-height: 1.7;
+}
+
+.software-feature__details {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.15fr);
+  gap: 1rem;
+  margin-top: 1.15rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.software-feature__status h3,
+.software-feature__checks strong {
+  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.software-feature__status h3 {
+  margin: 0 0 0.4rem;
+}
+
+.software-feature__status p {
+  margin-bottom: 0.45rem;
+}
+
+.software-feature__checks {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.software-feature__checks li {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.software-feature__checks span {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
 }
 
 .software-actions {
@@ -861,33 +937,6 @@ body.dark-theme .plot-status__title {
 .software-button--secondary:hover {
   background-color: var(--surface-3);
   color: var(--accent-hover) !important;
-}
-
-.software-capability-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-  margin: 1.2rem 0;
-}
-
-.software-capability {
-  padding: 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background-color: var(--surface-1);
-  box-shadow: var(--shadow-sm);
-}
-
-.software-capability i {
-  color: var(--accent-color);
-  font-size: 1.35rem;
-  margin-bottom: 0.65rem;
-}
-
-.software-capability h3 {
-  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
-  font-size: 1.05rem;
-  margin: 0 0 0.45rem;
 }
 
 .software-samples {
@@ -1060,26 +1109,16 @@ body.dark-theme .plot-status__title {
   justify-content: flex-end;
 }
 
-.software-note {
-  margin: 1.2rem 0;
-  padding: 1rem 1.1rem;
-  border-left: 5px solid var(--highlight-color);
-  background-color: var(--surface-2);
-  border-radius: var(--radius-sm);
-}
-
-.software-note h2 {
-  margin-bottom: 0.45rem;
-}
-
 .software-updated {
   margin-bottom: 0;
   color: var(--text-subtle) !important;
   font-size: 0.95rem !important;
 }
 
-.software-note--compact {
-  margin-top: 1.4rem;
+@media (max-width: 920px) {
+  .software-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -1091,7 +1130,8 @@ body.dark-theme .plot-status__title {
     min-height: 130px;
   }
 
-  .software-capability-grid,
+  .software-overview,
+  .software-feature__details,
   .software-project-grid,
   .software-sample-grid {
     grid-template-columns: 1fr;

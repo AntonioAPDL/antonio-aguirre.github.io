@@ -14,6 +14,29 @@ description: "Public packages, research code, and selected implementation exampl
     </p>
   </header>
 
+  <section class="software-overview" aria-label="Software at a glance">
+    <div class="software-overview-item">
+      <i class="fas fa-cube" aria-hidden="true"></i>
+      <h3>Released Package</h3>
+      <p>CRAN-published R software with inspectable source and tests.</p>
+    </div>
+    <div class="software-overview-item">
+      <i class="fas fa-water" aria-hidden="true"></i>
+      <h3>Forecast Pipelines</h3>
+      <p>Scripts for streamflow forecasts, climate data, and site outputs.</p>
+    </div>
+    <div class="software-overview-item">
+      <i class="fas fa-microchip" aria-hidden="true"></i>
+      <h3>Numerical Code</h3>
+      <p>Rcpp/C++ kernels for distribution utilities and state-space computation.</p>
+    </div>
+    <div class="software-overview-item">
+      <i class="fas fa-book-open" aria-hidden="true"></i>
+      <h3>Research Notes</h3>
+      <p>Public methods notes and manuscript-support materials.</p>
+    </div>
+  </section>
+
   <article class="software-feature">
     <div class="software-feature__media" aria-hidden="true">
       <img src="{{ '/public/images/devicons/r.svg' | absolute_url }}" alt="" loading="lazy" class="software-feature__icon">
@@ -45,64 +68,45 @@ description: "Public packages, research code, and selected implementation exampl
           <span>DOI</span>
         </a>
       </div>
+
+      <div class="software-feature__details">
+        <div class="software-feature__status">
+          <h3>Release &amp; Manuscript</h3>
+          <p>
+            <code>exdqlm</code> is available on CRAN. A companion article has been submitted to the
+            <em>Journal of Statistical Software</em>, with examples maintained alongside package development.
+          </p>
+          <p class="software-updated">Last updated: May 14, 2026</p>
+        </div>
+        <ul class="software-feature__checks" aria-label="exdqlm capabilities">
+          <li>
+            <strong>Models</strong>
+            <span>State-space quantile models with trend, seasonal, regression, and transfer-function components.</span>
+          </li>
+          <li>
+            <strong>Inference</strong>
+            <span>MCMC for posterior simulation and LDVB for scalable approximate inference.</span>
+          </li>
+          <li>
+            <strong>Evaluation</strong>
+            <span>Forecast summaries, calibration checks, scoring rules, and posterior predictive output.</span>
+          </li>
+        </ul>
+      </div>
     </div>
   </article>
 
-  <section class="software-note">
-    <h2>Release &amp; Manuscript</h2>
-    <p>
-      <code>exdqlm</code> is available on CRAN. A companion article,
-      <em>exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models</em>, has been
-      submitted to the <em>Journal of Statistical Software</em>; manuscript examples are maintained alongside package development.
-    </p>
-    <p class="software-updated">Last updated: May 14, 2026</p>
-  </section>
-
-  <section class="software-capability-grid" aria-label="exdqlm capabilities">
-    <div class="software-capability">
-      <i class="fas fa-chart-line" aria-hidden="true"></i>
-      <h3>Dynamic Quantile Models</h3>
-      <p>State-space quantile models with trend, seasonal, regression, and transfer-function components.</p>
-    </div>
-    <div class="software-capability">
-      <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
-      <h3>Inference Engines</h3>
-      <p>MCMC for posterior simulation and LDVB for scalable approximate inference on longer time series.</p>
-    </div>
-    <div class="software-capability">
-      <i class="fas fa-vial" aria-hidden="true"></i>
-      <h3>Diagnostics &amp; Forecasting</h3>
-      <p>Forecast summaries, calibration checks, scoring rules, and posterior predictive output.</p>
-    </div>
-  </section>
-
   <section class="software-samples" aria-label="Public projects and artifacts">
     <div class="software-samples__header">
-      <p class="software-kicker">Public Work</p>
-      <h2>Projects &amp; Artifacts</h2>
+      <p class="software-kicker">Repositories</p>
+      <h2>Public Projects</h2>
       <p>
-        Released packages, manuscript materials, public site workflows, and methods notes. Each item is linked
-        so readers can inspect the repository or source files directly.
+        Selected repositories and materials that are ready to inspect: article sources, site scripts,
+        methods notes, and manuscript-support code.
       </p>
     </div>
 
     <div class="software-project-grid">
-      <article class="software-project">
-        <div class="software-project__meta">
-          <span>Released package</span>
-          <span>R / C++</span>
-        </div>
-        <h3><code>exdqlm</code></h3>
-        <p>
-          CRAN package for Bayesian dynamic quantile state-space modeling, with MCMC, LDVB, C++ kernels,
-          forecast diagnostics, and multi-quantile synthesis.
-        </p>
-        <a href="https://github.com/AntonioAPDL/exdqlm" target="_blank" rel="noopener noreferrer">
-          <span>Package repository</span>
-          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-        </a>
-      </article>
-
       <article class="software-project">
         <div class="software-project__meta">
           <span>Article workflow</span>
@@ -121,13 +125,29 @@ description: "Public packages, research code, and selected implementation exampl
 
       <article class="software-project">
         <div class="software-project__meta">
-          <span>Site workflows</span>
+          <span>Manuscript support</span>
+          <span>Python / TeX</span>
+        </div>
+        <h3>Forecast Correction Manuscript</h3>
+        <p>
+          Revised Environmetrics manuscript materials with generated asset manifests, figure/table reports,
+          and validation scripts.
+        </p>
+        <a href="https://github.com/AntonioAPDL/Evironmetrics---REVISED-DOC-2" target="_blank" rel="noopener noreferrer">
+          <span>Manuscript repository</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-project">
+        <div class="software-project__meta">
+          <span>Site scripts</span>
           <span>Python / R / Bash</span>
         </div>
         <h3>Forecast &amp; Climate Tools</h3>
         <p>
-          Public scripts behind this website's forecast and climate-data outputs, including NOAA NWPS
-          requests, climate/soil-moisture merges, and repository checks.
+          Scripts behind this website's forecast and climate-data outputs, including NOAA NWPS requests,
+          climate/soil-moisture joins, and repository checks.
         </p>
         <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/tree/main/scripts" target="_blank" rel="noopener noreferrer">
           <span>Browse scripts</span>
@@ -142,8 +162,7 @@ description: "Public packages, research code, and selected implementation exampl
         </div>
         <h3>Q-DESN Theory Notes</h3>
         <p>
-          Public notes for Q-DESN implementation ideas, notation, and model structure. Application code will
-          be added after it is documented for public use.
+          Public notes for Q-DESN notation, model structure, and implementation ideas behind current research code.
         </p>
         <a href="https://github.com/AntonioAPDL/Q-DESN---Theory-for-implementation" target="_blank" rel="noopener noreferrer">
           <span>Read notes</span>
@@ -158,8 +177,8 @@ description: "Public packages, research code, and selected implementation exampl
       <p class="software-kicker">Code Samples</p>
       <h2>Selected Implementations</h2>
       <p>
-        Concrete files from public repositories. The goal is not to list everything, but to show implementation
-        style across package APIs, numerical kernels, data pipelines, and checks.
+        Selected files that show how I structure package APIs, numerical code, data pipelines,
+        manuscript checks, and site automation.
       </p>
     </div>
 
@@ -227,12 +246,12 @@ description: "Public packages, research code, and selected implementation exampl
       </article>
 
       <article class="software-sample">
-        <div class="software-sample__icon"><i class="fas fa-vial" aria-hidden="true"></i></div>
-        <h3>Site Integrity Checks</h3>
+        <div class="software-sample__icon"><i class="fas fa-file-alt" aria-hidden="true"></i></div>
+        <h3>Manuscript Figure Validator</h3>
         <p>
-          Lightweight validation for site data schemas, local references, generated assets, and conflict markers.
+          Python check that resolves TeX figure paths and fails when manuscript assets are missing.
         </p>
-        <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/blob/main/scripts/check_site_integrity.py" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/AntonioAPDL/Evironmetrics---REVISED-DOC-2/blob/main/scripts/validate_manuscript_figure_paths.py" target="_blank" rel="noopener noreferrer">
           <span>View Python source</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
@@ -243,8 +262,8 @@ description: "Public packages, research code, and selected implementation exampl
       <div>
         <h3>Explore More on GitHub</h3>
         <p>
-          Public repositories include released packages, manuscript materials, website code, and research notes.
-          GitHub activity is the best place to see current updates.
+          Browse current repositories, recent activity, and source files. More selected examples will be added
+          when they have clear setup notes and reusable examples.
         </p>
       </div>
       <div class="software-github-cta__actions" aria-label="GitHub profile links">
@@ -258,13 +277,5 @@ description: "Public packages, research code, and selected implementation exampl
         </a>
       </div>
     </div>
-  </section>
-
-  <section class="software-note software-note--compact">
-    <h2>Next Additions</h2>
-    <p>
-      Additional Python, MATLAB, Julia, and Q-DESN application code will be added when the examples have
-      clear entry points, documentation, and setup that makes sense outside my local environment.
-    </p>
   </section>
 </div>
