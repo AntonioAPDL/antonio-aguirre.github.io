@@ -6,13 +6,13 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
 
 <div class="research-section">
   <!-- Title and Introduction -->
-  <header class="research-hero">
-    <h1 class="section-heading">Research</h1>
-    <p class="intro-text">
+  <header class="research-hero page-header">
+    <h1 class="page-title">Research</h1>
+    <p class="page-lede">
       I develop Bayesian time-series methods for probabilistic forecasting, with an emphasis on quantile modeling,
       uncertainty quantification, scalable inference, and reusable research software.
     </p>
-    <p class="intro-text">
+    <p class="page-lede">
       Much of this work is motivated by hydrological and environmental forecasting, where forecasts need to be calibrated,
       interpretable, computationally practical, and easy to update as new data arrive.
     </p>

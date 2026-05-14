@@ -8,8 +8,8 @@ description: "Background, research focus, teaching, service, and applied experie
   <!-- Introduction Section -->
   <div class="intro-section about-card">
     <img src="/files/images/Me.jpg" alt="Antonio Aguirre" class="profile-pic">
-    <h1 class="home-title">Antonio Aguirre</h1>
-    <p class="intro-text">
+    <h1 class="page-title">Antonio Aguirre</h1>
+    <p class="page-lede">
       I'm a Ph.D. candidate in <strong>Statistics</strong> at the
       <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>,
       advised by <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Bruno Sansó</a> and
@@ -128,7 +128,7 @@ description: "Background, research focus, teaching, service, and applied experie
       Outside of work, I enjoy baking bread, cooking Mexican dishes, reading history, the philosophy of science, and learning German.
     </p>
     <p class="intro-text">
-      If you'd like to connect or discuss ideas, feel free to reach out. Thanks for stopping by!
+      For collaboration, questions, or related work, the <a href="/contact/">Contact page</a> lists the best ways to reach me.
     </p>
   </div>
 </div>

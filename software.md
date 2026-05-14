@@ -5,10 +5,10 @@ description: "Public packages, research code, and selected implementation exampl
 ---
 
 <div class="software-section">
-  <header class="software-hero">
+  <header class="software-hero page-header">
     <p class="software-kicker">Research Software</p>
-    <h1 class="section-heading">Software</h1>
-    <p class="software-intro">
+    <h1 class="page-title">Software</h1>
+    <p class="page-lede">
       Public packages, research code, and selected implementation examples for Bayesian modeling,
       forecasting, and scientific computing.
     </p>
