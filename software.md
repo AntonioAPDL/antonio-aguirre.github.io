@@ -47,6 +47,16 @@ description: "Overview of software projects and tools in development."
     </div>
   </article>
 
+  <section class="software-note">
+    <h2>Publication Track</h2>
+    <p>
+      The companion article, <em>exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models</em>,
+      has been submitted to the <em>Journal of Statistical Software</em>. The reproducible manuscript workflow tracks the current
+      package-development branch, while the public package release is available on CRAN.
+    </p>
+    <p class="software-updated">Last updated: May 14, 2026</p>
+  </section>
+
   <section class="software-capability-grid" aria-label="exdqlm capabilities">
     <div class="software-capability">
       <i class="fas fa-chart-line" aria-hidden="true"></i>
@@ -156,31 +166,33 @@ description: "Overview of software projects and tools in development."
 
     <div class="software-github-cta">
       <div>
-        <h3>Explore More on GitHub</h3>
+        <h3>Open Development on GitHub</h3>
         <p>
-          My public repositories are open access and include research software, reproducible manuscript workflows,
-          teaching materials, and active statistical-computing prototypes.
+          Public repositories linked from this page are open access. I use GitHub to track releases, tests,
+          reproducible manuscript workflows, and selected statistical-computing prototypes as they become ready
+          for public review.
         </p>
       </div>
-      <a class="software-button" href="https://github.com/AntonioAPDL" target="_blank" rel="noopener noreferrer">
-        <i class="fab fa-github" aria-hidden="true"></i>
-        <span>Visit GitHub</span>
-      </a>
+      <div class="software-github-cta__actions" aria-label="GitHub profile links">
+        <a class="software-button" href="https://github.com/AntonioAPDL?tab=overview" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-github" aria-hidden="true"></i>
+          <span>View Activity</span>
+        </a>
+        <a class="software-button software-button--secondary" href="https://github.com/AntonioAPDL?tab=repositories" target="_blank" rel="noopener noreferrer">
+          <i class="fas fa-folder-open" aria-hidden="true"></i>
+          <span>Browse Repos</span>
+        </a>
+      </div>
     </div>
   </section>
 
-  <section class="software-note">
-    <h2>Publication Track</h2>
-    <p>
-      The companion article, <em>exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models</em>,
-      has been submitted to the <em>Journal of Statistical Software</em>. The reproducible manuscript workflow tracks the current
-      package-development branch, while the public package release is available on CRAN.
+  <section class="language-software" aria-label="Languages and environments">
+    <h2>Languages &amp; Environments</h2>
+    <p class="software-stack-intro">
+      The current public samples emphasize the mature R/C++ release path behind <code>exdqlm</code>. I also work across
+      Python, MATLAB, and Julia for data workflows, research prototypes, and numerical experiments; those projects will be
+      added here as curated, documented public snapshots when they are ready for reuse.
     </p>
-    <p class="software-updated">Last updated: May 14, 2026</p>
-  </section>
-
-  <section class="language-software" aria-label="Software stack">
-    <h2>Stack</h2>
     <ul class="software-stack">
       <li><img src="{{ '/public/images/devicons/r.svg' | absolute_url }}" alt="" loading="lazy" class="software-icon"> R package development</li>
       <li><img src="{{ '/public/images/devicons/cpp.svg' | absolute_url }}" alt="" loading="lazy" class="software-icon"> C++ acceleration through Rcpp</li>
@@ -188,5 +200,13 @@ description: "Overview of software projects and tools in development."
       <li><img src="{{ '/public/images/devicons/matlab.svg' | absolute_url }}" alt="" loading="lazy" class="software-icon"> MATLAB research prototypes</li>
       <li><img src="{{ '/public/images/devicons/julia.svg' | absolute_url }}" alt="" loading="lazy" class="software-icon"> Julia exploration for numerical computing</li>
     </ul>
+    <div class="software-future-note">
+      <h3>More Software in Preparation</h3>
+      <p>
+        Additional MATLAB, Julia, and Python examples are planned for this page after cleanup for documentation,
+        reproducibility, and publishability. The goal is to share code that is useful beyond a single project folder,
+        with clear entry points and enough context for readers to understand what each sample demonstrates.
+      </p>
+    </div>
   </section>
 </div>
