@@ -816,8 +816,7 @@ body.dark-theme .plot-status__title {
 .software-samples__header p,
 .software-sample p,
 .software-github-cta p,
-.software-stack-intro,
-.software-future-note p {
+.software-stack-intro {
   font-size: 1.05rem;
   color: var(--text-muted);
   line-height: 1.7;
@@ -1023,6 +1022,28 @@ body.dark-theme .plot-status__title {
   margin: 0 0 1rem;
 }
 
+.software-language-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.software-language-group {
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-1);
+  box-shadow: var(--shadow-sm);
+}
+
+.software-language-group h3 {
+  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+  color: var(--text-color);
+  font-size: 1.05rem;
+  margin: 0 0 0.65rem;
+}
+
 .software-stack {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1047,25 +1068,9 @@ body.dark-theme .plot-status__title {
   flex: 0 0 auto;
 }
 
-.software-future-note {
-  margin-top: 1rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--border-color);
-  border-left: 5px solid var(--accent-color);
-  border-radius: var(--radius-sm);
-  background-color: var(--surface-1);
-  box-shadow: var(--shadow-sm);
-}
-
-.software-future-note h3 {
-  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
-  color: var(--text-color);
-  font-size: 1.1rem;
-  margin: 0 0 0.35rem;
-}
-
-.software-future-note p {
-  margin-bottom: 0;
+.software-language-group .software-stack {
+  grid-template-columns: 1fr;
+  margin-top: 0;
 }
 
 @media (max-width: 760px) {
@@ -1079,6 +1084,7 @@ body.dark-theme .plot-status__title {
 
   .software-capability-grid,
   .software-sample-grid,
+  .software-language-groups,
   .software-stack {
     grid-template-columns: 1fr;
   }
