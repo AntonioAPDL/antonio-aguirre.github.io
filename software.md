@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Software
-description: "Research software for Bayesian forecasting, quantile modeling, and scientific computing."
+description: "Public packages, research code, and selected implementation examples."
 ---
 
 <div class="software-section">
@@ -9,7 +9,8 @@ description: "Research software for Bayesian forecasting, quantile modeling, and
     <p class="software-kicker">Research Software</p>
     <h1 class="section-heading">Software</h1>
     <p class="software-intro">
-      Bayesian forecasting, quantile modeling, uncertainty quantification, and scientific computing.
+      Public packages, research code, and selected implementation examples for Bayesian modeling,
+      forecasting, and scientific computing.
     </p>
   </header>
 
@@ -75,20 +76,97 @@ description: "Research software for Bayesian forecasting, quantile modeling, and
     </div>
   </section>
 
-  <section class="software-samples" aria-label="Representative code samples">
+  <section class="software-samples" aria-label="Public projects and artifacts">
+    <div class="software-samples__header">
+      <p class="software-kicker">Public Work</p>
+      <h2>Projects &amp; Artifacts</h2>
+      <p>
+        Released packages, manuscript materials, public site workflows, and methods notes. Each item is linked
+        so readers can inspect the repository or source files directly.
+      </p>
+    </div>
+
+    <div class="software-project-grid">
+      <article class="software-project">
+        <div class="software-project__meta">
+          <span>Released package</span>
+          <span>R / C++</span>
+        </div>
+        <h3><code>exdqlm</code></h3>
+        <p>
+          CRAN package for Bayesian dynamic quantile state-space modeling, with MCMC, LDVB, C++ kernels,
+          forecast diagnostics, and multi-quantile synthesis.
+        </p>
+        <a href="https://github.com/AntonioAPDL/exdqlm" target="_blank" rel="noopener noreferrer">
+          <span>Package repository</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-project">
+        <div class="software-project__meta">
+          <span>Article workflow</span>
+          <span>R / TeX</span>
+        </div>
+        <h3><code>exdqlm</code> JSS Article</h3>
+        <p>
+          Public manuscript source, supplement files, and reproducibility notes for the submitted
+          <em>Journal of Statistical Software</em> article.
+        </p>
+        <a href="https://github.com/AntonioAPDL/exdqlm---Article" target="_blank" rel="noopener noreferrer">
+          <span>Article repository</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-project">
+        <div class="software-project__meta">
+          <span>Site workflows</span>
+          <span>Python / R / Bash</span>
+        </div>
+        <h3>Forecast &amp; Climate Tools</h3>
+        <p>
+          Public scripts behind this website's forecast and climate-data outputs, including NOAA NWPS
+          requests, climate/soil-moisture merges, and repository checks.
+        </p>
+        <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/tree/main/scripts" target="_blank" rel="noopener noreferrer">
+          <span>Browse scripts</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-project">
+        <div class="software-project__meta">
+          <span>Methods notes</span>
+          <span>Q-DESN</span>
+        </div>
+        <h3>Q-DESN Theory Notes</h3>
+        <p>
+          Public notes for Q-DESN implementation ideas, notation, and model structure. Application code will
+          be added after it is documented for public use.
+        </p>
+        <a href="https://github.com/AntonioAPDL/Q-DESN---Theory-for-implementation" target="_blank" rel="noopener noreferrer">
+          <span>Read notes</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+    </div>
+  </section>
+
+  <section class="software-samples" aria-label="Selected implementation examples">
     <div class="software-samples__header">
       <p class="software-kicker">Code Samples</p>
-      <h2>Representative Code</h2>
+      <h2>Selected Implementations</h2>
       <p>
-        These files from <code>exdqlm</code> show the package API, inference routines, numerical kernels,
-        synthesis utilities, and tests. This section will expand as other projects reach documented release branches.
+        Concrete files from public repositories. The goal is not to list everything, but to show implementation
+        style across package APIs, numerical kernels, data pipelines, and checks.
       </p>
     </div>
 
     <div class="software-sample-grid">
       <article class="software-sample">
         <div class="software-sample__icon"><i class="fab fa-r-project" aria-hidden="true"></i></div>
-        <h3>Laplace-Delta VB Engine</h3>
+        <h3>LDVB Inference Interface</h3>
         <p>
           Main LDVB interface for dynamic quantile state-space models, with controls for initialization,
           diagnostics, and posterior predictive summaries.
@@ -101,24 +179,12 @@ description: "Research software for Bayesian forecasting, quantile modeling, and
 
       <article class="software-sample">
         <div class="software-sample__icon"><i class="fab fa-r-project" aria-hidden="true"></i></div>
-        <h3>Posterior Simulation</h3>
+        <h3>Q-DESN Overlay Builder</h3>
         <p>
-          MCMC interface for posterior sampling, including VB initialization paths and dynamic model controls.
+          R script for building a Big Trees Q-DESN forecast overlay with explicit arguments, API access,
+          and package-loading checks.
         </p>
-        <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/R/exdqlmMCMC.R" target="_blank" rel="noopener noreferrer">
-          <span>View R source</span>
-          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <article class="software-sample">
-        <div class="software-sample__icon"><i class="fas fa-layer-group" aria-hidden="true"></i></div>
-        <h3>Quantile Synthesis</h3>
-        <p>
-          Post-processing for fitted quantile models, using isotonic correction and monotone rearrangement
-          for coherent predictive summaries.
-        </p>
-        <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/R/quantileSynthesis.R" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/blob/main/scripts/build_big_trees_qdesn_overlay.R" target="_blank" rel="noopener noreferrer">
           <span>View R source</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
@@ -137,25 +203,37 @@ description: "Research software for Bayesian forecasting, quantile modeling, and
       </article>
 
       <article class="software-sample">
-        <div class="software-sample__icon"><i class="fas fa-wave-square" aria-hidden="true"></i></div>
-        <h3>Kalman &amp; FFBS Kernels</h3>
+        <div class="software-sample__icon"><i class="fab fa-python" aria-hidden="true"></i></div>
+        <h3>NOAA Forecast Builder</h3>
         <p>
-          C++ acceleration for state updates and forward-filtering backward-sampling routines.
+          Dependency-light Python builder for Big Trees streamflow forecast JSON from NOAA NWPS APIs.
         </p>
-        <a href="https://github.com/AntonioAPDL/exdqlm/tree/main/src" target="_blank" rel="noopener noreferrer">
-          <span>Browse C++ kernels</span>
+        <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/blob/main/scripts/build_big_trees_forecast_json.py" target="_blank" rel="noopener noreferrer">
+          <span>View Python source</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-sample">
+        <div class="software-sample__icon"><i class="fab fa-python" aria-hidden="true"></i></div>
+        <h3>Climate Data Merge</h3>
+        <p>
+          Python workflow for joining precipitation, ERA5 soil moisture, and NWM retrospective soil series.
+        </p>
+        <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/blob/main/scripts/build_climate_daily_combined_csv.py" target="_blank" rel="noopener noreferrer">
+          <span>View Python source</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
       </article>
 
       <article class="software-sample">
         <div class="software-sample__icon"><i class="fas fa-vial" aria-hidden="true"></i></div>
-        <h3>Regression Tests</h3>
+        <h3>Site Integrity Checks</h3>
         <p>
-          Tests for diagnostics, exAL utilities, synthesis behavior, and package-level contracts.
+          Lightweight validation for site data schemas, local references, generated assets, and conflict markers.
         </p>
-        <a href="https://github.com/AntonioAPDL/exdqlm/tree/main/tests/testthat" target="_blank" rel="noopener noreferrer">
-          <span>Browse tests</span>
+        <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/blob/main/scripts/check_site_integrity.py" target="_blank" rel="noopener noreferrer">
+          <span>View Python source</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
       </article>
@@ -163,10 +241,10 @@ description: "Research software for Bayesian forecasting, quantile modeling, and
 
     <div class="software-github-cta">
       <div>
-        <h3>Open Development on GitHub</h3>
+        <h3>Explore More on GitHub</h3>
         <p>
-          Public repositories linked from this page are open access and include package releases, tests,
-          manuscript materials, and selected statistical-computing prototypes.
+          Public repositories include released packages, manuscript materials, website code, and research notes.
+          GitHub activity is the best place to see current updates.
         </p>
       </div>
       <div class="software-github-cta__actions" aria-label="GitHub profile links">
@@ -182,28 +260,11 @@ description: "Research software for Bayesian forecasting, quantile modeling, and
     </div>
   </section>
 
-  <section class="language-software" aria-label="Languages and environments">
-    <h2>Languages &amp; Environments</h2>
-    <p class="software-stack-intro">
-      Current links focus on the R/C++ release path behind <code>exdqlm</code>. Python, MATLAB, and Julia examples
-      will be added after they have clear entry points, documentation, and reusable examples.
+  <section class="software-note software-note--compact">
+    <h2>Next Additions</h2>
+    <p>
+      Additional Python, MATLAB, Julia, and Q-DESN application code will be added when the examples have
+      clear entry points, documentation, and setup that makes sense outside my local environment.
     </p>
-    <div class="software-language-groups">
-      <div class="software-language-group">
-        <h3>Published Now</h3>
-        <ul class="software-stack">
-          <li><img src="{{ '/public/images/devicons/r.svg' | absolute_url }}" alt="" loading="lazy" class="software-icon"> R package development</li>
-          <li><img src="{{ '/public/images/devicons/cpp.svg' | absolute_url }}" alt="" loading="lazy" class="software-icon"> C++ acceleration through Rcpp</li>
-        </ul>
-      </div>
-      <div class="software-language-group">
-        <h3>In Preparation</h3>
-        <ul class="software-stack">
-          <li><img src="{{ '/public/images/devicons/python.svg' | absolute_url }}" alt="" loading="lazy" class="software-icon"> Python automation and data workflows</li>
-          <li><img src="{{ '/public/images/devicons/matlab.svg' | absolute_url }}" alt="" loading="lazy" class="software-icon"> MATLAB research prototypes</li>
-          <li><img src="{{ '/public/images/devicons/julia.svg' | absolute_url }}" alt="" loading="lazy" class="software-icon"> Julia numerical-computing experiments</li>
-        </ul>
-      </div>
-    </div>
   </section>
 </div>
