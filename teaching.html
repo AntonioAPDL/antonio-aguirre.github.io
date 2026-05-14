@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Teaching
-description: "Course materials and resources for classes taught at UC Santa Cruz."
+description: "Course materials, TA resources, and teaching support for Statistics at UC Santa Cruz."
 ---
 
 <!-- Page Header - Teaching -->
@@ -10,9 +10,31 @@ description: "Course materials and resources for classes taught at UC Santa Cruz
     Teaching
   </h1>
   <p class="intro-text">
-    Below are courses where I have served as instructor or TA, with lecture materials and interactive notebooks. Select a course to view slides, assignments, and Colab notebooks.
+    I have taught and supported courses in statistics, probability, Bayesian inference, and data visualization at UC Santa Cruz.
+    This page collects selected public materials, course resources, and departmental TA guidance.
   </p>
 </div>
+
+<section class="teaching-resource-panel" aria-label="UCSC Statistics TA resources">
+  <div class="teaching-resource-panel__copy">
+    <p class="software-kicker">Teaching Infrastructure</p>
+    <h2>UCSC Statistics TA Resources</h2>
+    <p>
+      I co-maintain the UCSC Statistics TA Resources wiki, a public departmental guide for TA responsibilities,
+      teaching practices, course logistics, and practical support for discussion sections and office hours.
+    </p>
+  </div>
+  <div class="teaching-resource-panel__actions">
+    <a class="software-button" href="https://github.com/UCSC-Statistics/TA-resources/wiki" target="_blank" rel="noopener noreferrer">
+      <i class="fas fa-book-open" aria-hidden="true"></i>
+      <span>TA Wiki</span>
+    </a>
+    <a class="software-button software-button--secondary" href="https://github.com/UCSC-Statistics/TA-resources" target="_blank" rel="noopener noreferrer">
+      <i class="fab fa-github" aria-hidden="true"></i>
+      <span>Repository</span>
+    </a>
+  </div>
+</section>
 
 <!-- Teaching Materials -->
 {% assign courses = site.static_files | where_exp: "file", "file.path contains '/files/teaching/'" %}
@@ -30,7 +52,7 @@ description: "Course materials and resources for classes taught at UC Santa Cruz
       <div id="collapse{{ forloop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.index }}" data-bs-parent="#teachingAccordion">
         <div class="accordion-body">
           <p class="intro-text teaching-intro">
-            Explore resources for <strong>{{ course_name }}</strong>, including lecture slides, assignments, and Colab notebooks.
+            Explore selected resources for <strong>{{ course_name }}</strong>, including slides, review materials, assignments, and notebooks when available.
           </p>
           <ul class="teaching-list">
             {% for file in course.items %}
@@ -65,9 +87,9 @@ description: "Course materials and resources for classes taught at UC Santa Cruz
 
 <!-- Placeholder for Future Content -->
 <div class="future-content">
-  <h3>Work in Progress</h3>
+  <h3>Additional Materials</h3>
   <p>
-    Additional course materials and interactive notebooks are being added. Check back soon for updates.
+    I add materials as courses, review sessions, and workshops are updated.
   </p>
 </div>
 

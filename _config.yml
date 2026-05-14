@@ -1,7 +1,7 @@
 # Website Setup
 title:               Antonio Aguirre
-tagline:             "Data Modeling | Bayesian Statistics | Machine Learning"
-description:         "Bayesian statistics, machine learning, and spatio-temporal modeling."
+tagline:             "Bayesian Forecasting | Quantile Modeling | Research Software"
+description:         "Bayesian forecasting, quantile modeling, and research software."
 url:                 "https://antonio-aguirre.com" # Website URL
 baseurl:             ""                           # Leave empty for root deployment
 paginate:            5                             # Number of posts per page

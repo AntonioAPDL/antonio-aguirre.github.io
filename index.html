@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Home
-description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian time series forecasting, quantile modeling, and scalable inference."
+description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian forecasting, quantile modeling, and research software."
 ---
 
 <div class="home-section">
@@ -9,43 +9,74 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
   <div class="home-intro">
     <div class="intro-wrapper">
       <img src="/files/images/Me2.jpg" alt="Antonio Aguirre" class="profile-pic">
-      <h1 class="home-title">Welcome</h1>
+      <h1 class="home-title">Antonio Aguirre</h1>
+      <p class="home-subtitle">Bayesian forecasting, quantile modeling, and research software</p>
     </div>
     <p class="intro-text">
-      Hello! I'm <strong>Antonio Aguirre</strong>, a <strong>Ph.D. candidate</strong> in Statistics at the
+      I am a <strong>Ph.D. candidate</strong> in Statistics at the
       <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>.
       I work with <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Dr. Bruno Sansó</a> and
       <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Dr. Raquel Prado</a> on Bayesian time series forecasting and quantile modeling,
-      with a focus on uncertainty quantification and scalable variational inference.
+      with a focus on uncertainty quantification, scalable inference, and reproducible research software.
     </p>
     <p class="intro-text">
-      I develop modern statistical and machine learning methods for forecasting, including Deep Echo State Networks (Deep ESN).
-      I also have industry experience running experiment workflows and automated backtests on AWS.
+      My current work includes Bayesian correction and synthesis of river-flow forecasts, Q-DESN quantile forecasting,
+      and the <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>
+      R package for extended dynamic quantile linear models.
     </p>
     <p class="intro-text">
       I hold a <strong>B.Sc.</strong> in Applied Mathematics and an <strong>M.Sc.</strong> in Economics from
       <a href="https://www.itam.mx/" target="_blank" rel="noopener noreferrer">Instituto Tecnológico Autónomo de México (ITAM)</a>.
     </p>
+    <div class="home-actions" aria-label="Primary links">
+      <a class="software-button" href="/research/">
+        <i class="fas fa-chart-line" aria-hidden="true"></i>
+        <span>Research</span>
+      </a>
+      <a class="software-button software-button--secondary" href="/software/">
+        <i class="fas fa-code" aria-hidden="true"></i>
+        <span>Software</span>
+      </a>
+      <a class="software-button software-button--secondary" href="/cv/">
+        <i class="far fa-file-pdf" aria-hidden="true"></i>
+        <span>CV</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="home-highlights" aria-label="Current highlights">
+    <article class="home-highlight-card">
+      <span>CRAN package</span>
+      <h2><code>exdqlm</code> 0.4.0</h2>
+      <p>Bayesian dynamic quantile-modeling software on CRAN, with a companion JSS manuscript submitted.</p>
+    </article>
+    <article class="home-highlight-card">
+      <span>Forecasting</span>
+      <h2>River-flow correction</h2>
+      <p>Bayesian quantile methods for correcting, combining, and evaluating hydrological forecasts.</p>
+    </article>
+    <article class="home-highlight-card">
+      <span>Working paper</span>
+      <h2>Q-DESN readouts</h2>
+      <p>Bayesian quantile readouts for fixed Deep Echo State Network features.</p>
+    </article>
   </div>
 
   <!-- Research Interests Section -->
   <div class="home-content">
-    <h2 class="section-heading">Research Interests</h2>
+    <h2 class="section-heading">Current Focus</h2>
     <ul class="research-list">
       <li>
-        <strong>Time Series Forecasting:</strong> Bayesian dynamic models for probabilistic prediction and decision support.
+        <strong>Forecast correction and synthesis:</strong> methods that calibrate and combine probabilistic forecasts while preserving useful uncertainty information.
       </li>
       <li>
-        <strong>Quantile Modeling and Risk Assessment:</strong> Quantile-based methods for calibration and extremes.
+        <strong>Dynamic quantile models:</strong> state-space models for conditional quantiles, forecast diagnostics, and posterior predictive summaries.
       </li>
       <li>
-        <strong>Scalable Bayesian Inference:</strong> Variational Bayes and approximate inference for large, complex models.
+        <strong>Q-DESN forecasting:</strong> Bayesian quantile readouts for fixed reservoir features in nonlinear time-series problems.
       </li>
       <li>
-        <strong>Continual Learning:</strong> Online updates and adaptive forecasting as new data arrive.
-      </li>
-      <li>
-        <strong>Forecast Combination:</strong> Multi-model synthesis and bias correction for operational forecasts.
+        <strong>Research software:</strong> tested R, Python, C++, and workflow code for reproducible modeling and analysis.
       </li>
     </ul>
   </div>
@@ -53,10 +84,11 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
   <!-- Plot Section -->
   <div class="plot-container">
     <h2 class="section-heading">
-      Real-Time Monitoring: San Lorenzo River Discharge
+      Live Research Demo: San Lorenzo River Discharge
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> This chart combines recent observed river flow at Big Trees with the latest forecast guidance to show near-term conditions.
+      <strong>Note:</strong> This research display combines recent observed river flow at Big Trees with the latest forecast guidance.
+      It is intended for model development and communication, not for operational safety decisions.
     </div>
     <div class="usgs-iv-plot"
          data-site="11160500"
@@ -94,10 +126,11 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz focused on Bayesian
 
   <div class="plot-container">
     <h2 class="section-heading">
-      GEFS Forecasts Near Big Trees: Precipitation and Soil Moisture
+      Live Research Demo: GEFS Near Big Trees
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> Updated automatically throughout the day. These charts use GEFS cycle-history context and the latest GEFS forecast range; external observed overlays are intentionally excluded to keep the comparison consistent.
+      <strong>Note:</strong> Updated automatically throughout the day. These charts use GEFS cycle-history context and the latest GEFS forecast range;
+      external observed overlays are excluded so the comparison stays consistent.
     </div>
     <div class="gefs-forecast-panel"
          data-gefs-url="/assets/data/forecasts/gefs_big_trees_latest.json"
