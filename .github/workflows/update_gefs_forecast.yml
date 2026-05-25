@@ -2,8 +2,8 @@ name: Update GEFS Big Trees forecast
 
 on:
   schedule:
-    # GEFS publishes 00/06/12/18 UTC cycles. To cut production deploy volume,
-    # run every 8 hours and target the freshest completed 00/06/12 UTC cycles.
+    # GEFS publishes 00/06/12/18 UTC cycles. Run every 8 hours and publish
+    # only the latest completed cycles to the live-data branch.
     - cron: "20 1,9,17 * * *"
   workflow_dispatch: {}
 
@@ -49,27 +49,9 @@ jobs:
           chmod +x scripts/update_big_trees_gefs_forecast.sh
           scripts/update_big_trees_gefs_forecast.sh
 
-      - name: Commit and push if changed
+      - name: Publish GEFS asset to live-data branch
+        env:
+          LIVE_DATA_COMMIT_MESSAGE: "chore: update GEFS Big Trees forecast data"
         run: |
-          set -euo pipefail
-          if git diff --quiet -- assets/data/forecasts/gefs_big_trees_latest.json; then
-            echo "No changes to commit."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add assets/data/forecasts/gefs_big_trees_latest.json
-          if git diff --cached --quiet; then
-            echo "No staged GEFS asset changes to commit."
-            exit 0
-          fi
-          git commit -m "chore: update GEFS Big Trees forecast"
-          if ! git pull --rebase origin main; then
-            echo "Concurrent update caused rebase conflict; skipping this run."
-            git rebase --abort || true
-            exit 0
-          fi
-          if ! git push; then
-            echo "Push rejected (likely concurrent update); skipping this run."
-            exit 0
-          fi
+          scripts/publish_live_data_artifacts.sh \
+            assets/data/forecasts/gefs_big_trees_latest.json

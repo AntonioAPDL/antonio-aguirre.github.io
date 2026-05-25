@@ -2,7 +2,9 @@ name: Update climate series
 
 on:
   schedule:
-    - cron: "17 */8 * * *"
+    # Climate products are provider-lagged and are not part of the public
+    # live forecast panel, so a weekly archive refresh is sufficient.
+    - cron: "17 6 * * 1"
   workflow_dispatch: {}
 
 permissions:
@@ -78,46 +80,15 @@ jobs:
           chmod +x scripts/run_climate_updates_cron.sh
           scripts/run_climate_updates_cron.sh
 
-      - name: Commit and push climate data if changed
-        id: commit
+      - name: Publish climate data to live-data branch
         if: always()
+        env:
+          LIVE_DATA_COMMIT_MESSAGE: "chore: update climate point series data"
         run: |
-          set -euo pipefail
-          TRACKED=(
-            prism_precipitation_santa_cruz_1987_2023.csv
-            soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv
-            soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv
-            soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.meta.json
-            climate_series_status.csv
+          scripts/publish_live_data_artifacts.sh \
+            prism_precipitation_santa_cruz_1987_2023.csv \
+            soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv \
+            soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv \
+            soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.meta.json \
+            climate_series_status.csv \
             climate_daily_ppt_soil.csv
-          )
-
-          if git diff --quiet -- "${TRACKED[@]}"; then
-            echo "No climate data changes to commit."
-            echo "changed=false" >> "${GITHUB_OUTPUT}"
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "${TRACKED[@]}"
-
-          if git diff --cached --quiet; then
-            echo "No staged climate data changes to commit."
-            echo "changed=false" >> "${GITHUB_OUTPUT}"
-            exit 0
-          fi
-
-          git commit -m "chore: update climate point series"
-          if ! git pull --rebase origin main; then
-            echo "Concurrent update caused rebase conflict; skipping climate push."
-            git rebase --abort || true
-            echo "changed=false" >> "${GITHUB_OUTPUT}"
-            exit 0
-          fi
-          if ! git push; then
-            echo "Push rejected (likely concurrent update); skipping climate push."
-            echo "changed=false" >> "${GITHUB_OUTPUT}"
-            exit 0
-          fi
-          echo "changed=true" >> "${GITHUB_OUTPUT}"

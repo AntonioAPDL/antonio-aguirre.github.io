@@ -129,16 +129,19 @@ Supported attributes:
 - `data-ylabel` (base Y-axis label; units are appended automatically when available)
 - `data-y-min`, `data-y-max` (optional fixed Y-axis range)
 - `data-threshold-minor`, `data-threshold-moderate`, `data-threshold-major` (horizontal threshold lines + shaded regions)
-- `data-forecast-url` (optional forecast overlay JSON; defaults to `/assets/data/forecasts/big_trees_latest.json`)
+- `data-forecast-url` (optional forecast overlay JSON; the site uses the `live-data` branch raw URL in production)
+- `data-forecast-fallback-url` (optional bundled JSON fallback if the live-data request fails)
 - `data-qdesn-url` (optional QDESN overlay JSON; currently disabled on the site; omit to keep it off)
 - `data-flood-minor-cfs`, `data-flood-moderate-cfs`, `data-flood-major-cfs` (discharge-only thresholds; optional)
 
 ### Forecast overlay (NWS/NWM)
 
-The plot can overlay forecast guidance from a tracked JSON artifact:
+The plot can overlay forecast guidance from a JSON artifact published by scheduled automation:
 
-- **Artifact:** `assets/data/forecasts/big_trees_latest.json` (tracked in git)
+- **Live artifact:** `assets/data/forecasts/big_trees_latest.json` on the `live-data` branch
+- **Bundled fallback:** `assets/data/forecasts/big_trees_latest.json` on `main`
 - **Update script:** `scripts/update_big_trees_forecast.sh`
+- **Publish helper:** `scripts/publish_live_data_artifacts.sh`
 - **Included series:** JSON may include NWPS analysis/short deterministic plus NWM medium/long quantiles (`p10/p50/p90`); the USGS panel overlay uses ensemble quantiles (medium/long) only.
 - **Plot overlay behavior:** USGS observed discharge remains the base trace; NWS ensemble guidance is overlaid as medium/long `p10-p90` bands plus `p50` lines.
 - **Unit harmonization:** forecast series are unit-normalized and converted (`cfs`/`cms`) to match the observed USGS discharge axis before plotting.
@@ -146,13 +149,13 @@ The plot can overlay forecast guidance from a tracked JSON artifact:
 - **Fallback behavior:** if `_sandbox/nws_ensemble_point` is absent, updater builds JSON directly from NOAA NWPS APIs.
 - **Ops guard:** on updater errors, CI can keep the last tracked artifact by setting `BIG_TREES_FORECAST_ALLOW_STALE_ON_ERROR=1`.
 
-To update the tracked forecast JSON:
+To refresh the bundled forecast JSON locally:
 
 ```bash
 scripts/update_big_trees_forecast.sh
 ```
 
-If the forecast JSON is missing, the plot still renders observations only and logs a console warning.
+If the live-data request fails, the page tries the bundled fallback. If both are missing, the plot still renders observations only and logs a console warning.
 
 ### QDESN overlay (median + 95% CI)
 
@@ -164,14 +167,16 @@ The home page now includes a second panel for GEFS point forecasts (precipitatio
 
 - **Panel container:** `index.html` (`.gefs-forecast-panel`)
 - **Client script:** `public/js/gefs_forecast_panel.js`
-- **Tracked asset:** `assets/data/forecasts/gefs_big_trees_latest.json`
+- **Live artifact:** `assets/data/forecasts/gefs_big_trees_latest.json` on the `live-data` branch
+- **Bundled fallback:** `assets/data/forecasts/gefs_big_trees_latest.json` on `main`
 - **Pipeline source:** `_sandbox/gefs_point_pipeline`
 - **Update script:** `scripts/update_big_trees_gefs_forecast.sh`
+- **Publish helper:** `scripts/publish_live_data_artifacts.sh`
 - **Scheduled workflow:** `.github/workflows/update_gefs_forecast.yml` (3 times/day at `01:20`, `09:20`, and `17:20` UTC, aligned to completed GEFS cycles)
 
 Behavior:
 
-- Fetches `gefs_big_trees_latest.json`
+- Fetches `gefs_big_trees_latest.json` from the `live-data` branch and falls back to the bundled site copy if needed
 - Renders two Plotly charts:
   - APCP band (`p10-p90`) + `p50` + mean
   - SOILW depth-level medians (`p50`) with optional uncertainty bands
@@ -191,7 +196,7 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - PRISM/ERA5 observed overlays are intentionally disabled in the panel (GEFS-only context mode)
 - Exporter default is GEFS-only; observed payload is opt-in with `--include-observed-retrospective`
 - Exporter uses a history-scan guard: skips git-history backfill when prior 20-day GEFS context is already complete
-- The standalone climate CSV automation remains scheduled, but its PRISM/ERA5/NWM products are not plotted on the GEFS panel unless observed retrospective export is explicitly re-enabled.
+- The standalone climate CSV automation is retained for archive/status refreshes, but its PRISM/ERA5/NWM products are not plotted on the GEFS panel unless observed retrospective export is explicitly re-enabled.
 
 Background historical GEFS updater (no live monitoring):
 
@@ -268,19 +273,19 @@ NWM retrospective controls:
 
 ### GitHub Actions Automation
 
-The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
+The repo supports fully hosted forecast and climate refresh on GitHub Actions without spending Netlify production-deploy credits. Scheduled data jobs publish artifacts to the `live-data` branch; `main` remains the website branch that Netlify deploys.
 
 - `.github/workflows/update_forecast.yml`
   - cadence: every 8 hours on the hour UTC (`0 */8 * * *`) plus manual `workflow_dispatch`
-  - updates and commits:
+  - publishes to `live-data`:
     - `assets/data/forecasts/big_trees_latest.json`
   - race guards:
     - hard sync to latest `origin/main` before processing
-    - rebase-conflict-safe push (concurrent updates are skipped without failing the job)
+    - rebase-safe live-data publish with retry support
 
 - `.github/workflows/update_climate_series.yml`
-  - cadence: every 8 hours at minute 17 UTC (`17 */8 * * *`) plus manual `workflow_dispatch`
-  - updates and commits:
+  - cadence: weekly on Monday at `06:17` UTC (`17 6 * * 1`) plus manual `workflow_dispatch`
+  - publishes to `live-data`:
     - `prism_precipitation_santa_cruz_1987_2023.csv`
     - `soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv`
     - `soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv`
@@ -288,10 +293,11 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
     - `climate_series_status.csv`
     - `climate_daily_ppt_soil.csv`
   - incremental PRISM/ERA5 updaters probe backward to the latest available provider date instead of failing the whole run on a too-recent request
+  - weekly cadence is intentional because these provider-lagged archive files are not currently plotted on the public live panel
 
 - `.github/workflows/update_gefs_forecast.yml`
   - cadence: `01:20`, `09:20`, `17:20` UTC (`20 1,9,17 * * *`)
-  - updates and commits:
+  - publishes to `live-data`:
     - `assets/data/forecasts/gefs_big_trees_latest.json`
   - caches pip dependencies and performs a latest-cycle freshness precheck before the heavy full refresh
   - fail-fast checks in `scripts/update_big_trees_gefs_forecast.sh` ensure:
@@ -299,7 +305,7 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
     - 20-day GEFS analysis context coverage remains dense and current
   - race guards:
     - hard sync to latest `origin/main` before processing
-    - rebase-conflict-safe push (concurrent updates are skipped without failing the job)
+    - rebase-safe live-data publish with retry support
 
 - `.github/workflows/backfill_gefs_analysis_context.yml` (manual)
   - one-time/manual bootstrap for GEFS cycle-analysis context
@@ -314,7 +320,10 @@ The repo now supports fully hosted climate + GEFS refresh on GitHub Actions:
 
 - `.github/workflows/verify_site_build.yml`
   - runs `bundle exec jekyll build --trace` on pushes to `main` and on manual dispatch
+  - ignores generated data-only changes so GitHub Actions does not spend build time on non-site edits
   - catches site-build regressions in GitHub Actions before Netlify production publishes stale pages
+
+Netlify is protected by `scripts/netlify-ignore-build.sh`, wired through `netlify.toml`. The script skips production builds when the only changed files are generated data artifacts. Website code/content/CV changes still build normally.
 
 Required repository secrets for ERA5 updates:
 

@@ -1,5 +1,6 @@
 [build]
   command = "bundle exec jekyll build"
+  ignore = "./scripts/netlify-ignore-build.sh"
   publish = "_site"
 
 [build.environment]

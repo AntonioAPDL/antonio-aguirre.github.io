@@ -906,6 +906,7 @@
       const floodMajor = parseOptionalNumber(dataset.floodMajorCfs || dataset.thresholdMajor);
       const defaultForecastUrl = mode === 'discharge' ? '/assets/data/forecasts/big_trees_latest.json' : '';
       const forecastUrlRaw = (dataset.forecastUrl || defaultForecastUrl || '').trim();
+      const forecastFallbackUrlRaw = (dataset.forecastFallbackUrl || '').trim();
       const defaultQdesnUrl = '';
       const qdesnUrlRaw = (dataset.qdesnUrl || defaultQdesnUrl || '').trim();
       return {
@@ -923,6 +924,7 @@
         thresholdModerate: floodModerate,
         thresholdMajor: floodMajor,
         forecastUrl: forecastUrlRaw,
+        forecastFallbackUrl: forecastFallbackUrlRaw,
         qdesnUrl: qdesnUrlRaw,
         logY: logY,
         observationWindowDays: observationWindowDays,
@@ -1385,29 +1387,37 @@
         return { payload: null, warning: null };
       }
 
-      try {
-        const response = await fetch(this.config.forecastUrl, {
-          cache: 'no-store',
-          signal
-        });
-        if (!response.ok) {
+      const urls = [this.config.forecastUrl, this.config.forecastFallbackUrl]
+        .map((url) => (url || '').trim())
+        .filter((url, index, all) => url && all.indexOf(url) === index);
+
+      for (let i = 0; i < urls.length; i += 1) {
+        const url = urls[i];
+        try {
+          const response = await fetch(url, {
+            cache: 'no-store',
+            signal
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          const payload = await response.json();
+          if (!payload || typeof payload !== 'object') {
+            throw new Error('Invalid JSON payload');
+          }
           return {
-            payload: null,
-            warning: 'Forecast guidance is temporarily unavailable.'
+            payload,
+            warning: i > 0 ? 'Live forecast guidance is temporarily unavailable; showing the bundled snapshot.' : null
           };
+        } catch (err) {
+          if (err && err.name === 'AbortError') {
+            throw err;
+          }
+          console.warn('[usgs-iv] forecast overlay fetch failed', url, err);
         }
-        const payload = await response.json();
-        if (!payload || typeof payload !== 'object') {
-          return { payload: null, warning: 'Forecast guidance is temporarily unavailable.' };
-        }
-        return { payload, warning: null };
-      } catch (err) {
-        if (err && err.name === 'AbortError') {
-          throw err;
-        }
-        console.warn('[usgs-iv] forecast overlay fetch failed', err);
-        return { payload: null, warning: 'Forecast guidance is temporarily unavailable.' };
       }
+
+      return { payload: null, warning: 'Forecast guidance is temporarily unavailable.' };
     }
 
     async fetchQdesnPayload(signal) {

@@ -522,6 +522,15 @@
     return url.toString();
   }
 
+  function uniqueUrls() {
+    const urls = [];
+    Array.prototype.forEach.call(arguments, (url) => {
+      const value = (url || '').trim();
+      if (value && urls.indexOf(value) === -1) urls.push(value);
+    });
+    return urls;
+  }
+
   function renderPrecipChart(precipEl, payload, initDate, observationWindowDays, colors, statusWarnings) {
     const precipLevels = payload.precip || {};
     const precipLevelName = precipLevels.surface ? 'surface' : Object.keys(precipLevels)[0];
@@ -802,7 +811,7 @@
     );
   }
 
-  function renderPanel(container, payload) {
+  function renderPanel(container, payload, extraWarnings) {
     const precipEl = container.querySelector('.gefs-forecast-precip');
     const soilEl = container.querySelector('.gefs-forecast-soil');
     const statusEl = container.querySelector('.gefs-forecast-status');
@@ -820,7 +829,7 @@
 
     publishTimelineWindow(payload, observationWindowDays);
 
-    const statusWarnings = [];
+    const statusWarnings = Array.isArray(extraWarnings) ? extraWarnings.slice() : [];
     const staleHours = numberOrNull(container.dataset.staleHours) ?? numberOrNull(payload.stale_after_hours) ?? 12;
     const generatedDate = parseDate(payload.generated_at_utc);
     if (generatedDate) {
@@ -838,17 +847,21 @@
     if (!window.Plotly) return;
 
     const statusEl = container.querySelector('.gefs-forecast-status');
-    const url = container.dataset.gefsUrl || '/assets/data/forecasts/gefs_big_trees_latest.json';
+    const urls = uniqueUrls(
+      container.dataset.gefsUrl || '/assets/data/forecasts/gefs_big_trees_latest.json',
+      container.dataset.gefsFallbackUrl || ''
+    );
     const refreshMinutes = Math.max(1, numberOrNull(container.dataset.refreshMin) || 60);
     const refreshMs = refreshMinutes * 60 * 1000;
     let inFlight = false;
     let lastPayload = null;
+    let lastWarnings = [];
     let rerenderTimer = null;
 
     function rerenderFromCache() {
       if (!lastPayload || typeof lastPayload !== 'object') return;
       try {
-        renderPanel(container, lastPayload);
+        renderPanel(container, lastPayload, lastWarnings);
       } catch (err) {
         // Keep theme toggles resilient; next refresh will recover if needed.
       }
@@ -882,17 +895,39 @@
       themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     }
 
+    async function fetchPayload() {
+      for (let i = 0; i < urls.length; i += 1) {
+        const url = urls[i];
+        try {
+          const response = await fetch(buildFetchUrl(url), { cache: 'no-store' });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const payload = await response.json();
+          if (!payload || typeof payload !== 'object') throw new Error('Invalid JSON payload');
+          return {
+            payload,
+            warnings: i > 0 ? ['Live GEFS feed is temporarily unavailable; showing the bundled snapshot.'] : []
+          };
+        } catch (err) {
+          console.warn('[gefs-forecast-panel] fetch failed', url, err);
+        }
+      }
+      throw new Error('No GEFS forecast source is currently available');
+    }
+
     async function refreshOnce() {
       if (inFlight) return;
       inFlight = true;
       try {
-        const response = await fetch(buildFetchUrl(url), { cache: 'no-store' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const payload = await response.json();
-        if (!payload || typeof payload !== 'object') throw new Error('Invalid JSON payload');
-        lastPayload = payload;
-        renderPanel(container, payload);
+        const result = await fetchPayload();
+        lastPayload = result.payload;
+        lastWarnings = result.warnings;
+        renderPanel(container, result.payload, result.warnings);
       } catch (err) {
+        if (lastPayload && typeof lastPayload === 'object') {
+          lastWarnings = ['Live GEFS feed is temporarily unavailable; showing the most recent loaded forecast.'];
+          renderPanel(container, lastPayload, lastWarnings);
+          return;
+        }
         if (statusEl) {
           statusEl.textContent = 'Forecast data is temporarily unavailable. Please check back soon.';
           statusEl.classList.add('plot-status--error');
