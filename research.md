@@ -58,11 +58,11 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
     <h2>Selected Papers &amp; Software</h2>
     <ul class="research-output-list">
       <li class="research-output-item">
-        <span class="research-output__status">Submitted / CRAN</span>
+        <span class="research-output__status">Submitted / CRAN v1.0.0</span>
         <div>
           Aguirre, A., Barata, R., Prado, R., Sansó, B.
           <em>exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models</em>.
-          Manuscript submitted to the <em>Journal of Statistical Software</em>; companion package available on
+          Manuscript submitted to the <em>Journal of Statistical Software</em>; companion package released on
           <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer">CRAN</a>.
         </div>
       </li>

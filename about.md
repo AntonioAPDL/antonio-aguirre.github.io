@@ -26,7 +26,8 @@ description: "Background, research focus, teaching, service, and applied experie
     <ul class="about-list about-highlight-list">
       <li>
         <strong><a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>:</strong>
-        R package available on CRAN, with a companion manuscript submitted to the <em>Journal of Statistical Software</em>.
+        CRAN v1.0.0 R package for Bayesian quantile modeling, with a companion manuscript submitted to the
+        <em>Journal of Statistical Software</em>.
       </li>
       <li>
         <strong>Forecast correction manuscript:</strong>

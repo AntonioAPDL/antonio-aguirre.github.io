@@ -18,7 +18,7 @@ description: "Public packages, research code, and selected implementation exampl
     <div class="software-overview-item">
       <i class="fas fa-cube" aria-hidden="true"></i>
       <h3>Released Package</h3>
-      <p>CRAN-published R software with inspectable source and tests.</p>
+      <p>CRAN v1.0.0 R package with source, tests, reference docs, and a submitted software article.</p>
     </div>
     <div class="software-overview-item">
       <i class="fas fa-water" aria-hidden="true"></i>
@@ -45,14 +45,15 @@ description: "Public packages, research code, and selected implementation exampl
     <div class="software-feature__body">
       <div class="software-feature__eyebrow">
         <span>R package</span>
-        <span>CRAN 0.4.0</span>
-        <span>JSS manuscript submitted</span>
+        <span>CRAN 1.0.0</span>
+        <span>JSS software article submitted</span>
       </div>
       <h2><code>exdqlm</code>: Extended Dynamic Quantile Linear Models</h2>
       <p>
-        An R package for Bayesian estimation and analysis of dynamic quantile linear models under the extended asymmetric
-        Laplace family. It supports MCMC and Laplace-delta variational Bayes, state-space components, transfer-function
-        effects, forecasting, diagnostics, and posterior synthesis across fitted quantiles.
+        Bayesian quantile-regression software for dynamic state-space models and static regression under the extended
+        asymmetric Laplace family. Version 1.0.0 brings the software-article feature line together: dynamic exDQLM
+        fitting, static exAL regression, LDVB and MCMC inference, optional C++ accelerators, diagnostics, and
+        posterior-predictive synthesis across fitted quantiles.
       </p>
       <div class="software-actions" aria-label="exdqlm links">
         <a class="software-button" href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer">
@@ -73,23 +74,24 @@ description: "Public packages, research code, and selected implementation exampl
         <div class="software-feature__status">
           <h3>Release &amp; Manuscript</h3>
           <p>
-            <code>exdqlm</code> is available on CRAN. A companion article has been submitted to the
-            <em>Journal of Statistical Software</em>, with examples maintained alongside package development.
+            <code>exdqlm</code> 1.0.0 is available on CRAN. The companion software article has been submitted to the
+            <em>Journal of Statistical Software</em>; the article repository tracks the manuscript source, supplement,
+            examples, and reproducibility checks.
           </p>
-          <p class="software-updated">Last updated: May 14, 2026</p>
+          <p class="software-updated">Last updated: June 14, 2026</p>
         </div>
         <ul class="software-feature__checks" aria-label="exdqlm capabilities">
           <li>
             <strong>Models</strong>
-            <span>State-space quantile models with trend, seasonal, regression, and transfer-function components.</span>
+            <span>Dynamic exDQLMs plus static exAL regression, with trend, seasonal, regression, and transfer-function components.</span>
           </li>
           <li>
             <strong>Inference</strong>
-            <span>MCMC for posterior simulation and LDVB for scalable approximate inference.</span>
+            <span>LDVB for scalable approximate inference, MCMC for posterior simulation, and legacy ISVB paths for reproducibility.</span>
           </li>
           <li>
-            <strong>Evaluation</strong>
-            <span>Forecast summaries, calibration checks, scoring rules, and posterior predictive output.</span>
+            <strong>Diagnostics &amp; Synthesis</strong>
+            <span>Forecast summaries, calibration checks, scoring rules, and posterior-predictive synthesis across fitted quantiles.</span>
           </li>
         </ul>
       </div>
@@ -114,8 +116,8 @@ description: "Public packages, research code, and selected implementation exampl
         </div>
         <h3><code>exdqlm</code> JSS Article</h3>
         <p>
-          Public manuscript source, supplement files, and reproducibility notes for the submitted
-          <em>Journal of Statistical Software</em> article.
+          Submitted <em>Journal of Statistical Software</em> article source, supplement files, reproducibility checks,
+          and manuscript-support examples for <code>exdqlm</code>.
         </p>
         <a href="https://github.com/AntonioAPDL/exdqlm---Article" target="_blank" rel="noopener noreferrer">
           <span>Article repository</span>
@@ -187,7 +189,7 @@ description: "Public packages, research code, and selected implementation exampl
         <div class="software-sample__icon"><i class="fab fa-r-project" aria-hidden="true"></i></div>
         <h3>LDVB Inference Interface</h3>
         <p>
-          Main LDVB interface for dynamic quantile state-space models, with controls for initialization,
+          Main LDVB interface for dynamic quantile state-space models, including convergence controls,
           diagnostics, and posterior predictive summaries.
         </p>
         <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/R/exdqlmLDVB.R" target="_blank" rel="noopener noreferrer">
@@ -198,12 +200,12 @@ description: "Public packages, research code, and selected implementation exampl
 
       <article class="software-sample">
         <div class="software-sample__icon"><i class="fab fa-r-project" aria-hidden="true"></i></div>
-        <h3>Q-DESN Overlay Builder</h3>
+        <h3>Static exAL Regression</h3>
         <p>
-          R script for building a Big Trees Q-DESN forecast overlay with explicit arguments, API access,
-          and package-loading checks.
+          Static Bayesian quantile-regression interface under the exAL likelihood, including LDVB controls
+          and shrinkage-prior support.
         </p>
-        <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/blob/main/scripts/build_big_trees_qdesn_overlay.R" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/R/exalStaticLDVB.R" target="_blank" rel="noopener noreferrer">
           <span>View R source</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
@@ -213,7 +215,8 @@ description: "Public packages, research code, and selected implementation exampl
         <div class="software-sample__icon"><i class="fas fa-microchip" aria-hidden="true"></i></div>
         <h3>exAL Numerics</h3>
         <p>
-          Rcpp/Boost implementation of extended asymmetric Laplace distribution utilities and parameter-bound calculations.
+          Rcpp/Boost implementation of extended asymmetric Laplace density, distribution, quantile, simulation,
+          and parameter-bound utilities.
         </p>
         <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/src/exAL.cpp" target="_blank" rel="noopener noreferrer">
           <span>View C++ source</span>
@@ -222,13 +225,14 @@ description: "Public packages, research code, and selected implementation exampl
       </article>
 
       <article class="software-sample">
-        <div class="software-sample__icon"><i class="fab fa-python" aria-hidden="true"></i></div>
-        <h3>NOAA Forecast Builder</h3>
+        <div class="software-sample__icon"><i class="fab fa-r-project" aria-hidden="true"></i></div>
+        <h3>Quantile Synthesis</h3>
         <p>
-          Dependency-light Python builder for Big Trees streamflow forecast JSON from NOAA NWPS APIs.
+          Post hoc synthesis tools for combining separately fitted quantile models into coherent
+          posterior-predictive draws.
         </p>
-        <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/blob/main/scripts/build_big_trees_forecast_json.py" target="_blank" rel="noopener noreferrer">
-          <span>View Python source</span>
+        <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/R/quantileSynthesis.R" target="_blank" rel="noopener noreferrer">
+          <span>View R source</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
       </article>
