@@ -76,7 +76,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
         </div>
         <div>
           <dt>Focus</dt>
-          <dd>Forecast correction, exDQLM quantile modeling, posterior synthesis, and held-out forecast scoring.</dd>
+          <dd>Forecast correction, quantile dynamic modeling, posterior synthesis, and state-space modelling.</dd>
         </div>
       </dl>
       <div class="research-poster-feature__actions">
