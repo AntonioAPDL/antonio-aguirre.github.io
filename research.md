@@ -53,10 +53,58 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
     </article>
   </section>
 
+  <section class="research-poster-feature" id="isba2026-poster" aria-labelledby="isba2026-poster-title">
+    <a class="research-poster-feature__media" href="/files/posters/isba-2026-poster-aguirre.pdf" target="_blank" rel="noopener noreferrer">
+      <img
+        src="/public/images/posters/isba-2026-poster-preview.jpg"
+        alt="Preview of the ISBA 2026 poster Bayesian quantile-based correction and synthesis of climate products"
+        loading="lazy">
+    </a>
+    <div class="research-poster-feature__body">
+      <p class="software-kicker">Conference Poster</p>
+      <h2 id="isba2026-poster-title">ISBA 2026 World Meeting</h2>
+      <p>
+        My poster <em>Bayesian quantile-based correction and synthesis of climate products</em> was accepted
+        for the ISBA 2026 World Meeting in Nagoya, Japan. The work presents a Bayesian quantile workflow
+        for correcting climate-product forecasts and synthesizing the corrected quantile lanes into a
+        posterior predictive distribution, with daily San Lorenzo River flow as the case study.
+      </p>
+      <dl class="research-poster-feature__details">
+        <div>
+          <dt>Authors</dt>
+          <dd>Antonio Aguirre, Raquel Prado, and Bruno Sansó</dd>
+        </div>
+        <div>
+          <dt>Focus</dt>
+          <dd>Forecast correction, exDQLM quantile modeling, posterior synthesis, and held-out forecast scoring.</dd>
+        </div>
+      </dl>
+      <div class="research-poster-feature__actions">
+        <a class="software-button" href="/files/posters/isba-2026-poster-aguirre.pdf" target="_blank" rel="noopener noreferrer">
+          <i class="far fa-file-pdf" aria-hidden="true"></i>
+          <span>Open Poster</span>
+        </a>
+        <a class="software-button software-button--secondary" href="/files/posters/isba-2026-poster-aguirre.pdf" download>
+          <i class="fas fa-download" aria-hidden="true"></i>
+          <span>Download PDF</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
   <!-- Selected Publications -->
   <div class="publication-section">
-    <h2>Selected Papers &amp; Software</h2>
+    <h2>Selected Papers, Posters &amp; Software</h2>
     <ul class="research-output-list">
+      <li class="research-output-item">
+        <span class="research-output__status">Accepted poster</span>
+        <div>
+          Aguirre, A., Prado, R., Sansó, B.
+          <em>Bayesian quantile-based correction and synthesis of climate products</em>.
+          ISBA 2026 World Meeting, Nagoya, Japan.
+          <a href="/files/posters/isba-2026-poster-aguirre.pdf" target="_blank" rel="noopener noreferrer">Poster PDF</a>.
+        </div>
+      </li>
       <li class="research-output-item">
         <span class="research-output__status">Submitted / CRAN v1.0.0</span>
         <div>
