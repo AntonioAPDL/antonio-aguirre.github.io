@@ -10,10 +10,10 @@
   "projected_y": 17546.75955362525,
   "distance_m": 182.399854441176,
   "requested_start_date": "1987-01-01",
-  "requested_end_date": "2026-06-22",
+  "requested_end_date": "2026-06-29",
   "effective_start_date": "1987-01-01",
   "effective_end_date": "2023-02-01",
   "soil_layer_index": 0,
   "rows_out": 13181,
-  "created_utc": "2026-06-22T08:47:51.231318+00:00"
+  "created_utc": "2026-06-29T08:22:45.391728+00:00"
 }
