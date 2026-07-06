@@ -61,15 +61,19 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
         loading="lazy">
     </a>
     <div class="research-poster-feature__body">
-      <p class="software-kicker">Conference Poster</p>
+      <p class="software-kicker">Best Poster Prize</p>
       <h2 id="isba2026-poster-title">ISBA 2026 World Meeting</h2>
       <p>
-        My poster <em>Bayesian quantile-based correction and synthesis of climate products</em> was accepted
-        for the ISBA 2026 World Meeting in Nagoya, Japan. The work presents a Bayesian quantile workflow
-        for correcting climate-product forecasts and synthesizing the corrected quantile lanes into a
-        posterior predictive distribution, with daily San Lorenzo River flow as the case study.
+        My poster <em>Bayesian quantile-based correction and synthesis of climate products</em> received a
+        Best Poster Prize at the ISBA 2026 World Meeting in Nagoya, Japan. The work presents a Bayesian
+        quantile workflow for correcting climate-product forecasts and synthesizing the corrected quantile
+        lanes into a posterior predictive distribution, with daily San Lorenzo River flow as the case study.
       </p>
       <dl class="research-poster-feature__details">
+        <div>
+          <dt>Recognition</dt>
+          <dd>Best Poster Prize, ISBA 2026 World Meeting.</dd>
+        </div>
         <div>
           <dt>Authors</dt>
           <dd>Antonio Aguirre, Raquel Prado, and Bruno Sansó</dd>
@@ -97,11 +101,11 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
     <h2>Selected Papers, Posters &amp; Software</h2>
     <ul class="research-output-list">
       <li class="research-output-item">
-        <span class="research-output__status">Accepted poster</span>
+        <span class="research-output__status">Best Poster Prize</span>
         <div>
           Aguirre, A., Prado, R., Sansó, B.
           <em>Bayesian quantile-based correction and synthesis of climate products</em>.
-          ISBA 2026 World Meeting, Nagoya, Japan.
+          ISBA 2026 World Meeting, Nagoya, Japan. Best Poster Prize.
           <a href="/files/posters/isba-2026-poster-aguirre.pdf" target="_blank" rel="noopener noreferrer">Poster PDF</a>.
         </div>
       </li>

@@ -39,7 +39,7 @@ description: "Background, research focus, teaching, service, and applied experie
       </li>
       <li>
         <strong>Recent recognition:</strong>
-        ISBA 2026 poster accepted and EnviBayes Student Paper Competition winner.
+        ISBA 2026 Best Poster Prize and EnviBayes Student Paper Competition winner.
       </li>
     </ul>
   </div>
