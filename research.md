@@ -76,7 +76,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
         </div>
         <div>
           <dt>Authors</dt>
-          <dd>Antonio Aguirre, Raquel Prado, and Bruno Sansó</dd>
+          <dd>Antonio De Leon, Raquel Prado, and Bruno Sansó</dd>
         </div>
         <div>
           <dt>Focus</dt>
@@ -103,7 +103,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
       <li class="research-output-item">
         <span class="research-output__status">Best Poster Prize</span>
         <div>
-          Aguirre, A., Prado, R., Sansó, B.
+          De Leon, A., Prado, R., Sansó, B.
           <em>Bayesian quantile-based correction and synthesis of climate products</em>.
           ISBA 2026 World Meeting, Nagoya, Japan. Best Poster Prize.
           <a href="/files/posters/isba-2026-poster-aguirre.pdf" target="_blank" rel="noopener noreferrer">Poster PDF</a>.
@@ -112,7 +112,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
       <li class="research-output-item">
         <span class="research-output__status">Submitted / CRAN v1.0.0</span>
         <div>
-          Aguirre, A., Barata, R., Prado, R., Sansó, B.
+          De Leon, A., Barata, R., Prado, R., Sansó, B.
           <em>exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models</em>.
           Manuscript submitted to the <em>Journal of Statistical Software</em>; companion package released on
           <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer">CRAN</a>.
@@ -121,7 +121,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
       <li class="research-output-item">
         <span class="research-output__status">Working paper</span>
         <div>
-          Aguirre, A., Prado, R., Sansó, B.
+          De Leon, A., Prado, R., Sansó, B.
           <em>Bayesian Quantile Readouts for Fixed Deep Echo State Networks</em>.
           Current work on Q-DESN quantile forecasting.
         </div>
@@ -129,7 +129,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
       <li class="research-output-item">
         <span class="research-output__status">In revision</span>
         <div>
-          Aguirre, A., Sansó, B., Prado, R.
+          De Leon, A., Sansó, B., Prado, R.
           <em>A Bayesian Quantile-Based Correction and Synthesis of River Flow Forecasts</em>.
           Manuscript in revision.
         </div>
@@ -137,7 +137,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
       <li class="research-output-item">
         <span class="research-output__status">Published</span>
         <div>
-          Aguirre, A., Lobato, I.N. (2024).
+          De Leon, A., Lobato, I.N. (2024).
           <em>Evidence of Non-Fundamentalness in OECD Capital Stocks</em>.
           <em>Empirical Economics</em>.
           <a href="https://doi.org/10.1007/s00181-024-02564-5" target="_blank" rel="noopener noreferrer">DOI</a>.
