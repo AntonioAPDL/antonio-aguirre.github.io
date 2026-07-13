@@ -1,4 +1,4 @@
-# Antonio Aguirre - Personal Website
+# Antonio De Leon - Personal Website
 
 This repository contains the source for antonio-aguirre.com, built with Jekyll and the Lanyon/Poole theme foundation.
 

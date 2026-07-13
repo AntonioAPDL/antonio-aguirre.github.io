@@ -1,14 +1,14 @@
 ---
 layout: default
 title: About
-description: "Background, research focus, teaching, service, and applied experience of Antonio Aguirre."
+description: "Background, research focus, teaching, service, and applied experience of Antonio De Leon."
 ---
 
 <div class="about-section">
   <!-- Introduction Section -->
   <div class="intro-section about-card">
-    <img src="/files/images/Me.jpg" alt="Antonio Aguirre" class="profile-pic">
-    <h1 class="page-title">Antonio Aguirre</h1>
+    <img src="/files/images/Me.jpg" alt="Antonio De Leon" class="profile-pic">
+    <h1 class="page-title">Antonio De Leon</h1>
     <p class="page-lede">
       I'm a Ph.D. candidate in <strong>Statistics</strong> at the
       <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>,

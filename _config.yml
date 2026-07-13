@@ -1,5 +1,5 @@
 # Website Setup
-title:               Antonio Aguirre
+title:               Antonio De Leon
 tagline:             "Bayesian Statistics | Machine Learning | Statistical Software"
 description:         "Bayesian forecasting, quantile modeling, and research software."
 url:                 "https://antonio-aguirre.com" # Website URL
@@ -18,7 +18,7 @@ course_names:
 
 # Author Information
 author:
-  name:              Antonio Aguirre
+  name:              Antonio De Leon
   url:               https://github.com/AntonioAPDL
   email:             jaguir26@ucsc.edu
 

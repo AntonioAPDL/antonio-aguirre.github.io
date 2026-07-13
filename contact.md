@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Contact
-description: "Contact Antonio Aguirre via email or social platforms."
+description: "Contact Antonio De Leon via email or social platforms."
 ---
 
 <div class="page-header">
