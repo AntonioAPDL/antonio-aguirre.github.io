@@ -1,6 +1,6 @@
 # Antonio De Leon - Personal Website
 
-This repository contains the source for antonio-aguirre.com, built with Jekyll and the Lanyon/Poole theme foundation.
+This repository contains the source for antoniodeleon.com, built with Jekyll and the Lanyon/Poole theme foundation.
 
 ## Local development
 
@@ -44,8 +44,8 @@ Notes:
 The website CV is maintained from LaTeX source and published as a tracked PDF.
 
 - Source: `cv/antonio_aguirre_cv.tex`
-- Canonical website PDF: `files/cv/antonio-aguirre-cv.pdf`
-- Legacy PDF alias: `files/cv/cv.pdf`
+- Canonical website PDF: `files/cv/antonio-deleon-cv.pdf`
+- Legacy PDF aliases: `files/cv/antonio-aguirre-cv.pdf`, `files/cv/cv.pdf`
 - CV page link: `cv.html`
 
 To update the CV:

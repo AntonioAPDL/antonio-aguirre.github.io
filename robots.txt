@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://antonio-aguirre.com/sitemap.xml
+Sitemap: https://antoniodeleon.com/sitemap.xml

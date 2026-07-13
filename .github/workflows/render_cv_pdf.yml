@@ -56,13 +56,13 @@ jobs:
       - name: Commit and push if changed
         run: |
           set -euo pipefail
-          if git diff --quiet -- files/cv/antonio-aguirre-cv.pdf files/cv/cv.pdf; then
+          if git diff --quiet -- files/cv/antonio-deleon-cv.pdf files/cv/antonio-aguirre-cv.pdf files/cv/cv.pdf; then
             echo "No CV PDF changes to commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add files/cv/antonio-aguirre-cv.pdf files/cv/cv.pdf
+          git add files/cv/antonio-deleon-cv.pdf files/cv/antonio-aguirre-cv.pdf files/cv/cv.pdf
           if git diff --cached --quiet; then
             echo "No staged CV PDF changes to commit."
             exit 0

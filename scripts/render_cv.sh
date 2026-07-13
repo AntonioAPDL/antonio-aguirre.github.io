@@ -3,8 +3,11 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SOURCE="${ROOT_DIR}/cv/antonio_aguirre_cv.tex"
-OUTPUT="${ROOT_DIR}/files/cv/antonio-aguirre-cv.pdf"
-LEGACY_OUTPUT="${ROOT_DIR}/files/cv/cv.pdf"
+OUTPUT="${ROOT_DIR}/files/cv/antonio-deleon-cv.pdf"
+LEGACY_OUTPUTS=(
+  "${ROOT_DIR}/files/cv/cv.pdf"
+  "${ROOT_DIR}/files/cv/antonio-aguirre-cv.pdf"
+)
 CHECK_ONLY=0
 KEEP_BUILD=0
 
@@ -19,7 +22,7 @@ Options:
                           committed PDFs are current.
   --source PATH           Override the LaTeX source path.
   --output PATH           Override the canonical PDF output path.
-  --legacy-output PATH    Override the legacy PDF alias path.
+  --legacy-output PATH    Override the legacy PDF alias path, replacing defaults.
   --keep-build            Keep the temporary build directory for debugging.
   -h, --help              Show this help text.
 USAGE
@@ -52,7 +55,7 @@ while [[ $# -gt 0 ]]; do
         echo "[ERROR] --legacy-output requires a path." >&2
         exit 2
       fi
-      LEGACY_OUTPUT="$2"
+      LEGACY_OUTPUTS=("$2")
       shift 2
       ;;
     --keep-build)
@@ -207,28 +210,28 @@ if [[ "${CHECK_ONLY}" == "1" ]]; then
   if ! compare_rendered_content "${BUILT_PDF}" "${OUTPUT}" "canonical"; then
     exit 1
   fi
-  if [[ -n "${LEGACY_OUTPUT}" ]]; then
-    if [[ ! -s "${LEGACY_OUTPUT}" ]]; then
-      echo "[ERROR] Legacy CV PDF is missing: ${LEGACY_OUTPUT}" >&2
+  for legacy_pdf in "${LEGACY_OUTPUTS[@]}"; do
+    if [[ ! -s "${legacy_pdf}" ]]; then
+      echo "[ERROR] Legacy CV PDF is missing: ${legacy_pdf}" >&2
       exit 1
     fi
-    if ! cmp -s "${OUTPUT}" "${LEGACY_OUTPUT}"; then
-      echo "[ERROR] Legacy CV PDF does not match the canonical PDF: ${LEGACY_OUTPUT}" >&2
+    if ! cmp -s "${OUTPUT}" "${legacy_pdf}"; then
+      echo "[ERROR] Legacy CV PDF does not match the canonical PDF: ${legacy_pdf}" >&2
       exit 1
     fi
-  fi
+  done
   echo "[OK] CV source renders and published PDF content is current."
   exit 0
 fi
 
 mkdir -p "$(dirname "${OUTPUT}")"
 cp "${BUILT_PDF}" "${OUTPUT}"
-if [[ -n "${LEGACY_OUTPUT}" ]]; then
-  mkdir -p "$(dirname "${LEGACY_OUTPUT}")"
-  cp "${BUILT_PDF}" "${LEGACY_OUTPUT}"
-fi
+for legacy_pdf in "${LEGACY_OUTPUTS[@]}"; do
+  mkdir -p "$(dirname "${legacy_pdf}")"
+  cp "${BUILT_PDF}" "${legacy_pdf}"
+done
 
 echo "[OK] Wrote ${OUTPUT}"
-if [[ -n "${LEGACY_OUTPUT}" ]]; then
-  echo "[OK] Wrote ${LEGACY_OUTPUT}"
-fi
+for legacy_pdf in "${LEGACY_OUTPUTS[@]}"; do
+  echo "[OK] Wrote ${legacy_pdf}"
+done

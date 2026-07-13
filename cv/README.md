@@ -5,7 +5,8 @@ This directory contains the editable LaTeX source for the website CV.
 ## Files
 
 - `antonio_aguirre_cv.tex`: canonical source file.
-- `../files/cv/antonio-aguirre-cv.pdf`: canonical public PDF linked from `../cv.html`.
+- `../files/cv/antonio-deleon-cv.pdf`: canonical public PDF linked from `../cv.html`.
+- `../files/cv/antonio-aguirre-cv.pdf`: legacy alias kept in sync for older links.
 - `../files/cv/cv.pdf`: legacy alias kept in sync for older links.
 
 ## Update Workflow
