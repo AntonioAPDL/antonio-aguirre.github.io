@@ -4,6 +4,9 @@ title: Home
 description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian forecasting, quantile modeling, and research software."
 ---
 
+{% assign exdqlm = site.data.cran_packages.exdqlm %}
+{% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
+
 <div class="home-section">
   <!-- Intro Section -->
   <div class="home-intro">
@@ -47,7 +50,7 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
   <div class="home-highlights" aria-label="Current highlights">
     <article class="home-highlight-card">
       <span>CRAN package</span>
-      <h2><code>exdqlm</code> 1.0.0</h2>
+      <h2><code>exdqlm</code> {{ exdqlm_version }}</h2>
       <p>CRAN release for Bayesian quantile modeling, with the companion JSS software article submitted.</p>
     </article>
     <article class="home-highlight-card">

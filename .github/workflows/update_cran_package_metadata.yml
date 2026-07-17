@@ -1,0 +1,85 @@
+name: Update CRAN Package Metadata
+
+on:
+  schedule:
+    - cron: "37 11 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-cran-package-metadata
+  cancel-in-progress: false
+
+jobs:
+  update-cran-package-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Sync to latest main
+        run: |
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+      - name: Update CRAN metadata
+        run: python3 scripts/update_cran_package_metadata.py
+
+      - name: Render CV PDF if metadata changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- _data/cran_packages.yml cv/antonio_aguirre_cv.tex; then
+            echo "No CRAN metadata changes."
+            exit 0
+          fi
+
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            latexmk \
+            poppler-utils \
+            texlive-fonts-recommended \
+            texlive-latex-base \
+            texlive-latex-extra \
+            texlive-latex-recommended
+
+          scripts/render_cv.sh
+          scripts/render_cv.sh --check
+
+      - name: Commit and push if changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- _data/cran_packages.yml cv/antonio_aguirre_cv.tex files/cv/antonio-deleon-cv.pdf files/cv/antonio-aguirre-cv.pdf files/cv/cv.pdf; then
+            echo "No CRAN metadata changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            _data/cran_packages.yml \
+            cv/antonio_aguirre_cv.tex \
+            files/cv/antonio-deleon-cv.pdf \
+            files/cv/antonio-aguirre-cv.pdf \
+            files/cv/cv.pdf
+
+          if git diff --cached --quiet; then
+            echo "No staged CRAN metadata changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: update CRAN package metadata"
+          if ! git pull --rebase origin main; then
+            echo "Concurrent update caused rebase conflict; skipping CRAN metadata push."
+            git rebase --abort || true
+            exit 0
+          fi
+          if ! git push; then
+            echo "Push rejected (likely concurrent update); skipping CRAN metadata push."
+            exit 0
+          fi

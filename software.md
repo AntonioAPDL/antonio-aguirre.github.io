@@ -4,6 +4,10 @@ title: Software
 description: "Public packages, research code, and selected implementation examples."
 ---
 
+{% assign exdqlm = site.data.cran_packages.exdqlm %}
+{% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
+{% assign exdqlm_published_label = exdqlm.published_label | default: "July 9, 2026" %}
+
 <div class="software-section">
   <header class="software-hero page-header">
     <p class="software-kicker">Research Software</p>
@@ -18,7 +22,7 @@ description: "Public packages, research code, and selected implementation exampl
     <div class="software-overview-item">
       <i class="fas fa-cube" aria-hidden="true"></i>
       <h3>Released Package</h3>
-      <p>CRAN v1.0.0 R package with source, tests, reference docs, and a submitted software article.</p>
+      <p>CRAN v{{ exdqlm_version }} R package with source, tests, reference docs, and a submitted software article.</p>
     </div>
     <div class="software-overview-item">
       <i class="fas fa-water" aria-hidden="true"></i>
@@ -45,13 +49,13 @@ description: "Public packages, research code, and selected implementation exampl
     <div class="software-feature__body">
       <div class="software-feature__eyebrow">
         <span>R package</span>
-        <span>CRAN 1.0.0</span>
+        <span>CRAN {{ exdqlm_version }}</span>
         <span>JSS software article submitted</span>
       </div>
       <h2><code>exdqlm</code>: Extended Dynamic Quantile Linear Models</h2>
       <p>
         Bayesian quantile-regression software for dynamic state-space models and static regression under the extended
-        asymmetric Laplace family. Version 1.0.0 brings the software-article feature line together: dynamic exDQLM
+        asymmetric Laplace family. The current CRAN release brings the software-article feature line together: dynamic exDQLM
         fitting, static exAL regression, LDVB and MCMC inference, optional C++ accelerators, diagnostics, and
         posterior-predictive synthesis across fitted quantiles.
       </p>
@@ -74,11 +78,11 @@ description: "Public packages, research code, and selected implementation exampl
         <div class="software-feature__status">
           <h3>Release &amp; Manuscript</h3>
           <p>
-            <code>exdqlm</code> 1.0.0 is available on CRAN. The companion software article has been submitted to the
+            <code>exdqlm</code> {{ exdqlm_version }} is available on CRAN. The companion software article has been submitted to the
             <em>Journal of Statistical Software</em>; the article repository tracks the manuscript source, supplement,
             examples, and reproducibility checks.
           </p>
-          <p class="software-updated">Last updated: June 14, 2026</p>
+          <p class="software-updated">CRAN release: {{ exdqlm_published_label }}</p>
         </div>
         <ul class="software-feature__checks" aria-label="exdqlm capabilities">
           <li>

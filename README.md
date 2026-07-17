@@ -63,6 +63,20 @@ scripts/render_cv.sh --check
 
 `scripts/render_cv.sh` uses `latexmk`, `pdflatex`, or `tectonic`, in that order. The GitHub Actions workflow `.github/workflows/render_cv_pdf.yml` can also render and commit the PDFs from `main` when the CV source changes, or from a manual dispatch.
 
+## CRAN package metadata
+
+The `exdqlm` version shown on the website is stored in `_data/cran_packages.yml` and read through Jekyll/Liquid. The same CRAN version is also reflected in the LaTeX CV source.
+
+To refresh the metadata manually:
+
+```bash
+python3 scripts/update_cran_package_metadata.py
+scripts/render_cv.sh
+scripts/render_cv.sh --check
+```
+
+The scheduled GitHub Actions workflow `.github/workflows/update_cran_package_metadata.yml` checks CRAN daily. It updates `_data/cran_packages.yml`, updates the CV source, renders the website CV PDFs, and commits only when CRAN publishes a new package version or publication date.
+
 ## San Lorenzo River live USGS plot
 
 The home page includes a client-side Plotly chart of USGS instantaneous values for the San Lorenzo River (site 11160500). It is fully static and runs in the browser, with a mode toggle for stage or discharge.

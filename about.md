@@ -4,6 +4,9 @@ title: About
 description: "Background, research focus, teaching, service, and applied experience of Antonio De Leon."
 ---
 
+{% assign exdqlm = site.data.cran_packages.exdqlm %}
+{% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
+
 <div class="about-section">
   <!-- Introduction Section -->
   <div class="intro-section about-card">
@@ -26,7 +29,7 @@ description: "Background, research focus, teaching, service, and applied experie
     <ul class="about-list about-highlight-list">
       <li>
         <strong><a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>:</strong>
-        CRAN v1.0.0 R package for Bayesian quantile modeling, with a companion manuscript submitted to the
+        CRAN v{{ exdqlm_version }} R package for Bayesian quantile modeling, with a companion manuscript submitted to the
         <em>Journal of Statistical Software</em>.
       </li>
       <li>

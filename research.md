@@ -4,6 +4,9 @@ title: Research
 description: "Research on Bayesian forecasting, quantile modeling, scalable inference, and research software."
 ---
 
+{% assign exdqlm = site.data.cran_packages.exdqlm %}
+{% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
+
 <div class="research-section">
   <!-- Title and Introduction -->
   <header class="research-hero page-header">
@@ -110,7 +113,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
         </div>
       </li>
       <li class="research-output-item">
-        <span class="research-output__status">Submitted / CRAN v1.0.0</span>
+        <span class="research-output__status">Submitted / CRAN v{{ exdqlm_version }}</span>
         <div>
           De Leon, A., Barata, R., Prado, R., Sansó, B.
           <em>exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models</em>.
