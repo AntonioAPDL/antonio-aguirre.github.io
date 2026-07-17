@@ -2,7 +2,7 @@
 title:               Antonio De Leon
 tagline:             "Bayesian Statistics | Machine Learning | Statistical Software"
 description:         "Bayesian forecasting, quantile modeling, and research software."
-url:                 "https://antoniodeleon.com" # Website URL
+url:                 "https://antonio-de-leon.com" # Website URL
 baseurl:             ""                           # Leave empty for root deployment
 paginate:            5                             # Number of posts per page
 permalink:           pretty                        # Clean, user-friendly URLs

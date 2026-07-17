@@ -1,6 +1,6 @@
 # Antonio De Leon - Personal Website
 
-This repository contains the source for antoniodeleon.com, built with Jekyll and the Lanyon/Poole theme foundation.
+This repository contains the source for antonio-de-leon.com, built with Jekyll and the Lanyon/Poole theme foundation.
 
 ## Local development
 
