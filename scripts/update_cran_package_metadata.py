@@ -17,6 +17,9 @@ PACKAGE = "exdqlm"
 DESCRIPTION_URL = f"https://cran.r-project.org/web/packages/{PACKAGE}/DESCRIPTION"
 PACKAGE_URL = f"https://CRAN.R-project.org/package={PACKAGE}"
 DOI_URL = f"https://doi.org/10.32614/CRAN.package.{PACKAGE}"
+ARXIV_ID = "2607.22760"
+ARXIV_URL = f"https://arxiv.org/abs/{ARXIV_ID}"
+ARXIV_DOI_URL = f"https://doi.org/10.48550/arXiv.{ARXIV_ID}"
 DATA_PATH = ROOT / "_data" / "cran_packages.yml"
 CV_PATH = ROOT / "cv" / "antonio_aguirre_cv.tex"
 
@@ -58,6 +61,9 @@ def parse_cran_description(text: str) -> dict[str, str]:
         "package_url": PACKAGE_URL,
         "description_url": DESCRIPTION_URL,
         "doi_url": DOI_URL,
+        "arxiv_id": ARXIV_ID,
+        "arxiv_url": ARXIV_URL,
+        "arxiv_doi_url": ARXIV_DOI_URL,
     }
 
 
@@ -73,6 +79,9 @@ def render_yaml(metadata: dict[str, str]) -> str:
         f"  package_url: \"{metadata['package_url']}\"\n"
         f"  description_url: \"{metadata['description_url']}\"\n"
         f"  doi_url: \"{metadata['doi_url']}\"\n"
+        f"  arxiv_id: \"{metadata['arxiv_id']}\"\n"
+        f"  arxiv_url: \"{metadata['arxiv_url']}\"\n"
+        f"  arxiv_doi_url: \"{metadata['arxiv_doi_url']}\"\n"
     )
 
 
@@ -83,8 +92,8 @@ def update_cv_text(text: str, version: str) -> str:
         text,
     )
     text, publication_count = re.subn(
-        r"companion R package released on CRAN, version \d+(?:\.\d+)*\.",
-        f"companion R package released on CRAN, version {version}.",
+        r"(?:companion R package released on CRAN, version \d+(?:\.\d+)*\.|R package on CRAN v\d+(?:\.\d+)*;)",
+        f"R package on CRAN v{version};",
         text,
     )
 

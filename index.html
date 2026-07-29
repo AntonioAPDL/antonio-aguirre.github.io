@@ -6,6 +6,7 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
+{% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
 
 <div class="home-section">
   <!-- Intro Section -->
@@ -23,9 +24,10 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
       with a focus on uncertainty quantification, scalable inference, and reproducible research software.
     </p>
     <p class="intro-text">
-      My current work includes Bayesian correction and synthesis of river-flow forecasts, Q-DESN quantile forecasting,
-      and the CRAN-published <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>
-      R package for dynamic and static Bayesian quantile models.
+      My current Ph.D. work includes hydrologic forecast correction, Q-DESN quantile forecasting,
+      mean-tilted relaxed quantile regression, and the CRAN-published
+      <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>
+      R package.
     </p>
     <p class="intro-text">
       I hold a <strong>B.Sc.</strong> in Applied Mathematics and an <strong>M.Sc.</strong> in Economics from
@@ -51,12 +53,12 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
     <article class="home-highlight-card">
       <span>CRAN package</span>
       <h2><code>exdqlm</code> {{ exdqlm_version }}</h2>
-      <p>CRAN release for Bayesian quantile modeling, with the companion JSS software article submitted.</p>
+      <p>Bayesian quantile-modeling software on CRAN, with a JSS submission and <a href="{{ exdqlm_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv preprint</a>.</p>
     </article>
     <article class="home-highlight-card">
-      <span>Forecasting</span>
-      <h2>River-flow correction</h2>
-      <p>Bayesian quantile methods for correcting, combining, and evaluating hydrological forecasts.</p>
+      <span>In revision</span>
+      <h2>Hydrologic products</h2>
+      <p>Bayesian correction and synthesis of river-flow forecast products, with related ISBA and EnviBayes recognition.</p>
     </article>
     <article class="home-highlight-card">
       <span>Working paper</span>
@@ -64,12 +66,9 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
       <p>Bayesian quantile readouts for fixed Deep Echo State Network features.</p>
     </article>
     <article class="home-highlight-card">
-      <span>Poster prize</span>
-      <h2>ISBA 2026</h2>
-      <p>
-        Best Poster Prize for Bayesian quantile-based correction and synthesis of climate products.
-        <a href="/research/#isba2026-poster">View poster</a>.
-      </p>
+      <span>Working paper</span>
+      <h2>Mean-tilted RQR</h2>
+      <p>Generalized-Bayes computation for fixed-content interval functionals and relaxed quantile regression.</p>
     </article>
   </div>
 
@@ -78,16 +77,16 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
     <h2 class="section-heading">Current Focus</h2>
     <ul class="research-list">
       <li>
-        <strong>Forecast correction and synthesis:</strong> methods that calibrate and combine probabilistic forecasts while preserving useful uncertainty information.
+        <strong>Forecast correction and synthesis:</strong> Bayesian quantile methods for combining hydrologic observations, retrospective products, and forecast products.
       </li>
       <li>
-        <strong>Dynamic quantile models:</strong> state-space models for conditional quantiles, forecast diagnostics, and posterior predictive summaries.
+        <strong>Dynamic quantile models:</strong> state-space models, scalable inference, diagnostics, forecasting, and posterior predictive summaries.
       </li>
       <li>
         <strong>Q-DESN forecasting:</strong> Bayesian quantile readouts for fixed reservoir features in nonlinear time-series problems.
       </li>
       <li>
-        <strong>Research software:</strong> tested R, Python, C++, and workflow code for reproducible modeling and analysis.
+        <strong>Relaxed quantile regression:</strong> loss-based interval-root models for fixed-content intervals and generalized-Bayes computation.
       </li>
     </ul>
   </div>

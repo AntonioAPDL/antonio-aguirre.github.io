@@ -7,6 +7,7 @@ description: "Public packages, research code, and selected implementation exampl
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
 {% assign exdqlm_published_label = exdqlm.published_label | default: "July 9, 2026" %}
+{% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
 
 <div class="software-section">
   <header class="software-hero page-header">
@@ -22,7 +23,7 @@ description: "Public packages, research code, and selected implementation exampl
     <div class="software-overview-item">
       <i class="fas fa-cube" aria-hidden="true"></i>
       <h3>Released Package</h3>
-      <p>CRAN v{{ exdqlm_version }} R package with source, tests, reference docs, and a submitted software article.</p>
+      <p>CRAN v{{ exdqlm_version }} R package with source, tests, reference docs, JSS submission, and arXiv preprint.</p>
     </div>
     <div class="software-overview-item">
       <i class="fas fa-water" aria-hidden="true"></i>
@@ -64,6 +65,10 @@ description: "Public packages, research code, and selected implementation exampl
           <i class="fas fa-cube" aria-hidden="true"></i>
           <span>CRAN</span>
         </a>
+        <a class="software-button software-button--secondary" href="{{ exdqlm_arxiv_url }}" target="_blank" rel="noopener noreferrer">
+          <i class="far fa-file-alt" aria-hidden="true"></i>
+          <span>arXiv</span>
+        </a>
         <a class="software-button software-button--secondary" href="https://github.com/AntonioAPDL/exdqlm" target="_blank" rel="noopener noreferrer">
           <i class="fab fa-github" aria-hidden="true"></i>
           <span>GitHub</span>
@@ -79,8 +84,8 @@ description: "Public packages, research code, and selected implementation exampl
           <h3>Release &amp; Manuscript</h3>
           <p>
             <code>exdqlm</code> {{ exdqlm_version }} is available on CRAN. The companion software article has been submitted to the
-            <em>Journal of Statistical Software</em>; the article repository tracks the manuscript source, supplement,
-            examples, and reproducibility checks.
+            <em>Journal of Statistical Software</em> and is available as an arXiv preprint; the article repository tracks the
+            manuscript source, supplement, examples, and reproducibility checks.
           </p>
           <p class="software-updated">CRAN release: {{ exdqlm_published_label }}</p>
         </div>
@@ -120,7 +125,7 @@ description: "Public packages, research code, and selected implementation exampl
         </div>
         <h3><code>exdqlm</code> JSS Article</h3>
         <p>
-          Submitted <em>Journal of Statistical Software</em> article source, supplement files, reproducibility checks,
+          JSS article source, arXiv preprint materials, supplement files, reproducibility checks,
           and manuscript-support examples for <code>exdqlm</code>.
         </p>
         <a href="https://github.com/AntonioAPDL/exdqlm---Article" target="_blank" rel="noopener noreferrer">
@@ -139,8 +144,40 @@ description: "Public packages, research code, and selected implementation exampl
           Revised Environmetrics manuscript materials with generated asset manifests, figure/table reports,
           and validation scripts.
         </p>
-        <a href="https://github.com/AntonioAPDL/Evironmetrics---REVISED-DOC-2" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/AntonioAPDL/Evironmetrics---REVISED-DOC-Corrected-2" target="_blank" rel="noopener noreferrer">
           <span>Manuscript repository</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-project">
+        <div class="software-project__meta">
+          <span>Working paper</span>
+          <span>Q-DESN</span>
+        </div>
+        <h3>Q-DESN Article</h3>
+        <p>
+          Manuscript and reproducibility materials for Bayesian quantile readouts using fixed Deep Echo
+          State Network features.
+        </p>
+        <a href="https://github.com/AntonioAPDL/Article-Q-DESN---Version-2" target="_blank" rel="noopener noreferrer">
+          <span>Article repository</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-project">
+        <div class="software-project__meta">
+          <span>Working paper</span>
+          <span>R / C++ / TeX</span>
+        </div>
+        <h3>RQR-GIBBS</h3>
+        <p>
+          Manuscript and computation workspace for mean-tilted relaxed quantile regression,
+          fixed-content interval functionals, and generalized-Bayes Gibbs samplers.
+        </p>
+        <a href="https://github.com/AntonioAPDL/RQR-GIBBS" target="_blank" rel="noopener noreferrer">
+          <span>Project repository</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
       </article>
@@ -157,21 +194,6 @@ description: "Public packages, research code, and selected implementation exampl
         </p>
         <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/tree/main/scripts" target="_blank" rel="noopener noreferrer">
           <span>Browse scripts</span>
-          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <article class="software-project">
-        <div class="software-project__meta">
-          <span>Methods notes</span>
-          <span>Q-DESN</span>
-        </div>
-        <h3>Q-DESN Theory Notes</h3>
-        <p>
-          Public notes for Q-DESN notation, model structure, and implementation ideas behind current research code.
-        </p>
-        <a href="https://github.com/AntonioAPDL/Q-DESN---Theory-for-implementation" target="_blank" rel="noopener noreferrer">
-          <span>Read notes</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
       </article>
@@ -259,8 +281,21 @@ description: "Public packages, research code, and selected implementation exampl
         <p>
           Python check that resolves TeX figure paths and fails when manuscript assets are missing.
         </p>
-        <a href="https://github.com/AntonioAPDL/Evironmetrics---REVISED-DOC-2/blob/main/scripts/validate_manuscript_figure_paths.py" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/AntonioAPDL/Evironmetrics---REVISED-DOC-Corrected-2/blob/main/scripts/validate_manuscript_figure_paths.py" target="_blank" rel="noopener noreferrer">
           <span>View Python source</span>
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <article class="software-sample">
+        <div class="software-sample__icon"><i class="fab fa-r-project" aria-hidden="true"></i></div>
+        <h3>RQR-DLM Interface</h3>
+        <p>
+          R interface for dynamic relaxed-quantile root models, including evolution modes,
+          root-label handling, and forecast paths.
+        </p>
+        <a href="https://github.com/AntonioAPDL/RQR-GIBBS/blob/main/application/R/rqr_dlm_fit.R" target="_blank" rel="noopener noreferrer">
+          <span>View R source</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
       </article>

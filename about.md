@@ -6,6 +6,7 @@ description: "Background, research focus, teaching, service, and applied experie
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
+{% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
 
 <div class="about-section">
   <!-- Introduction Section -->
@@ -19,7 +20,8 @@ description: "Background, research focus, teaching, service, and applied experie
       <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Raquel Prado</a>.
       My research centers on Bayesian time series forecasting, quantile modeling, and uncertainty quantification,
       with an emphasis on scalable inference and research software that can be inspected, tested, and reused.
-      I work on river-flow forecast correction, Q-DESN quantile forecasting, and dynamic quantile state-space models.
+      I work on hydrologic forecast correction, Q-DESN quantile forecasting, dynamic quantile state-space models,
+      and generalized-Bayes interval methods for relaxed quantile regression.
     </p>
   </div>
 
@@ -29,16 +31,21 @@ description: "Background, research focus, teaching, service, and applied experie
     <ul class="about-list about-highlight-list">
       <li>
         <strong><a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>:</strong>
-        CRAN v{{ exdqlm_version }} R package for Bayesian quantile modeling, with a companion manuscript submitted to the
+        CRAN v{{ exdqlm_version }} R package for Bayesian quantile modeling, with a companion
+        <a href="{{ exdqlm_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv preprint</a> and a manuscript submitted to
         <em>Journal of Statistical Software</em>.
       </li>
       <li>
         <strong>Forecast correction manuscript:</strong>
-        Bayesian quantile-based correction and synthesis of river-flow forecasts, currently in revision.
+        Bayesian quantile-based correction and synthesis of hydrologic products, currently in revision at <em>Environmetrics</em>.
       </li>
       <li>
         <strong>Q-DESN working paper:</strong>
         Bayesian quantile readouts for fixed Deep Echo State Network features.
+      </li>
+      <li>
+        <strong>RQR working paper:</strong>
+        Mean-tilted relaxed quantile regression for fixed-content interval functionals and generalized-Bayes computation.
       </li>
       <li>
         <strong>Recent recognition:</strong>
@@ -52,13 +59,16 @@ description: "Background, research focus, teaching, service, and applied experie
     <h2 class="section-heading">Ongoing Projects</h2>
     <ul class="about-list">
       <li>
-        <strong>Quantile-Based Forecast Correction:</strong> Bayesian correction and synthesis of river flow forecasts (manuscript in revision).
+        <strong>Quantile-Based Forecast Correction:</strong> Bayesian correction and synthesis of hydrologic products (manuscript in revision).
       </li>
       <li>
         <strong>Q-DESN Forecasting:</strong> Working paper on Bayesian quantile readouts for fixed Deep Echo State Network features.
       </li>
       <li>
-        <strong>Scalable Bayesian Inference:</strong> Variational Bayes and Sequential Monte Carlo for real-time updating in operational settings.
+        <strong>Mean-Tilted RQR:</strong> Working paper on fixed-content interval functionals and generalized-Bayes Gibbs computation.
+      </li>
+      <li>
+        <strong>Scalable Bayesian Inference:</strong> MCMC, variational Bayes, diagnostics, and reproducible workflows for repeated model evaluation.
       </li>
     </ul>
   </div>

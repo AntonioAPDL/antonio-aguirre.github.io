@@ -8,3 +8,6 @@ exdqlm:
   package_url: "https://CRAN.R-project.org/package=exdqlm"
   description_url: "https://cran.r-project.org/web/packages/exdqlm/DESCRIPTION"
   doi_url: "https://doi.org/10.32614/CRAN.package.exdqlm"
+  arxiv_id: "2607.22760"
+  arxiv_url: "https://arxiv.org/abs/2607.22760"
+  arxiv_doi_url: "https://doi.org/10.48550/arXiv.2607.22760"

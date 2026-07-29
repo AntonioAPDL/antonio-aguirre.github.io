@@ -6,52 +6,53 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
+{% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
 
 <div class="research-section">
   <!-- Title and Introduction -->
   <header class="research-hero page-header">
     <h1 class="page-title">Research</h1>
     <p class="page-lede">
-      I develop Bayesian time-series methods for probabilistic forecasting, with an emphasis on quantile modeling,
-      uncertainty quantification, scalable inference, and reusable research software.
+      I develop Bayesian quantile methods for probabilistic forecasting, interval modeling,
+      scalable inference, and reusable research software.
     </p>
     <p class="page-lede">
-      Much of this work is motivated by hydrological and environmental forecasting, where forecasts need to be calibrated,
-      interpretable, computationally practical, and easy to update as new data arrive.
+      My Ph.D. work is organized around hydrologic forecast correction, dynamic quantile state-space models,
+      fixed-reservoir quantile readouts, and generalized-Bayes interval functionals.
     </p>
   </header>
 
   <section class="research-area-grid" aria-label="Research areas">
     <article class="research-area">
-      <span>Forecasting</span>
-      <h2>Forecast Correction and Synthesis</h2>
+      <span>In revision</span>
+      <h2>Hydrologic Forecast Correction</h2>
       <p>
-        Bayesian quantile methods for correcting river-flow forecasts, combining forecast sources,
-        and evaluating predictive distributions with proper scoring rules.
+        Bayesian quantile correction and synthesis for USGS observations, retrospective products,
+        and operational forecast products in river-flow forecasting.
       </p>
     </article>
     <article class="research-area">
-      <span>Nonlinear Time Series</span>
+      <span>Software / JSS</span>
+      <h2>Dynamic Quantile State-Space Models</h2>
+      <p>
+        Extended dynamic quantile linear models with MCMC, Laplace-delta variational Bayes,
+        diagnostics, forecasting, and posterior-predictive synthesis.
+      </p>
+    </article>
+    <article class="research-area">
+      <span>Working paper</span>
       <h2>Q-DESN Quantile Forecasting</h2>
       <p>
-        Bayesian quantile readouts for fixed Deep Echo State Network features, with regularized readouts,
-        exAL working likelihoods, MCMC, and variational approximations.
+        Bayesian quantile readouts for fixed Deep Echo State Network features, with shrinkage priors,
+        single-quantile and multi-quantile reporting, and forecast validation.
       </p>
     </article>
     <article class="research-area">
-      <span>State Space Models</span>
-      <h2>Dynamic Quantile Models</h2>
+      <span>Working paper</span>
+      <h2>Mean-Tilted RQR</h2>
       <p>
-        Flexible dynamic quantile linear models with trend, seasonal, regression, transfer-function,
-        forecasting, diagnostics, and posterior synthesis components.
-      </p>
-    </article>
-    <article class="research-area">
-      <span>Computation</span>
-      <h2>Scalable Inference and Diagnostics</h2>
-      <p>
-        Variational Bayes, Sequential Monte Carlo, simulation diagnostics, and reproducible workflows
-        for models that need to run repeatedly and be checked carefully.
+        Relaxed quantile regression for fixed-content interval targets, treated through
+        loss-based generalized posteriors and Gibbs computation.
       </p>
     </article>
   </section>
@@ -69,7 +70,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
       <p>
         My poster <em>Bayesian quantile-based correction and synthesis of climate products</em> received a
         Best Poster Prize at the ISBA 2026 World Meeting in Nagoya, Japan. The work presents a Bayesian
-        quantile workflow for correcting climate-product forecasts and synthesizing the corrected quantile
+        quantile workflow for correcting hydrologic forecast products and synthesizing the corrected quantile
         lanes into a posterior predictive distribution, with daily San Lorenzo River flow as the case study.
       </p>
       <dl class="research-poster-feature__details">
@@ -83,7 +84,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
         </div>
         <div>
           <dt>Focus</dt>
-          <dd>Forecast correction, quantile dynamic modeling, posterior synthesis, and state-space modelling.</dd>
+          <dd>Forecast correction, quantile dynamic modeling, posterior synthesis, and state-space modeling.</dd>
         </div>
       </dl>
       <div class="research-poster-feature__actions">
@@ -101,24 +102,26 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
 
   <!-- Selected Publications -->
   <div class="publication-section">
-    <h2>Selected Papers, Posters &amp; Software</h2>
+    <h2>Selected Papers &amp; Software</h2>
     <ul class="research-output-list">
       <li class="research-output-item">
-        <span class="research-output__status">Best Poster Prize</span>
-        <div>
-          De Leon, A., Prado, R., Sansó, B.
-          <em>Bayesian quantile-based correction and synthesis of climate products</em>.
-          ISBA 2026 World Meeting, Nagoya, Japan. Best Poster Prize.
-          <a href="/files/posters/isba-2026-poster-aguirre.pdf" target="_blank" rel="noopener noreferrer">Poster PDF</a>.
-        </div>
-      </li>
-      <li class="research-output-item">
-        <span class="research-output__status">Submitted / CRAN v{{ exdqlm_version }}</span>
+        <span class="research-output__status">JSS / CRAN v{{ exdqlm_version }}</span>
         <div>
           De Leon, A., Barata, R., Prado, R., Sansó, B.
           <em>exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models</em>.
-          Manuscript submitted to the <em>Journal of Statistical Software</em>; companion package released on
-          <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer">CRAN</a>.
+          Manuscript submitted to the <em>Journal of Statistical Software</em>; package on
+          <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer">CRAN</a>;
+          <a href="{{ exdqlm_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv preprint</a>.
+        </div>
+      </li>
+      <li class="research-output-item">
+        <span class="research-output__status">In revision / awards</span>
+        <div>
+          De Leon, A., Prado, R., Sansó, B.
+          <em>Bayesian Quantile-Based Correction and Synthesis of Hydrologic Products</em>.
+          Manuscript in revision at <em>Environmetrics</em>. Related work received the EnviBayes Student Paper
+          Competition award and the ISBA 2026 Best Poster Prize.
+          <a href="/files/posters/isba-2026-poster-aguirre.pdf" target="_blank" rel="noopener noreferrer">Poster PDF</a>.
         </div>
       </li>
       <li class="research-output-item">
@@ -126,15 +129,15 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
         <div>
           De Leon, A., Prado, R., Sansó, B.
           <em>Bayesian Quantile Readouts for Fixed Deep Echo State Networks</em>.
-          Current work on Q-DESN quantile forecasting.
+          Working paper on fixed-reservoir quantile forecasting with Bayesian readouts.
         </div>
       </li>
       <li class="research-output-item">
-        <span class="research-output__status">In revision</span>
+        <span class="research-output__status">Working paper</span>
         <div>
-          De Leon, A., Sansó, B., Prado, R.
-          <em>A Bayesian Quantile-Based Correction and Synthesis of River Flow Forecasts</em>.
-          Manuscript in revision.
+          De Leon, A., Prado, R., Sansó, B.
+          <em>Mean-Tilted Relaxed Quantile Regression: Fixed-Content Interval Functionals and Generalized-Bayes Computation</em>.
+          Working paper on interval-root functionals, fixed-content intervals, and Gibbs computation.
         </div>
       </li>
       <li class="research-output-item">
