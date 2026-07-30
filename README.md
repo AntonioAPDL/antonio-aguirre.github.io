@@ -33,8 +33,8 @@ Notes:
 
 ## Structure
 
-- `index.html`, `about.md`, `research.md`, `teaching.html`, `software.md`, `blog.html`, `cv.html`, `contact.md`: main pages
-- `_posts/`: blog posts
+- `index.html`, `about.md`, `research.md`, `teaching.html`, `software.md`, `demos.html`, `cv.html`, `contact.md`: main public pages
+- `blog.html`, `_posts/`: unpublished technical notes under review
 - `_layouts/`, `_includes/`: shared templates
 - `public/`: theme assets and custom styles
 - `files/`: PDFs and images
@@ -43,25 +43,24 @@ Notes:
 
 The website CV is maintained from LaTeX source and published as a tracked PDF.
 
-- Source: `cv/antonio_aguirre_cv.tex`
+- Source: `cv/antonio_deleon_cv.tex`
 - Canonical website PDF: `files/cv/antonio-deleon-cv.pdf`
-- Legacy PDF aliases: `files/cv/antonio-aguirre-cv.pdf`, `files/cv/cv.pdf`
 - CV page link: `cv.html`
 
 To update the CV:
 
 ```bash
 # 1. Edit the LaTeX source.
-$EDITOR cv/antonio_aguirre_cv.tex
+$EDITOR cv/antonio_deleon_cv.tex
 
-# 2. Render the website PDFs.
+# 2. Render the website PDF.
 scripts/render_cv.sh
 
 # 3. Verify the committed PDFs match the source.
 scripts/render_cv.sh --check
 ```
 
-`scripts/render_cv.sh` uses `latexmk`, `pdflatex`, or `tectonic`, in that order. The GitHub Actions workflow `.github/workflows/render_cv_pdf.yml` can also render and commit the PDFs from `main` when the CV source changes, or from a manual dispatch.
+`scripts/render_cv.sh` uses `latexmk`, `pdflatex`, or `tectonic`, in that order. The GitHub Actions workflow `.github/workflows/render_cv_pdf.yml` can also render and commit the PDF from `main` when the CV source changes, or from a manual dispatch.
 
 ## CRAN package metadata
 
@@ -75,16 +74,16 @@ scripts/render_cv.sh
 scripts/render_cv.sh --check
 ```
 
-The scheduled GitHub Actions workflow `.github/workflows/update_cran_package_metadata.yml` checks CRAN daily. It updates `_data/cran_packages.yml`, updates the CV source, renders the website CV PDFs, and commits only when CRAN publishes a new package version or publication date.
+The scheduled GitHub Actions workflow `.github/workflows/update_cran_package_metadata.yml` checks CRAN daily. It updates `_data/cran_packages.yml`, updates the CV source, renders the website CV PDF, and commits only when CRAN publishes a new package version or publication date.
 
 ## San Lorenzo River live USGS plot
 
-The home page includes a client-side Plotly chart of USGS instantaneous values for the San Lorenzo River (site 11160500). It is fully static and runs in the browser, with a mode toggle for stage or discharge.
+The demos page includes a client-side Plotly chart of USGS instantaneous values for the San Lorenzo River (site 11160500). It is fully static and runs in the browser, with a mode toggle for stage or discharge.
 
-- **Page location:** `index.html` (Plot Section).
+- **Page location:** `demos.html` (Live Research Displays).
 - **Container class:** `.usgs-iv-plot`.
 - **Client script:** `public/js/sanlorenzo_flow.js`.
-- **Plotting library:** Plotly (pinned CDN version in `index.html`).
+- **Plotting library:** Plotly (pinned CDN version in `demos.html`).
 - **Data source:** USGS NWIS IV JSON endpoint.
 
 ### Configuration via data attributes
@@ -177,9 +176,9 @@ The QDESN discharge overlay is currently disabled on the site and the scheduled 
 
 ## GEFS forecast panel (new, additive)
 
-The home page now includes a second panel for GEFS point forecasts (precipitation + soil moisture) near Big Trees.
+The demos page includes a second panel for GEFS point forecasts (precipitation + soil moisture) near Big Trees.
 
-- **Panel container:** `index.html` (`.gefs-forecast-panel`)
+- **Panel container:** `demos.html` (`.gefs-forecast-panel`)
 - **Client script:** `public/js/gefs_forecast_panel.js`
 - **Live artifact:** `assets/data/forecasts/gefs_big_trees_latest.json` on the `live-data` branch
 - **Bundled fallback:** `assets/data/forecasts/gefs_big_trees_latest.json` on `main`

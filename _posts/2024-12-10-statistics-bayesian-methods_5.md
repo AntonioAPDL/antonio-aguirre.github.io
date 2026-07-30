@@ -1,5 +1,6 @@
 ---
 layout: post
+published: false
 title: "On Bayesian Methodology. Part 5/6"
 date: 2024-12-02
 theme: Review
@@ -57,4 +58,3 @@ When faced with many candidate models, the goal is often to find a simpler model
 This approach enables efficient comparison of a large number of models while maintaining robust predictive performance.
 
 Understanding and comparing multiple models is an integral part of Bayesian Workflow. By focusing on the process of model fitting rather than rigid selection or averaging, practitioners can better navigate uncertainty and extract meaningful insights from their analyses. Tools like stacking and projection predictive variable selection ensure that model comparison remains both rigorous and practical.
-

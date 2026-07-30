@@ -1,5 +1,6 @@
 ---
 layout: post
+published: false
 title: "On Bayesian Methodology Part. 2/6"
 date: 2024-10-11
 theme: Review

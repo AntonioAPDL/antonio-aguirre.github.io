@@ -8,10 +8,10 @@
 \fi
 
 % -------------------- Packages --------------------
-\usepackage[margin=0.58in]{geometry}
+\usepackage[margin=0.5in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[scaled=0.95]{helvet}
+\usepackage[scaled=0.93]{helvet}
 \renewcommand{\familydefault}{\sfdefault}
 \usepackage{microtype}
 \usepackage{xcolor}
@@ -37,7 +37,7 @@
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0pt}
-\setlist[itemize]{leftmargin=1.1em, itemsep=1pt, topsep=1pt, parsep=0pt, partopsep=0pt}
+\setlist[itemize]{leftmargin=1.05em, itemsep=0pt, topsep=0pt, parsep=0pt, partopsep=0pt}
 \hyphenpenalty=10000
 \exhyphenpenalty=10000
 \emergencystretch=2em
@@ -45,16 +45,16 @@
 
 \titleformat{\section}
   {\large\bfseries\color{navy}}
-  {}{0pt}{}[\vspace{2pt}\titlerule]
-\titlespacing*{\section}{0pt}{6pt}{3pt}
+  {}{0pt}{}[\vspace{1pt}\titlerule]
+\titlespacing*{\section}{0pt}{5pt}{2pt}
 
 \newcommand{\cvsection}[1]{%
-  \Needspace{5\baselineskip}%
+  \Needspace{4\baselineskip}%
   \section*{#1}%
 }
 
 \newcommand{\entry}[4]{%
-  \Needspace{6\baselineskip}%
+  \Needspace{5\baselineskip}%
   \textbf{#1} \hfill #2\\
   \textit{#3} \hfill \textit{#4}\\[-2pt]
 }
@@ -66,10 +66,10 @@
 }
 
 \newcommand{\pubentry}[3]{%
-  \Needspace{4\baselineskip}%
+  \Needspace{3\baselineskip}%
   \textbf{#1}\\
   \textit{#2}\\
-  #3\\[2pt]
+  #3\\[1pt]
 }
 
 \newcommand{\contactsep}{\enspace\textbar\enspace}
@@ -88,15 +88,13 @@
 
 % -------------------- Summary --------------------
 \cvsection{Summary}
-Ph.D. candidate in Statistics building Bayesian forecasting, quantile-modeling, and interval-methods tools for environmental and financial time series. I work across model development, R/Python software, diagnostics, and reproducible compute workflows, with industry experience in finance, sensor analytics, and research infrastructure.
+Ph.D. candidate in Statistics building Bayesian forecasting, quantile-modeling, and interval-methods tools for environmental and financial time series. I work across model development, R/Python software, diagnostics, and reproducible compute workflows.
 
 % -------------------- Research Software --------------------
 \cvsection{Research Software}
 \textbf{\href{https://CRAN.R-project.org/package=exdqlm}{\texttt{exdqlm}}} \hfill CRAN v1.1.0; JSS software article submitted\\
-\textit{R package for dynamic and static Bayesian quantile models under the exAL family}\\[-4pt]
-\begin{itemize}
-  \item Co-author of Bayesian quantile-modeling software supporting dynamic exDQLMs, static exAL regression, MCMC, Laplace--delta variational Bayes, diagnostics, and posterior-predictive synthesis.
-\end{itemize}
+\textit{R package for dynamic and static Bayesian quantile models under the exAL family.}
+Co-author of software supporting dynamic exDQLMs, static exAL regression, MCMC, Laplace--delta variational Bayes, diagnostics, and posterior predictive synthesis.
 
 % -------------------- Education --------------------
 \cvsection{Education}
@@ -109,15 +107,14 @@ Ph.D. candidate in Statistics building Bayesian forecasting, quantile-modeling, 
 
 \entry{Delos Financial Technologies, San Rafael, CA (Remote)}{May 2025--Sep. 2025}{Quantitative Researcher (Contract)}{Python, Git, Bash, C++, AWS, Stan}
 \begin{itemize}
-  \item Built a shared model-evaluation notebook suite for residual checks, goodness-of-fit plots, and cohort summaries used in model review.
-  \item Implemented baseline and extended forecasting variants, standardizing interfaces so parameters, backtests, and plots compared cleanly across experiments.
-  \item Automated AWS experiment runs and backtests with versioned outputs, making model comparisons easier to reproduce and review.
+  \item Built model-evaluation notebooks for residual checks, goodness-of-fit plots, cohort summaries, and backtest review.
+  \item Implemented baseline and extended forecasting variants, automated AWS experiment runs, and standardized versioned outputs for reproducible comparisons.
 \end{itemize}
 
 \entry{UCSC Statistics Department, Santa Cruz, CA}{Feb. 2024--Present}{Computer Systems Coordinator}{Linux, Bash, Python/R, Networking, User Support}
 \begin{itemize}
   \item Administer Linux research servers used by faculty and graduate students, including software stacks, storage, upgrades, and incident response.
-  \item Wrote automation scripts and internal documentation for onboarding, resource usage, and reproducible compute workflows; coordinate with central IT on infrastructure planning.
+  \item Wrote automation scripts and documentation for onboarding, resource usage, and reproducible compute workflows; coordinate with central IT on infrastructure planning.
 \end{itemize}
 
 \entry{NeatLeaf Inc., Scotts Valley, CA}{May 2021--Sep. 2022}{Data Analyst}{Python, SQL, Git, Bash, Linux, C++, DBeaver}
@@ -154,12 +151,10 @@ Ph.D. candidate in Statistics building Bayesian forecasting, quantile-modeling, 
   \item \textbf{Best Poster Prize}, ISBA 2026 World Meeting, International Society for Bayesian Analysis, 2026.
   \item \textbf{ISBA 2026 Junior Researcher Travel Award}, International Society for Bayesian Analysis / National Science Foundation, 2026.
   \item \textbf{EnviBayes Student Paper Competition Winner}, International Society for Bayesian Analysis, 2026.
-  \item \textbf{UCSC Statistics Department Conference Travel Award}, 2026.
-  \item \textbf{UCSC Summer Research Fellowship}, UCSC Statistics, 2024.
+  \item \textbf{UCSC Statistics Department Conference Travel Award}, 2026; \textbf{UCSC Summer Research Fellowship}, 2024.
   \item \textbf{UC Regents Fellowship}, UCSC Statistics, 2021.
   \item \textbf{TLC Graduate Pedagogy Fellowship Certificate}, Center for Innovations in Teaching and Learning, 2023--2024.
-  \item \textbf{Baill\`eres Fellowship}, ITAM B.Sc., 2014--2018.
-  \item \textbf{Baill\`eres Fellowship}, ITAM M.Sc., 2018--2020.
+  \item \textbf{Baill\`eres Fellowship}, ITAM B.Sc. and M.Sc., 2014--2020.
 \end{itemize}
 
 % -------------------- Teaching --------------------
@@ -167,7 +162,7 @@ Ph.D. candidate in Statistics building Bayesian forecasting, quantile-modeling, 
 \entry{University of California, Santa Cruz}{2021--Present}{Teaching Assistant / Graduate Student Instructor}{Statistics and Probability}
 \begin{itemize}
   \item Graduate Student Instructor for \textit{Data Visualization (STAT 80B)}, Spring 2025.
-  \item Teaching Assistant for \textit{Probability Theory (STAT 131)}, \textit{Classical and Bayesian Inference (STAT 132)}, \textit{Statistics (STAT 5)}, and related courses; led sections, office hours, worksheets, grading workflows, and student support.
+  \item Teaching Assistant for \textit{Probability Theory (STAT 131)}, \textit{Classical and Bayesian Inference (STAT 132)}, \textit{Statistics (STAT 5)}, and related courses.
 \end{itemize}
 
 \entry{ASA DataFest, Fresno, CA}{Apr. 2023}{Mentor}{R, Python}
@@ -177,6 +172,7 @@ Ph.D. candidate in Statistics building Bayesian forecasting, quantile-modeling, 
 
 % -------------------- Skills --------------------
 \cvsection{Technical Skills}
+\small
 \begin{tabularx}{\linewidth}{>{\bfseries}p{0.18\linewidth}X}
 Programming & R, Python, SQL, C/C++, Bash, Git, \LaTeX \\
 Methods & Bayesian inference, state-space models, time series forecasting, quantile modeling, variational inference, diagnostics, calibration \\

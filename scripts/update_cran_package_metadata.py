@@ -21,7 +21,7 @@ ARXIV_ID = "2607.22760"
 ARXIV_URL = f"https://arxiv.org/abs/{ARXIV_ID}"
 ARXIV_DOI_URL = f"https://doi.org/10.48550/arXiv.{ARXIV_ID}"
 DATA_PATH = ROOT / "_data" / "cran_packages.yml"
-CV_PATH = ROOT / "cv" / "antonio_aguirre_cv.tex"
+CV_PATH = ROOT / "cv" / "antonio_deleon_cv.tex"
 
 
 def fetch_text(url: str) -> str:

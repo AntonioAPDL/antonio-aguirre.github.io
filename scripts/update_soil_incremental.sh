@@ -8,7 +8,7 @@ CSV_PATH="${ROOT_DIR}/soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_
 TMP_DIR="${ROOT_DIR}/soil_moisture_data/.tmp_era5_incremental_$$"
 TMP_DAILY="${ROOT_DIR}/soil_moisture_data/.soil_daily_incremental_${TARGET_END_DATE}_$$.csv"
 TMP_ATTEMPT_LOG="${ROOT_DIR}/soil_moisture_data/.soil_attempt_${TARGET_END_DATE}_$$.log"
-PYTHON_BIN_DEFAULT="/home/jaguir26/python39/bin/python3"
+PYTHON_BIN_DEFAULT="python3"
 PYTHON_BIN="${PYTHON_BIN:-$PYTHON_BIN_DEFAULT}"
 
 mkdir -p "${ROOT_DIR}/soil_moisture_data"

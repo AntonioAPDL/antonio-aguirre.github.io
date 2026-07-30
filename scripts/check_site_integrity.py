@@ -11,6 +11,8 @@ import csv
 import json
 import re
 import sys
+import shutil
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Iterable
@@ -68,6 +70,7 @@ TEXT_SUFFIXES = {
     ".py",
     ".R",
     ".sh",
+    ".tex",
     ".toml",
     ".xml",
     ".yml",
@@ -163,10 +166,10 @@ def check_yaml(errors: list[str], warnings: list[str]) -> None:
 
     paths = [
         ROOT / "_config.yml",
-        ROOT / "_data" / "colab_links.yml",
         ROOT / "_sandbox" / "gefs_point_pipeline" / "config" / "gefs.yaml",
         ROOT / "_sandbox" / "gefs_point_pipeline" / "config" / "points.yaml",
     ]
+    paths.extend(sorted((ROOT / "_data").glob("*.yml")))
     paths.extend(sorted((ROOT / ".github" / "workflows").glob("*.yml")))
     for path in paths:
         if not path.exists():
@@ -176,6 +179,50 @@ def check_yaml(errors: list[str], warnings: list[str]) -> None:
             yaml.safe_load(path.read_text(encoding="utf-8"))
         except Exception as exc:
             errors.append(f"{rel(path)}: invalid YAML ({exc})")
+
+
+def check_teaching_data(errors: list[str]) -> None:
+    try:
+        import yaml  # type: ignore
+    except Exception:
+        return
+
+    path = ROOT / "_data" / "teaching.yml"
+    if not path.exists():
+        errors.append("missing YAML: _data/teaching.yml")
+        return
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or []
+    if not isinstance(data, list):
+        errors.append("_data/teaching.yml: top-level value must be a list")
+        return
+    for course_index, course in enumerate(data, start=1):
+        if not isinstance(course, dict):
+            errors.append(f"_data/teaching.yml: course {course_index} must be an object")
+            continue
+        for key in ("id", "course", "role", "resources"):
+            if key not in course:
+                errors.append(f"_data/teaching.yml: course {course_index} missing {key!r}")
+        resources = course.get("resources", [])
+        if not isinstance(resources, list):
+            errors.append(f"_data/teaching.yml: course {course.get('id', course_index)} resources must be a list")
+            continue
+        for resource_index, resource in enumerate(resources, start=1):
+            if not isinstance(resource, dict):
+                errors.append(
+                    f"_data/teaching.yml: course {course.get('id', course_index)} resource "
+                    f"{resource_index} must be an object"
+                )
+                continue
+            file_value = resource.get("file")
+            if not file_value:
+                errors.append(
+                    f"_data/teaching.yml: course {course.get('id', course_index)} resource "
+                    f"{resource_index} missing file"
+                )
+                continue
+            target = ROOT / str(file_value).lstrip("/")
+            if not target.exists():
+                errors.append(f"_data/teaching.yml: missing teaching resource {file_value}")
 
 
 def check_local_asset_refs(errors: list[str]) -> None:
@@ -189,6 +236,63 @@ def check_local_asset_refs(errors: list[str]) -> None:
             target = ROOT / url.lstrip("/")
             if not target.exists():
                 errors.append(f"{rel(path)}: missing local asset reference {url}")
+
+
+def check_canonical_cv(errors: list[str], warnings: list[str]) -> None:
+    canonical_source = ROOT / "cv" / "antonio_deleon_cv.tex"
+    canonical_pdf = ROOT / "files" / "cv" / "antonio-deleon-cv.pdf"
+    forbidden = [
+        ROOT / "cv" / "antonio_aguirre_cv.tex",
+        ROOT / "files" / "cv" / "antonio-aguirre-cv.pdf",
+        ROOT / "files" / "cv" / "cv.pdf",
+        ROOT / "files" / "cv" / "CV___Winter_26.pdf",
+    ]
+
+    if not canonical_source.exists():
+        errors.append("missing canonical CV source: cv/antonio_deleon_cv.tex")
+    if not canonical_pdf.exists():
+        errors.append("missing canonical CV PDF: files/cv/antonio-deleon-cv.pdf")
+    for path in forbidden:
+        if path.exists():
+            errors.append(f"legacy/stale CV artifact should not be present: {rel(path)}")
+
+    if canonical_pdf.exists() and shutil.which("pdfinfo"):
+        result = subprocess.run(
+            ["pdfinfo", str(canonical_pdf)],
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        pages = re.search(r"(?m)^Pages:\s+(\d+)$", result.stdout)
+        if pages and pages.group(1) != "2":
+            errors.append(f"{rel(canonical_pdf)}: expected 2 pages, found {pages.group(1)}")
+    elif canonical_pdf.exists():
+        warnings.append("pdfinfo is not installed; CV page-count check skipped")
+
+
+def check_forbidden_machine_paths(errors: list[str]) -> None:
+    skip_parts = {
+        ".git",
+        "_site",
+        ".jekyll-cache",
+        ".venv",
+        "__pycache__",
+        ".local_gefs_hist_pipeline",
+        "data",
+        "local_audit_reports",
+    }
+    forbidden_re = re.compile(r"(/data/(?:muscat_data/)?jaguir26|/home/jaguir26/python39)")
+    for path in ROOT.rglob("*"):
+        if not path.is_file() or path.suffix not in TEXT_SUFFIXES:
+            continue
+        if path == Path(__file__).resolve():
+            continue
+        if any(part in skip_parts for part in path.parts):
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        if forbidden_re.search(text):
+            errors.append(f"{rel(path)}: machine-local path found")
 
 
 def check_conflict_markers(errors: list[str]) -> None:
@@ -211,7 +315,10 @@ def main() -> int:
     check_csvs(errors, warnings)
     check_json(errors)
     check_yaml(errors, warnings)
+    check_teaching_data(errors)
     check_local_asset_refs(errors)
+    check_canonical_cv(errors, warnings)
+    check_forbidden_machine_paths(errors)
     check_conflict_markers(errors)
 
     for warning in warnings:

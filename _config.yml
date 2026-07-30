@@ -1,10 +1,9 @@
 # Website Setup
 title:               Antonio De Leon
 tagline:             "Bayesian Statistics | Machine Learning | Statistical Software"
-description:         "Bayesian forecasting, quantile modeling, and research software."
+description:         "Bayesian statistics, machine learning, and statistical software."
 url:                 "https://antonio-de-leon.com" # Website URL
 baseurl:             ""                           # Leave empty for root deployment
-paginate:            5                             # Number of posts per page
 permalink:           pretty                        # Clean, user-friendly URLs
 
 # Logo Configuration
@@ -12,9 +11,9 @@ logo:                "/files/images/logo.png"      # Path to the logo file
 
 # Teaching Information
 course_names:
-  stat131: "STAT131: Probability Theory"
-  stat132: "STAT132: Classical and Bayesian Inference"
-  stat5: "STAT5: Statistics"
+  stat131: "STAT 131: Probability Theory"
+  stat132: "STAT 132: Classical and Bayesian Inference"
+  stat5: "STAT 5: Statistics"
 
 # Author Information
 author:
@@ -26,14 +25,12 @@ author:
 social_media:
   github: https://github.com/AntonioAPDL
   linkedin: https://www.linkedin.com/in/AntonioAPDL
-  twitter: https://twitter.com/AntonioAPDL
-  bsky: antonioaguirre.bsky.social
+  bsky: https://bsky.app/profile/antonioaguirre.bsky.social
   email: jaguir26@ucsc.edu
 
 # Plugins
 plugins:
   - jekyll-feed
-  - jekyll-paginate  # Enable pagination for blog posts
   - jekyll-sitemap
   - jemoji
 
@@ -53,9 +50,27 @@ sass:
 include:
   - public/css/
 
+exclude:
+  - local_audit_reports/
+  - cv/*.tex
+  - cv/README.md
+  - prism_precipitation_santa_cruz_1987_2023.csv
+  - soil_moisture_data/
+  - climate_series_status.csv
+  - climate_daily_ppt_soil.csv
+  - assets/data/forecasts/big_trees_qdesn_latest.json
+  - files/cv/CV___Winter_26.pdf
+  - "files/teaching/stat131/Solutions - Final (Spring 2024).pdf"
+  - "files/teaching/stat131/Solutions - Midterm 1 (Fall 2024).pdf"
+  - "files/teaching/stat131/Solutions - Quiz 1 (Fall 2024).pdf"
+  - "files/teaching/stat131/Solutions - Quiz 2 (Fall 2024).pdf"
+  - "files/teaching/stat131/Solutions - Quiz 3 (Fall 2024).pdf"
+  - "files/teaching/stat131/Solutions - Random Variable Transformations (Fall 2024).pdf"
+
 defaults:
   - scope:
       path: ""
       type: posts
     values:
       math: true
+      published: false

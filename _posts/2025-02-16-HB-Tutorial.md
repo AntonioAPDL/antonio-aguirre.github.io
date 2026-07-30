@@ -1,5 +1,6 @@
 ---
 layout: post
+published: false
 title: "Statistical Computing: A tutorial for UCSC Graduate Students"
 date: 2025-02-16  <!-- Update with actual date -->
 theme: HPC
@@ -286,4 +287,3 @@ seff $(squeue -u $USER -h -o %i)
    Never use <code>pip install --user</code> - it can break cluster environments</li>
  </ul>
 </div>
-

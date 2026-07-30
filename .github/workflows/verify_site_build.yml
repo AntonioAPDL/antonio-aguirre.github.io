@@ -1,6 +1,7 @@
 name: Verify site build
 
 on:
+  pull_request:
   push:
     branches:
       - main
@@ -28,6 +29,19 @@ jobs:
           ruby-version: 3.3.4
           bundler: 2.5.23
           bundler-cache: true
+
+      - name: Install Python check dependencies
+        run: python3 -m pip install --upgrade pyyaml
+
+      - name: Run site integrity checks
+        run: python3 scripts/check_site_integrity.py
+
+      - name: Check JavaScript syntax
+        run: |
+          set -euo pipefail
+          for file in public/js/*.js; do
+            node --check "$file"
+          done
 
       - name: Build Jekyll site
         env:

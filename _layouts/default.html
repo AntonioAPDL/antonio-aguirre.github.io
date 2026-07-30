@@ -4,6 +4,7 @@
   {% include head.html %}
 
   <body class="theme-base-0b">
+    <a class="skip-link" href="#main-content">Skip to content</a>
 
     {% include sidebar.html %}
 
@@ -12,20 +13,22 @@
     <div class="wrap">
       <div class="masthead">
         <div class="container">
-          <h3 class="masthead-title">
+          <p class="masthead-title">
             <a href="{{ site.baseurl }}/" title="Home">{{ site.title }}</a>
             <small>{{ site.tagline }}</small>
-          </h3>
+          </p>
         </div>
       </div>
 
-      <div class="container content">
+      <main id="main-content" class="container content" tabindex="-1">
         {{ content }}
-      </div>
+      </main>
     </div>
 
-    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+    <button class="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false">
+      <span class="sr-only">Open navigation</span>
+    </button>
 
-    <script src='{{ site.baseurl }}/public/js/script.js'></script>
+    <script src="{{ site.baseurl }}/public/js/script.js" defer></script>
   </body>
 </html>

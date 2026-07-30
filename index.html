@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Home
-description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian forecasting, quantile modeling, and research software."
+description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian statistics, machine learning, and statistical software."
 ---
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
@@ -13,26 +13,23 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
   <!-- Intro Section -->
   <div class="home-intro">
     <div class="intro-wrapper">
-      <img src="/files/images/Me2.jpg" alt="Antonio De Leon" class="profile-pic">
+      <img src="/files/images/Me.jpg" alt="Antonio De Leon" class="profile-pic">
       <h1 class="page-title">Antonio De Leon</h1>
-      <p class="home-subtitle">Bayesian forecasting, quantile modeling, and research software</p>
+      <p class="home-subtitle">Bayesian Statistics | Machine Learning | Statistical Software</p>
     </div>
     <p class="intro-text">
       I am a <strong>Ph.D. candidate</strong> in Statistics at the
       <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>.
       I work with <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Dr. Bruno Sansó</a> and
-      <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Dr. Raquel Prado</a> on Bayesian time series forecasting and quantile modeling,
-      with a focus on uncertainty quantification, scalable inference, and reproducible research software.
+      <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Dr. Raquel Prado</a>.
+      I develop Bayesian methods for probabilistic forecasting and quantile modeling, with applications to hydrologic time series.
     </p>
     <p class="intro-text">
-      My current Ph.D. work includes hydrologic forecast correction, Q-DESN quantile forecasting,
-      mean-tilted relaxed quantile regression, and the CRAN-published
-      <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>
-      R package.
-    </p>
-    <p class="intro-text">
-      I hold a <strong>B.Sc.</strong> in Applied Mathematics and an <strong>M.Sc.</strong> in Economics from
-      <a href="https://www.itam.mx/" target="_blank" rel="noopener noreferrer">Instituto Tecnológico Autónomo de México (ITAM)</a>.
+      My current research includes Bayesian correction and synthesis of hydrologic forecast products,
+      quantile readouts for fixed Deep Echo State Network features, and direct estimation of fixed-content intervals.
+      I also co-develop and maintain
+      <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>,
+      a CRAN package for dynamic and static Bayesian quantile models.
     </p>
     <div class="home-actions" aria-label="Primary links">
       <a class="software-button" href="/research/">
@@ -58,127 +55,28 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
     </article>
     <article class="home-highlight-card">
       <span>In revision</span>
-      <h2>Hydrologic products</h2>
-      <p>Bayesian correction and synthesis of river-flow forecast products, with related ISBA and EnviBayes recognition.</p>
-    </article>
-    <article class="home-highlight-card">
-      <span>Working paper</span>
-      <h2>Q-DESN readouts</h2>
-      <p>Bayesian quantile readouts for fixed Deep Echo State Network features.</p>
+      <h2>Hydrologic forecasting</h2>
+      <p>Bayesian correction and synthesis of hydrologic forecast products. Related work received the ISBA 2026 Best Poster Prize and the EnviBayes Student Paper Competition award.</p>
     </article>
     <article class="home-highlight-card">
       <span>arXiv preprint</span>
-      <h2>Mean-tilted RQR</h2>
-      <p>Generalized-Bayes computation for fixed-content interval functionals and relaxed quantile regression. <a href="{{ rqr_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv</a>.</p>
+      <h2>Interval methods</h2>
+      <p>Mean-tilted relaxed quantile regression for directly estimating intervals that contain a fixed probability mass. <a href="{{ rqr_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv</a>.</p>
     </article>
   </div>
 
-  <!-- Research Interests Section -->
-  <div class="home-content">
-    <h2 class="section-heading">Current Focus</h2>
-    <ul class="research-list">
-      <li>
-        <strong>Forecast correction and synthesis:</strong> Bayesian quantile methods for combining hydrologic observations, retrospective products, and forecast products.
-      </li>
-      <li>
-        <strong>Dynamic quantile models:</strong> state-space models, scalable inference, diagnostics, forecasting, and posterior predictive summaries.
-      </li>
-      <li>
-        <strong>Q-DESN forecasting:</strong> Bayesian quantile readouts for fixed reservoir features in nonlinear time-series problems.
-      </li>
-      <li>
-        <strong>Relaxed quantile regression:</strong> loss-based interval-root models for fixed-content intervals and generalized-Bayes computation.
-      </li>
-    </ul>
-  </div>
-
-  <!-- Plot Section -->
-  <div class="plot-container">
-    <h2 class="section-heading">
-      Live Research Demo: San Lorenzo River Discharge
-    </h2>
-    <div class="note-box">
-      <strong>Note:</strong> This research display combines recent observed river flow at Big Trees with the latest forecast guidance.
-      It is intended for model development and communication, not for operational safety decisions.
+  <section class="home-demo-preview" aria-labelledby="home-demo-preview-title">
+    <div>
+      <p class="software-kicker">Live Research Demo</p>
+      <h2 id="home-demo-preview-title">San Lorenzo River Forecast Display</h2>
+      <p>
+        A browser-based research display combines recent USGS flow observations at Big Trees with NOAA/NWS forecast guidance.
+        The full demo includes the river-flow panel and GEFS precipitation/soil-moisture context.
+      </p>
     </div>
-    <div class="usgs-iv-plot"
-         data-site="11160500"
-         data-mode="discharge"
-         data-period="P20D"
-         data-refresh-min="15"
-         data-timeout-sec="20"
-         data-observation-window-days="20"
-         data-daily-avg-min-coverage="0.90"
-         data-future-horizon-hours="240"
-         data-y-min="0"
-         data-y-max="2000"
-         data-title="San Lorenzo River Discharge"
-         data-ylabel="Discharge"
-         data-forecast-url="https://raw.githubusercontent.com/AntonioAPDL/antonio-aguirre.github.io/live-data/assets/data/forecasts/big_trees_latest.json"
-         data-forecast-fallback-url="/assets/data/forecasts/big_trees_latest.json"
-         data-flood-minor-cfs=""
-         data-flood-moderate-cfs=""
-         data-flood-major-cfs="">
-      <div class="plot-status" role="status" aria-live="polite">Loading river flow data...</div>
-      <div class="plot-stage plot-iframe" role="img" aria-label="San Lorenzo River discharge plot">
-        <div class="plot-skeleton" aria-hidden="true">
-          <div class="plot-skeleton__spinner"></div>
-          <div class="plot-skeleton__text">Loading latest river conditions...</div>
-        </div>
-        <div class="usgs-iv-plot__chart"></div>
-      </div>
-      <div class="plot-caption">
-        Data sources:
-        <a href="https://waterservices.usgs.gov/" target="_blank" rel="noopener noreferrer">USGS NWIS IV</a>
-        and
-        <a href="https://api.water.noaa.gov/" target="_blank" rel="noopener noreferrer">NOAA NWS/NWM APIs</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="plot-container">
-    <h2 class="section-heading">
-      Live Research Demo: GEFS Near Big Trees
-    </h2>
-    <div class="note-box">
-      <strong>Note:</strong> Updated automatically throughout the day. These charts use GEFS cycle-history context and the latest GEFS forecast range;
-      external observed overlays are excluded so the comparison stays consistent.
-    </div>
-    <div class="gefs-forecast-panel"
-         data-gefs-url="https://raw.githubusercontent.com/AntonioAPDL/antonio-aguirre.github.io/live-data/assets/data/forecasts/gefs_big_trees_latest.json"
-         data-gefs-fallback-url="/assets/data/forecasts/gefs_big_trees_latest.json"
-         data-refresh-min="60"
-         data-observation-window-days="20"
-         data-stale-hours="12">
-      <div class="plot-status gefs-forecast-status" role="status" aria-live="polite">
-        Loading GEFS forecast charts...
-      </div>
-      <section class="gefs-chart-card">
-        <div class="gefs-chart-card__head">
-          <h3>Precipitation Forecast</h3>
-          <p>Recent precipitation and the expected forecast range for the coming days.</p>
-        </div>
-        <div class="plot-stage plot-iframe" role="img" aria-label="GEFS precipitation forecast">
-          <div class="gefs-forecast-precip"></div>
-        </div>
-      </section>
-      <section class="gefs-chart-card">
-        <div class="gefs-chart-card__head">
-          <h3>Soil Moisture Forecast</h3>
-          <p>Recent soil moisture and forecast conditions by soil depth.</p>
-        </div>
-        <div class="plot-stage plot-iframe" role="img" aria-label="GEFS soil moisture forecast">
-          <div class="gefs-forecast-soil"></div>
-        </div>
-      </section>
-      <div class="plot-caption">
-        Data source:
-        <a href="https://registry.opendata.aws/noaa-gefs/" target="_blank" rel="noopener noreferrer">NOAA GEFS (AWS open data)</a>
-      </div>
-    </div>
-  </div>
+    <a class="software-button" href="/demos/">
+      <i class="fas fa-chart-area" aria-hidden="true"></i>
+      <span>View Demos</span>
+    </a>
+  </section>
 </div>
-
-<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-<script src="{{ '/public/js/sanlorenzo_flow.js' | relative_url }}"></script>
-<script src="{{ '/public/js/gefs_forecast_panel.js' | relative_url }}"></script>

@@ -15,20 +15,39 @@ description: "Background, research focus, teaching, service, and applied experie
     <img src="/files/images/Me.jpg" alt="Antonio De Leon" class="profile-pic">
     <h1 class="page-title">Antonio De Leon</h1>
     <p class="page-lede">
-      I'm a Ph.D. candidate in <strong>Statistics</strong> at the
+      I am a Ph.D. candidate in <strong>Statistics</strong> at the
       <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>,
       advised by <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Bruno Sansó</a> and
       <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Raquel Prado</a>.
-      My research centers on Bayesian time series forecasting, quantile modeling, and uncertainty quantification,
-      with an emphasis on scalable inference and research software that can be inspected, tested, and reused.
-      I work on hydrologic forecast correction, Q-DESN quantile forecasting, dynamic quantile state-space models,
-      and generalized-Bayes interval methods for relaxed quantile regression.
+      I develop Bayesian forecasting and quantile methods for environmental time series, with emphasis on uncertainty quantification,
+      approximate and simulation-based inference, and tested R/Python implementations.
+      My current projects concern hydrologic forecast correction, dynamic quantile state-space models,
+      quantile readouts for fixed Deep Echo State Network features, and relaxed-quantile interval methods.
     </p>
   </div>
 
-  <!-- Current Highlights Section -->
+  <!-- Applied and Professional Experience -->
+  <div class="service-section about-card">
+    <h2 class="section-heading">Applied and Professional Experience</h2>
+    <ul class="about-list">
+      <li>
+        <strong>Computer Systems Coordinator, UCSC Statistics:</strong> Administer Linux research servers and build automation for research workflows (2024–present).
+      </li>
+      <li>
+        <strong>Quantitative Researcher, Delos Financial Technologies:</strong> Built evaluation workflows, automated backtests on AWS, and standardized model diagnostics (2025).
+      </li>
+      <li>
+        <strong>Data Analyst, NeatLeaf Inc.:</strong> Developed data pipelines and spatiotemporal models for greenhouse telemetry and anomaly detection (2021–2022).
+      </li>
+      <li>
+        <strong>Data Analyst, Banco de México:</strong> Built pipelines for image datasets, anomaly classification models, and forecasting prototypes (2018–2019).
+      </li>
+    </ul>
+  </div>
+
+  <!-- Current Work Section -->
   <div class="highlights-section about-card">
-    <h2 class="section-heading">Current Highlights</h2>
+    <h2 class="section-heading">Current Work</h2>
     <ul class="about-list about-highlight-list">
       <li>
         <strong><a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>:</strong>
@@ -41,55 +60,13 @@ description: "Background, research focus, teaching, service, and applied experie
         Bayesian quantile-based correction and synthesis of hydrologic products, currently in revision at <em>Environmetrics</em>.
       </li>
       <li>
-        <strong>Q-DESN working paper:</strong>
-        Bayesian quantile readouts for fixed Deep Echo State Network features.
+        <strong>Q-DESN forecasting:</strong>
+        Working paper on Bayesian quantile readouts for fixed Deep Echo State Network features.
       </li>
       <li>
         <strong>RQR preprint:</strong>
         <a href="{{ rqr_arxiv_url }}" target="_blank" rel="noopener noreferrer">Mean-tilted relaxed quantile regression</a>
-        for fixed-content interval functionals and generalized-Bayes computation.
-      </li>
-      <li>
-        <strong>Recent recognition:</strong>
-        ISBA 2026 Best Poster Prize and EnviBayes Student Paper Competition winner.
-      </li>
-    </ul>
-  </div>
-
-  <!-- Ongoing Projects Section -->
-  <div class="projects-section about-card">
-    <h2 class="section-heading">Ongoing Projects</h2>
-    <ul class="about-list">
-      <li>
-        <strong>Quantile-Based Forecast Correction:</strong> Bayesian correction and synthesis of hydrologic products (manuscript in revision).
-      </li>
-      <li>
-        <strong>Q-DESN Forecasting:</strong> Working paper on Bayesian quantile readouts for fixed Deep Echo State Network features.
-      </li>
-      <li>
-        <strong>Mean-Tilted RQR:</strong> arXiv preprint on fixed-content interval functionals and generalized-Bayes Gibbs computation.
-      </li>
-      <li>
-        <strong>Scalable Bayesian Inference:</strong> MCMC, variational Bayes, diagnostics, and reproducible workflows for repeated model evaluation.
-      </li>
-    </ul>
-  </div>
-
-  <!-- Applied and Professional Experience -->
-  <div class="service-section about-card">
-    <h2 class="section-heading">Applied and Professional Experience</h2>
-    <ul class="about-list">
-      <li>
-        <strong>Computer Systems Coordinator, UCSC Statistics:</strong> Administer Linux research servers and build automation for research workflows (2024-present).
-      </li>
-      <li>
-        <strong>Quantitative Researcher, Delos Financial Technologies:</strong> Built evaluation workflows, automated backtests on AWS, and standardized model diagnostics (2025).
-      </li>
-      <li>
-        <strong>Data Analyst, NeatLeaf Inc.:</strong> Developed data pipelines and spatiotemporal models for greenhouse telemetry and anomaly detection (2021-2022).
-      </li>
-      <li>
-        <strong>Data Analyst, Banco de México:</strong> Built pipelines for image datasets, anomaly classification models, and forecasting prototypes (2018-2019).
+        for fixed-content interval functionals and generalized Bayesian computation.
       </li>
     </ul>
   </div>
@@ -102,10 +79,7 @@ description: "Background, research focus, teaching, service, and applied experie
         <strong>Graduate Student Instructor:</strong> Data Visualization (STAT 80B), Spring 2025.
       </li>
       <li>
-        <strong>Teaching Assistant:</strong> Supported Probability Theory, Classical and Bayesian Inference, Statistics, and related courses (2021-present).
-      </li>
-      <li>
-        <strong>TA Training Program:</strong> Co-organize workshops on inclusive teaching and active learning.
+        <strong>Teaching Assistant:</strong> Supported Probability Theory, Classical and Bayesian Inference, Statistics, and related courses (2021–present).
       </li>
       <li>
         <strong>UCSC Statistics TA Resources:</strong> Co-maintain the
@@ -124,15 +98,15 @@ description: "Background, research focus, teaching, service, and applied experie
     <ul class="about-list about-list-disc">
       <li>
         <strong>Ph.D. in Statistics:</strong>
-        <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a> (2021-present, expected 2026)
+        <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a> (2021–present, expected 2026)
       </li>
       <li>
         <strong>M.Sc. in Economic Theory:</strong>
-        <a href="https://mteoriaeconomica.itam.mx/en/conoce-el-posgrado-teoriaeconomica" target="_blank" rel="noopener noreferrer">Instituto Tecnológico Autónomo de México (ITAM)</a> (2018-2020)
+        <a href="https://mteoriaeconomica.itam.mx/en/conoce-el-posgrado-teoriaeconomica" target="_blank" rel="noopener noreferrer">Instituto Tecnológico Autónomo de México (ITAM)</a> (2018–2020)
       </li>
       <li>
         <strong>B.Sc. in Applied Mathematics:</strong>
-        <a href="https://departamentodematematicas.itam.mx/" target="_blank" rel="noopener noreferrer">Instituto Tecnológico Autónomo de México (ITAM)</a> (2014-2018)
+        <a href="https://departamentodematematicas.itam.mx/" target="_blank" rel="noopener noreferrer">Instituto Tecnológico Autónomo de México (ITAM)</a> (2014–2018)
       </li>
     </ul>
   </div>
@@ -141,7 +115,7 @@ description: "Background, research focus, teaching, service, and applied experie
   <div class="beyond-research-section about-card">
     <h2 class="section-heading">Beyond Research</h2>
     <p class="intro-text">
-      Outside of work, I enjoy baking bread, cooking Mexican dishes, reading history, the philosophy of science, and learning German.
+      Outside work, I enjoy baking bread, cooking Mexican food, reading history and philosophy of science, and studying German.
     </p>
     <p class="intro-text">
       For collaboration, questions, or related work, the <a href="/contact/">Contact page</a> lists the best ways to reach me.

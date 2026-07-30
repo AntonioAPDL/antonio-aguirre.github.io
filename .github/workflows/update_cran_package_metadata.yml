@@ -34,7 +34,7 @@ jobs:
       - name: Render CV PDF if metadata changed
         run: |
           set -euo pipefail
-          if git diff --quiet -- _data/cran_packages.yml cv/antonio_aguirre_cv.tex; then
+          if git diff --quiet -- _data/cran_packages.yml cv/antonio_deleon_cv.tex; then
             echo "No CRAN metadata changes."
             exit 0
           fi
@@ -54,7 +54,7 @@ jobs:
       - name: Commit and push if changed
         run: |
           set -euo pipefail
-          if git diff --quiet -- _data/cran_packages.yml cv/antonio_aguirre_cv.tex files/cv/antonio-deleon-cv.pdf files/cv/antonio-aguirre-cv.pdf files/cv/cv.pdf; then
+          if git diff --quiet -- _data/cran_packages.yml cv/antonio_deleon_cv.tex files/cv/antonio-deleon-cv.pdf; then
             echo "No CRAN metadata changes to commit."
             exit 0
           fi
@@ -63,10 +63,8 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
             _data/cran_packages.yml \
-            cv/antonio_aguirre_cv.tex \
-            files/cv/antonio-deleon-cv.pdf \
-            files/cv/antonio-aguirre-cv.pdf \
-            files/cv/cv.pdf
+            cv/antonio_deleon_cv.tex \
+            files/cv/antonio-deleon-cv.pdf
 
           if git diff --cached --quiet; then
             echo "No staged CRAN metadata changes to commit."

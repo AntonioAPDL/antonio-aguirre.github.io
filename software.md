@@ -15,33 +15,9 @@ description: "Public packages, research code, and selected implementation exampl
     <p class="software-kicker">Research Software</p>
     <h1 class="page-title">Software</h1>
     <p class="page-lede">
-      Public packages, research code, and selected implementation examples for Bayesian modeling,
-      forecasting, and scientific computing.
+      Selected software and reproducibility materials for Bayesian modeling, forecasting, and scientific computing.
     </p>
   </header>
-
-  <section class="software-overview" aria-label="Software at a glance">
-    <div class="software-overview-item">
-      <i class="fas fa-cube" aria-hidden="true"></i>
-      <h3>Released Package</h3>
-      <p>CRAN v{{ exdqlm_version }} R package with source, tests, reference docs, JSS submission, and arXiv preprint.</p>
-    </div>
-    <div class="software-overview-item">
-      <i class="fas fa-water" aria-hidden="true"></i>
-      <h3>Forecast Pipelines</h3>
-      <p>Scripts for streamflow forecasts, climate data, and site outputs.</p>
-    </div>
-    <div class="software-overview-item">
-      <i class="fas fa-microchip" aria-hidden="true"></i>
-      <h3>Numerical Code</h3>
-      <p>Rcpp/C++ kernels for distribution utilities and state-space computation.</p>
-    </div>
-    <div class="software-overview-item">
-      <i class="fas fa-book-open" aria-hidden="true"></i>
-      <h3>Research Notes</h3>
-      <p>Public methods notes and manuscript-support materials.</p>
-    </div>
-  </section>
 
   <article class="software-feature">
     <div class="software-feature__media" aria-hidden="true">
@@ -56,10 +32,9 @@ description: "Public packages, research code, and selected implementation exampl
       </div>
       <h2><code>exdqlm</code>: Extended Dynamic Quantile Linear Models</h2>
       <p>
-        Bayesian quantile-regression software for dynamic state-space models and static regression under the extended
-        asymmetric Laplace family. The current CRAN release brings the software-article feature line together: dynamic exDQLM
-        fitting, static exAL regression, LDVB and MCMC inference, optional C++ accelerators, diagnostics, and
-        posterior-predictive synthesis across fitted quantiles.
+        <code>exdqlm</code> implements dynamic extended quantile linear models and static extended-asymmetric-Laplace regression.
+        The package provides MCMC and Laplace–delta variational Bayes (LDVB), model diagnostics, forecasting tools,
+        optional C++ acceleration, and posterior synthesis across separately fitted quantiles.
       </p>
       <div class="software-actions" aria-label="exdqlm links">
         <a class="software-button" href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer">
@@ -97,11 +72,11 @@ description: "Public packages, research code, and selected implementation exampl
           </li>
           <li>
             <strong>Inference</strong>
-            <span>LDVB for scalable approximate inference, MCMC for posterior simulation, and legacy ISVB paths for reproducibility.</span>
+            <span>Laplace–delta variational Bayes for approximate inference and MCMC for posterior simulation.</span>
           </li>
           <li>
             <strong>Diagnostics &amp; Synthesis</strong>
-            <span>Forecast summaries, calibration checks, scoring rules, and posterior-predictive synthesis across fitted quantiles.</span>
+            <span>Forecast summaries, calibration checks, scoring rules, and posterior synthesis across fitted quantiles.</span>
           </li>
         </ul>
       </div>
@@ -113,20 +88,19 @@ description: "Public packages, research code, and selected implementation exampl
       <p class="software-kicker">Repositories</p>
       <h2>Public Projects</h2>
       <p>
-        Selected repositories and materials that are ready to inspect: article sources, site scripts,
-        methods notes, and manuscript-support code.
+        Selected public repositories supporting released software and current manuscripts. Each entry states its maturity and scope.
       </p>
     </div>
 
     <div class="software-project-grid">
       <article class="software-project">
         <div class="software-project__meta">
-          <span>Article workflow</span>
+          <span>Submitted article</span>
           <span>R / TeX</span>
         </div>
         <h3><code>exdqlm</code> JSS Article</h3>
         <p>
-          JSS article source, arXiv preprint materials, supplement files, reproducibility checks,
+          Article source, arXiv preprint materials, supplement files, reproducibility checks,
           and manuscript-support examples for <code>exdqlm</code>.
         </p>
         <a href="https://github.com/AntonioAPDL/exdqlm---Article" target="_blank" rel="noopener noreferrer">
@@ -137,28 +111,12 @@ description: "Public packages, research code, and selected implementation exampl
 
       <article class="software-project">
         <div class="software-project__meta">
-          <span>Manuscript support</span>
-          <span>Python / TeX</span>
-        </div>
-        <h3>Forecast Correction Manuscript</h3>
-        <p>
-          Revised Environmetrics manuscript materials with generated asset manifests, figure/table reports,
-          and validation scripts.
-        </p>
-        <a href="https://github.com/AntonioAPDL/Evironmetrics---REVISED-DOC-Corrected-2" target="_blank" rel="noopener noreferrer">
-          <span>Manuscript repository</span>
-          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <article class="software-project">
-        <div class="software-project__meta">
-          <span>Working paper</span>
-          <span>Q-DESN</span>
+          <span>Working manuscript</span>
+          <span>Q-DESN / TeX</span>
         </div>
         <h3>Q-DESN Article</h3>
         <p>
-          Manuscript and reproducibility materials for Bayesian quantile readouts using fixed Deep Echo
+          Source and reproducibility materials for Bayesian quantile readouts using fixed Deep Echo
           State Network features.
         </p>
         <a href="https://github.com/AntonioAPDL/Article-Q-DESN---Version-2" target="_blank" rel="noopener noreferrer">
@@ -175,7 +133,7 @@ description: "Public packages, research code, and selected implementation exampl
         <h3>RQR-GIBBS</h3>
         <p>
           Manuscript and computation workspace for mean-tilted relaxed quantile regression,
-          fixed-content interval functionals, and generalized-Bayes Gibbs samplers.
+          fixed-content interval functionals, and generalized Bayesian computation.
         </p>
         <div class="software-project__links">
           <a href="https://github.com/AntonioAPDL/RQR-GIBBS" target="_blank" rel="noopener noreferrer">
@@ -189,21 +147,6 @@ description: "Public packages, research code, and selected implementation exampl
         </div>
       </article>
 
-      <article class="software-project">
-        <div class="software-project__meta">
-          <span>Site scripts</span>
-          <span>Python / R / Bash</span>
-        </div>
-        <h3>Forecast &amp; Climate Tools</h3>
-        <p>
-          Scripts behind this website's forecast and climate-data outputs, including NOAA NWPS requests,
-          climate/soil-moisture joins, and repository checks.
-        </p>
-        <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/tree/main/scripts" target="_blank" rel="noopener noreferrer">
-          <span>Browse scripts</span>
-          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-        </a>
-      </article>
     </div>
   </section>
 
@@ -212,8 +155,7 @@ description: "Public packages, research code, and selected implementation exampl
       <p class="software-kicker">Code Samples</p>
       <h2>Selected Implementations</h2>
       <p>
-        Selected files that show how I structure package APIs, numerical code, data pipelines,
-        manuscript checks, and site automation.
+        A short source tour for API design, numerical implementation, and posterior synthesis in <code>exdqlm</code>.
       </p>
     </div>
 
@@ -222,7 +164,7 @@ description: "Public packages, research code, and selected implementation exampl
         <div class="software-sample__icon"><i class="fab fa-r-project" aria-hidden="true"></i></div>
         <h3>LDVB Inference Interface</h3>
         <p>
-          Main LDVB interface for dynamic quantile state-space models, including convergence controls,
+          Main Laplace–delta variational Bayes interface for dynamic quantile state-space models, including convergence controls,
           diagnostics, and posterior predictive summaries.
         </p>
         <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/R/exdqlmLDVB.R" target="_blank" rel="noopener noreferrer">
@@ -262,7 +204,7 @@ description: "Public packages, research code, and selected implementation exampl
         <h3>Quantile Synthesis</h3>
         <p>
           Post hoc synthesis tools for combining separately fitted quantile models into coherent
-          posterior-predictive draws.
+          posterior predictive draws.
         </p>
         <a href="https://github.com/AntonioAPDL/exdqlm/blob/main/R/quantileSynthesis.R" target="_blank" rel="noopener noreferrer">
           <span>View R source</span>
@@ -270,50 +212,14 @@ description: "Public packages, research code, and selected implementation exampl
         </a>
       </article>
 
-      <article class="software-sample">
-        <div class="software-sample__icon"><i class="fab fa-python" aria-hidden="true"></i></div>
-        <h3>Climate Data Merge</h3>
-        <p>
-          Python workflow for joining precipitation, ERA5 soil moisture, and NWM retrospective soil series.
-        </p>
-        <a href="https://github.com/AntonioAPDL/antonio-aguirre.github.io/blob/main/scripts/build_climate_daily_combined_csv.py" target="_blank" rel="noopener noreferrer">
-          <span>View Python source</span>
-          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <article class="software-sample">
-        <div class="software-sample__icon"><i class="fas fa-file-alt" aria-hidden="true"></i></div>
-        <h3>Manuscript Figure Validator</h3>
-        <p>
-          Python check that resolves TeX figure paths and fails when manuscript assets are missing.
-        </p>
-        <a href="https://github.com/AntonioAPDL/Evironmetrics---REVISED-DOC-Corrected-2/blob/main/scripts/validate_manuscript_figure_paths.py" target="_blank" rel="noopener noreferrer">
-          <span>View Python source</span>
-          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <article class="software-sample">
-        <div class="software-sample__icon"><i class="fab fa-r-project" aria-hidden="true"></i></div>
-        <h3>RQR-DLM Interface</h3>
-        <p>
-          R interface for dynamic relaxed-quantile root models, including evolution modes,
-          root-label handling, and forecast paths.
-        </p>
-        <a href="https://github.com/AntonioAPDL/RQR-GIBBS/blob/main/application/R/rqr_dlm_fit.R" target="_blank" rel="noopener noreferrer">
-          <span>View R source</span>
-          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-        </a>
-      </article>
     </div>
 
     <div class="software-github-cta">
       <div>
         <h3>Explore More on GitHub</h3>
         <p>
-          Browse current repositories, recent activity, and source files. More selected examples will be added
-          when they have clear setup notes and reusable examples.
+          Additional repositories and development history are available on GitHub. The items above are the projects
+          most relevant to my current research and software work.
         </p>
       </div>
       <div class="software-github-cta__actions" aria-label="GitHub profile links">

@@ -1,0 +1,116 @@
+---
+layout: default
+title: Demos
+description: "Live research displays for San Lorenzo River flow and GEFS forecast context near Big Trees."
+---
+
+<div class="demos-section">
+  <header class="page-header">
+    <h1 class="page-title">Live Research Demos</h1>
+    <p class="page-lede">
+      Browser-based research displays for hydrologic forecast correction and forecast-context monitoring near Big Trees.
+      These panels are for model development and communication, not operational safety decisions.
+    </p>
+  </header>
+
+  <div class="plot-container">
+    <h2 class="section-heading">
+      San Lorenzo River Discharge
+    </h2>
+    <div class="note-box">
+      <strong>Note:</strong> This research display combines recent observed river flow at Big Trees with the latest forecast guidance.
+      It is intended for model development and communication, not for operational safety decisions.
+    </div>
+    <div class="usgs-iv-plot"
+         data-site="11160500"
+         data-mode="discharge"
+         data-period="P20D"
+         data-refresh-min="15"
+         data-timeout-sec="20"
+         data-observation-window-days="20"
+         data-daily-avg-min-coverage="0.90"
+         data-future-horizon-hours="240"
+         data-y-min="0"
+         data-title="San Lorenzo River Discharge"
+         data-ylabel="Discharge"
+         data-forecast-url="https://raw.githubusercontent.com/AntonioAPDL/antonio-aguirre.github.io/live-data/assets/data/forecasts/big_trees_latest.json"
+         data-forecast-fallback-url="/assets/data/forecasts/big_trees_latest.json"
+         data-flood-minor-cfs=""
+         data-flood-moderate-cfs=""
+         data-flood-major-cfs="">
+      <div class="plot-status" role="status" aria-live="polite">Loading river flow data...</div>
+      <div class="plot-stage plot-iframe" role="img" aria-label="San Lorenzo River discharge plot">
+        <div class="plot-skeleton" aria-hidden="true">
+          <div class="plot-skeleton__spinner"></div>
+          <div class="plot-skeleton__text">Loading latest river conditions...</div>
+        </div>
+        <div class="usgs-iv-plot__chart"></div>
+      </div>
+      <noscript>
+        <p class="plot-caption">
+          JavaScript is required for the interactive chart. The forecast JSON fallback is available at
+          <a href="/assets/data/forecasts/big_trees_latest.json">the bundled forecast file</a>.
+        </p>
+      </noscript>
+      <div class="plot-caption">
+        Data sources:
+        <a href="https://waterservices.usgs.gov/" target="_blank" rel="noopener noreferrer">USGS NWIS IV</a>
+        and
+        <a href="https://api.water.noaa.gov/" target="_blank" rel="noopener noreferrer">NOAA NWS/NWM APIs</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="plot-container">
+    <h2 class="section-heading">
+      GEFS Near Big Trees
+    </h2>
+    <div class="note-box">
+      <strong>Note:</strong> Updated automatically throughout the day. These charts use GEFS cycle-history context and the latest GEFS forecast range;
+      external observed overlays are excluded so the comparison stays consistent.
+    </div>
+    <div class="gefs-forecast-panel"
+         data-gefs-url="https://raw.githubusercontent.com/AntonioAPDL/antonio-aguirre.github.io/live-data/assets/data/forecasts/gefs_big_trees_latest.json"
+         data-gefs-fallback-url="/assets/data/forecasts/gefs_big_trees_latest.json"
+         data-refresh-min="60"
+         data-observation-window-days="20"
+         data-timeout-sec="25"
+         data-stale-hours="12">
+      <div class="plot-status gefs-forecast-status" role="status" aria-live="polite">
+        Loading GEFS forecast charts...
+      </div>
+      <section class="gefs-chart-card">
+        <div class="gefs-chart-card__head">
+          <h3>Precipitation Forecast</h3>
+          <p>Recent precipitation and the expected forecast range for the coming days.</p>
+        </div>
+        <div class="plot-stage plot-iframe" role="img" aria-label="GEFS precipitation forecast">
+          <div class="gefs-forecast-precip"></div>
+        </div>
+      </section>
+      <section class="gefs-chart-card">
+        <div class="gefs-chart-card__head">
+          <h3>Soil Moisture Forecast</h3>
+          <p>Recent soil moisture and forecast conditions by soil depth.</p>
+        </div>
+        <div class="plot-stage plot-iframe" role="img" aria-label="GEFS soil moisture forecast">
+          <div class="gefs-forecast-soil"></div>
+        </div>
+      </section>
+      <noscript>
+        <p class="plot-caption">
+          JavaScript is required for the interactive GEFS charts. The bundled fallback is available at
+          <a href="/assets/data/forecasts/gefs_big_trees_latest.json">the GEFS forecast file</a>.
+        </p>
+      </noscript>
+      <div class="plot-caption">
+        Data source:
+        <a href="https://registry.opendata.aws/noaa-gefs/" target="_blank" rel="noopener noreferrer">NOAA GEFS (AWS open data)</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" defer></script>
+<script src="{{ '/public/js/sanlorenzo_flow.js' | relative_url }}" defer></script>
+<script src="{{ '/public/js/gefs_forecast_panel.js' | relative_url }}" defer></script>

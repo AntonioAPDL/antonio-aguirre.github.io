@@ -1,5 +1,6 @@
 ---
 layout: post
+published: false
 title: "On Bayesian Methodology. Part 1/6"
 date: 2024-09-29
 theme: Review
@@ -100,7 +101,6 @@ Workflows often become disorderly when moving beyond predefined designs and anal
 A Bayesian Workflow provides a comprehensive framework for organizing applied Bayesian Statistics. It embraces the iterative nature of statistical modeling, acknowledges the importance of learning from flawed models, and prioritizes the exploration of uncertainty. By following these structured principles, practitioners can make informed, defensible decisions while navigating the complexities of statistical analysis.
 
 For those interested in exploring this further, I would recommend you review Gelman et al. (2020) and consider how these principles can be applied in your work. 
-
 
 
 

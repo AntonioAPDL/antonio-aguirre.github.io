@@ -1,5 +1,6 @@
 ---
 layout: post
+published: false
 title: "On Bayesian Methodology. Part 6/6"
 date: 2024-12-19
 theme: Review
@@ -106,5 +107,4 @@ Statistical tasks often involve generalization, which Bayesian methods address e
 - Regularization to handle complex, large-scale models.
 
 The iterative nature of Bayesian Workflow, with its emphasis on model trust, computational efficiency, and careful navigation of overfitting risks, reflects the dynamic and evolving nature of modern statistical practice. By embedding models within a larger framework and embracing the iterative process, a Bayesian Workflow ensures robust and insightful statistical analyses.
-
 

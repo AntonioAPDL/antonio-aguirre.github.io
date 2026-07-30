@@ -9,9 +9,10 @@ import pandas as pd
 try:
     from herbie import Herbie
 except ImportError as exc:  # pragma: no cover
-    raise SystemExit(
-        "Missing dependency: herbie-data. Install requirements in _sandbox/gefs_point_pipeline."
-    ) from exc
+    Herbie = None  # type: ignore[assignment]
+    HERBIE_IMPORT_ERROR = exc
+else:
+    HERBIE_IMPORT_ERROR = None
 
 
 def _naive_utc(value: dt.datetime) -> dt.datetime:
@@ -29,6 +30,11 @@ def make_herbie(
     source_priority: List[str],
     save_dir: Optional[Union[Path, str]] = None,
 ) -> Any:
+    if Herbie is None:
+        raise RuntimeError(
+            "Missing dependency: herbie-data. Install requirements in _sandbox/gefs_point_pipeline."
+        ) from HERBIE_IMPORT_ERROR
+
     kwargs: Dict[str, Any] = {
         "model": model,
         "product": product,

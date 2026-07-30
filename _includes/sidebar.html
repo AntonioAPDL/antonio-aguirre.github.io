@@ -1,42 +1,28 @@
-<!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular styles, `#sidebar-checkbox` for behavior. -->
-<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
-
 <!-- Toggleable sidebar -->
-<div class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar" aria-label="Site navigation">
   <!-- Sidebar Header -->
   <div class="sidebar-header">
   </div>
 
   <!-- Navigation Links -->
-  <nav class="sidebar-nav">
+  <nav class="sidebar-nav" aria-label="Primary">
     <ul>
       <li><a class="sidebar-nav-item{% if page.title == 'Home' %} active{% endif %}" href="{{ '/' | absolute_url }}">Home</a></li>
-      <li><a class="sidebar-nav-item{% if page.title == 'About' %} active{% endif %}" href="{{ '/about/' | absolute_url }}">About</a></li>
       <li><a class="sidebar-nav-item{% if page.title == 'Research' %} active{% endif %}" href="{{ '/research/' | absolute_url }}">Research</a></li>
-      <li><a class="sidebar-nav-item{% if page.title == 'Teaching' %} active{% endif %}" href="{{ '/teaching/' | absolute_url }}">Teaching</a></li>
       <li><a class="sidebar-nav-item{% if page.title == 'Software' %} active{% endif %}" href="{{ '/software/' | absolute_url }}">Software</a></li>
-      <li><a class="sidebar-nav-item{% if page.title == 'Blog' %} active{% endif %}" href="{{ '/blog/' | absolute_url }}">Blog</a></li>
+      <li><a class="sidebar-nav-item{% if page.title == 'Demos' %} active{% endif %}" href="{{ '/demos/' | absolute_url }}">Demos</a></li>
+      <li><a class="sidebar-nav-item{% if page.title == 'About' %} active{% endif %}" href="{{ '/about/' | absolute_url }}">About</a></li>
+      <li><a class="sidebar-nav-item{% if page.title == 'Teaching' %} active{% endif %}" href="{{ '/teaching/' | absolute_url }}">Teaching</a></li>
       <li><a class="sidebar-nav-item{% if page.title == 'CV' %} active{% endif %}" href="{{ '/cv/' | absolute_url }}">CV</a></li>
       <li><a class="sidebar-nav-item{% if page.title == 'Contact' %} active{% endif %}" href="{{ '/contact/' | absolute_url }}">Contact</a></li>
     </ul>
-    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" aria-pressed="false">
-      <i class="fas fa-moon" aria-hidden="true"></i>
-    </button>
   </nav>
-
-  <!-- Sidebar Buy Me a Coffee -->
-  <div class="sidebar-item">
-    <p>Hi, I'm Antonio, a Ph.D. candidate in Statistics. If my teaching materials or code have been useful, you can support the work with a coffee.</p>
-    <a href="https://buymeacoffee.com/antonioaguirre" target="_blank" rel="noopener noreferrer">
-      <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px; width: auto;">
-    </a>
-  </div>
 
   <!-- Footer -->
   <div class="sidebar-footer">
-    <p>&copy; {{ site.time | date: '%Y' }} All rights reserved.</p>
-    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" aria-pressed="false">
+    <p>&copy; {{ site.time | date: '%Y' }} Antonio De Leon. Site code under MIT; text and documents unless otherwise noted.</p>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" aria-pressed="false">
       <i class="fas fa-moon" aria-hidden="true"></i>
     </button>
   </div>
-</div>
+</aside>

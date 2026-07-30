@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Research
-description: "Research on Bayesian forecasting, quantile modeling, scalable inference, and research software."
+description: "Research on Bayesian forecasting, quantile modeling, interval estimation, and statistical software."
 ---
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
@@ -14,12 +14,10 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
   <header class="research-hero page-header">
     <h1 class="page-title">Research</h1>
     <p class="page-lede">
-      I develop Bayesian quantile methods for probabilistic forecasting, interval modeling,
-      scalable inference, and reusable research software.
+      I develop Bayesian methods for quantile forecasting and interval estimation, with applications to hydrologic time series.
     </p>
     <p class="page-lede">
-      My Ph.D. work is organized around hydrologic forecast correction, dynamic quantile state-space models,
-      fixed-reservoir quantile readouts, and generalized-Bayes interval functionals.
+      My work combines state-space modeling, simulation-based and variational inference, forecast evaluation, and statistical software.
     </p>
   </header>
 
@@ -33,11 +31,11 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
       </p>
     </article>
     <article class="research-area">
-      <span>Software / JSS</span>
+      <span>CRAN / JSS submission</span>
       <h2>Dynamic Quantile State-Space Models</h2>
       <p>
         Extended dynamic quantile linear models with MCMC, Laplace-delta variational Bayes,
-        diagnostics, forecasting, and posterior-predictive synthesis.
+        diagnostics, forecasting, and posterior predictive synthesis.
       </p>
     </article>
     <article class="research-area">
@@ -71,8 +69,10 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
       <p>
         My poster <em>Bayesian quantile-based correction and synthesis of climate products</em> received a
         Best Poster Prize at the ISBA 2026 World Meeting in Nagoya, Japan. The work presents a Bayesian
-        quantile workflow for correcting hydrologic forecast products and synthesizing the corrected quantile
-        lanes into a posterior predictive distribution, with daily San Lorenzo River flow as the case study.
+        quantile workflow for correcting hydrologic forecast products and synthesizing corrected quantile forecasts
+        into a posterior predictive distribution, with daily San Lorenzo River flow as the case study.
+        The poster used the earlier title <em>climate products</em>; the revised manuscript uses
+        <em>hydrologic products</em>.
       </p>
       <dl class="research-poster-feature__details">
         <div>
@@ -145,7 +145,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
       <li class="research-output-item">
         <span class="research-output__status">Published</span>
         <div>
-          De Leon, A., Lobato, I.N. (2024).
+          De Leon, A., Lobato, I. N. (2024).
           <em>Evidence of Non-Fundamentalness in OECD Capital Stocks</em>.
           <em>Empirical Economics</em>.
           <a href="https://doi.org/10.1007/s00181-024-02564-5" target="_blank" rel="noopener noreferrer">DOI</a>.
@@ -157,9 +157,8 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
   <div class="research-software-note">
     <h2>Code and Reproducibility</h2>
     <p>
-      Selected package code, manuscript-support scripts, and data-processing workflows are collected on the
-      <a href="/software/">Software page</a>. I keep that page selective so each public example has a clear purpose
-      and enough context to be useful.
+      Package source, manuscript repositories, and selected implementation examples are listed on the
+      <a href="/software/">Software page</a>. Each item is labeled by release or manuscript status.
     </p>
   </div>
 </div>
