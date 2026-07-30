@@ -157,7 +157,7 @@ The plot can overlay forecast guidance from a JSON artifact published by schedul
 - **Publish helper:** `scripts/publish_live_data_artifacts.sh`
 - **Included series:** JSON may include NWPS analysis/short deterministic plus NWM medium/long quantiles (`p10/p50/p90`); the USGS panel overlay uses ensemble quantiles (medium/long) only.
 - **Plot overlay behavior:** USGS observed discharge remains the base trace; NWS ensemble guidance is overlaid as medium/long `p10-p90` bands plus `p50` lines.
-- **Unit harmonization:** forecast series are unit-normalized and converted (`cfs`/`cms`) to match the observed USGS discharge axis before plotting.
+- **Unit harmonization:** the forecast JSON stores streamflow in `ft3/s` (cfs). The browser also normalizes `cfs`/`cms` labels and converts any forecast overlay to the observed USGS discharge axis before plotting.
 - **TODO:** HEFS ensembles once location_id lookup is resolved
 - **Fallback behavior:** if `_sandbox/nws_ensemble_point` is absent, updater builds JSON directly from NOAA NWPS APIs.
 - **Ops guard:** on updater errors, CI can keep the last tracked artifact by setting `BIG_TREES_FORECAST_ALLOW_STALE_ON_ERROR=1`.

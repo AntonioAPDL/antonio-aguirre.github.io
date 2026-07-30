@@ -15,8 +15,7 @@
     "streamflow"
   ],
   "units": [
-    "ft3/s",
-    "m3 s-1"
+    "ft3/s"
   ],
   "init_times": {
     "analysis": "2026-07-29 04:00:00+00:00",

@@ -155,6 +155,10 @@ def check_json(errors: list[str]) -> None:
             continue
         if not isinstance(data, dict):
             errors.append(f"{rel(path)}: top-level JSON must be an object")
+            continue
+        if path.name == "big_trees_latest.json":
+            if data.get("units") != ["ft3/s"]:
+                errors.append(f"{rel(path)}: streamflow forecast units must be ['ft3/s']")
 
 
 def check_yaml(errors: list[str], warnings: list[str]) -> None:

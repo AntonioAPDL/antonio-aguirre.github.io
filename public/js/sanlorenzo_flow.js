@@ -86,11 +86,14 @@
   function normalizeUnits(unitCode) {
     if (!unitCode) return unitCode;
     const normalized = String(unitCode).trim().toLowerCase();
-    if (normalized === 'ft3/s' || normalized === 'ft^3/s' || normalized === 'ft3s-1') {
+    if (normalized === 'ft3/s' || normalized === 'ft^3/s' || normalized === 'ft³/s' ||
+        normalized === 'ft3 s-1' || normalized === 'ft³ s-1' || normalized === 'ft3s-1' ||
+        normalized === 'cfs') {
       return 'cfs';
     }
-    if (normalized === 'm3/s' || normalized === 'm^3/s' || normalized === 'm3 s-1' ||
-        normalized === 'm^3 s-1' || normalized === 'cms') {
+    if (normalized === 'm3/s' || normalized === 'm^3/s' || normalized === 'm³/s' ||
+        normalized === 'm3 s-1' || normalized === 'm^3 s-1' || normalized === 'm³ s-1' ||
+        normalized === 'm3s-1' || normalized === 'cms') {
       return 'cms';
     }
     if (normalized === 'ft') {

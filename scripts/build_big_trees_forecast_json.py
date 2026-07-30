@@ -24,6 +24,8 @@ DEFAULT_OUTPUT = "data/_sandbox_nws/big_trees_latest.json"
 DEFAULT_TIMEOUT_SEC = 30
 DEFAULT_RETRIES = 4
 DEFAULT_ANALYSIS_POINTS = 120
+OUTPUT_FLOW_UNITS = "ft3/s"
+CMS_TO_CFS = 35.31466672148859
 
 
 def parse_args() -> argparse.Namespace:
@@ -80,6 +82,34 @@ def to_float(raw: Any) -> Optional[float]:
     return value
 
 
+def normalize_flow_units(raw: Any) -> str:
+    text = str(raw or "").strip().lower()
+    text = text.replace("³", "3").replace("^3", "3")
+    text = re_space(text)
+    if text in {"ft3/s", "ft3 s-1", "ft3s-1", "cfs"}:
+        return "cfs"
+    if text in {"kcfs", "kft3/s", "kft3 s-1"}:
+        return "kcfs"
+    if text in {"m3/s", "m3 s-1", "m3s-1", "cms"}:
+        return "cms"
+    return text
+
+
+def re_space(text: str) -> str:
+    return " ".join(text.replace("\u00a0", " ").split())
+
+
+def flow_to_cfs(value: float, units: Any) -> Optional[float]:
+    unit = normalize_flow_units(units)
+    if unit == "cfs":
+        return float(value)
+    if unit == "kcfs":
+        return float(value) * 1000.0
+    if unit == "cms":
+        return float(value) * CMS_TO_CFS
+    return None
+
+
 def fetch_json(url: str, timeout_sec: int, retries: int) -> Dict[str, Any]:
     headers = {
         "User-Agent": "antonio-aguirre-forecast-updater/1.0",
@@ -105,26 +135,34 @@ def fetch_json(url: str, timeout_sec: int, retries: int) -> Dict[str, Any]:
     raise RuntimeError(f"Unable to fetch {url} after retries")
 
 
-def extract_stageflow_secondary(series_obj: Dict[str, Any], scale: float = 1000.0) -> List[Dict[str, float]]:
+def extract_stageflow_secondary(series_obj: Dict[str, Any]) -> List[Dict[str, float]]:
     out: List[Dict[str, float]] = []
+    units = series_obj.get("secondaryUnits") or "kcfs"
     for row in series_obj.get("data", []) or []:
         ts = iso_ts(row.get("validTime"))
         val = to_float(row.get("secondary"))
         if ts is None or val is None:
             continue
-        out.append({"t": ts, "v": float(val * scale)})
+        converted = flow_to_cfs(val, units)
+        if converted is None:
+            continue
+        out.append({"t": ts, "v": float(converted)})
     out.sort(key=lambda row: row["t"])
     return out
 
 
 def extract_reach_flow_series(series_obj: Dict[str, Any]) -> List[Dict[str, float]]:
     out: List[Dict[str, float]] = []
+    units = series_obj.get("units") or OUTPUT_FLOW_UNITS
     for row in series_obj.get("data", []) or []:
         ts = iso_ts(row.get("validTime"))
         val = to_float(row.get("flow"))
         if ts is None or val is None:
             continue
-        out.append({"t": ts, "v": float(val)})
+        converted = flow_to_cfs(val, units)
+        if converted is None:
+            continue
+        out.append({"t": ts, "v": float(converted)})
     out.sort(key=lambda row: row["t"])
     return out
 
@@ -244,8 +282,8 @@ def build_payload(args: argparse.Namespace) -> Dict[str, Any]:
     else:
         notes.append("Reach streamflow endpoint unavailable; medium/long ensembles may be missing.")
 
-    observed_series = extract_stageflow_secondary(stageflow.get("observed", {}) or {}, scale=1000.0)
-    forecast_fallback_series = extract_stageflow_secondary(stageflow.get("forecast", {}) or {}, scale=1000.0)
+    observed_series = extract_stageflow_secondary(stageflow.get("observed", {}) or {})
+    forecast_fallback_series = extract_stageflow_secondary(stageflow.get("forecast", {}) or {})
 
     analysis_raw = extract_reach_flow_series((((reach_streamflow.get("analysisAssimilation") or {}).get("series")) or {}))
     if analysis_raw:
@@ -302,7 +340,7 @@ def build_payload(args: argparse.Namespace) -> Dict[str, Any]:
             "gauge_id": str(args.gauge_id),
         },
         "variable": ["streamflow"],
-        "units": ["ft3/s", "m3 s-1"],
+        "units": [OUTPUT_FLOW_UNITS],
         "init_times": {
             "analysis": analysis_init,
             "long_range": long_init,
