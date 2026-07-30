@@ -51,6 +51,7 @@ include:
   - public/css/
 
 exclude:
+  - vendor/
   - local_audit_reports/
   - cv/*.tex
   - cv/README.md
