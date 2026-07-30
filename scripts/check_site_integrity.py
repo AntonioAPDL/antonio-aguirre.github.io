@@ -281,6 +281,7 @@ def check_forbidden_machine_paths(errors: list[str]) -> None:
         ".local_gefs_hist_pipeline",
         "data",
         "local_audit_reports",
+        "vendor",
     }
     forbidden_re = re.compile(r"(/data/(?:muscat_data/)?jaguir26|/home/jaguir26/python39)")
     for path in ROOT.rglob("*"):
@@ -296,7 +297,7 @@ def check_forbidden_machine_paths(errors: list[str]) -> None:
 
 
 def check_conflict_markers(errors: list[str]) -> None:
-    skip_parts = {".git", "_site", ".jekyll-cache", ".venv", "__pycache__"}
+    skip_parts = {".git", "_site", ".jekyll-cache", ".venv", "__pycache__", "vendor"}
     marker_re = re.compile(r"(?m)^(<<<<<<< .+|=======$|>>>>>>> .+)$")
     for path in ROOT.rglob("*"):
         if not path.is_file() or path.suffix not in TEXT_SUFFIXES:
