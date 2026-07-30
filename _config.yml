@@ -48,6 +48,7 @@ sass:
 
 # Ensure custom CSS is referenced correctly
 include:
+  - _redirects
   - public/css/
 
 exclude:
