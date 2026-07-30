@@ -7,6 +7,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
 {% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
+{% assign rqr_arxiv_url = "https://arxiv.org/abs/2607.26098" %}
 
 <div class="research-section">
   <!-- Title and Introduction -->
@@ -48,7 +49,7 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
       </p>
     </article>
     <article class="research-area">
-      <span>Working paper</span>
+      <span>arXiv preprint</span>
       <h2>Mean-Tilted RQR</h2>
       <p>
         Relaxed quantile regression for fixed-content interval targets, treated through
@@ -133,11 +134,12 @@ description: "Research on Bayesian forecasting, quantile modeling, scalable infe
         </div>
       </li>
       <li class="research-output-item">
-        <span class="research-output__status">Working paper</span>
+        <span class="research-output__status">arXiv preprint</span>
         <div>
           De Leon, A., Prado, R., Sansó, B.
           <em>Mean-Tilted Relaxed Quantile Regression: Fixed-Content Interval Functionals and Generalized-Bayes Computation</em>.
-          Working paper on interval-root functionals, fixed-content intervals, and Gibbs computation.
+          Preprint on interval-root functionals, fixed-content intervals, and generalized-Bayes computation.
+          <a href="{{ rqr_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:2607.26098</a>.
         </div>
       </li>
       <li class="research-output-item">

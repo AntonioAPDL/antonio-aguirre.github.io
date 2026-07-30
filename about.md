@@ -7,6 +7,7 @@ description: "Background, research focus, teaching, service, and applied experie
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
 {% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
+{% assign rqr_arxiv_url = "https://arxiv.org/abs/2607.26098" %}
 
 <div class="about-section">
   <!-- Introduction Section -->
@@ -44,8 +45,9 @@ description: "Background, research focus, teaching, service, and applied experie
         Bayesian quantile readouts for fixed Deep Echo State Network features.
       </li>
       <li>
-        <strong>RQR working paper:</strong>
-        Mean-tilted relaxed quantile regression for fixed-content interval functionals and generalized-Bayes computation.
+        <strong>RQR preprint:</strong>
+        <a href="{{ rqr_arxiv_url }}" target="_blank" rel="noopener noreferrer">Mean-tilted relaxed quantile regression</a>
+        for fixed-content interval functionals and generalized-Bayes computation.
       </li>
       <li>
         <strong>Recent recognition:</strong>
@@ -65,7 +67,7 @@ description: "Background, research focus, teaching, service, and applied experie
         <strong>Q-DESN Forecasting:</strong> Working paper on Bayesian quantile readouts for fixed Deep Echo State Network features.
       </li>
       <li>
-        <strong>Mean-Tilted RQR:</strong> Working paper on fixed-content interval functionals and generalized-Bayes Gibbs computation.
+        <strong>Mean-Tilted RQR:</strong> arXiv preprint on fixed-content interval functionals and generalized-Bayes Gibbs computation.
       </li>
       <li>
         <strong>Scalable Bayesian Inference:</strong> MCMC, variational Bayes, diagnostics, and reproducible workflows for repeated model evaluation.

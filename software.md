@@ -8,6 +8,7 @@ description: "Public packages, research code, and selected implementation exampl
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
 {% assign exdqlm_published_label = exdqlm.published_label | default: "July 9, 2026" %}
 {% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
+{% assign rqr_arxiv_url = "https://arxiv.org/abs/2607.26098" %}
 
 <div class="software-section">
   <header class="software-hero page-header">
@@ -168,7 +169,7 @@ description: "Public packages, research code, and selected implementation exampl
 
       <article class="software-project">
         <div class="software-project__meta">
-          <span>Working paper</span>
+          <span>arXiv preprint</span>
           <span>R / C++ / TeX</span>
         </div>
         <h3>RQR-GIBBS</h3>
@@ -176,10 +177,16 @@ description: "Public packages, research code, and selected implementation exampl
           Manuscript and computation workspace for mean-tilted relaxed quantile regression,
           fixed-content interval functionals, and generalized-Bayes Gibbs samplers.
         </p>
-        <a href="https://github.com/AntonioAPDL/RQR-GIBBS" target="_blank" rel="noopener noreferrer">
-          <span>Project repository</span>
-          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-        </a>
+        <div class="software-project__links">
+          <a href="https://github.com/AntonioAPDL/RQR-GIBBS" target="_blank" rel="noopener noreferrer">
+            <span>Project repository</span>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          </a>
+          <a href="{{ rqr_arxiv_url }}" target="_blank" rel="noopener noreferrer">
+            <span>arXiv preprint</span>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          </a>
+        </div>
       </article>
 
       <article class="software-project">

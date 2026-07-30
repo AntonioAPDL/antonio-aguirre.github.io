@@ -1597,6 +1597,17 @@ body.dark-theme .plot-status__title {
   text-decoration: none;
 }
 
+.software-project__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+  margin-top: auto;
+}
+
+.software-project__links a {
+  margin-top: 0;
+}
+
 .software-project a:hover {
   color: var(--accent-hover);
   text-decoration: underline;
