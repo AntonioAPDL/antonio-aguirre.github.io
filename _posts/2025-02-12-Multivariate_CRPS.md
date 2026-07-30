@@ -1,127 +1,176 @@
 ---
 layout: post
-published: false
-title: "The Energy Score for Multivariate Normal Distributions"
+published: true
+title: "Energy scores for Gaussian forecasts: what is closed form and what is not"
 date: 2025-02-12
-theme: Review
-tags: [statistics, forecasting, probabilistic-models, scores]
-excerpt: "Closed-form expressions and special cases for the multivariate generalization of CRPS"
+updated: 2026-07-29
+theme: Probabilistic forecasting
+tags: [forecasting, scoring-rules, gaussian-models, r]
+description: "A corrected note on the Gaussian energy score, separating the spherical closed form from the general covariance case."
+excerpt: "The standard noncentral-chi expression applies to spherical Gaussian covariance. General covariance requires a generalized quadratic-form calculation or simulation."
+math: true
 ---
 
-## Introduction
+The energy score is a proper scoring rule for multivariate probabilistic forecasts. It is often described as the multivariate analogue of the continuous ranked probability score. That description is useful, but it can hide a technical point: a simple noncentral-chi closed form is available for spherical Gaussian covariance, not for an arbitrary positive-definite covariance matrix.
 
-The Energy Score serves as the multivariate extension of the Continuous Ranked Probability Score (CRPS), maintaining its desirable properties while handling vector-valued forecasts. This post presents the closed-form expression for multivariate normal distributions and its connection to classical CRPS results.
-
-<div class="green-box">
-<strong>Insight:</strong>  
-<li>The Energy Score generalizes CRPS through expectations of pairwise distances, avoiding direct integration over multivariate CDFs</li>
-<li>Special function relationships enable closed-form solutions for normal distributions</li>
-</div>
-
-## Energy Score: Definition
-
-For a $d$-dimensional forecast distribution $P$ and observation vector $\mathbf{y} \in \mathbb{R}^d$:
+For a forecast distribution $$P$$ on $$\mathbb R^d$$ and an observation $$y$$, the energy score with Euclidean distance is
 
 $$
-\text{ES}(P, \mathbf{y}) = \mathbb{E}\left[\|\mathbf{X} - \mathbf{y}\|\right] - \frac{1}{2} \mathbb{E}\left[\|\mathbf{X} - \mathbf{X'}\|\right]
+\operatorname{ES}(P,y)
+=
+\mathbb E_P\|X-y\|_2
+-
+\frac{1}{2}\mathbb E_P\|X-X'\|_2,
 $$
 
-where $\mathbf{X}, \mathbf{X'} \sim P$ are independent random vectors.
+where $$X$$ and $$X'$$ are independent draws from $$P$$. Smaller values are better. The usual power-score family requires the corresponding moment condition; for the Euclidean version above, finite first moments are enough.
 
-## The Multivariate Normal Case
+## The Gaussian problem
 
-For $P = \mathcal{N}_d(\boldsymbol{\mu}, \mathbf{\Sigma})$ and observation $\mathbf{y}$:
-
-$$
-\text{ES}(P, \mathbf{y}) = \sqrt{2\text{tr}(\mathbf{\Sigma})} \cdot \frac{\Gamma\left(\frac{d+1}{2}\right)}{\Gamma\left(\frac{d}{2}\right)} \left[ {}_1F_1\left(-\frac{1}{2}; \frac{d}{2}; -\frac{\delta^2}{2}\right) - 1 \right]
-$$
-
-**Components**:
-- $\delta^2 = (\boldsymbol{\mu} - \mathbf{y})^\top \mathbf{\Sigma}^{-1} (\boldsymbol{\mu} - \mathbf{y})$ (Mahalanobis distance squared)
-- ${}_1F_1$: Confluent hypergeometric function
-- $\Gamma$: Gamma function
-
-<div class="yellow-box">
-<strong>Practical Note:</strong>  
-<li>Requires special function implementations (e.g., scipy.special.hyp1f1)</li>
-<li>Reduces to familiar CRPS when $d=1$</li>
-</div>
-
-## Special Cases
-
-### Isotropic Covariance
-
-When $\mathbf{\Sigma} = \sigma^2\mathbf{I}_d$:
+Let $$X \sim N_d(\mu,\Sigma)$$. The two terms in the score are expectations of Euclidean norms:
 
 $$
-\text{ES}(P, \mathbf{y}) = \sqrt{2d}\sigma \cdot \frac{\Gamma\left(\frac{d+1}{2}\right)}{\Gamma\left(\frac{d}{2}\right)} \left[ {}_1F_1\left(-\frac{1}{2}; \frac{d}{2}; -\frac{\|\boldsymbol{\mu} - \mathbf{y}\|^2}{2\sigma^2}\right) - 1 \right]
+\mathbb E\|X-y\|_2
+\quad\text{and}\quad
+\mathbb E\|X-X'\|_2.
 $$
 
-### Univariate Case (Classical CRPS)
+The second term is another Gaussian norm because $$X-X' \sim N_d(0,2\Sigma)$$. The difficulty is therefore the same in both terms: compute $$\mathbb E\sqrt{Z^\top Z}$$ for $$Z \sim N_d(m,\Sigma)$$.
 
-For $P = \mathcal{N}(\mu, \sigma^2)$ and observation $y$:
+When $$\Sigma = \sigma^2 I_d$$, the scaled norm $$\|Z\|_2/\sigma$$ is noncentral chi. Standard formulas for the mean of a noncentral-chi random variable apply. When $$\Sigma$$ has unequal eigenvalues, $$Z^\top Z$$ is a generalized noncentral quadratic form. It is not a scaled standard noncentral chi-square variable. Treating it that way gives the wrong score.
 
-$$
-\text{CRPS}(P, y) = \sigma \left[ z(2\Phi(z) - 1) + \sqrt{\frac{2}{\pi}}(e^{-z^2/2} - 1) \right]
-$$
+## A valid general-covariance route
 
-where $z = \frac{y - \mu}{\sigma}$ and $\Phi$ is the standard normal CDF.
-
-## Computational Approaches
-
-| Component               | Implementation Strategy          |
-|-------------------------|-----------------------------------|
-| ${}_1F_1$ function      | scipy.special.hyp1f1              |
-| Gamma functions         | Standard math libraries           |
-| High-dimensional cases  | Monte Carlo sampling              |
-
-<div class="green-box">
-<strong>Implementation Suggestion:</strong>  
-<li>For d > 3, consider Monte Carlo approximation:</li>
-$$
-\text{ES}(P, \mathbf{y}) \approx \frac{1}{N}\sum_{i=1}^N \|\mathbf{X}_i - \mathbf{y}\| - \frac{1}{2N^2}\sum_{i,j=1}^N \|\mathbf{X}_i - \mathbf{X}_j\|
-$$
-</div>
-
-## Proof Sketch
-
-### Key Steps
-
-1. **Non-central Chi Distribution**: $\|\mathbf{X}-\mathbf{y}\|$ follows a non-central chi distribution
-2. **Central Chi Moments**: $\mathbb{E}[\|\mathbf{X}-\mathbf{X'}\|]$ uses central chi properties
-3. **Hypergeometric Connection**: Relate Bessel functions to ${}_1F_1$ through series expansions
-
-### Technical Lemma
-
-For $\mathbf{V} \sim \mathcal{N}_d(\boldsymbol{\nu}, \mathbf{\Omega})$:
+For general positive-definite $$\Sigma$$, use the Laplace transform of
 
 $$
-\mathbb{E}[\|\mathbf{V}\|] = \sqrt{2\text{tr}(\mathbf{\Omega})} \cdot \frac{\Gamma\left(\frac{d+1}{2}\right)}{\Gamma\left(\frac{d}{2}\right)} \cdot {}_1F_1\left(-\frac{1}{2}; \frac{d}{2}; -\frac{\boldsymbol{\nu}^\top \mathbf{\Omega}^{-1} \boldsymbol{\nu}}{2}\right)
+Q = Z^\top Z.
 $$
 
-## Comments
+For $$Z \sim N_d(m,\Sigma)$$,
 
-The Energy Score's extension of CRPS to multivariate settings addresses a critical need in modern probabilistic forecasting. Where the univariate CRPS revolutionized verification of scalar forecasts [1], complex systems increasingly demand *joint calibration assessments* of vector-valued predictions - from weather models (temperature-pressure-wind vectors) to financial risk (correlated asset returns).
+$$
+\mathcal L_Q(t)
+=
+\det(I+2t\Sigma)^{-1/2}
+\exp\left\{
+-t m^\top(I+2t\Sigma)^{-1}m
+\right\}.
+$$
 
-<div class="green-box">
-<strong>Some Motivations:</strong>
-<li><strong>Dependency Awareness:</strong> Unlike marginal CRPS averaging, the Energy Score's pairwise distance terms (𝔼‖𝐗−𝐗'‖) directly penalize misrepresented correlations [2]</li>
-<li><strong>Properness Preservation:</strong> Maintains the CRPS' crucial property of being strictly proper - forecasters can't game the system by misrepresenting uncertainties [1]</li>
-<li><strong>Consistency:</strong> Reduces exactly to CRPS when 𝑑=1, ensuring backward compatibility</li>
-</div>
+Then
 
-While computation requires special functions (${}_1F_1$, Γ) or Monte Carlo methods, this cost reflects the intrinsic complexity of multivariate dependence structures. As shown in [3], alternative scores like the variogram score make different tradeoffs, but the Energy Score remains uniquely tied to the CRPS.
+$$
+\mathbb E\sqrt Q
+=
+\frac{1}{2\sqrt\pi}
+\int_0^\infty
+\{1-\mathcal L_Q(t)\}t^{-3/2}\,dt.
+$$
 
-<div class="yellow-box">
-<strong>Implementation Insight:</strong>  
-<li>For high-𝑑 systems, the hypergeometric term ${}_1F_1(−1/2;𝑑/2;−𝛿^2/2)$ approaches $e^{−𝛿^2/(2𝑑)}$ - suggestion some interesting  connections to Gaussian kernels in RKHS theory [2]</li>
-</div>
+This gives a one-dimensional numerical integral for each Gaussian norm expectation. It is not as compact as a closed form, but it is valid for arbitrary positive-definite covariance matrices.
 
-As multivariate probabilistic AI/ML systems proliferate, the Energy Score provides a principled verification framework - one that honors the CRPS' "properness" philosophy.
+## Base R implementation
 
----
+The following code uses only base R. It maps the semi-infinite integral to $$u\in(0,1)$$ through $$t=u/(1-u)$$.
 
-**References**  
-1. [Gneiting, T., & Raftery, A. E. (2007). Strictly proper scoring rules, prediction, and estimation. *JASA*](https://doi.org/10.1198/016214506000001437)  
-2. [Székely, G. J., & Rizzo, M. L. (2013). Energy statistics: A class of statistics based on distances. *JSPI*](https://doi.org/10.1016/j.jspi.2013.03.018)  
-3. [Pinson, P., & Girard, R. (2012). Evaluating the quality of scenarios of short-term wind power generation. *Applied Energy*](https://doi.org/10.1016/j.apenergy.2012.05.010)
+```r
+norm_mean_quad <- function(mean, Sigma, rel.tol = 1e-8) {
+  mean <- as.numeric(mean)
+  Sigma <- as.matrix(Sigma)
+  d <- length(mean)
+  stopifnot(nrow(Sigma) == d, ncol(Sigma) == d)
+  Sigma <- 0.5 * (Sigma + t(Sigma))
+  if (min(eigen(Sigma, symmetric = TRUE, only.values = TRUE)$values) <= 0) {
+    stop("Sigma must be positive definite")
+  }
+
+  laplace_q <- function(tval) {
+    A <- diag(d) + 2 * tval * Sigma
+    chol_A <- chol(A)
+    log_det <- 2 * sum(log(diag(chol_A)))
+    sol <- backsolve(chol_A, forwardsolve(t(chol_A), mean))
+    exp(-0.5 * log_det - tval * sum(mean * sol))
+  }
+
+  integrand <- function(u) {
+    vapply(u, function(ui) {
+      if (ui <= 0 || ui >= 1) return(0)
+      tval <- ui / (1 - ui)
+      (1 - laplace_q(tval)) * tval^(-1.5) / (1 - ui)^2
+    }, numeric(1))
+  }
+
+  integrate(integrand, lower = 0, upper = 1, rel.tol = rel.tol,
+            subdivisions = 1000)$value / (2 * sqrt(pi))
+}
+
+gaussian_energy_score <- function(mu, Sigma, y, rel.tol = 1e-8) {
+  mu <- as.numeric(mu)
+  y <- as.numeric(y)
+  Sigma <- as.matrix(Sigma)
+  term1 <- norm_mean_quad(mu - y, Sigma, rel.tol = rel.tol)
+  term2 <- norm_mean_quad(rep(0, length(mu)), 2 * Sigma, rel.tol = rel.tol)
+  term1 - 0.5 * term2
+}
+
+energy_score_draws <- function(draws, y) {
+  y <- as.numeric(y)
+  draws <- as.matrix(draws)
+  first <- mean(sqrt(rowSums((draws - matrix(y, nrow(draws), length(y), TRUE))^2)))
+  pair_index <- sample.int(nrow(draws), nrow(draws), replace = TRUE)
+  second <- mean(sqrt(rowSums((draws - draws[pair_index, , drop = FALSE])^2)))
+  first - 0.5 * second
+}
+```
+
+The direct draw-based estimator is simple and useful for any forecast distribution that can be sampled. The quadrature route is useful when the forecast is Gaussian and the dimension is moderate. In high dimensions, direct simulation or specialized quadratic-form methods may be preferable.
+
+There are two implementation details worth making explicit. First, the covariance matrix should be symmetrized before numerical work, because small floating-point asymmetries can appear after matrix operations. Symmetrizing does not rescue a non-positive-definite matrix, but it avoids rejecting a matrix because of harmless numerical noise. Second, the quadrature formula evaluates a difference, $$1-\mathcal L_Q(t)$$, that is small near zero. The mapped integral remains integrable, but numerical tolerances should be checked against simulation on representative cases rather than trusted abstractly.
+
+Monte Carlo estimation is often the most robust baseline. It can be slower, and the pairwise term can be expensive if all pairs are used, but it is easy to reason about. A simulation check is also a useful way to catch scale errors. If the quadrature score and a large Monte Carlo estimate disagree beyond Monte Carlo error, the first suspects should be covariance scaling, dimension mismatch, or an incorrect interpretation of the forecast draws.
+
+## Checks
+
+For a one-dimensional normal forecast at its mean, the energy score equals the Gaussian CRPS:
+
+$$
+\operatorname{CRPS}\{N(\mu,\sigma^2),\mu\}
+=
+\sigma\left(\sqrt{\frac{2}{\pi}}-\frac{1}{\sqrt{\pi}}\right).
+$$
+
+This provides a small but important check.
+
+```r
+set.seed(1)
+sigma <- 1.7
+quad_1d <- gaussian_energy_score(0, matrix(sigma^2), 0)
+crps_mean <- sigma * (sqrt(2 / pi) - 1 / sqrt(pi))
+stopifnot(abs(quad_1d - crps_mean) < 1e-7)
+
+mu <- c(0.5, -0.3)
+Sigma <- matrix(c(1.2, 0.4, 0.4, 0.8), 2, 2)
+y <- c(0.1, 0.2)
+score_quad <- gaussian_energy_score(mu, Sigma, y)
+stopifnot(is.finite(score_quad))
+```
+
+## Spherical covariance
+
+When $$\Sigma=\sigma^2I_d$$, the noncentral-chi representation is valid. In that case $$\|X-y\|_2/\sigma$$ has noncentrality $$\|\mu-y\|_2/\sigma$$, and $$\|X-X'\|_2/(\sqrt{2}\sigma)$$ is central chi. The closed form can be evaluated through the mean of a noncentral-chi variate, using special functions.
+
+That result should be presented as a spherical-covariance formula. It should not be used as the general multivariate Gaussian formula.
+
+## Dependence sensitivity
+
+The energy score is proper, but in higher dimensions it may be less sensitive to dependence misspecification than analysts expect. Forecasts with different covariance structures can have similar Euclidean-distance behavior. For multivariate forecasting problems where dependence matters, the energy score should often be paired with variogram scores, marginal calibration checks, rank histograms, event-specific scores, or summaries tied to the decision problem.
+
+This is the practical reason to be precise about the formula. The goal is not to make the energy score look less useful. The goal is to use it correctly. If a model produces full covariance forecasts, then the scoring calculation should respect that covariance. If the forecast is spherical or intentionally isotropic, the closed form is appropriate and efficient. If the forecast is general Gaussian, use a method that handles the full covariance. If the forecast is generated by simulation, the draw-based estimator may be the cleanest option.
+
+In applied reports, I would state which estimator was used, the number of forecast draws if simulation was used, and any numerical tolerance used for quadrature. I would also report at least one check against a simpler case, such as the one-dimensional CRPS identity or a spherical covariance example. These checks are small, but they make the score calculation auditable.
+
+## References
+
+- Gneiting, T. and Raftery, A. E. "Strictly proper scoring rules, prediction, and estimation." [Journal of the American Statistical Association](https://doi.org/10.1198/016214506000001437).
+- Scheuerer, M. and Hamill, T. M. "Variogram-based proper scoring rules for probabilistic forecasts of multivariate quantities." [Monthly Weather Review](https://doi.org/10.1175/MWR-D-14-00269.1).

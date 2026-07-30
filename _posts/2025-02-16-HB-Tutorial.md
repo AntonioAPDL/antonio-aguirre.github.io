@@ -1,289 +1,194 @@
 ---
 layout: post
-published: false
-title: "Statistical Computing: A tutorial for UCSC Graduate Students"
-date: 2025-02-16  <!-- Update with actual date -->
-theme: HPC
-tags: [statistics, HPC, cluster-computing, UCSC]
-excerpt: "Leveraging Hummingbird HPC for statistical research"
+published: true
+title: "A practical Slurm workflow on UCSC Hummingbird"
+date: 2025-02-16
+updated: 2026-07-29
+last_verified: 2026-07-29
+theme: Scientific computing
+tags: [slurm, hpc, reproducibility, ucsc]
+description: "A practical workflow for running statistical computing jobs on UCSC Hummingbird without hard-coding stale cluster details."
+excerpt: "Use Hummingbird by discovering current partitions, testing small interactive jobs, controlling threads, and submitting reproducible Slurm batches."
+math: false
 ---
-  
-Hi, grads! Whether you’re running Bayesian models, tuning machine learning algorithms, or analyzing massive datasets, this guide aims to help you take advantage of the full potential of UCSC’s **Hummingbird (HB) clusters**.
 
-### What Are the Hummingbird Clusters?  
-The HB clusters are UCSC’s shared high-performance computing (HPC) systems, built to handle tasks that would overwhelm personal computers. Designed for researchers across disciplines, they offer:  
-- **Parallel computing**: Run thousands of simulations or MCMC chains simultaneously  
-- **High-speed storage**: Process TB-scale datasets (e.g., genomics, climate models)  
-- **Specialized hardware**: Access GPU nodes for deep learning  
-- **Scalability**: Transition seamlessly from small interactive tests to large batch jobs  
+This note is a practical starting point for running statistical computing work on UCSC Hummingbird. It focuses on habits that remain useful when partitions, modules, hardware, and allocation rules change. Do not copy resource requests blindly from an old tutorial. Discover the current system, start small, and scale only after the job has been measured.
 
-### Who Should Use HB?  
-These clusters are ideal for statistical work requiring:  
-- **Computational intensity**: Hierarchical models, bootstrapping, or optimization  
-- **Reproducibility**: Version-controlled environments for collaborative projects  
-- **Speed**: Accelerate workflows that take days on a laptop  
-  
-### What’s in This Guide?  
-You’ll learn to:  
-1. **Test code interactively** (e.g., debug an RStan model)  
-2. **Submit batch jobs** (e.g., parallelize 100 MCMC chains)  
-3. **Optimize resources** (avoid memory crashes, leverage GPUs)  
-4. **Manage workflows** (from data storage to result analysis)  
+Hummingbird is a Slurm-managed cluster. The basic objects are login nodes, compute nodes, partitions, accounts or allocations, jobs, and job steps. The login node is for editing files, submitting jobs, moving modest amounts of data, and checking status. Real computation should run inside an interactive allocation or a batch job.
 
-## Introduction to Cluster Computing for Stats Grads
+## Connect and inspect the current system
 
-### Brief Glossary: 
+The open Hummingbird service has used `hb.ucsc.edu`. Some PI-specific allocations may use different entry points, including Elkhorn-managed resources. Follow the instructions for your allocation and verify the endpoint before building automation around it.
 
-- **Node**: Dedicated server (128 cores/256GB RAM typical) - Think of it as a powerful workstation
-- **Core**: Individual processing unit (Like a CPU thread) - Your basic computation unit
-- **GPU Node**: Specialized nodes with 4  NVIDIA A100 GPUs (80GB VRAM each) for deep learning
-- **Scratch Space**: 1PB high-speed temporary storage (Auto-cleaned every 14 days) - Perfect for intermediate results
-
-
-## I. Interactive Development Sessions
-
-<div class="yellow-box">
-  <strong>When to Use Interactive:</strong>  
-  <ul>
-    <li>Debugging code</li>
-    <li>Exploratory analysis</li>
-    <li>Small simulations</li>
-    <li>Model prototyping</li>
-    <li>Visualization</li>
-  </ul>
-</div>
-
-### Example 1: Debugging Bayesian Models in R
+After logging in, inspect the live system:
 
 ```bash
-# Request interactive resources: 4 cores, 8GB RAM for 2 hours
-srun --pty --mem=8G --cpus-per-task=4 --time=02:00:00 bash
-
-# Load R environment with Bayesian stack
-module load R/4.3.0
-
-# Start R session with debugging capabilities
-R
-> library(rstan)          # Load STAN interface
-> debug(fit_model)        # Set breakpoint in function
-> source("hierarchical_bayes.R")  # Run script until breakpoint
-> where                  # Show call stack when breakpoint hits
+ssh your_ucsc_id@hb.ucsc.edu
+sinfo -o "%P %a %l %D %c %m %G"
+scontrol show partition
+module avail
 ```
 
-### Example 2: Interactive ML Development with Jupyter
+These commands tell you what partitions exist, whether they are available, their limits, and what modules are currently installed. Treat this output as the source of truth for resource requests.
+
+This discovery step should be repeated when a project is moved to a new allocation or when an old script is reused after a long break. Cluster administrators can change limits, add partitions, retire modules, or redirect specialized resources. A script that was reasonable last year may still run, but it may request resources poorly or rely on software that is no longer the default.
+
+## Keep a reproducible project layout
+
+A stable layout makes batch jobs easier to restart and debug:
+
+```text
+project/
+  code/
+  data/
+  config/
+  logs/
+  results/
+  scratch/
+```
+
+Keep source code under version control. Store job logs separately from results. Write outputs to a run-specific directory. Avoid editing scripts inside generated result folders because that makes it harder to reconstruct the run later.
+
+## Start with an interactive allocation
+
+Use a small interactive job to test paths, package loading, and one reduced example. The exact partition and limits depend on the current system, so adjust after checking `sinfo` and your allocation policy.
 
 ```bash
-# Request heavier resources for data e ploration: 8 cores, 16GB RAM
-srun --pty --mem=16G --cpus-per-task=8 --time=04:00:00 bash
-
-# Load Python environment
-module load python/3.11
-
-# Start Jupyter Lab on cluster (no local browser)
-python -m jupyter lab --no-browser --port=8889
-
-# On your local machine, create SSH tunnel:
-ssh -L 8889:localhost:8889 cruzid@hb.ucsc.edu
-# Now access via http://localhost:8889 in local browser
+srun --pty --cpus-per-task=1 --mem=4G --time=00:30:00 bash
+hostname
+pwd
 ```
 
-
-## II. Batch Processing for Production Workloads
-
-<div class="yellow-box">
-  <strong>When to Use Batch Processing:</strong>  
-  <ul>
-    <li>Long-running computations (>4 hours)</li>
-    <li>Parameter sweeps/optimization runs</li>
-    <li>Production model training/inference</li>
-    <li>Final analyses requiring full resources</li>
-    <li>Reproducible pipeline executions</li>
-  </ul>
-</div>
-
-### Example 1: Large-Scale Bayesian Inference
+Inside that shell, run the smallest version of the analysis. For R:
 
 ```bash
-#!/bin/bash
-#SBATCH --job-name=stan_meta          # Job identifier
-#SBATCH --output=mcmc_%A_%a.log       # Log file template (JobID_ArrayID)
-#SBATCH --array=1-100                 # Parallelize 100 independent chains
-#SBATCH --cpus-per-task=4             # 4 cores per chain (for within-chain parallel)
-#SBATCH --mem=16G                     # 16GB RAM per chain
-#SBATCH --time=24:00:00               # 24hr ma  runtime
-
-# Load environment
-module load R/4.3.0
-
-# Run STAN model with chain-specific data
-Rscript run_stan.R --model hierarchical \
-                  --data ${SLURM_ARRAY_TASK_ID} \  
-                  --iter 5000
+module avail R
+module load R
+R --vanilla
 ```
 
-### Example 2: Distributed ML Training
+For Python:
 
 ```bash
-#!/bin/bash
-#SBATCH --job-name= gb_ensemble       # Job name
-#SBATCH --nodes=2                     # Use 2 physical servers
-#SBATCH --ntasks-per-node=16          # 32 total tasks (16 per node)
-#SBATCH --mem=128G                    # 128GB total RAM (64GB/node)
-#SBATCH --time=48:00:00               # 2-day ma  runtime
-#SBATCH --gres=gpu:2                  # Request 2 GPUs per node
-
-# Load ML environment
-module load python/3.11
-
-# Train  GBoost ensemble with cross-validation
-python train_ensemble.py --n-estimators 1000 \  # 1000 trees
-                        --depth-range 3-10 \   # Search depth 3-10
-                        --gpu                  # Enable GPU acceleration
+module avail python
+module load python
+python --version
 ```
 
+If your work uses user-level environments, create them in your home or project space rather than relying on one fixed module version. Record how the environment was created.
 
-## Reproducible Environment Setup
+## Use conservative batch scripts
 
-### Statistical Computing Environments
+A batch script should request only what the job can use. Over-requesting memory, CPUs, or wall time makes scheduling harder and can hide inefficient code.
 
 ```bash
-# R: Create project-specific environment with renv
-module load R/4.3.0
-R -e "renv::init()"            # Initialize project
-R -e "renv::install('brms')"   # Install Bayesian regression models
+#!/usr/bin/env bash
+#SBATCH --job-name=fit_model
+#SBATCH --output=logs/%x_%j.out
+#SBATCH --error=logs/%x_%j.err
+#SBATCH --time=02:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=4G
 
-# Python: Lock dependencies with conda-lock
-module load miniconda3
-conda create -n stats_proj python=3.11  # New environment
-conda install -n stats_proj numpy pandas scikit-learn  # Core stack
-conda-lock lock --file environment.yml --platform linu -64  # Create reproducible lockfile
+set -euo pipefail
+
+cd "$SLURM_SUBMIT_DIR"
+mkdir -p logs results
+
+module load R
+
+export OMP_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export VECLIB_MAXIMUM_THREADS=1
+
+Rscript --vanilla code/run_model.R --config config/base.yml --out results/run_${SLURM_JOB_ID}.rds
 ```
 
-<div class="green-box ">
- <strong>Big Data Best Practices</strong>
- <ul>
-   <li><u>Chunked Processing:</u> Use dask.dataframe.read_csv(chunksize=1e6) for memory-efficient ETL</li>
-   <li><u>Memory Mapping:</u> numpy.memmap('large_array.npy') for out-of-core 100GB+ arrays</li>
-   <li><u>Columnar Storage:</u> pd.read_parquet('data.parquet') for fast I/O of structured data</li>
- </ul>
-</div>
+The thread variables matter. Many R and Python numerical libraries use threaded BLAS or OpenMP. If a Slurm array starts many tasks and each task also starts many threads, the job can oversubscribe the allocated CPUs. Decide whether parallelism happens across processes or inside one process, then request resources accordingly.
 
-<div class="red-box ">
- <strong>Pro Tip:</strong> Always test workflows interactively before submitting batch jobs!
- <ul>
-   <li>Validate data loading in small sessions</li>
-   <li>Profile memory usage with RStudio/python -m memory_profiler</li>
-   <li>Test single array job element before full submission</li>
- </ul>
-</div>
+## Job arrays
 
-## Performance Optimization Guide
-
-<div class="yellow-box">
- <strong>Understanding Cluster Resources</strong>
- <ul>
-   <li>All compute happens on <u>remote servers</u> - your laptop just submits jobs</li>
-   <li>Storage paths like /hb/home are <u>network-mounted</u> - accessible from all nodes</li>
-   <li>Always test scripts with small resources first!</li>
- </ul>
-</div>
-
-### Memory Management Essentials
+Arrays are useful for independent chains, simulation replicates, bootstrap runs, or scenario sweeps.
 
 ```bash
-# For R: Profile memory usage with Valgrind
-# This creates detailed memory usage reports
-module load R/4.3.0
-R -d "valgrind --tool=massif" -f bayesian_analysis.R
-# After running, analyze with:
-ms_print massif.out.* > memory_report.txt
+#!/usr/bin/env bash
+#SBATCH --job-name=sim_array
+#SBATCH --array=1-100
+#SBATCH --output=logs/%x_%A_%a.out
+#SBATCH --error=logs/%x_%A_%a.err
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=2G
 
-# For Python: Track memory allocation
-# First install memory profiler in your environment
-pip install memray
-# Run profiling and generate report
-python -m memray run -o profile.bin ml_pipeline.py
-python -m memray stats --json profile.bin > memory_stats.json
+set -euo pipefail
+
+cd "$SLURM_SUBMIT_DIR"
+mkdir -p logs results
+
+if [[ -z "${SLURM_ARRAY_TASK_ID:-}" ]]; then
+  echo "Missing SLURM_ARRAY_TASK_ID" >&2
+  exit 1
+fi
+
+module load R
+export OMP_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+
+Rscript --vanilla code/run_simulation.R \
+  --replicate "${SLURM_ARRAY_TASK_ID}" \
+  --out "results/sim_${SLURM_ARRAY_TASK_ID}.rds"
 ```
 
-<div class="green-box">
- <strong>Why Memory Matters:</strong>
- <ul>
-   <li>Jobs exceeding requested memory get <u>automatically killed</u></li>
-   <li>Use 10-20% less than node maximums for safety</li>
-   <li>Monitor memory during runs with <code>seff JOBID</code></li>
- </ul>
-</div>
+Validate the array index inside the analysis script as well. A missing or out-of-range index should fail fast rather than overwrite a default output.
 
-### Parallel Computing Patterns Explained
+## Monitor and size jobs empirically
 
-<table>
- <tr>
-   <th>Method</th>
-   <th>SLURM Directives</th>
-   <th>When to Use</th>
-   <th>Example Command</th>
- </tr>
- <tr>
-   <td>Embarrassing Parallel</td>
-   <td>--array=1-100</td>
-   <td>Independent tasks (Bootstrap/permutation tests)</td>
-   <td><code>sbatch --array=1-100 job.sh</code></td>
- </tr>
- <tr>
-   <td>MPI (Message Passing)</td>
-   <td>--nodes=4 --ntasks-per-node=16</td>
-   <td>Inter-process communication (Gibbs sampling)</td>
-   <td><code>mpirun -np 64 ./model</code></td>
- </tr>
- <tr>
-   <td>Multithreading</td>
-   <td>--cpus-per-task=32</td>
-   <td>Shared-memory tasks (XGBoost/CV tuning)</td>
-   <td><code>export OMP_NUM_THREADS=32</code></td>
- </tr>
-</table>
-
-<div class="green-box">
- <strong>Key Concept:</strong> Always match parallel method to your algorithm:
- <ul>
-   <li>Embarrassing Parallel: No data sharing between tasks</li>
-   <li>MPI: Needs data exchange between processes</li>
-   <li>Multithreading: Single process with multiple threads</li>
- </ul>
-</div>
-
-
-## Getting Help with HPC
-
-<div class="green-box">
- <strong>Cluster Support Channels</strong>
- <ul>
-   <li>Email Support: hummmingbird@ucsc.edu</li>
-   <li>Slack Channel: <a href="https://join.slack.com/t/ucschummingbi-lph3072/shared_invite/zt-19mbwqvx1-GqguQcumVBLss~nzjOHAYg">Link</a> </li>
-   <li>Documentation at  <a href="https://hummingbird.ucsc.edu/docs">https://hummingbird.ucsc.edu/docs</a> </li>
- </ul>
-</div>
+Submit, inspect, and adjust:
 
 ```bash
-# Check job efficiency - run this while job is active
-seff $(squeue -u $USER -h -o %i)
-# Look for:
-# - CPU Utilization: Should be >90% for good efficiency
-# - Memory Usage: Should be < requested amount
+sbatch code/job.sh
+squeue -u "$USER"
+sacct -j JOBID --format=JobID,State,Elapsed,MaxRSS,ReqMem,ExitCode
+tail -n 80 logs/fit_model_JOBID.out
+tail -n 80 logs/fit_model_JOBID.err
 ```
 
-<div class="red-box">
- <strong>Avoid These Common Mistakes</strong>
- <ul>
-   <li><u>Memory Overallocation:</u><br>
-   Bad: <code>--mem=256G</code> (max is 256GB/node)<br>
-   Good: <code>--mem=230G</code> (leave 10% margin)</li>
-   
-   <li><u>Ignoring Error Logs:</u><br>
-   Always check <code>slurm-JOBID.err</code> after failures</li>
-   
-   <li><u>Local Installs:</u><br>
-   Never use <code>pip install --user</code> - it can break cluster environments</li>
- </ul>
-</div>
+Use `sacct` output to tune future requests. If a job used 1.5 GB, requesting 64 GB is not justified. If it died from memory pressure, increase memory or change the algorithm. If it hit the time limit, checkpoint intermediate results and estimate runtime from smaller runs.
+
+## Jupyter through an allocation
+
+Run Jupyter on a compute node, not on the login node. First request an allocation. Then start Jupyter without opening a browser:
+
+```bash
+srun --pty --cpus-per-task=2 --mem=8G --time=02:00:00 bash
+hostname
+jupyter lab --no-browser --ip=127.0.0.1 --port=8888
+```
+
+From your local machine, open an SSH tunnel through the login host to the allocated compute node. Replace `COMPUTE_NODE` with the hostname printed inside the allocation:
+
+```bash
+ssh -L 8888:COMPUTE_NODE:8888 your_ucsc_id@hb.ucsc.edu
+```
+
+Then open the local URL shown by Jupyter. Shut down the server and release the allocation when finished.
+
+## Checkpoints and dependencies
+
+Long jobs should be restartable. Save intermediate outputs, write final results atomically when possible, and avoid a single monolithic job that loses all progress if it fails near the end. Slurm dependencies can chain stages:
+
+```bash
+first=$(sbatch --parsable code/preprocess.sh)
+sbatch --dependency=afterok:${first} code/fit_model.sh
+```
+
+Do not hard-code private paths, module versions, GPU syntax, or partition names in public instructions. Put allocation-specific details in a local README or configuration file that can be updated independently.
+
+For statistical work, the most common failure is not that Slurm is complicated. It is that the analysis script assumes an interactive laptop environment. Batch jobs should not depend on the current working directory being guessed correctly, on a package being installed only in an interactive shell, or on a plot window opening. Write scripts so that all inputs, outputs, and configuration files are explicit. Then test the exact command inside a small allocation before scaling to an array or a long run.
+
+## References
+
+- UCSC Hummingbird. [Getting started documentation](https://hummingbird.ucsc.edu/getting-started/).
+- SchedMD. [Slurm job array documentation](https://slurm.schedmd.com/job_array.html).

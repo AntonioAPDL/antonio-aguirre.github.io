@@ -1,130 +1,84 @@
 ---
 layout: post
-published: false
-title: "On Bayesian Methodology Part. 2/6"
+published: true
+title: "Preparing and monitoring computation"
 date: 2024-10-11
-theme: Review
-tags: [statistics, bayesian, methodology]
-excerpt: "Before and While Fitting a Model "
+updated: 2026-07-29
+theme: Bayesian workflow
+tags: [bayesian-statistics, computation, diagnostics]
+series: "Bayesian workflow"
+series_order: 2
+description: "How to prepare Bayesian computation, fit models in stages, and monitor the quantities that determine whether the approximation is usable."
+excerpt: "Computation should be staged, diagnosed, and recorded against the quantities that will actually be reported."
+math: true
 ---
 
+After a first model is written, the next problem is not simply to run the largest dataset through the most sophisticated algorithm. The safer path is staged computation. Each stage should answer one question: does the code evaluate the model correctly, does the algorithm explore or optimize the relevant region, and is the remaining numerical error small enough for the reported target?
 
-## I. Before Fitting a Model
+This matters because Bayesian computation can fail quietly. A Markov chain can have a high effective sample size for parameters that do not matter and still miss tail behavior that drives a decision. A variational objective can appear stable while the approximation is too narrow. An optimizer can converge to a local mode that is irrelevant for the posterior mass. Monitoring should be tied to the analysis target, not only to generic software output.
 
-**Choosing an Initial Model**  
-The starting point of almost all analyses is to adapt what has been done before. Drawing from existing methods provides a foundation for further refinement.
+## Prepare the model for computation
 
-**Modular Construction**  
-A Bayesian model is built from **modules** rather than whole models. Naming and constructing models in a modular fashion makes it easier to:
-- Identify connections between seemingly different models.
-- Adapt models to the specific requirements of an analysis project.  
+Parameterization is often the difference between a model that is routine to fit and one that is fragile. Centered and noncentered parameterizations can behave very differently in hierarchical models. Raw scale parameters can create poor geometry if they span several orders of magnitude. Constrained parameters need transformations that preserve support while keeping gradients stable.
 
-Modules often act as placeholders, which can be replaced or expanded as necessary.
+Before fitting the full model, I prefer to check the following:
 
-**Scaling and Transforming the Parameters**  
-Parameters should be interpretable for both practical and ethical reasons. Transformations can make parameters more meaningful, aiding in:
-- Clear communication of results.
-- Effective use of prior information.
+- Can the log density be evaluated at reasonable parameter values?
+- Do simulated data have the expected dimensions and units?
+- Do transformed parameters remain finite under plausible inputs?
+- Are constraints handled by the parameterization rather than by fragile penalties?
+- Does a small artificial dataset produce interpretable output?
 
-**Prior Predictive Checking**  
-Prior predictive checks are invaluable for understanding the implications of prior distributions within generative models.  
+These checks catch many errors before they become statistical diagnostics. A divergent transition caused by a coding mistake and one caused by real posterior geometry can look similar. The first goal is to remove coding mistakes.
 
-<div class="green-box">
-  <strong>Key Approaches</strong>  
-  <ul>
-    <li>Considering priors on outcomes and deriving corresponding joint priors on parameters.</li>
-    <li>Using simulations to elicit expert knowledge on measurable quantities, which is often easier than soliciting opinions on unobservable model parameters.</li>
-  </ul>
-</div>
+## Fit in stages
 
-**Generative and Partially Generative Models**  
-Fully Bayesian data analysis typically requires a **generative model**, a joint probability distribution for all data and parameters.
+Start with small cases. Fit a reduced dataset, a reduced hierarchy, or a simpler likelihood before using the full model. This is not a substitute for the final fit. It is a way to isolate failure. If the small model fails, the full model is unlikely to clarify the issue. If the small model works and the full one fails, the difference is informative.
 
-<div class="yellow-box">
-  <strong>Insights</strong>  
-  <ul>
-    <li>Bayesian inference does not require the generative model. It only needs the likelihood derived from the data, and different generative models can share the same likelihood.</li>
-    <li>Bayesian data analysis, however, depends on the generative model to enable predictive simulation and model checking.</li>
-    <li>The Bayesian workflow evaluates a series of generative models to improve understanding and predictions.</li>
-  </ul>
-</div>
+A typical sequence is:
 
-Prior and posterior predictive checks can vary under different generative models while satisfying the likelihood principle.  
-Some models commonly used in Bayesian analysis are not fully generative:
-- Regression models and survival data with censoring.
-- Models with improper priors, which lack a joint distribution for data and parameters and cannot sample from the prior predictive distribution. Improper priors often serve as placeholders on the path to a fully Bayesian model.
+1. Simulate from the prior or from fixed known parameters.
+2. Fit the model to a small simulated dataset.
+3. Fit the model to a small real-data subset.
+4. Fit a simpler baseline to the full data.
+5. Fit the intended model to the full data.
+6. Re-run the final fit with the recorded production settings.
 
-In applied Bayesian work, complexity often arises from incorporating multiple data sources. This necessitates balancing simplicity with flexibility in modeling.
+At each step, the diagnostic target changes. Early runs test code and geometry. Later runs test inference, approximation quality, and reproducibility. Mixing these purposes makes debugging slower.
 
-<div class="green-box">
-  <strong>Progression of Generative Models</strong>  
-  <ul>
-    <li>At one extreme, non-generative methods consist solely of data summaries with no model for the data.</li>
-    <li>Classical statistical models provide probability distributions \( p(y; \theta) \) for data \( y \) given parameters \( \theta \), but no distribution for \( \theta \).</li>
-    <li>Partially generative Bayesian models include unmodeled data \( x \), such as sample sizes, design settings, or hyperparameters, represented as \( p(y, \theta \mid x) \).</li>
-    <li>Fully generative models encompass everything, represented as \( p(y, \theta, x) \), leaving no data “left out.”</li>
-  </ul>
-</div>
+## MCMC diagnostics
 
+For Markov chain Monte Carlo, convergence is not a single number. Multiple chains should start from dispersed initial values when possible. Rank plots, trace plots, split $$\hat R$$, effective sample size, divergences, tree depth, energy diagnostics, and Monte Carlo standard errors all provide different information.
 
----
+The most important diagnostic is whether Monte Carlo error is small for the quantities being reported. If the final result is a forecast interval, the Monte Carlo error of the interval endpoint matters more than the effective sample size of an unrelated latent state. If the final result is a tail probability, tail effective sample size matters. If the result is a model comparison, uncertainty in predictive score differences matters.
 
-## II. Fitting a Model
+More iterations can be the right response after the model geometry is understood. But more iterations are not a cure for a broken parameterization, a multimodal posterior that chains cannot move between, or a prior that creates unreasonable regions of high curvature.
 
-Bayesian computation has evolved significantly over time. Early methods relied on analytic calculations and normal approximations. In the 1990s, the advent of advanced algorithms expanded the landscape for exploring posterior distributions:
-- **Gibbs and Metropolis Algorithms:** Enabled Bayesian inference for many models.
-- **Sequential Monte Carlo (SMC):** A generalization of Metropolis applicable to broader Bayesian computations.
-- **Variational Inference (VI):** A fast but potentially inaccurate approximation, building on the expectation-maximization (EM) algorithm.
-- **Hamiltonian Monte Carlo (HMC):** Uses gradient computations to navigate continuous probability spaces efficiently.
+## Approximate inference diagnostics
 
-These innovations have revolutionized Bayesian workflow, but safe usage requires strong diagnostics to flag unreliable computations.
+Variational inference, Laplace approximations, expectation propagation, and other approximations need their own checks. A stable optimization objective does not guarantee a good approximation to the posterior. The approximation may understate uncertainty, miss dependence, or fail in tails.
 
-### Initial Values, Adaptation, and Warmup
-The initial phase of inference algorithms is critical:
-- **Initial Values:** While theoretically irrelevant in the asymptotic limit, poor initial values can bias results.
-- **Warmup Phase:** Moves simulations from unrepresentative initial values toward the typical set, a concept in information theory. This phase serves three purposes:
-  1. Reduces bias from initial values.
-  2. Provides information to tune algorithm parameters.
-  3. Flags computational issues early.
+For approximate inference, I look for:
 
-### How Long to Run an Iterative Algorithm
-The duration of iterative algorithms like MCMC impacts result reliability and computational efficiency:
-- **Convergence Diagnostics:**  
-  - Standard practice: Run until a mixing measure, Vehtari et al. (2020), is below 1.01 for all parameters.  
-  - Monitor the multivariate mixing statistic, Lambert and Vehtari (2020).  
-- **Balancing Accuracy and Speed:**  
-  While increasing adequate sample size or reducing Monte Carlo error improves accuracy, it limits model exploration if computation is too slow.
-- **Leveraging Parallelism:**  
-  Instead of increasing iterations, variance reduction can be achieved by increasing parallel chains.
+- sensitivity to initialization;
+- agreement with a slower method on small cases;
+- calibration under simulated data;
+- stability of reported summaries under alternative approximation settings;
+- clear identification of which posterior features the approximation is expected to preserve.
 
-### Approximate Algorithms and Models
-Markov chain simulation is an approximation where theoretical error reduces with more iterations. However, scalability challenges arise as models and datasets grow larger, necessitating faster alternatives:
-- **Techniques for Approximation:**  
-  - Empirical Bayes  
-  - Linearization  
-  - Laplace approximation  
-  - Nested approximations (e.g., INLA)  
-  - Data-splitting (e.g., expectation propagation)  
-  - Mode-finding (e.g., variational inference)  
-  - Penalized maximum likelihood  
+Approximate methods can be excellent engineering choices. They should be presented as approximations with known diagnostics, not as exact posterior computation.
 
-- **Diagnostics for Approximate Algorithms:**  
-  Use diagnostic tools to ensure the algorithm reproduces key posterior features for the specific model.
+## Record the run
 
-<div class="yellow-box">
-  <strong>Insights</strong>: Approximate algorithms can be viewed as exact algorithms for approximate models.  
-  <ul>
-    <li> <strong>Empirical Bayes:</strong>   Replaces prior distributions with data-dependent point-mass priors. </li>
-    <li> strong>Laplace Approximation:</strong>   Data-dependent linearization of the model.   </li>
-    <li> <strong>Nested Laplace Approximation:</strong>   Linearizes conditional posterior distributions.</li>
-  </ul>
-</div>
+Reproducibility is easier if it is treated as part of computation rather than as a final cleanup step. A useful run record includes the data version, code commit, random seeds, package versions, hardware or cluster environment, model configuration, and output paths. For long jobs, logs should include enough information to identify whether the job failed because of model code, resource limits, missing files, or external services.
 
-### Fit Fast, Fail Fast
-Efficient Bayesian workflow emphasizes quickly identifying and discarding flawed models:
-- **Failing Fast:** Saves time by avoiding perfect inference for fundamentally flawed models.
-  
-<div class="red-box">
-  <strong>Fast Algorithms vs. Early Failure</strong>  
-  There is extensive literature on fast approximation algorithms to fit desired models, but less focus on algorithms designed to minimize time spent on models that will ultimately be abandoned.
-</div>
+This record also protects interpretation. If a result changes, the analyst can ask whether the data changed, the code changed, the random seed changed, or the computational settings changed. Without that separation, the same analysis can become difficult to explain even to the person who ran it.
+
+## Practical stopping rule for computation
+
+Computational work can stop when the remaining numerical error is small relative to the statistical uncertainty and the conclusions are stable for the target summaries. That is a practical standard, not a claim that the posterior has been perfectly explored. It should be reported honestly: what method was used, what diagnostics were checked, and what limitations remain.
+
+## References
+
+- Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., and Buerkner, P. "Rank-normalization, folding, and localization: An improved $$\hat R$$ for assessing convergence of MCMC." [Bayesian Analysis](https://projecteuclid.org/journals/bayesian-analysis/volume-16/issue-2/Rank-Normalization-Folding-and-Localization--An-Improved-R%cb%86-for/10.1214/20-BA1221.full).
+- Stan Development Team. [Stan Reference Manual: MCMC diagnostics](https://mc-stan.org/docs/reference-manual/analysis.html).

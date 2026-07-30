@@ -36,6 +36,11 @@ jobs:
       - name: Run site integrity checks
         run: python3 scripts/check_site_integrity.py
 
+      - name: Run blog publication checks
+        run: |
+          python3 scripts/check_blog_quality.py
+          python3 scripts/check_blog_code_blocks.py
+
       - name: Check JavaScript syntax
         run: |
           set -euo pipefail

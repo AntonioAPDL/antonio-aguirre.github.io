@@ -1,60 +1,63 @@
 ---
 layout: post
-published: false
-title: "On Bayesian Methodology. Part 5/6"
+published: true
+title: "Comparing and combining predictive models"
 date: 2024-12-02
-theme: Review
-tags: [statistics, bayesian, methodology]
-excerpt: "Model Comparison"
+updated: 2026-07-29
+theme: Bayesian workflow
+tags: [bayesian-statistics, forecasting, model-comparison]
+series: "Bayesian workflow"
+series_order: 5
+description: "A practical guide to predictive model comparison, validation design, proper scores, stacking, Bayesian model averaging, and projection predictive inference."
+excerpt: "Model comparison should match the prediction task, report uncertainty, and avoid treating stacking weights as posterior model probabilities."
+math: true
 ---
 
+Model comparison begins with the prediction task. A score computed under the wrong validation design can be precise and still misleading. If the future task is forecasting the next month, random folds that mix future and past observations are not the right test. If the future task is prediction for new groups, validation should hold out groups rather than individual rows. If preprocessing uses the full dataset before splitting, information can leak into the evaluation.
 
-## VII. Understanding and Comparing Multiple Models
+The comparison should reproduce the deployment setting as closely as possible. That includes the timing of covariates, data availability at prediction time, grouping structure, spatial or temporal dependence, and the loss function that matters. A model that wins under one score or split design may not be better for a different target.
 
-### Visualizing Models in Relation to Each Other
-A key aspect of a Bayesian Workflow is fitting multiple models for a single problem. This process is not about selecting the best model or averaging models, but rather using a series of fitted models to gain a deeper understanding of each one.
+## Proper scores and uncertainty
 
-<div class="red-box">
-  <strong>Remark:</strong>  
-  <li> Model comparison in this context is not about selecting or averaging but about exploring the <strong>process</strong> of fitting multiple models to understand them better. </li>
-</div>
+For probabilistic forecasts, proper scoring rules reward calibrated and sharp predictive distributions. Log predictive density, continuous ranked probability score, energy score, variogram score, interval score, and quantile score emphasize different features. The score should be chosen because it matches the target, not because it is convenient.
 
-**Considerations When Fitting Multiple Models:**
-- Be aware of researcher degrees of freedom:
-  - Overfitting can occur if a single “best” model is chosen.
-  - A set of fitted models might appear to bracket total uncertainty, but other unconsidered models could still contribute.
-- Multiverse analysis: Evaluate situations where multiple models pass all checks to ensure robustness.
+Average score differences should be reported with uncertainty. A small difference can be overwhelmed by sampling variability, dependence across folds, or the number of candidate models tried. Selecting the model with the best noisy estimate creates optimism. This is especially important when many models are compared after repeated exploration.
 
-### Cross-validation and Model Averaging
-Cross-validation (CV) is a powerful tool for evaluating models, but it requires careful interpretation:
+The best average score is also not the whole story. Subgroup performance, tail behavior, lead-time performance, and failure modes can matter more than a single average. In forecasting, the average score may hide poor behavior during rare but important events.
 
-<div class="red-box">
-  <strong>Key Principle:</strong>  
-  <li> If there is significant uncertainty in model comparisons, avoid selecting the single model with the best cross-validation result. This discards the uncertainty from the CV process. </li>
-</div>
+## Cross-validation design
 
-**Alternative Approaches:**
-- **Stacking:**  
-  Combines inferences by weighting models to minimize cross-validation error. Stacking can sometimes be seen as pointwise model selection.
-- **Scaffold Models:**  
-  Include models that are deliberately simple (e.g., for comparison), experimental, or flawed (e.g., with coding errors). These models serve as benchmarks or stepping stones but are not included in final predictions.
+Cross-validation estimates predictive performance under a specific data-generating and data-splitting scheme. The split design is part of the estimand. For independent and identically distributed rows, random folds may be reasonable. For time series, blocked or rolling-origin validation is often more appropriate. For hierarchical data, leaving out groups may answer a different question than leaving out observations within known groups.
 
-While a Bayesian Workflow emphasizes continuous model expansion over averaging, there are cases where averaging predictions over competing Bayesian models is reasonable.
+All preprocessing that would be unavailable at prediction time should happen inside each training fold. This includes scaling, feature selection, imputation, tuning, and sometimes transformation choices. Otherwise the validation score can be too optimistic.
 
-### Comparing a Large Number of Models
-When faced with many candidate models, the goal is often to find a simpler model with comparable predictive performance to a more complex, expanded model.
+## PSIS-LOO and diagnostics
 
-<div class="red-box">
-  <strong>Warning:</strong>  
-  <li> Selecting one model based solely on minimizing cross-validation error risks overfitting and suboptimal choices. </li>
-</div>
+Pareto-smoothed importance sampling leave-one-out cross-validation can be efficient for Bayesian models because it reuses posterior draws from the full-data fit. Its diagnostics are essential. Large Pareto $$k$$ values indicate that the approximation to leaving out an observation is unreliable. The fix may be exact refitting for problematic points, a different validation design, or a model revision.
 
-**Projection Predictive Variable Selection:**
-- A stable and reliable method to identify smaller models with strong predictive performance.
-- Avoids overfitting by:
-  - Projecting submodels based on the expanded model’s predictions.
-  - Not fitting each model independently to the data.
+PSIS-LOO estimates pointwise out-of-sample predictive accuracy under a leave-one-observation structure. It does not automatically validate time-series extrapolation, new-group prediction, or decisions with asymmetric costs. The interpretation depends on whether the leave-one-out task matches the target.
 
-This approach enables efficient comparison of a large number of models while maintaining robust predictive performance.
+## Stacking
 
-Understanding and comparing multiple models is an integral part of Bayesian Workflow. By focusing on the process of model fitting rather than rigid selection or averaging, practitioners can better navigate uncertainty and extract meaningful insights from their analyses. Tools like stacking and projection predictive variable selection ensure that model comparison remains both rigorous and practical.
+Stacking combines predictive distributions by choosing weights that optimize predictive performance under a validation criterion. It can be useful when different models capture different parts of the data. The combined forecast can outperform each individual model under the chosen score.
+
+Stacking weights should not be read as posterior probabilities that each model is true. They are optimization weights for prediction under a specified criterion and validation design. A model can receive a high stacking weight because it complements other models, not because it is the most plausible data-generating mechanism. Conversely, a useful diagnostic model may receive a low weight because it adds little to the ensemble.
+
+## Bayesian model averaging
+
+Bayesian model averaging is different. It averages over models using posterior model probabilities under a model space and prior probabilities on models. This can be principled when the model list is meaningful, the priors are defensible, and the likelihood comparison is stable. In many applied workflows, the candidate models are not a clean exhaustive model space. They are a sequence of approximations, diagnostics, and engineering choices. In that setting, stacking or explicit predictive comparison may be more transparent.
+
+## Projection predictive inference
+
+When the goal is a smaller model rather than the single best model, projection predictive inference is useful. A rich reference model is fit first. Smaller models are then chosen by how well they approximate the reference model's predictions. This avoids fitting every small model independently and selecting the one with the noisiest validation advantage.
+
+Projection is especially useful when a complex model is acceptable for discovery but a smaller model is needed for deployment, interpretation, or cost. The target is not truth in an absolute sense. The target is predictive behavior close to the reference model with fewer inputs or simpler structure.
+
+## What to report
+
+A useful comparison report includes the validation design, the score, uncertainty in score differences, diagnostic warnings, subgroup or tail behavior, and whether the final choice was a single model, a stacked combination, or a reduced projection. It should also state what the comparison does not establish. A good score does not prove the model is mechanistically correct. It supports a predictive claim under the evaluation design.
+
+## References
+
+- Vehtari, A., Gelman, A., and Gabry, J. "Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC." [Statistics and Computing](https://doi.org/10.1007/s11222-016-9696-4).
+- Yao, Y., Vehtari, A., Simpson, D., and Gelman, A. "Using stacking to average Bayesian predictive distributions." [Bayesian Analysis](https://doi.org/10.1214/17-BA1091).

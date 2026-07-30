@@ -1,226 +1,89 @@
 ---
 layout: post
-published: false
-title: "On Bayesian Methodology. Part 4/6"
+published: true
+title: "Diagnosing fit and revising the model"
 date: 2024-11-13
-theme: Review
-tags: [statistics, bayesian, methodology]
-excerpt: "Computational Challenges and Model Validation"
+updated: 2026-07-29
+theme: Bayesian workflow
+tags: [bayesian-statistics, diagnostics, model-checking]
+series: "Bayesian workflow"
+series_order: 4
+description: "How to separate computational failure from model failure, use posterior predictive checks, and revise a Bayesian model without losing the target."
+excerpt: "A failed diagnostic should lead to a specific revision: code, computation, parameterization, prior information, or model structure."
+math: true
 ---
 
+Model checking is useful only if it leads to a disciplined response. A poor fit, a divergent transition, a biased residual pattern, or an unstable forecast should not trigger an automatic search for a larger model. The first task is to identify what kind of failure is being observed.
 
-## IV. Addressing Computational Problems
+There are at least three different failures that often look similar in practice. The code may not implement the intended model. The computation may not approximate the posterior or generalized posterior well. The model may be a poor description of the data-generating process for the target being studied. Revising the wrong layer can waste substantial time. Adding covariates will not fix an indexing bug. Running more iterations will not fix an impossible prior predictive distribution. Reparameterizing may not fix a missing seasonal component.
 
-<div class="red-box">
-  <strong>The Folk Theorem of Statistical Computing: </strong>   
- <li> When computational problems arise, they often indicate an issue with the model itself.  </li>
- <li> Many cases of poor convergence are tied to regions of parameter space that are either irrelevant or nonsensical. </li>
-  <li> Instead of throwing more computational resources at the problem, the first step should be to identify and address potential model pathologies. </li>
-</div>
+## Start with the failure type
 
-### Starting at Simple and Complex Models and Meeting in the Middle
-Diagnosing computational problems often requires a two-pronged approach:
-- Simplify the problematic model step by step until it works reliably.
-- Start with a simple, well-understood model and gradually add features until the issue reappears.
+When a fit looks wrong, I try to classify the failure before changing the model:
 
-This process helps isolate the root cause of the problem.
+- **Implementation failure:** dimensions, transformations, offsets, dates, units, or likelihood contributions are wrong.
+- **Computational failure:** the intended model is hard for the algorithm to explore or optimize.
+- **Model failure:** the fitted model cannot reproduce features of the data that matter.
+- **Target failure:** the model may fit observed data but does not answer the intended prediction or decision question.
 
-### Getting a Handle on Models That Take a Long Time to Fit
-Slow computation is often symptomatic of deeper issues, such as poorly performing Hamiltonian Monte Carlo (HMC). However, debugging becomes harder as computation times increase.  
-Key strategies include:
-- Viewing model choices as provisional.
-- Fitting multiple models to understand computational and inferential behavior in the applied problem.
+This separation is not always clean, but it is a useful starting point. For example, in Hamiltonian Monte Carlo, divergences may indicate difficult posterior geometry. That geometry may come from a centered parameterization, a weak prior, a funnel-shaped hierarchy, a coding mistake, or a real lack of information. The diagnostic points to a region that needs investigation; it does not name the repair by itself.
 
-### Monitoring Intermediate Quantities
-Saving and plotting intermediate quantities during computation can reveal hidden issues with the model or algorithm. These visualizations often provide valuable clues for debugging.
+## The statistical computing folk theorem
 
-### Stacking to Reweight Poorly Mixing Chains
-In situations where multiple chains mix slowly but remain within reasonable ranges, stacking can be used:
-- Combine simulations by assigning weights to chains through cross-validation.
-- Particularly useful during model exploration when diagnostics suggest some progress but full convergence remains elusive.
+The informal folk theorem says that computational problems often reveal model problems. This is a useful heuristic, not a theorem. Poor computation can be caused by model geometry that reflects weak information, unrealistic priors, or awkward parameterization. It can also be caused by a software mistake or by asking an algorithm to solve a problem outside its strengths.
 
-### Posterior Distributions with Multimodality and Difficult Geometry
-Multimodality and complex posterior geometries pose significant challenges:
-- **Disjoint Posterior Volumes:**  
-  - Near-zero mass for all but one mode.  
-  - Symmetric volumes, such as label switching in mixture models.  
-  - Distinct volumes with significant probability mass.  
-- **Unstable Tails:**  
-  A single posterior volume with arithmetically unstable regions.
+The practical lesson is to inspect the model rather than only increasing runtime. More computation is appropriate after the geometry and implementation are understood. Before that, it can hide the issue. A chain that eventually produces many draws from a poorly parameterized model may still leave the analyst with a fragile workflow.
 
-Each scenario requires tailored strategies for efficient computation.
+## Localize the problem
 
-### Reparameterization
-HMC-based samplers perform best when:
-- The mass matrix is well-tuned.
-- The posterior geometry is smooth, with no sharp corners or irregularities.  
+A good debugging strategy moves in both directions. Simplify the current model until the failure disappears. Separately, start from a small model that works and add components until the failure appears. The point where behavior changes is often more informative than the final failed model.
 
-For many classical models, results like the Bernstein-von Mises theorem simplify posterior geometry with sufficient data. When this is not the case, reparameterization can significantly improve computational performance by simplifying posterior geometry.
+Useful simplifications include:
 
-### Marginalization
-Challenging geometries in posterior distributions often stem from parameter interactions. Marginalizing over certain parameters can simplify computations:
-- Approximations like the Laplace method can be particularly effective for latent Gaussian models.
-- Exploiting the structure of the problem can lead to substantial improvements.
+- fixing selected parameters at reasonable values;
+- reducing hierarchy depth;
+- shortening a time series;
+- removing one data source;
+- fitting one group or one season;
+- replacing a nonlinear component with a linear approximation;
+- using simulated data with known parameters.
 
-### Adding Prior Information
-Many computational issues can be mitigated by incorporating prior information:
-- Priors help address weakly informative data regions, improving model behavior without sacrificing inference quality.
-- While the primary purpose of priors is not to fix fitting problems, their inclusion often resolves computational challenges.  
+These reductions should be temporary and documented. They are not the final analysis. They are diagnostic experiments.
 
-<div class="red-box">
-  <strong>Identifiability?</strong>  
-  <li> “Identification” is an asymptotic property in classical statistics </li>
-  <li> Bayesian inference prioritizes inference with finite data. </li>
-  <li> If data are insufficient for certain aspects of the model, priors can supply the necessary information. </li>
-</div>
+## Posterior predictive checks
 
-**Ladder of Abstraction:**  
-1. Poor mixing of MCMC.  
-2. Difficult geometry as a mathematical explanation.  
-3. Weakly informative data as a statistical explanation.  
-4. Substantive prior information as a solution.  
+Posterior predictive checks compare observed data with data replicated from the fitted model. They are most useful when the discrepancy is chosen before looking only at the most convenient summary. A model can match the marginal distribution while failing on extremes, temporal dependence, spatial structure, or subgroup behavior.
 
-Addressing computational issues can start at either end of this ladder, transitioning from troubleshooting to workflow optimization.
+For a forecasting model, I would check calibration of forecast intervals, behavior at high and low values, residual autocorrelation, seasonal structure, and performance by lead time. For a regression model, I would check residual patterns over covariates and groups. For a dynamic latent-state model, I would check whether latent trajectories imply realistic observed series.
 
-### Adding Data
-Similar to priors, additional data can constrain models and resolve computational problems:
-- Incorporate new data sources into the model.
-- Models that work well with larger datasets may struggle in small data regimes; expanding the dataset can improve performance.
+The check should be tied to the target. If the analysis reports upper-tail flood risk, a posterior predictive check that only examines the mean is insufficient. If the analysis supports resource allocation by group, average predictive performance can hide unacceptable subgroup errors.
 
-Addressing computational problems in Bayesian modeling involves a combination of simplifying models, leveraging prior information, and refining computational techniques. A systematic approach, starting with diagnostics and iterative improvements, ensures both model reliability and computational efficiency.
+## Revise one assumption at a time when possible
 
----
+Model revision should follow the diagnostic. If residuals show temporal dependence, revise the dynamic or error structure. If high values are systematically underpredicted, revise the tail behavior, transformation, covariates, or regime structure. If the posterior is weakly identified, revise the prior, data design, or target summary. If computation fails because of a funnel, try a noncentered parameterization or stronger scale information.
 
-## V. Evaluating and Using a Fitted Model
+Not every discrepancy deserves a model expansion. A discrepancy matters when it affects the target, reveals a known scientific mechanism, or undermines the interpretation being reported. A model can always be made more flexible, but flexibility can hide misspecification and make computation harder. The revision should improve the analysis, not only the appearance of fit.
 
-Evaluating a fitted model involves multiple checks, each tailored to the specific goals of the analysis. The aspects of the model that require evaluation depend on the application and the intended users of the statistical methods.
+## Sensitivity analysis
 
-### Posterior Predictive Checking
-Posterior predictive checking involves simulations from the posterior distribution to evaluate model performance:
-- While there’s no universal guide for which checks to perform, conducting a few direct checks can safeguard against gross misspecification.
-- Similarly, there’s no definitive rule for deciding when a failed check necessitates adjustments to the model.
-- The choice of checks depends on the analysis goals and the costs and benefits of adjustments.
+Some assumptions cannot be learned well from the available data. Priors on weakly identified parameters, missing-data mechanisms, tail behavior, and extrapolation rules often need sensitivity analysis. The question is not whether the analyst can find one assumption that gives a preferred result. The question is whether the conclusion is stable across assumptions that remain plausible.
 
-<div class="green-box">
-   <strong>Key Principle:</strong>   
-  <li> Seek “severe tests”—checks likely to fail if the model produces misleading answers to critical questions. </li>
-</div>
+Sensitivity analysis should be reported in a way that connects to the decision or scientific statement. If a forecast ranking changes under a plausible prior, say so. If an interval endpoint is stable but a latent parameter is not, separate those results. If the data do not identify a mechanism, the report should not imply that they do.
 
-### Cross-Validation and Influence of Individual Data Points
-Cross-validation (CV) enhances predictive diagnostics, especially for flexible models, by providing insights into model fit and data influence:
-1. **Calibration Checks:** Use the cross-validation predictive distribution to assess calibration.
-2. **Difficult Observations:** Identify observations or groups that are hard to predict.
-3. **Influence Diagnostics:** Examine the additional information provided by individual observations.
+## A revision loop
 
-- Leave-one-out cross-validation (LOO-CV) is a popular method, though it doesn’t always align with inferential goals for multilevel (hierarchical) models.
-- Calibration insights:
-  - Posterior predictive checking compares marginal prediction distributions to data.
-  - LOO-CV predictive checking evaluates the calibration of conditional predictive distributions.
-  - Probability integral transformations (PIT) under good calibration are uniform.
+A disciplined revision loop is:
 
-<div class="blue-box">
-  <strong>  Practical Tip:</strong>   
-  <li> Cross-validation for multilevel models requires thoughtful implementation to ensure alignment with inferential goals. </li>
-</div>
+1. Identify the failure and the affected target.
+2. Determine whether it is implementation, computation, model structure, or target mismatch.
+3. Run a minimal diagnostic experiment.
+4. Revise the smallest relevant component.
+5. Re-run prior, computational, and posterior predictive checks.
+6. Record why the revision was made.
 
-### Influence of Prior Information
-Understanding how prior information affects posterior inferences is essential for a robust evaluation:
-- A statistical model can be understood in two ways:
-  1. **Generatively:** Explore how parameters map to data using prior predictive simulations.
-  2. **Inferentially:** Examine the path from inputs (data and priors) to outputs (estimates and uncertainties).
+This loop is slower than trying many changes at once, but it produces an analysis that can be explained. The final model is not just the one that survived. It is the result of a documented sequence of checks and revisions.
 
-- **Sensitivity Analysis:**
-  - Measure shrinkage between prior and posterior distributions, such as comparing posterior standard deviations or quantiles.
-  - Use importance sampling to approximate and compare posteriors across models.
-  - Conduct static sensitivity analysis to study posterior sensitivity to prior perturbations without re-fitting the model.
+## References
 
-<div class="green-box">
-  <strong>Practical Insight:</strong>   
-  <li> Sensitivity analysis highlights the balance between prior information and data, offering valuable diagnostic insights without excessive computation. </li>
-</div>
-
-### Summarizing Inference and Propagating Uncertainty
-Traditional methods of summarizing Bayesian inference often fail to fully represent the complexity of variation and uncertainty:
-- Tables and graphs of parameter estimates and uncertainties only capture one-dimensional margins.
-- Marginal posterior distribution graphs become unwieldy for models with many parameters and fail to illustrate the interplay of hierarchical model uncertainties.
-
-**Tools for Advanced Summaries:**
-- Use visualization tools like the `bayesplot` R package to effectively summarize and explore Bayesian inference results.
-
-Evaluating a fitted model is a multifaceted process. It involves a combination of diagnostic checks, sensitivity analyses, and advanced visualization techniques. The goal is not just to identify potential misfits but to refine the model for better inference and predictive accuracy.
-
-
----
-
-## VI. Modifying a Model
-
-### Constructing a Model for the Data
-Model construction is a creative process where the modeler combines existing components to account for new data, enhance features of existing data, or establish links to underlying processes.
-
-<div class="green-box">
-  <strong>Model Building as a Task:</strong>  
-  <li> Model construction is akin to a language-like task, where components are assembled to encompass new data, existing data features, and links to underlying processes. </li>
-</div>
-
-<div class="yellow-box">
-  <strong>Reasons for Model Expansion:</strong>  
-  <li> Response to new data.  </li>
-  <li> Failures of models fit to existing data.   </li>
-  <li> Computational challenges with current fitting procedures. </li>
-</div>
-
-### Incorporating Additional Data
-Expanding a model to include more data is a critical step in a Bayesian Workflow.  
-It’s often said that the value of a statistical method lies not just in how it handles data but in the choice of what data to use.
-
-### Working with Prior Distributions
-Traditionally, Bayesian statistics refers to noninformative or fully informative priors, but in practice, these rarely exist:
-- **Uniform Prior:** Depends on parameterization, carrying implicit information.
-- **Reference Prior:** Based on asymptotic regimes and fictional data assumptions.
-- **Informative Prior:** Rarely encompasses all available knowledge.
-
-**Ladder of Priors:**  
-Think of prior distributions as existing on a continuum:
-1. Improper flat prior.  
-2. Super-vague but proper prior.  
-3. Very weakly informative prior.  
-4. Generic weakly informative prior.  
-5. Specific informative prior.  
-
-Priors also act as constraints, shrinking estimates toward simpler models. However, the need for prior information varies based on:
-- The role of the parameter in the model.  
-- The parameter’s position in the hierarchy.  
-
-<div class="red-box">
-  <strong>Critical Insight:</strong>   
-  Priors must be specified for each model in the workflow. Expanded models often require additional thought regarding parameterization and joint priors to avoid unintended effects like cancellations or overly stabilizing priors.
-</div>
-
-When introducing new parameters:
-- Consider tightening priors on overarching metrics like means and standard deviations.
-- Be cautious of the concentration of measure in higher-dimensional spaces.
-
----
-
-### A Topology of Models
-Models within a framework can be thought of as forming a topology or network structure. This structure reflects connections and partial orderings rather than probabilities assigned to individual models.
-
-<div class="yellow-box">
-  <strong> Model Topology?:</strong>    
-  <li> A topology of models refers to their connections and relationships, not a probability space. The goal is not to average over models but to navigate among them effectively.</li>
-</div>
-
-**Examples of Model Navigation Tools:**
-- **Automatic Statistician:** Explores models in specified but open-ended classes, like time series or regression models, using inference and model criticism.  
-- **Prophet:** A time series forecasting tool allowing users to build models from predefined building blocks.
-
-**Model Operations:**
-Models, treated as probabilistic random variables, can be combined in multiple ways:
-- Additive, multiplicative, linear mixing, log-linear mixing, pointwise mixing, and more.  
-Each model has its internal structure, with parameters estimated from data, and parameters across models can interact (e.g., shared parameters).
-
-<div class="blue-box">
-  <strong>Applications:</strong>  
-  <li> <strong>Forecasting:</strong> Using interconnected models to predict future outcomes. </li> 
-  <li> <strong>Causal Inference:</strong> Exploring relationships between variables using networked model structures. </li>
-</div>
+- Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A. "Visualization in Bayesian workflow." [Journal of the Royal Statistical Society: Series A](https://doi.org/10.1111/rssa.12378).
+- Betancourt, M. "A conceptual introduction to Hamiltonian Monte Carlo." [arXiv:1701.02434](https://arxiv.org/abs/1701.02434).

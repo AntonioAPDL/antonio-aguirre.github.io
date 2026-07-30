@@ -1,65 +1,78 @@
 ---
 layout: post
-published: false
-title: "On Bayesian Methodology. Part 3/6"
+published: true
+title: "Simulation, recovery, and calibration"
 date: 2024-11-01
-theme: Review
-tags: [statistics, bayesian, methodology]
-excerpt: "Simulations"
+updated: 2026-07-29
+theme: Bayesian workflow
+tags: [bayesian-statistics, simulation, calibration]
+series: "Bayesian workflow"
+series_order: 3
+description: "A diagnostic ladder for Bayesian models: deterministic checks, fake-data recovery, prior predictive checks, repeated-sampling behavior, and simulation-based calibration."
+excerpt: "Simulation helps separate coding errors, weak identification, poor priors, and biased computation before real-data conclusions are trusted."
+math: true
 ---
 
-## III. Using Constructed Data to Find and Understand Problems
+Simulation is one of the most useful tools in applied Bayesian work because it lets the analyst inspect a procedure under controlled conditions. Real data rarely reveal whether a failure comes from a coding error, weak information, an unrealistic prior, or an approximation that is too crude. Simulated data cannot solve the real scientific problem, but they can show whether the model and computation behave coherently when the truth is known.
 
-### Fake-Data Simulation
-The core idea of fake-data simulation is to test whether a procedure can recover correct parameter values when applied to simulated data. This involves the following steps:
+It helps to separate several kinds of simulation. They answer different questions and should not be treated as one generic "fake-data check."
 
-1. **Simulate Fake Data:**  
-   Choose reasonable parameter values and generate a fake dataset that matches the size, structure, and shape of the original data.
+## Deterministic checks
 
-2. **Evaluate the Procedure:**  
-   - **Information Beyond the Prior:** Simulate fake data from the model using fixed, known parameters and check if the observed data adds meaningful information. Analyze point estimates and the coverage of posterior intervals.
-   - **Parameter Recovery:** Assess whether the true parameters are recovered within the uncertainty range implied by the fitted posterior distribution.
-   - **Behavior Across Parameter Space:** Explore how the model behaves in different regions of the parameter space, revealing the various "stories" the model encodes about data generation.
+Before fitting any simulated data, check deterministic pieces of the model. If a link function, matrix construction, indexing rule, state update, or likelihood contribution is wrong, posterior diagnostics will be confusing. Unit tests for these pieces are often simple: feed in a small input whose output can be calculated by hand, then verify the code returns the same result.
 
-3. **Two-Step Procedure:**  
-   Fit the model to real data, draw parameters from the resulting posterior distribution, and use these parameters for fake-data checking.
+These checks are not glamorous, but they are high value. A model with a shifted time index, a transposed design matrix, or a scale parameter interpreted in the wrong units can produce plausible-looking output. The earlier these errors are caught, the less time is spent interpreting artifacts.
 
-<div class="red-box">
-  <strong>Key Insight:</strong>  
-   <li> If a model cannot make reliable inferences on fake data generated from itself, it’s unlikely to provide reasonable inferences on real data.  </li>
-</div>
+## Fixed-parameter recovery
 
-While fake-data simulations help evaluate a model’s ability to recover parameters, they also highlight potential weaknesses. For example:
-- Creating fake data that causes the procedure to fail can deepen understanding of an inference method.
-- Overparameterized models may yield comparable predictions despite wildly different parameter estimates, limiting the usefulness of predictive checks.
+The next step is to choose known parameter values, simulate data from the model, fit the model, and check whether the fitted procedure recovers the known values at the expected uncertainty level. This is useful for testing identifiability in realistic sample sizes.
 
-### Simulation-Based Calibration (SBC)
-SBC provides a more comprehensive approach than truth-point benchmarking by fitting the model multiple times and comparing posterior distributions to simulated data. However, SBC has its challenges:
-- **Computational Cost:** Requires significant resources to fit the model repeatedly.
-- **Priors and Modeler Bias:**  
-  - Weakly informative priors, often chosen conservatively, can lead to extreme datasets during SBC.  
-  - This mismatch can obscure insights about calibration and posterior behavior.
+Recovery should be evaluated carefully. If the posterior interval misses the truth once, that is not automatically a failure; a nominal 95 percent interval will miss sometimes. The more relevant question is whether repeated simulations show systematic bias or miscalibration. It is also possible for parameter recovery to be weak while prediction remains strong. In overparameterized or partially identified models, several parameter settings may imply nearly identical predictive distributions.
 
-<div class="purple-box">
-  <strong>Open Research Question:</strong>    
-  How effective is SBC with a limited number of simulations?  
-</div>
+For this reason, recovery checks should include both parameters and observable implications. If a latent parameter is scientifically important, poor recovery is a real limitation. If the main target is prediction, the simulated predictive performance may be more relevant.
 
-Simulation-based calibration and truth-point benchmarking are complementary, with SBC offering broader insights but at a higher computational expense.
+## Prior predictive simulation
 
-### Experimentation Using Constructed Data
-Simulating data from different scenarios provides valuable insights into models and inference methods. This experimentation allows practitioners to:
-- Understand how a model performs under varying conditions.
-- Explore the limits of inferences by fitting the model to data generated from challenging scenarios.
-- Gain a deeper understanding of both computational issues and the underlying data.
+Prior predictive simulation checks the consequences of priors before the observed outcome is used. It answers a simple question: what kinds of data does this model think are plausible before fitting?
 
-<div class="red-box">
-  <strong>Important Consideration:</strong> Testing a model with a single fake dataset is not sufficient.  
-   <li> Even if the computational algorithm works, there’s a 5% chance that a random draw will fall outside a 95% uncertainty interval. </li>  
-   <li> Bayesian inference is calibrated only when averaging over the prior.   </li>
-   <li> Parameter recovery can fail not because of algorithmic errors but due to insufficient information in the observed data.  </li>
-</div>
+This is especially important when priors interact with nonlinear transformations or dynamic recursions. A prior that looks weak on each parameter can imply impossible counts, explosive time series, negative physical quantities after transformation, or unrealistically smooth trajectories. Prior predictive checks can reveal these problems early.
 
-Simulation of statistical systems under diverse conditions not only addresses computational challenges but also enhances our understanding of data and inference.
+A prior predictive check should be performed on the scale that matters. For a forecasting model, plot simulated forecasts and intervals. For a regression model, inspect outcome ranges over realistic covariate settings. For a hierarchical model, inspect between-group variation and within-group variation separately. The goal is not to tune priors until they match the observed data. The goal is to remove implications that are unreasonable before the data are used.
 
----
+## Repeated-sampling behavior
+
+Sometimes the question is frequentist in form: if this procedure were used repeatedly under a specified data-generating mechanism, how often would intervals cover, how biased would estimates be, or how well calibrated would predictive probabilities be? This is a property of a procedure under a simulation design, not a universal property of Bayesian inference.
+
+Repeated-sampling checks are useful when a method will be deployed repeatedly or compared against alternatives. They require care because the simulation design determines the conclusion. A procedure can be calibrated under the model and fail under misspecification. That is not a contradiction; it is information about robustness.
+
+## Simulation-based calibration
+
+Simulation-based calibration, or SBC, checks whether the combination of prior, data simulation, and posterior computation is calibrated. The basic idea is to draw parameters from the prior, simulate data from the model, fit the model, and compare the true simulated parameter values with posterior draws. Under correct implementation and exact computation, the rank of the true value among posterior draws should be uniform, up to Monte Carlo error.
+
+SBC is powerful because it can detect biased computation, poor mixing, incorrect likelihoods, and some coding errors. It is also expensive. Each simulated dataset requires a fit. Autocorrelation in posterior draws and finite simulation counts matter. Weakly informative priors can generate extreme datasets, which may dominate the diagnostic and obscure behavior in the practical region of interest.
+
+The shape of SBC rank histograms is informative. U-shaped patterns can indicate underdispersed posteriors. Hump-shaped patterns can indicate overdispersion. Skew can indicate bias. But SBC should be interpreted with simulation uncertainty and with knowledge of the model geometry.
+
+## Posterior predictive simulation
+
+After fitting real data, posterior predictive simulation checks whether the fitted model can reproduce features of the observed data that matter for the target. This is not the same as parameter recovery. It asks whether replicated data from the fitted model resemble the observed data in relevant ways.
+
+Good posterior predictive checks are targeted. A time-series model should be checked for persistence, extremes, seasonal behavior, residual autocorrelation, and forecast calibration if those features matter. A grouped model should be checked within and across groups. A quantile model should be checked at the quantile levels it claims to estimate.
+
+## A diagnostic ladder
+
+The sequence I prefer is:
+
+1. Deterministic code checks.
+2. Fixed-parameter simulation and recovery.
+3. Prior predictive simulation.
+4. Repeated-sampling checks for selected operating regimes.
+5. SBC when the computational burden is justified.
+6. Posterior predictive checks on real data.
+
+The ladder is useful because each step narrows the source of failure. If deterministic checks fail, the model code is wrong. If fixed-parameter recovery fails, the procedure may be biased or weakly identified. If prior predictive simulation fails, the assumptions are unreasonable before seeing data. If posterior predictive checks fail after everything else passes, the model is probably missing structure in the real process.
+
+## References
+
+- Talts, S., Betancourt, M., Simpson, D., Vehtari, A., and Gelman, A. "Validating Bayesian inference algorithms with simulation-based calibration." [arXiv:1804.06788](https://arxiv.org/abs/1804.06788).
+- Gabry, J., Simpson, D., Vehtari, A., Betancourt, M., and Gelman, A. "Visualization in Bayesian workflow." [Journal of the Royal Statistical Society: Series A](https://doi.org/10.1111/rssa.12378).

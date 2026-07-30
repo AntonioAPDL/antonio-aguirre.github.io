@@ -1,51 +1,83 @@
 ---
 layout: default
-title: Technical Notes
-description: "Draft technical notes under review."
-noindex: true
-sitemap: false
+title: Blog
+description: "Technical notes on Bayesian workflow, probabilistic forecasting, statistical computing, and research software."
 ---
 
-<div class="blog-section">
-  <!-- Blog Introduction -->
-  <header class="blog-header page-header">
-    <h1 class="page-title">
-      Technical Notes
-    </h1>
+<section class="blog-index" aria-labelledby="blog-title">
+  <header class="blog-index__header page-header">
+    <p class="section-kicker">Technical notes</p>
+    <h1 id="blog-title" class="page-title">Blog</h1>
     <p class="page-lede">
-      Technical notes are currently under review. I will republish selected posts after technical and editorial checks.
+      Notes on statistical modeling, Bayesian computation, forecast evaluation, and scientific computing.
+      The emphasis is on clear assumptions, reproducible implementation, and diagnostics that can be checked.
     </p>
   </header>
 
-  <!-- Blog Posts Section -->
-  <div class="posts">
-    {% if site.posts.size > 0 %}
-      {% for post in site.posts %}
-        <div class="post">
-          <h2 class="post-title">
-            <a href="{{ post.url | absolute_url }}">
-              {{ post.title }}
-            </a>
-          </h2>
-          <p class="post-meta">
-            Published on {{ post.date | date: "%B %d, %Y" }}
-            {% if post.theme %}| Theme: <strong>{{ post.theme }}</strong>{% endif %}
-          </p>
-          <p class="post-excerpt">
-            {{ post.excerpt }}
-          </p>
-          <a href="{{ post.url | absolute_url }}" class="read-more">
-            Read more &rarr;
+  {% assign workflow_posts = site.posts | where: "series", "Bayesian workflow" | sort: "series_order" %}
+  {% if workflow_posts.size > 0 %}
+  <section class="blog-series-panel" aria-labelledby="workflow-series-title">
+    <div class="blog-section-heading">
+      <p class="section-kicker">Six-part series</p>
+      <h2 id="workflow-series-title">Bayesian workflow</h2>
+      <p>
+        A compact sequence from problem formulation through computation, simulation, model criticism,
+        predictive comparison, and final reporting.
+      </p>
+    </div>
+
+    <ol class="blog-series-list">
+      {% for post in workflow_posts %}
+        {% assign words = post.content | number_of_words %}
+        {% assign minutes = words | divided_by: 220 %}
+        {% if minutes < 1 %}{% assign minutes = 1 %}{% endif %}
+        <li class="blog-series-item">
+          <a href="{{ post.url | absolute_url }}">
+            <span class="blog-series-item__number">{{ post.series_order }}</span>
+            <span class="blog-series-item__content">
+              <span class="blog-series-item__title">{{ post.title }}</span>
+              <span class="blog-series-item__meta">
+                {{ post.date | date: "%b %-d, %Y" }}
+                {% if post.updated %}<span aria-hidden="true"> · </span>Updated {{ post.updated | date: "%b %-d, %Y" }}{% endif %}
+                <span aria-hidden="true"> · </span>{{ minutes }} min read
+              </span>
+              <span class="blog-series-item__excerpt">{{ post.excerpt | strip_html }}</span>
+            </span>
           </a>
-        </div>
+        </li>
       {% endfor %}
-    {% else %}
-      <div class="no-posts">
-        <h2>Posts Under Review</h2>
-        <p>
-          This section is intentionally not linked from the main navigation while draft material is being revised.
-        </p>
-      </div>
-    {% endif %}
-  </div>
-</div>
+    </ol>
+  </section>
+  {% endif %}
+
+  <section class="blog-standalone" aria-labelledby="standalone-title">
+    <div class="blog-section-heading">
+      <p class="section-kicker">Methods and computing</p>
+      <h2 id="standalone-title">Standalone notes</h2>
+    </div>
+
+    <div class="blog-card-grid">
+      {% for post in site.posts %}
+        {% unless post.series %}
+          {% assign words = post.content | number_of_words %}
+          {% assign minutes = words | divided_by: 220 %}
+          {% if minutes < 1 %}{% assign minutes = 1 %}{% endif %}
+          <article class="blog-card">
+            <div class="blog-card__meta">
+              <span>{{ post.theme }}</span>
+              <span>{{ minutes }} min read</span>
+            </div>
+            <h3><a href="{{ post.url | absolute_url }}">{{ post.title }}</a></h3>
+            <p>{{ post.excerpt | strip_html }}</p>
+            <p class="blog-card__date">
+              <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%B %-d, %Y" }}</time>
+              {% if post.updated %}
+                <span aria-hidden="true"> · </span>Updated <time datetime="{{ post.updated | date_to_xmlschema }}">{{ post.updated | date: "%B %-d, %Y" }}</time>
+              {% endif %}
+            </p>
+          </article>
+        {% endunless %}
+      {% endfor %}
+    </div>
+  </section>
+</section>

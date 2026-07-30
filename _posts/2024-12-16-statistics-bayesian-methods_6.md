@@ -1,110 +1,94 @@
 ---
 layout: post
-published: false
-title: "On Bayesian Methodology. Part 6/6"
+published: true
+title: "Iteration, stopping, and reporting"
 date: 2024-12-19
-theme: Review
-tags: [statistics, bayesian, methodology]
-excerpt: "Final Comments"
+updated: 2026-07-29
+theme: Bayesian workflow
+tags: [bayesian-statistics, reproducibility, reporting]
+series: "Bayesian workflow"
+series_order: 6
+description: "How to stop an iterative Bayesian workflow, control repeated model search, and report what was checked, changed, and left unresolved."
+excerpt: "A model is ready to report when it answers the target with acceptable uncertainty, not when every possible discrepancy has disappeared."
+math: true
 ---
 
-## Final Comments
+Bayesian workflow is iterative by design. Models are built, fit, checked, revised, compared, and sometimes simplified. That iteration is a strength because it lets the analysis respond to data structure and model failure. It is also a risk because repeated model search can blur the distinction between discovery, validation, and final reporting.
 
-### Different Perspectives on Statistical Modeling and Prediction
-Statistical modeling and prediction can be approached from several perspectives, each with unique goals and implications:
+The final step of a workflow is therefore not only choosing a model. It is deciding whether the remaining uncertainty and model limitations are acceptable for the target. A workflow should stop because the analysis is adequate for its purpose, not because the model has become impossible to improve.
 
-1. **Traditional Statistical Perspective:**  
-   - Models are typically predefined, and the goal is to accurately summarize the posterior distribution.  
-   - Computation continues until approximate convergence is achieved, with approximations used sparingly.  
+## Different working modes
 
-2. **Machine Learning Perspective:**  
-   - The primary focus is on prediction rather than parameter estimation.  
-   - Computation halts once cross-validation accuracy plateaus, emphasizing scalability and efficiency within a fixed computational budget.
+Applied modeling often moves through several modes. In an exploratory mode, the analyst tries models to understand data structure, software behavior, and possible failures. Approximate computation and rough checks may be acceptable because the goal is learning. In a development mode, the analyst stabilizes the model, checks simulations, evaluates predictive behavior, and records decisions. In a reporting or deployment mode, the analysis should be reproducible, diagnostics should be complete, and the final evaluation should be protected from uncontrolled repeated tuning.
 
-3. **Model Exploration Perspective:**  
-   - Applied statistical work often involves trying out many models, some of which may exhibit poor data fit, low predictive performance, or slow convergence.  
-   - Approximations are more acceptable here but must faithfully reproduce key posterior features.
+Problems arise when these modes are mixed. A validation set used repeatedly during model development becomes part of the modeling process. A rough exploratory fit can be overinterpreted. A model selected from many unreported alternatives can appear more certain than it is. The workflow needs a point where the rules become stricter.
 
-<div class="green-box">
-  <strong>Key Insight:</strong>  
- <li> The distinction here is not between inference vs. prediction or exploratory vs. confirmatory analysis, but rather how much trust is placed in a model and how computation approximates it. </li>
-</div>
+## Practical stopping criteria
 
-<div class="yellow-box">
-  <strong>Model Trust:</strong>  
- <li>  The process of iterative model building highlights how much computation and model development rely on trust in individual models and their approximations. </li>
-</div>
+I consider a model ready to report when these conditions are met:
 
-These differing perspectives influence how statistical methods evolve as new challenges emerge in applied settings.
+- The model answers the stated target at the required resolution.
+- Major posterior or predictive summaries are stable under reasonable computational settings.
+- Monte Carlo or optimization error is small relative to inferential uncertainty.
+- Prior and posterior predictive checks do not reveal target-relevant failures.
+- Predictive comparisons are designed for the intended future task.
+- Conclusions are stable under plausible assumptions that the data cannot resolve.
+- Additional complexity gives little practical improvement relative to cost and interpretability.
 
-### Justification of Iterative Model Building
-The iterative model-building process is central to modern Bayesian Workflows and represents the next transformative step in data science:
-- **Historical Progression:**  
-  - **Data Summarization:** The foundation of statistics up to 1900.  
-  - **Modeling:** Began with Gauss and Laplace, continuing to this day.  
-  - **Computation:** The current focus, enabling iterative workflows and complex modeling.  
+This is not a proof that the model is true. It is a practical standard for using a model responsibly. Statistical reports should avoid implying more certainty than the workflow supports.
 
-- **Real-World Considerations:**  
-  - A Bayesian Workflow acknowledges the limitations of human and computational resources.  
-  - The goal is to simplify processes for humans, even in idealized settings where exact computation is automated.  
-  - Fully automated computation yielding perfect results remains unattainable.
+## Repeated search and validation
 
-<div class="green-box">
-  <strong>Simplifying Challenges:</strong>   
-  <li> Computational challenges are easier to address when fewer "moving parts" exist in the modeling process. </li>
-</div>
+Every model revision uses information. If the same data are used repeatedly to choose transformations, priors, covariates, interactions, and diagnostics, the final performance estimate can be optimistic. This is not unique to Bayesian analysis. It is a general consequence of researcher degrees of freedom.
 
----
+Several practices reduce the problem:
 
-### Model Selection and Overfitting
-An iterative workflow risks overfitting, as model improvement often involves conditioning on data discrepancies:
-- **Double Dipping:** Using data multiple times during model iteration can compromise the frequency properties of inferences.
+- keep a log of material model revisions;
+- separate exploratory diagnostics from locked final evaluation when possible;
+- use validation designs that reflect the deployment setting;
+- report sensitivity to plausible alternatives;
+- avoid claiming confirmatory evidence from a test that guided model construction;
+- reserve a final holdout or future-data evaluation for high-stakes predictive claims.
 
-<div class="red-box">
-<strong>Warning:</strong>  
-  <li> Double dipping and post-selection inference can lead to overfitting. Model improvement conditioned on discrepancies must be carefully managed. </li>
-</div>
+In many research settings, a perfect split between exploration and confirmation is not possible. The honest solution is to describe the workflow and state which conclusions are exploratory, predictive, mechanistic, or decision-oriented.
 
-**Garden of Forking Paths:**  
-- The model-building process often involves paths that depend on the specific data observed.  
-- Instead of selecting the best-fitting model, a Bayesian Workflow emphasizes iterative improvements, ensuring each step is justified.
+## Reporting the workflow
 
-<div class="blue-box">
-<strong>Example:</strong>  
- <li>  Suppose model \(M_1\) fails a posterior predictive check, leading to the development of \(M_2\), which incorporates more prior information and better fits the data. Had the data differed, \(M_1\) might have sufficed. This highlights the iterative nature of a Bayesian Workflow. </li>
-</div>
+A good report does not need to list every failed model, but it should include enough information for a reader to understand why the final model is credible. I try to report:
 
-To mitigate post-selection inference issues:
-- Embed multiple models in a larger framework.
-- Use predictive model averaging or incorporate all models simultaneously.
-- Perform severe tests of the assumptions underlying each model.
+1. The target quantity or prediction task.
+2. The data source, preprocessing, exclusions, and timing.
+3. The model structure and important assumptions.
+4. Prior or regularization choices and their observable implications.
+5. Computational method, diagnostics, and remaining numerical limitations.
+6. Simulation checks, posterior predictive checks, or calibration checks.
+7. Predictive comparison design and uncertainty in score differences.
+8. Sensitivity analyses for assumptions not identified by the data.
+9. The final limitations and what would change the conclusion.
 
-### Bigger Datasets Demand Bigger Models
-Larger datasets enable the fitting of complex models, such as hierarchical Bayesian models and deep learning approaches:
-- These models facilitate information aggregation and partial pooling across diverse data sources.
-- Effective modeling requires:
-  1. **Regularization:** To stabilize estimates.  
-  2. **Latent Variable Modeling:** To address missingness and measurement errors.
+This structure is useful for papers, technical notes, internal model-review documents, and research software vignettes. It also makes later revision easier because the assumptions are visible.
 
-<div class="yellow-box">
-<strong>Insight:</strong>  
-  <li> A model does not exist in isolation; it emerges from engagement with the application and available data. </li>
-</div>
+## Versioning and reproducibility
 
-### Prediction, Generalization, and Poststratification
-Statistical tasks often involve generalization, which Bayesian methods address effectively:
-1. **Generalizing from Sample to Population:** Using hierarchical models and partial pooling.  
-2. **Generalizing from Control to Treatment Groups:** Leveraging regularization to handle large nonparametric models.  
-3. **Generalizing from Observed Data to Underlying Constructs:** Applying multilevel modeling for latent variables.
+Model results should be connected to code, data, and environment versions. At minimum, record a repository commit, data snapshot, random seeds, software versions, and the command or configuration used to generate results. For long-running jobs, save logs and intermediate artifacts. For public work, separate generated outputs from source code and document how the outputs were produced.
 
-<div class="green-box">
-<strong>Key Principle:</strong>  
-  <li> Just as priors are understood in the context of the likelihood, models should be understood in light of their intended use. </li>
-</div>
+This is not only about replication by others. It protects the analyst. When a result changes six months later, a recorded workflow makes it possible to determine whether the change came from data, code, dependencies, or the model itself.
 
-**Methods in Bayesian Framework:**
-- Hierarchical modeling and transportability via Bayesian graph models.
-- Regularization to handle complex, large-scale models.
+## Final audit
 
-The iterative nature of Bayesian Workflow, with its emphasis on model trust, computational efficiency, and careful navigation of overfitting risks, reflects the dynamic and evolving nature of modern statistical practice. By embedding models within a larger framework and embracing the iterative process, a Bayesian Workflow ensures robust and insightful statistical analyses.
+Before releasing a model-based analysis, I use a final audit:
 
+- Does the introduction state the actual target?
+- Are the reported quantities produced by the model being described?
+- Are figures labeled with correct units, dates, and uncertainty definitions?
+- Are approximation and computation limitations stated plainly?
+- Are predictive claims supported by the validation design?
+- Are model weights, posterior probabilities, and score differences interpreted correctly?
+- Are unresolved failures either fixed or disclosed?
+
+The purpose of iteration is not to make a model immune to criticism. It is to make the criticism specific, documented, and useful. A clear stopping rule and a careful report turn an exploratory sequence into work that can be evaluated.
+
+## References
+
+- Gelman, A., Vehtari, A., Simpson, D., et al. "Bayesian workflow." [arXiv:2011.01808](https://arxiv.org/abs/2011.01808).
+- Vehtari, A., Simpson, D., Gelman, A., Yao, Y., and Gabry, J. "Pareto smoothed importance sampling." [Journal of Machine Learning Research](https://www.jmlr.org/papers/v25/19-556.html).

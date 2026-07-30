@@ -2,26 +2,93 @@
 layout: default
 ---
 
-<div class="post">
-  <h1 class="post-title">{{ page.title }}</h1>
-  <span class="post-date">{{ page.date | date_to_string }}</span>
-  {{ content }}
-</div>
+{% assign words = content | number_of_words %}
+{% assign minutes = words | divided_by: 220 %}
+{% if minutes < 1 %}{% assign minutes = 1 %}{% endif %}
+{% assign series_posts = site.posts | where: "series", page.series | sort: "series_order" %}
 
-{% if site.related_posts.size >= 1 %}
-<div class="related">
-  <h2>Related posts</h2>
-  <ul class="related-posts">
-    {% for post in site.related_posts limit:3 %}
-      <li>
-        <h3>
-          <a href="{{ site.baseurl }}{{ post.url }}">
-            {{ post.title }}
-            <small>{{ post.date | date_to_string }}</small>
-          </a>
-        </h3>
-      </li>
-    {% endfor %}
-  </ul>
-</div>
-{% endif %}
+<article class="post-article" itemscope itemtype="https://schema.org/BlogPosting">
+  <nav class="post-breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ '/blog/' | absolute_url }}">Blog</a>
+    {% if page.theme %}
+      <span aria-hidden="true">/</span>
+      <span>{{ page.theme }}</span>
+    {% endif %}
+  </nav>
+
+  <header class="post-hero">
+    {% if page.series %}
+      <p class="section-kicker">{{ page.series }} · Part {{ page.series_order }}</p>
+    {% elsif page.theme %}
+      <p class="section-kicker">{{ page.theme }}</p>
+    {% endif %}
+    <h1 itemprop="headline">{{ page.title }}</h1>
+    {% if page.description %}
+      <p class="post-deck" itemprop="description">{{ page.description }}</p>
+    {% endif %}
+
+    <div class="post-meta-list">
+      <span>
+        Published
+        <time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
+          {{ page.date | date: "%B %-d, %Y" }}
+        </time>
+      </span>
+      {% if page.updated %}
+        <span>
+          Updated
+          <time datetime="{{ page.updated | date_to_xmlschema }}" itemprop="dateModified">
+            {{ page.updated | date: "%B %-d, %Y" }}
+          </time>
+        </span>
+      {% endif %}
+      <span>{{ minutes }} min read</span>
+    </div>
+
+    {% if page.tags %}
+      <ul class="post-tags" aria-label="Article tags">
+        {% for tag in page.tags %}
+          <li>{{ tag }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </header>
+
+  {% if page.last_verified %}
+    <aside class="post-verification" aria-label="Verification note">
+      Operational details in this article were last checked on
+      <time datetime="{{ page.last_verified | date_to_xmlschema }}">{{ page.last_verified | date: "%B %-d, %Y" }}</time>.
+      Re-check cluster documentation before copying commands into a new allocation.
+    </aside>
+  {% endif %}
+
+  {% if page.series and series_posts.size > 1 %}
+    <nav class="post-series-nav" aria-labelledby="series-nav-title">
+      <h2 id="series-nav-title">{{ page.series }}</h2>
+      <ol>
+        {% for post in series_posts %}
+          <li>
+            <a href="{{ post.url | absolute_url }}"{% if post.url == page.url %} aria-current="page"{% endif %}>
+              <span>{{ post.series_order }}</span>
+              {{ post.title }}
+            </a>
+          </li>
+        {% endfor %}
+      </ol>
+    </nav>
+  {% endif %}
+
+  <div class="post-content" itemprop="articleBody">
+    {{ content }}
+  </div>
+</article>
+
+<nav class="post-footer-nav" aria-label="Blog navigation">
+  <a href="{{ '/blog/' | absolute_url }}">Back to Blog</a>
+  {% if page.previous %}
+    <a href="{{ page.previous.url | absolute_url }}">Previous: {{ page.previous.title }}</a>
+  {% endif %}
+  {% if page.next %}
+    <a href="{{ page.next.url | absolute_url }}">Next: {{ page.next.title }}</a>
+  {% endif %}
+</nav>
