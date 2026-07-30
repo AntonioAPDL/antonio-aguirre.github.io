@@ -8,7 +8,9 @@ EXPORTER="${PIPELINE_DIR}/export_latest_web_json.py"
 CFG="${PIPELINE_DIR}/config/gefs.yaml"
 VENV_ACTIVATE="${PIPELINE_DIR}/.venv/bin/activate"
 WEB_JSON="${REPO_ROOT}/data/_sandbox_gefs/web/gefs_big_trees_latest.json"
-ASSET_JSON="${REPO_ROOT}/assets/data/forecasts/gefs_big_trees_latest.json"
+ASSET_REL="assets/data/forecasts/gefs_big_trees_latest.json"
+ASSET_JSON="${REPO_ROOT}/${ASSET_REL}"
+PREVIOUS_LIVE_JSON="${REPO_ROOT}/data/_sandbox_gefs/web/gefs_big_trees_latest.previous_live.json"
 OBS_WINDOW_DAYS="${OBS_WINDOW_DAYS:-20}"
 ANALYSIS_HISTORY_MAX_COMMITS="${ANALYSIS_HISTORY_MAX_COMMITS:-240}"
 ALLOW_STALE_ON_ERROR="${GEFS_FORECAST_ALLOW_STALE_ON_ERROR:-0}"
@@ -22,6 +24,31 @@ gh_warn() {
     echo "::warning::${message}"
   else
     log_warn "${message}"
+  fi
+}
+
+load_previous_live_asset() {
+  rm -f "${PREVIOUS_LIVE_JSON}"
+
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if ! git ls-remote --exit-code --heads origin live-data >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if ! git fetch --quiet origin +live-data:refs/remotes/origin/live-data; then
+    gh_warn "Could not fetch origin/live-data for GEFS stale fallback."
+    return 0
+  fi
+
+  if git show "origin/live-data:${ASSET_REL}" > "${PREVIOUS_LIVE_JSON}" 2>/dev/null; then
+    mkdir -p "$(dirname "${ASSET_JSON}")"
+    cp "${PREVIOUS_LIVE_JSON}" "${ASSET_JSON}"
+    echo "[INFO] Loaded GEFS live-data baseline from origin/live-data."
+  else
+    rm -f "${PREVIOUS_LIVE_JSON}"
   fi
 }
 
@@ -48,6 +75,15 @@ PY
 
 keep_stale_and_exit() {
   local reason="$1"
+  if [[ "${ALLOW_STALE_ON_ERROR}" == "1" ]] && [[ -f "${PREVIOUS_LIVE_JSON}" ]]; then
+    mkdir -p "$(dirname "${ASSET_JSON}")"
+    cp "${PREVIOUS_LIVE_JSON}" "${ASSET_JSON}"
+    gh_warn "${reason}"
+    gh_warn "Keeping latest live-data GEFS asset without update: ${ASSET_JSON}"
+    print_asset_metadata
+    exit 0
+  fi
+
   if [[ "${ALLOW_STALE_ON_ERROR}" == "1" ]] && [[ -f "${ASSET_JSON}" ]]; then
     gh_warn "${reason}"
     gh_warn "Keeping tracked GEFS asset without update: ${ASSET_JSON}"
@@ -177,6 +213,7 @@ then
   exit 1
 fi
 
+load_previous_live_asset
 precheck_existing_asset
 
 if ! python "${RUNNER}" --gefs-config "${CFG}" --profile full --log-level INFO; then

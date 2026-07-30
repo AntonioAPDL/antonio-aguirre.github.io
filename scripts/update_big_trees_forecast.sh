@@ -8,12 +8,19 @@ CONFIG="${REPO_ROOT}/_sandbox/nws_ensemble_point/config.yaml"
 REQUIREMENTS="${REPO_ROOT}/_sandbox/nws_ensemble_point/requirements.txt"
 API_BUILDER="${REPO_ROOT}/scripts/build_big_trees_forecast_json.py"
 SANDBOX_JSON="${REPO_ROOT}/data/_sandbox_nws/big_trees_latest.json"
-ASSETS_JSON="${REPO_ROOT}/assets/data/forecasts/big_trees_latest.json"
+ASSET_REL="assets/data/forecasts/big_trees_latest.json"
+ASSETS_JSON="${REPO_ROOT}/${ASSET_REL}"
+PREVIOUS_LIVE_JSON="${REPO_ROOT}/data/_sandbox_nws/big_trees_latest.previous_live.json"
+PREVIOUS_LIVE_COMMIT_FILE="${PREVIOUS_LIVE_JSON}.commit"
 VENV_ACTIVATE="${REPO_ROOT}/_sandbox/nws_ensemble_point/.venv/bin/activate"
 MAX_SANDBOX_AGE_SEC=21600
 
 INSTALL_DEPS="${BIG_TREES_FORECAST_INSTALL_DEPS:-0}"
 ALLOW_STALE_ON_ERROR="${BIG_TREES_FORECAST_ALLOW_STALE_ON_ERROR:-${BIG_TREES_FORECAST_ALLOW_STALE_ON_MISSING_PIPELINE:-0}}"
+REQUIRE_EXTENDED_RANGES="${BIG_TREES_FORECAST_REQUIRE_EXTENDED_RANGES:-1}"
+BASELINE_MAX_COMMITS="${BIG_TREES_FORECAST_BASELINE_MAX_COMMITS:-36}"
+API_TIMEOUT_SEC="${BIG_TREES_FORECAST_TIMEOUT_SEC:-30}"
+API_RETRIES="${BIG_TREES_FORECAST_RETRIES:-4}"
 
 log_info() { echo "[INFO] $*"; }
 log_warn() { echo "[WARN] $*" >&2; }
@@ -26,6 +33,125 @@ gh_warn() {
   else
     log_warn "${message}"
   fi
+}
+
+payload_has_extended_ranges() {
+  local path="$1"
+  [[ -f "${path}" ]] || return 1
+  STREAMFLOW_VALIDATE_PATH="${path}" "${PYTHON_BIN}" - <<'PY' >/dev/null
+import json
+import os
+from pathlib import Path
+
+path = Path(os.environ["STREAMFLOW_VALIDATE_PATH"])
+data = json.loads(path.read_text(encoding="utf-8"))
+ranges = data.get("ranges") or {}
+
+def count(name):
+    block = ranges.get(name) or {}
+    if not isinstance(block, dict):
+        return 0
+    series = block.get("p50") or []
+    return len(series) if isinstance(series, list) else 0
+
+raise SystemExit(0 if count("medium_range") > 0 and count("long_range") > 0 else 1)
+PY
+}
+
+print_streamflow_asset_metadata() {
+  local path="$1"
+  STREAMFLOW_ASSET_PATH="${path}" "${PYTHON_BIN}" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+path = Path(os.environ["STREAMFLOW_ASSET_PATH"])
+try:
+    data = json.loads(path.read_text(encoding="utf-8"))
+except Exception as exc:
+    print("[WARN] streamflow asset is not valid JSON:", path, exc)
+    raise SystemExit(0)
+
+print("[INFO] using streamflow asset:", path)
+print("[INFO] generated_at_utc:", data.get("generated_at_utc"))
+print("[INFO] init_times:", data.get("init_times"))
+for name, payload in (data.get("ranges") or {}).items():
+    if not isinstance(payload, dict):
+        continue
+    if "deterministic" in payload:
+        series = payload.get("deterministic") or []
+        if series:
+            print(f"[INFO] {name}: deterministic points={len(series)} start={series[0].get('t')} end={series[-1].get('t')}")
+    else:
+        p50 = payload.get("p50") or []
+        if p50:
+            print(f"[INFO] {name}: p50 points={len(p50)} start={p50[0].get('t')} end={p50[-1].get('t')}")
+        else:
+            print(f"[INFO] {name}: p50 points=0")
+PY
+}
+
+load_previous_live_baseline() {
+  rm -f "${PREVIOUS_LIVE_JSON}" "${PREVIOUS_LIVE_JSON}.candidate" "${PREVIOUS_LIVE_COMMIT_FILE}"
+
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if ! git ls-remote --exit-code --heads origin live-data >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if ! git fetch --quiet origin +live-data:refs/remotes/origin/live-data; then
+    gh_warn "Could not fetch origin/live-data for streamflow stale fallback."
+    return 0
+  fi
+
+  local commits=()
+  mapfile -t commits < <(git log -n "${BASELINE_MAX_COMMITS}" --format=%H origin/live-data -- "${ASSET_REL}" 2>/dev/null || true)
+  for commit in "${commits[@]}"; do
+    if git show "${commit}:${ASSET_REL}" > "${PREVIOUS_LIVE_JSON}.candidate" 2>/dev/null \
+      && payload_has_extended_ranges "${PREVIOUS_LIVE_JSON}.candidate"; then
+      mv "${PREVIOUS_LIVE_JSON}.candidate" "${PREVIOUS_LIVE_JSON}"
+      printf '%s\n' "${commit}" > "${PREVIOUS_LIVE_COMMIT_FILE}"
+      log_info "Loaded previous complete streamflow live-data baseline from ${commit}."
+      return 0
+    fi
+  done
+
+  rm -f "${PREVIOUS_LIVE_JSON}.candidate"
+}
+
+validate_streamflow_export() {
+  local path="$1"
+  if [[ "${REQUIRE_EXTENDED_RANGES}" != "1" ]]; then
+    return 0
+  fi
+
+  STREAMFLOW_VALIDATE_PATH="${path}" "${PYTHON_BIN}" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+path = Path(os.environ["STREAMFLOW_VALIDATE_PATH"])
+data = json.loads(path.read_text(encoding="utf-8"))
+ranges = data.get("ranges") or {}
+
+def p50_count(name):
+    block = ranges.get(name) or {}
+    if not isinstance(block, dict):
+        return 0
+    series = block.get("p50") or []
+    return len(series) if isinstance(series, list) else 0
+
+medium_n = p50_count("medium_range")
+long_n = p50_count("long_range")
+print(f"[INFO] streamflow validation: medium_p50={medium_n} long_p50={long_n}")
+if medium_n <= 0 or long_n <= 0:
+    print("[WARN] streamflow validation failed: medium and long-range guidance are required for publishing.")
+    raise SystemExit(1)
+print("[INFO] streamflow validation_status=ok")
+PY
 }
 
 cd "${REPO_ROOT}"
@@ -51,19 +177,27 @@ then
   exit 3
 fi
 
+load_previous_live_baseline
+
 keep_stale_and_exit() {
   local reason="$1"
+  if [[ "${ALLOW_STALE_ON_ERROR}" == "1" ]] && [[ -f "${PREVIOUS_LIVE_JSON}" ]]; then
+    gh_warn "${reason}"
+    mkdir -p "$(dirname "${ASSETS_JSON}")"
+    cp "${PREVIOUS_LIVE_JSON}" "${ASSETS_JSON}"
+    local baseline_commit="unknown"
+    if [[ -f "${PREVIOUS_LIVE_COMMIT_FILE}" ]]; then
+      baseline_commit="$(cat "${PREVIOUS_LIVE_COMMIT_FILE}")"
+    fi
+    gh_warn "Restored previous complete live-data streamflow asset from ${baseline_commit}."
+    print_streamflow_asset_metadata "${ASSETS_JSON}"
+    exit 0
+  fi
+
   if [[ "${ALLOW_STALE_ON_ERROR}" == "1" ]] && [[ -f "${ASSETS_JSON}" ]]; then
     gh_warn "${reason}"
     gh_warn "Keeping tracked asset without update: ${ASSETS_JSON}"
-    "${PYTHON_BIN}" - <<'PY'
-import json
-from pathlib import Path
-path = Path("assets/data/forecasts/big_trees_latest.json")
-data = json.loads(path.read_text(encoding="utf-8"))
-print("[INFO] using existing tracked asset:", path)
-print("[INFO] existing generated_at_utc:", data.get("generated_at_utc"))
-PY
+    print_streamflow_asset_metadata "${ASSETS_JSON}"
     exit 0
   fi
 
@@ -145,6 +279,8 @@ run_api_builder() {
   "${PYTHON_BIN}" "${API_BUILDER}" \
     --gauge-id "BTEC1" \
     --reach-id "17682474" \
+    --timeout-sec "${API_TIMEOUT_SEC}" \
+    --retries "${API_RETRIES}" \
     --output "${SANDBOX_JSON}"
 }
 
@@ -162,6 +298,10 @@ fi
 
 if [[ ! -f "${SANDBOX_JSON}" ]]; then
   keep_stale_and_exit "Expected export not found: ${SANDBOX_JSON}"
+fi
+
+if ! validate_streamflow_export "${SANDBOX_JSON}"; then
+  keep_stale_and_exit "Big Trees streamflow update produced incomplete medium/long-range guidance."
 fi
 
 mkdir -p "$(dirname "${ASSETS_JSON}")"
