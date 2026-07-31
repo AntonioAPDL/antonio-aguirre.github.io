@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Research
-description: "Research on Bayesian forecasting, quantile modeling, climate-risk applications, interval estimation, and statistical software."
+description: "Research on Bayesian forecasting, quantile modeling, environmental applications, interval estimation, and statistical software."
 ---
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
@@ -14,20 +14,20 @@ description: "Research on Bayesian forecasting, quantile modeling, climate-risk 
   <header class="research-hero page-header">
     <h1 class="page-title">Research</h1>
     <p class="page-lede">
-      I develop Bayesian methods for quantile forecasting and interval estimation that turn noisy climate and environmental data into calibrated risk forecasts.
+      I develop Bayesian methods for quantile forecasting, forecast correction, and interval estimation for climate and environmental data.
     </p>
     <p class="page-lede">
-      My work combines state-space modeling, simulation-based and variational inference, forecast evaluation, and statistical software to turn uncertain observations and forecast guidance into calibrated predictive distributions.
+      My work combines state-space modeling, variational and simulation-based inference, forecast evaluation, and reproducible statistical software.
     </p>
   </header>
 
   <section class="research-area-grid" aria-label="Research areas">
     <article class="research-area">
       <span>In revision</span>
-      <h2>Climate-Risk Forecast Correction</h2>
+      <h2>Forecast Correction for Environmental Data</h2>
       <p>
-        Bayesian quantile correction and synthesis for observed environmental measurements, retrospective data products,
-        and operational forecast guidance used in risk assessment, preparedness, and early-warning settings.
+        Bayesian quantile methods for correcting observed and forecast environmental products, then combining
+        corrected quantile forecasts into predictive distributions for risk assessment.
       </p>
     </article>
     <article class="research-area">
@@ -70,8 +70,8 @@ description: "Research on Bayesian forecasting, quantile modeling, climate-risk 
         My poster <em>Bayesian quantile-based correction and synthesis of climate products</em> received a
         Best Poster Prize at the ISBA 2026 World Meeting in Nagoya, Japan. The work presents a Bayesian
         quantile workflow for correcting forecast products and synthesizing corrected quantile forecasts
-        into a posterior predictive distribution for climate-risk assessment. The case study uses local
-        environmental observations and NOAA/NWS forecast guidance near Big Trees.
+        into a posterior predictive distribution. The case study uses local environmental observations and
+        NOAA/NWS forecast guidance near Big Trees.
       </p>
       <dl class="research-poster-feature__details">
         <div>

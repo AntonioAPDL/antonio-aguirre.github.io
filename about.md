@@ -19,10 +19,10 @@ description: "Background, research focus, teaching, service, and applied experie
       <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>,
       advised by <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Bruno Sansó</a> and
       <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Raquel Prado</a>.
-      I develop Bayesian forecasting and quantile methods for climate-driven risk data, with emphasis on uncertainty quantification,
-      approximate and simulation-based inference, and tested R/Python implementations.
-      My current projects concern forecast correction for risk assessment and early warning, dynamic quantile state-space models,
-      quantile readouts for fixed Deep Echo State Network features, and relaxed-quantile interval methods.
+      I work on Bayesian forecasting and quantile methods for climate and environmental data, with emphasis on uncertainty
+      quantification, approximate and simulation-based inference, and reproducible R/Python software.
+      Current projects include forecast correction for environmental products, dynamic quantile state-space models, quantile readouts for fixed
+      Deep Echo State Network features, and interval methods based on relaxed quantile regression.
     </p>
   </div>
 
@@ -57,7 +57,7 @@ description: "Background, research focus, teaching, service, and applied experie
       </li>
       <li>
         <strong>Forecast correction manuscript:</strong>
-        Bayesian quantile-based correction and synthesis of environmental forecast products for climate-risk assessment and early warning, currently in revision at <em>Environmetrics</em>.
+        Bayesian quantile-based correction and synthesis of environmental forecast products for risk assessment, currently in revision at <em>Environmetrics</em>.
       </li>
       <li>
         <strong>Q-DESN forecasting:</strong>

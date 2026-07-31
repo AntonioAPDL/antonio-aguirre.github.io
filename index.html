@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Home
-description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian statistics, machine learning, and statistical software."
+description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian forecasting, quantile methods, and statistical software."
 ---
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
@@ -22,11 +22,13 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
       <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>.
       I work with <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Dr. Bruno Sansó</a> and
       <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Dr. Raquel Prado</a>.
-      I develop Bayesian methods for probabilistic forecasting and quantile modeling that help turn noisy climate and environmental data into calibrated risk forecasts.
+      I develop Bayesian forecasting methods that quantify uncertainty in climate and environmental data.
+      My work focuses on correcting forecast products, combining quantile forecasts into predictive distributions,
+      and implementing the methods in reproducible R/Python software.
     </p>
     <p class="intro-text">
-      My current research includes Bayesian forecast correction and synthesis for risk assessment, preparedness, and early-warning settings,
-      quantile readouts for fixed Deep Echo State Network features, and direct estimation of fixed-content intervals.
+      Current projects include Bayesian forecast correction and posterior synthesis, quantile readouts for fixed Deep Echo
+      State Network features, and generalized-Bayes methods for fixed-content intervals.
       I also co-develop and maintain
       <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>,
       a CRAN package for dynamic and static Bayesian quantile models.
@@ -55,8 +57,8 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
     </article>
     <article class="home-highlight-card">
       <span>In revision</span>
-      <h2>Climate-risk forecasting</h2>
-      <p>Bayesian correction and synthesis of environmental forecast products for risk assessment, preparedness, and early warning. Related work received the ISBA 2026 Best Poster Prize and the EnviBayes Student Paper Competition award.</p>
+      <h2>Forecast correction</h2>
+      <p>Bayesian correction and synthesis of environmental forecast products for risk assessment. Related work received the ISBA 2026 Best Poster Prize and the EnviBayes Student Paper Competition award.</p>
     </article>
     <article class="home-highlight-card">
       <span>arXiv preprint</span>
@@ -68,10 +70,10 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
   <section class="home-demo-preview" aria-labelledby="home-demo-preview-title">
     <div>
       <p class="software-kicker">Live Research Demo</p>
-      <h2 id="home-demo-preview-title">Climate-Risk Forecast Display</h2>
+      <h2 id="home-demo-preview-title">Forecast Correction Display</h2>
       <p>
-        A browser-based research display combines recent USGS observations at Big Trees with NOAA/NWS forecast guidance.
-        The full demo includes the local conditions panel and GEFS precipitation/soil-moisture context.
+        A browser-based research display combines recent USGS observations near Big Trees with NOAA/NWS forecast guidance
+        and GEFS precipitation/soil-moisture context.
       </p>
     </div>
     <a class="software-button" href="/demos/">

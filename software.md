@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Software
-description: "Public packages, research code, and selected implementation examples."
+description: "Public packages, research code, and selected implementation examples for Bayesian quantile modeling and forecast evaluation."
 ---
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
@@ -15,7 +15,8 @@ description: "Public packages, research code, and selected implementation exampl
     <p class="software-kicker">Research Software</p>
     <h1 class="page-title">Software</h1>
     <p class="page-lede">
-      Selected software and reproducibility materials for Bayesian modeling, forecasting, and scientific computing.
+      Selected software and reproducibility materials for Bayesian quantile modeling, forecast evaluation,
+      posterior synthesis, and scientific computing.
     </p>
   </header>
 
