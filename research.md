@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Research
-description: "Research on Bayesian forecasting, quantile modeling, interval estimation, and statistical software."
+description: "Research on Bayesian forecasting, quantile modeling, climate-risk applications, interval estimation, and statistical software."
 ---
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
@@ -14,20 +14,20 @@ description: "Research on Bayesian forecasting, quantile modeling, interval esti
   <header class="research-hero page-header">
     <h1 class="page-title">Research</h1>
     <p class="page-lede">
-      I develop Bayesian methods for quantile forecasting and interval estimation, with applications to hydrologic time series.
+      I develop Bayesian methods for quantile forecasting and interval estimation that turn noisy climate and environmental data into calibrated risk forecasts.
     </p>
     <p class="page-lede">
-      My work combines state-space modeling, simulation-based and variational inference, forecast evaluation, and statistical software.
+      My work combines state-space modeling, simulation-based and variational inference, forecast evaluation, and statistical software to turn uncertain observations and forecast guidance into calibrated predictive distributions.
     </p>
   </header>
 
   <section class="research-area-grid" aria-label="Research areas">
     <article class="research-area">
       <span>In revision</span>
-      <h2>Hydrologic Forecast Correction</h2>
+      <h2>Climate-Risk Forecast Correction</h2>
       <p>
-        Bayesian quantile correction and synthesis for USGS observations, retrospective products,
-        and operational forecast products in river-flow forecasting.
+        Bayesian quantile correction and synthesis for observed environmental measurements, retrospective data products,
+        and operational forecast guidance used in risk assessment, preparedness, and early-warning settings.
       </p>
     </article>
     <article class="research-area">
@@ -69,10 +69,9 @@ description: "Research on Bayesian forecasting, quantile modeling, interval esti
       <p>
         My poster <em>Bayesian quantile-based correction and synthesis of climate products</em> received a
         Best Poster Prize at the ISBA 2026 World Meeting in Nagoya, Japan. The work presents a Bayesian
-        quantile workflow for correcting hydrologic forecast products and synthesizing corrected quantile forecasts
-        into a posterior predictive distribution, with daily San Lorenzo River flow as the case study.
-        The poster used the earlier title <em>climate products</em>; the revised manuscript uses
-        <em>hydrologic products</em>.
+        quantile workflow for correcting forecast products and synthesizing corrected quantile forecasts
+        into a posterior predictive distribution for climate-risk assessment. The case study uses local
+        environmental observations and NOAA/NWS forecast guidance near Big Trees.
       </p>
       <dl class="research-poster-feature__details">
         <div>
