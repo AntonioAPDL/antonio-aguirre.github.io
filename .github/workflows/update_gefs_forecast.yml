@@ -43,15 +43,20 @@ jobs:
           pip install -r _sandbox/gefs_point_pipeline/requirements.txt
 
       - name: Run GEFS update script
-        env:
-          GEFS_FORECAST_ALLOW_STALE_ON_ERROR: "1"
         run: |
           chmod +x scripts/update_big_trees_gefs_forecast.sh
           scripts/update_big_trees_gefs_forecast.sh
 
+      - name: Validate GEFS asset freshness
+        run: |
+          python3 scripts/check_forecast_assets.py \
+            --gefs assets/data/forecasts/gefs_big_trees_latest.json \
+            --max-age-hours 36
+
       - name: Publish GEFS asset to live-data branch
         env:
           LIVE_DATA_COMMIT_MESSAGE: "chore: update GEFS Big Trees forecast data"
+          LIVE_DATA_MAX_AGE_HOURS: "36"
         run: |
           scripts/publish_live_data_artifacts.sh \
             assets/data/forecasts/gefs_big_trees_latest.json

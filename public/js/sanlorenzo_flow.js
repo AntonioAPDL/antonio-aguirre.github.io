@@ -359,6 +359,21 @@
     };
   }
 
+  function createForecastLineTrace(points, label, unitLabel, colorLine, dash, legendRank) {
+    if (!Array.isArray(points) || !points.length) return null;
+    return {
+      x: points.map((p) => p.x),
+      y: points.map((p) => p.y),
+      type: 'scatter',
+      mode: 'lines+markers',
+      name: label,
+      legendrank: legendRank,
+      line: { color: colorLine, width: 2.0, dash: dash || 'solid' },
+      marker: { color: colorLine, size: 3.6 },
+      hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>${label}: %{y:.2f} ${unitLabel}<extra></extra>`
+    };
+  }
+
   function buildForecastOverlay(payload, observedUnits, logAxis) {
     const traces = [];
     const extentPoints = [];
@@ -395,16 +410,18 @@
       return { traces, extentPoints, note: null, warning, forecastStart: null };
     }
 
+    const shortRange = ranges.short && typeof ranges.short === 'object' ? ranges.short : {};
     const medium = ranges.medium_range && typeof ranges.medium_range === 'object' ? ranges.medium_range : {};
     const longRange = ranges.long_range && typeof ranges.long_range === 'object' ? ranges.long_range : {};
 
+    const shortSeries = parseFlowSeries(shortRange.deterministic, forecastUnits, observedFlowUnits, logAxis);
     const mediumP10 = parseFlowSeries(medium.p10, forecastUnits, observedFlowUnits, logAxis);
     const mediumP50 = parseFlowSeries(medium.p50, forecastUnits, observedFlowUnits, logAxis);
     const mediumP90 = parseFlowSeries(medium.p90, forecastUnits, observedFlowUnits, logAxis);
     const longP10 = parseFlowSeries(longRange.p10, forecastUnits, observedFlowUnits, logAxis);
     const longP50 = parseFlowSeries(longRange.p50, forecastUnits, observedFlowUnits, logAxis);
     const longP90 = parseFlowSeries(longRange.p90, forecastUnits, observedFlowUnits, logAxis);
-    const ensembleSeries = [mediumP10, mediumP50, mediumP90, longP10, longP50, longP90];
+    const ensembleSeries = [shortSeries, mediumP10, mediumP50, mediumP90, longP10, longP50, longP90];
     let forecastStart = null;
     ensembleSeries.forEach((series) => {
       if (!Array.isArray(series) || !series.length) return;
@@ -414,6 +431,16 @@
         forecastStart = first;
       }
     });
+
+    const shortTrace = createForecastLineTrace(
+      shortSeries,
+      'NWS short',
+      observedFlowUnits,
+      '#1d4ed8',
+      'solid',
+      18
+    );
+    if (shortTrace) traces.push(shortTrace);
 
     traces.push(
       ...createBandTraces(
@@ -438,11 +465,19 @@
       )
     );
 
-    [mediumP10, mediumP50, mediumP90, longP10, longP50, longP90].forEach((series) => {
+    [shortSeries, mediumP10, mediumP50, mediumP90, longP10, longP50, longP90].forEach((series) => {
       series.forEach((point) => extentPoints.push(point));
     });
 
     if (traces.length) noteParts.unshift('Includes forecast guidance');
+    const availability = payload.availability && typeof payload.availability === 'object' ? payload.availability : {};
+    const extendedUnavailable = availability.extended_guidance_available === false
+      || (!mediumP50.length && !longP50.length);
+    if (traces.length && extendedUnavailable) {
+      warning = 'Medium/long NWS guidance is temporarily unavailable; showing available short-range guidance.';
+    } else if (!traces.length) {
+      warning = 'Forecast guidance is temporarily unavailable.';
+    }
     return {
       traces,
       extentPoints,

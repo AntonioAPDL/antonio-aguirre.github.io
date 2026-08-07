@@ -35,14 +35,22 @@ jobs:
 
       - name: Update forecast JSON
         env:
-          BIG_TREES_FORECAST_ALLOW_STALE_ON_ERROR: "1"
+          BIG_TREES_FORECAST_REQUIRE_CORE_RANGES: "1"
+          BIG_TREES_FORECAST_REQUIRE_EXTENDED_RANGES: "0"
         run: |
           chmod +x scripts/update_big_trees_forecast.sh
           scripts/update_big_trees_forecast.sh
 
+      - name: Validate forecast asset freshness
+        run: |
+          python3 scripts/check_forecast_assets.py \
+            --streamflow assets/data/forecasts/big_trees_latest.json \
+            --max-age-hours 36
+
       - name: Publish forecast asset to live-data branch
         env:
           LIVE_DATA_COMMIT_MESSAGE: "chore: update Big Trees forecast data"
+          LIVE_DATA_MAX_AGE_HOURS: "36"
         run: |
           scripts/publish_live_data_artifacts.sh \
             assets/data/forecasts/big_trees_latest.json

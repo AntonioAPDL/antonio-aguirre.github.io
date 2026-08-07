@@ -155,17 +155,20 @@ The plot can overlay forecast guidance from a JSON artifact published by schedul
 - **Bundled fallback:** `assets/data/forecasts/big_trees_latest.json` on `main`
 - **Update script:** `scripts/update_big_trees_forecast.sh`
 - **Publish helper:** `scripts/publish_live_data_artifacts.sh`
-- **Included series:** JSON may include NWPS analysis/short deterministic plus NWM medium/long quantiles (`p10/p50/p90`); the USGS panel overlay uses ensemble quantiles (medium/long) only.
-- **Plot overlay behavior:** USGS observed discharge remains the base trace; NWS ensemble guidance is overlaid as medium/long `p10-p90` bands plus `p50` lines.
+- **Included series:** JSON may include NWPS analysis/short deterministic plus NWM medium/long quantiles (`p10/p50/p90`). The medium range may fall back to `medium_range_blend` when the direct medium-range series is unavailable.
+- **Plot overlay behavior:** USGS observed discharge remains the base trace; the browser overlays available NWS short-range guidance and medium/long `p10-p90` bands when present.
 - **Unit harmonization:** the forecast JSON stores streamflow in `ft3/s` (cfs). The browser also normalizes `cfs`/`cms` labels and converts any forecast overlay to the observed USGS discharge axis before plotting.
 - **TODO:** HEFS ensembles once location_id lookup is resolved
 - **Fallback behavior:** if `_sandbox/nws_ensemble_point` is absent, updater builds JSON directly from NOAA NWPS APIs.
-- **Ops guard:** on updater errors, CI can keep the last tracked artifact by setting `BIG_TREES_FORECAST_ALLOW_STALE_ON_ERROR=1`.
+- **Ops guard:** stale fallback is disabled in scheduled CI. If `BIG_TREES_FORECAST_ALLOW_STALE_ON_ERROR=1` is set manually, fallback still exits nonzero by default so stale data is not reported as a successful refresh.
 
 To refresh the bundled forecast JSON locally:
 
 ```bash
 scripts/update_big_trees_forecast.sh
+python3 scripts/check_forecast_assets.py \
+  --streamflow assets/data/forecasts/big_trees_latest.json \
+  --max-age-hours 36
 ```
 
 If the live-data request fails, the page tries the bundled fallback. If both are missing, the plot still renders observations only and logs a console warning.
@@ -195,6 +198,7 @@ Behavior:
   - SOILW depth-level medians (`p50`) with optional uncertainty bands
 - Adds retrospective context from prior GEFS cycles and shows a fixed 20-day pre-forecast window
 - Displays metadata and freshness warning if stale
+- Displays a context-quality warning if the forecast is current but the rolling GEFS analysis context is incomplete
 - Degrades gracefully when JSON is missing/invalid
 
 GEFS JSON includes optional retrospective metadata used by the panel:
@@ -205,6 +209,7 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - `retrospective.soil_moisture.<level>.p50`
 - `gefs_analysis_context.precip_f003_proxy.<level>` (GEFS cycle-history analysis proxy, plotted)
 - `gefs_analysis_context.soil_f000.<level>` (GEFS cycle-history analysis, plotted)
+- `gefs_analysis_context_summary` and `quality_warnings` describe whether the rolling context is complete enough for display
 - Plot units are harmonized by panel logic (`APCP` in mm water-equivalent; `SOILW` in m3/m3)
 - PRISM/ERA5 observed overlays are intentionally disabled in the panel (GEFS-only context mode)
 - Exporter default is GEFS-only; observed payload is opt-in with `--include-observed-retrospective`
@@ -292,9 +297,12 @@ The repo supports fully hosted forecast and climate refresh on GitHub Actions wi
   - cadence: every 8 hours on the hour UTC (`0 */8 * * *`) plus manual `workflow_dispatch`
   - publishes to `live-data`:
     - `assets/data/forecasts/big_trees_latest.json`
+  - validates `generated_at_utc`, units, and core analysis/short-range series before publishing
+  - accepts partial streamflow artifacts when medium/long guidance is unavailable, but the browser labels that state
   - race guards:
     - hard sync to latest `origin/main` before processing
     - rebase-safe live-data publish with retry support
+    - publish helper refuses to replace a newer live-data JSON with an older candidate
 
 - `.github/workflows/update_climate_series.yml`
   - cadence: weekly on Monday at `06:17` UTC (`17 6 * * 1`) plus manual `workflow_dispatch`
@@ -315,10 +323,12 @@ The repo supports fully hosted forecast and climate refresh on GitHub Actions wi
   - caches pip dependencies and performs a latest-cycle freshness precheck before the heavy full refresh
   - fail-fast checks in `scripts/update_big_trees_gefs_forecast.sh` ensure:
     - latest init is not stale
-    - 20-day GEFS analysis context coverage remains dense and current
+    - current precipitation and soil-moisture forecast series exist
+    - 20-day GEFS analysis context coverage is reported as `ok` or `limited`; limited context is a warning, not a blocker for publishing a current forecast
   - race guards:
     - hard sync to latest `origin/main` before processing
     - rebase-safe live-data publish with retry support
+    - publish helper refuses stale or older JSON artifacts when `LIVE_DATA_MAX_AGE_HOURS` is set
 
 - `.github/workflows/backfill_gefs_analysis_context.yml` (manual)
   - one-time/manual bootstrap for GEFS cycle-analysis context

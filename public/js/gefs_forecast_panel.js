@@ -480,6 +480,8 @@
     cleaned.forEach((msg) => {
       if (msg.startsWith('Update appears delayed')) {
         out.push(msg);
+      } else if (msg.indexOf('current forecast is still shown') !== -1 || msg.indexOf('analysis context is limited') !== -1) {
+        out.push(msg);
       } else {
         hasSeriesIssue = true;
       }
@@ -830,6 +832,13 @@
     publishTimelineWindow(payload, observationWindowDays);
 
     const statusWarnings = Array.isArray(extraWarnings) ? extraWarnings.slice() : [];
+    if (Array.isArray(payload.quality_warnings)) {
+      payload.quality_warnings.forEach((warning) => {
+        if (typeof warning === 'string' && warning.trim()) {
+          statusWarnings.push(warning.trim());
+        }
+      });
+    }
     const staleHours = numberOrNull(container.dataset.staleHours) ?? numberOrNull(payload.stale_after_hours) ?? 12;
     const generatedDate = parseDate(payload.generated_at_utc);
     if (generatedDate) {

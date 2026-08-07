@@ -17,10 +17,12 @@ MAX_SANDBOX_AGE_SEC=21600
 
 INSTALL_DEPS="${BIG_TREES_FORECAST_INSTALL_DEPS:-0}"
 ALLOW_STALE_ON_ERROR="${BIG_TREES_FORECAST_ALLOW_STALE_ON_ERROR:-${BIG_TREES_FORECAST_ALLOW_STALE_ON_MISSING_PIPELINE:-0}}"
-REQUIRE_EXTENDED_RANGES="${BIG_TREES_FORECAST_REQUIRE_EXTENDED_RANGES:-1}"
+REQUIRE_CORE_RANGES="${BIG_TREES_FORECAST_REQUIRE_CORE_RANGES:-1}"
+REQUIRE_EXTENDED_RANGES="${BIG_TREES_FORECAST_REQUIRE_EXTENDED_RANGES:-0}"
 BASELINE_MAX_COMMITS="${BIG_TREES_FORECAST_BASELINE_MAX_COMMITS:-36}"
 API_TIMEOUT_SEC="${BIG_TREES_FORECAST_TIMEOUT_SEC:-30}"
 API_RETRIES="${BIG_TREES_FORECAST_RETRIES:-4}"
+STALE_FALLBACK_IS_FAILURE="${BIG_TREES_FORECAST_STALE_FALLBACK_IS_FAILURE:-1}"
 
 log_info() { echo "[INFO] $*"; }
 log_warn() { echo "[WARN] $*" >&2; }
@@ -58,6 +60,31 @@ raise SystemExit(0 if count("medium_range") > 0 and count("long_range") > 0 else
 PY
 }
 
+payload_has_core_ranges() {
+  local path="$1"
+  [[ -f "${path}" ]] || return 1
+  STREAMFLOW_VALIDATE_PATH="${path}" "${PYTHON_BIN}" - <<'PY' >/dev/null
+import json
+import os
+from pathlib import Path
+
+path = Path(os.environ["STREAMFLOW_VALIDATE_PATH"])
+data = json.loads(path.read_text(encoding="utf-8"))
+ranges = data.get("ranges") or {}
+
+def count(name, key):
+    block = ranges.get(name) or {}
+    if not isinstance(block, dict):
+        return 0
+    series = block.get(key) or []
+    return len(series) if isinstance(series, list) else 0
+
+short_n = count("short", "deterministic")
+analysis_n = count("analysis", "deterministic")
+raise SystemExit(0 if short_n > 0 or analysis_n > 0 else 1)
+PY
+}
+
 print_streamflow_asset_metadata() {
   local path="$1"
   STREAMFLOW_ASSET_PATH="${path}" "${PYTHON_BIN}" - <<'PY'
@@ -92,6 +119,7 @@ PY
 }
 
 load_previous_live_baseline() {
+  mkdir -p "$(dirname "${PREVIOUS_LIVE_JSON}")"
   rm -f "${PREVIOUS_LIVE_JSON}" "${PREVIOUS_LIVE_JSON}.candidate" "${PREVIOUS_LIVE_COMMIT_FILE}"
 
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -111,10 +139,11 @@ load_previous_live_baseline() {
   mapfile -t commits < <(git log -n "${BASELINE_MAX_COMMITS}" --format=%H origin/live-data -- "${ASSET_REL}" 2>/dev/null || true)
   for commit in "${commits[@]}"; do
     if git show "${commit}:${ASSET_REL}" > "${PREVIOUS_LIVE_JSON}.candidate" 2>/dev/null \
-      && payload_has_extended_ranges "${PREVIOUS_LIVE_JSON}.candidate"; then
+      && payload_has_core_ranges "${PREVIOUS_LIVE_JSON}.candidate" \
+      && { [[ "${REQUIRE_EXTENDED_RANGES}" != "1" ]] || payload_has_extended_ranges "${PREVIOUS_LIVE_JSON}.candidate"; }; then
       mv "${PREVIOUS_LIVE_JSON}.candidate" "${PREVIOUS_LIVE_JSON}"
       printf '%s\n' "${commit}" > "${PREVIOUS_LIVE_COMMIT_FILE}"
-      log_info "Loaded previous complete streamflow live-data baseline from ${commit}."
+      log_info "Loaded previous streamflow live-data baseline from ${commit}."
       return 0
     fi
   done
@@ -124,9 +153,6 @@ load_previous_live_baseline() {
 
 validate_streamflow_export() {
   local path="$1"
-  if [[ "${REQUIRE_EXTENDED_RANGES}" != "1" ]]; then
-    return 0
-  fi
 
   STREAMFLOW_VALIDATE_PATH="${path}" "${PYTHON_BIN}" - <<'PY'
 import json
@@ -144,12 +170,24 @@ def p50_count(name):
     series = block.get("p50") or []
     return len(series) if isinstance(series, list) else 0
 
+def deterministic_count(name):
+    block = ranges.get(name) or {}
+    if not isinstance(block, dict):
+        return 0
+    series = block.get("deterministic") or []
+    return len(series) if isinstance(series, list) else 0
+
+analysis_n = deterministic_count("analysis")
+short_n = deterministic_count("short")
 medium_n = p50_count("medium_range")
 long_n = p50_count("long_range")
-print(f"[INFO] streamflow validation: medium_p50={medium_n} long_p50={long_n}")
+print(f"[INFO] streamflow validation: analysis={analysis_n} short={short_n} medium_p50={medium_n} long_p50={long_n}")
+if os.environ.get("REQUIRE_CORE_RANGES", "1") == "1" and analysis_n <= 0 and short_n <= 0:
+    print("[WARN] streamflow validation failed: analysis or short-range guidance is required for publishing.")
+    raise SystemExit(1)
 if medium_n <= 0 or long_n <= 0:
     print("[WARN] streamflow validation failed: medium and long-range guidance are required for publishing.")
-    raise SystemExit(1)
+    raise SystemExit(2 if os.environ.get("REQUIRE_EXTENDED_RANGES", "0") == "1" else 0)
 print("[INFO] streamflow validation_status=ok")
 PY
 }
@@ -181,6 +219,10 @@ load_previous_live_baseline
 
 keep_stale_and_exit() {
   local reason="$1"
+  local stale_rc=0
+  if [[ "${STALE_FALLBACK_IS_FAILURE}" == "1" ]]; then
+    stale_rc=2
+  fi
   if [[ "${ALLOW_STALE_ON_ERROR}" == "1" ]] && [[ -f "${PREVIOUS_LIVE_JSON}" ]]; then
     gh_warn "${reason}"
     mkdir -p "$(dirname "${ASSETS_JSON}")"
@@ -189,16 +231,16 @@ keep_stale_and_exit() {
     if [[ -f "${PREVIOUS_LIVE_COMMIT_FILE}" ]]; then
       baseline_commit="$(cat "${PREVIOUS_LIVE_COMMIT_FILE}")"
     fi
-    gh_warn "Restored previous complete live-data streamflow asset from ${baseline_commit}."
+    gh_warn "Restored previous live-data streamflow asset from ${baseline_commit}."
     print_streamflow_asset_metadata "${ASSETS_JSON}"
-    exit 0
+    exit "${stale_rc}"
   fi
 
   if [[ "${ALLOW_STALE_ON_ERROR}" == "1" ]] && [[ -f "${ASSETS_JSON}" ]]; then
     gh_warn "${reason}"
     gh_warn "Keeping tracked asset without update: ${ASSETS_JSON}"
     print_streamflow_asset_metadata "${ASSETS_JSON}"
-    exit 0
+    exit "${stale_rc}"
   fi
 
   log_error "${reason}"
@@ -300,7 +342,7 @@ if [[ ! -f "${SANDBOX_JSON}" ]]; then
   keep_stale_and_exit "Expected export not found: ${SANDBOX_JSON}"
 fi
 
-if ! validate_streamflow_export "${SANDBOX_JSON}"; then
+if ! REQUIRE_CORE_RANGES="${REQUIRE_CORE_RANGES}" REQUIRE_EXTENDED_RANGES="${REQUIRE_EXTENDED_RANGES}" validate_streamflow_export "${SANDBOX_JSON}"; then
   keep_stale_and_exit "Big Trees streamflow update produced incomplete medium/long-range guidance."
 fi
 

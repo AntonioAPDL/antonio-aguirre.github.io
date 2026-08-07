@@ -14,6 +14,7 @@ PREVIOUS_LIVE_JSON="${REPO_ROOT}/data/_sandbox_gefs/web/gefs_big_trees_latest.pr
 OBS_WINDOW_DAYS="${OBS_WINDOW_DAYS:-20}"
 ANALYSIS_HISTORY_MAX_COMMITS="${ANALYSIS_HISTORY_MAX_COMMITS:-240}"
 ALLOW_STALE_ON_ERROR="${GEFS_FORECAST_ALLOW_STALE_ON_ERROR:-0}"
+STALE_FALLBACK_IS_FAILURE="${GEFS_FORECAST_STALE_FALLBACK_IS_FAILURE:-1}"
 
 log_warn() { echo "[WARN] $*" >&2; }
 log_error() { echo "[ERROR] $*" >&2; }
@@ -28,6 +29,7 @@ gh_warn() {
 }
 
 load_previous_live_asset() {
+  mkdir -p "$(dirname "${PREVIOUS_LIVE_JSON}")"
   rm -f "${PREVIOUS_LIVE_JSON}"
 
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -75,20 +77,24 @@ PY
 
 keep_stale_and_exit() {
   local reason="$1"
+  local stale_rc=0
+  if [[ "${STALE_FALLBACK_IS_FAILURE}" == "1" ]]; then
+    stale_rc=1
+  fi
   if [[ "${ALLOW_STALE_ON_ERROR}" == "1" ]] && [[ -f "${PREVIOUS_LIVE_JSON}" ]]; then
     mkdir -p "$(dirname "${ASSET_JSON}")"
     cp "${PREVIOUS_LIVE_JSON}" "${ASSET_JSON}"
     gh_warn "${reason}"
     gh_warn "Keeping latest live-data GEFS asset without update: ${ASSET_JSON}"
     print_asset_metadata
-    exit 0
+    exit "${stale_rc}"
   fi
 
   if [[ "${ALLOW_STALE_ON_ERROR}" == "1" ]] && [[ -f "${ASSET_JSON}" ]]; then
     gh_warn "${reason}"
     gh_warn "Keeping tracked GEFS asset without update: ${ASSET_JSON}"
     print_asset_metadata
-    exit 0
+    exit "${stale_rc}"
   fi
   log_error "${reason}"
   if [[ "${ALLOW_STALE_ON_ERROR}" != "1" ]]; then
@@ -297,9 +303,37 @@ def best_series(block):
     return best
 
 errors = []
+warnings = []
 window_days = int(data.get("observation_window_days") or 0)
 if window_days < 20:
     errors.append(f"observation_window_days={window_days} (expected >= 20)")
+
+member_count = int(data.get("member_count") or 0)
+if member_count <= 0:
+    errors.append("member_count is missing or zero")
+
+def best_series_count(section_name):
+    section = data.get(section_name) or {}
+    best = 0
+    if not isinstance(section, dict):
+        return 0
+    for level_block in section.values():
+        if not isinstance(level_block, dict):
+            continue
+        for metric in ("p50", "mean", "p10", "p90"):
+            series = level_block.get(metric)
+            if isinstance(series, list):
+                best = max(best, len(series))
+    return best
+
+precip_forecast_points = best_series_count("precip")
+soil_forecast_points = best_series_count("soil_moisture")
+print("forecast_precip_representative_points:", precip_forecast_points)
+print("forecast_soil_representative_points:", soil_forecast_points)
+if precip_forecast_points <= 0:
+    errors.append("precip forecast series are missing")
+if soil_forecast_points <= 0:
+    errors.append("soil-moisture forecast series are missing")
 
 init_time = parse_iso(data.get("init_time_utc"))
 if init_time is None:
@@ -330,24 +364,43 @@ else:
 
     edge_tol = timedelta(hours=9)
     if p_count < min_expected:
-        errors.append(f"precip analysis coverage too sparse ({p_count} < {min_expected})")
+        warnings.append(f"precip analysis coverage too sparse ({p_count} < {min_expected})")
     if s_count < min_expected:
-        errors.append(f"soil analysis coverage too sparse ({s_count} < {min_expected})")
+        warnings.append(f"soil analysis coverage too sparse ({s_count} < {min_expected})")
     if p_first is None or p_first > (start + edge_tol):
-        errors.append("precip analysis does not cover start of retrospective window")
+        warnings.append("precip analysis does not cover start of retrospective window")
     if s_first is None or s_first > (start + edge_tol):
-        errors.append("soil analysis does not cover start of retrospective window")
+        warnings.append("soil analysis does not cover start of retrospective window")
     if p_last is None or p_last < (precip_end - edge_tol):
-        errors.append("precip analysis does not include recent cycle context")
+        warnings.append("precip analysis does not include recent cycle context")
     if s_last is None or s_last < (soil_end - edge_tol):
-        errors.append("soil analysis does not include recent cycle context")
+        warnings.append("soil analysis does not include recent cycle context")
+
+quality_warnings = data.get("quality_warnings") or []
+if isinstance(quality_warnings, list):
+    for warning in quality_warnings:
+        if isinstance(warning, str) and warning.strip():
+            warnings.append(warning.strip())
+
+deduped_warnings = []
+seen_warnings = set()
+for warning in warnings:
+    if warning in seen_warnings:
+        continue
+    seen_warnings.add(warning)
+    deduped_warnings.append(warning)
 
 if errors:
     print("validation_status=failed")
     for err in errors:
         print("validation_error:", err)
     raise SystemExit(1)
-print("validation_status=ok")
+if deduped_warnings:
+    print("validation_status=ok_with_warnings")
+    for warning in deduped_warnings:
+        print("validation_warning:", warning)
+else:
+    print("validation_status=ok")
 PY
 then
   keep_stale_and_exit "GEFS validation failed for freshly exported payload."

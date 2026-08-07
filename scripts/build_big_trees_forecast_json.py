@@ -303,16 +303,21 @@ def build_payload(args: argparse.Namespace) -> Dict[str, Any]:
         short_init = init_ts((stageflow.get("forecast") or {}).get("issuedTime"))
         notes.append("Using NWPS stageflow forecast as short-range fallback.")
 
-    medium_p10: List[Dict[str, float]]
-    medium_p50: List[Dict[str, float]]
-    medium_p90: List[Dict[str, float]]
-    medium_init: Optional[str]
-    medium_notes: List[str]
     medium_p10, medium_p50, medium_p90, medium_init, medium_notes = build_range_quantiles(
         reach_streamflow.get("mediumRange", {}) or {},
         "NWM medium_range",
     )
     notes.extend(medium_notes)
+    if not medium_p50:
+        blend_p10, blend_p50, blend_p90, blend_init, blend_notes = build_range_quantiles(
+            reach_streamflow.get("mediumRangeBlend", {}) or {},
+            "NWM medium_range_blend",
+        )
+        notes.extend(blend_notes)
+        if blend_p50:
+            medium_p10, medium_p50, medium_p90 = blend_p10, blend_p50, blend_p90
+            medium_init = blend_init
+            notes.append("Using NWM medium_range_blend as medium-range guidance fallback.")
 
     long_p10: List[Dict[str, float]]
     long_p50: List[Dict[str, float]]
@@ -329,9 +334,19 @@ def build_payload(args: argparse.Namespace) -> Dict[str, Any]:
         raise RuntimeError("No usable forecast/analysis series were produced.")
 
     generated = datetime.now(timezone.utc).isoformat(timespec="microseconds")
+    availability = {
+        "analysis_points": len(analysis_series),
+        "short_points": len(short_series),
+        "medium_range_points": len(medium_p50),
+        "long_range_points": len(long_p50),
+        "extended_guidance_available": bool(medium_p50 and long_p50),
+        "partial_update": not bool(medium_p50 and long_p50),
+    }
     payload: Dict[str, Any] = {
         "generated_utc": generated,
         "generated_at_utc": generated,
+        "status": "complete" if not availability["partial_update"] else "partial",
+        "availability": availability,
         "provider_used": "api",
         "provider_mix": provider_mix,
         "location": {

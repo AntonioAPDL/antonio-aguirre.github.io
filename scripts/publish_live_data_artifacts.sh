@@ -48,7 +48,93 @@ else
   git -C "${LIVE_DIR}" rm -r --ignore-unmatch . >/dev/null 2>&1 || true
 fi
 
+validate_artifact_for_publish() {
+  local artifact="$1"
+  LIVE_DATA_LOCAL_PATH="${REPO_ROOT}/${artifact}" \
+  LIVE_DATA_EXISTING_PATH="${LIVE_DIR}/${artifact}" \
+  LIVE_DATA_ALLOW_OLDER="${LIVE_DATA_ALLOW_OLDER:-0}" \
+  LIVE_DATA_MAX_AGE_HOURS="${LIVE_DATA_MAX_AGE_HOURS:-}" \
+  python3 - <<'PY'
+import datetime as dt
+import json
+import os
+import sys
+from pathlib import Path
+
+
+def parse_time(value):
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def artifact_time(path):
+    if path.suffix.lower() != ".json" or not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    candidates = [
+        data.get("generated_at_utc"),
+        data.get("generated_utc"),
+        data.get("init_time_utc"),
+    ]
+    init_times = data.get("init_times")
+    if isinstance(init_times, dict):
+        candidates.extend(init_times.values())
+    parsed = [parse_time(value) for value in candidates]
+    parsed = [value for value in parsed if value is not None]
+    return max(parsed) if parsed else None
+
+
+local_path = Path(os.environ["LIVE_DATA_LOCAL_PATH"])
+existing_path = Path(os.environ["LIVE_DATA_EXISTING_PATH"])
+allow_older = os.environ.get("LIVE_DATA_ALLOW_OLDER") == "1"
+max_age_raw = os.environ.get("LIVE_DATA_MAX_AGE_HOURS", "").strip()
+
+current_ts = artifact_time(local_path)
+existing_ts = artifact_time(existing_path)
+
+if current_ts and existing_ts and current_ts < existing_ts and not allow_older:
+    print(
+        f"Refusing to publish older artifact {local_path}: "
+        f"candidate={current_ts.isoformat()} existing={existing_ts.isoformat()}",
+        file=sys.stderr,
+    )
+    raise SystemExit(8)
+
+if max_age_raw:
+    try:
+        max_age_hours = float(max_age_raw)
+    except ValueError:
+        print(f"Invalid LIVE_DATA_MAX_AGE_HOURS={max_age_raw!r}", file=sys.stderr)
+        raise SystemExit(2)
+    if current_ts is None:
+        print(f"Cannot enforce freshness for {local_path}: no parseable artifact timestamp.", file=sys.stderr)
+        raise SystemExit(9)
+    age_hours = (dt.datetime.now(dt.timezone.utc) - current_ts).total_seconds() / 3600.0
+    if age_hours > max_age_hours:
+        print(
+            f"Refusing to publish stale artifact {local_path}: "
+            f"age={age_hours:.1f}h max={max_age_hours:.1f}h",
+            file=sys.stderr,
+        )
+        raise SystemExit(9)
+PY
+}
+
 for artifact in "${artifacts[@]}"; do
+  validate_artifact_for_publish "${artifact}"
   mkdir -p "${LIVE_DIR}/$(dirname "${artifact}")"
   cp "${REPO_ROOT}/${artifact}" "${LIVE_DIR}/${artifact}"
 done

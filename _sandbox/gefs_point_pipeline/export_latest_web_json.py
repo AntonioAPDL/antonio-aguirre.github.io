@@ -328,6 +328,79 @@ def _prior_context_sufficient_for_window(
     return precip_ok and soil_ok
 
 
+def _analysis_context_summary(
+    payload: Dict[str, Any],
+    observation_window_days: int,
+) -> Dict[str, Any]:
+    init_time = _parse_iso(payload.get("init_time_utc"))
+    window_days = int(max(1, observation_window_days))
+    summary: Dict[str, Any] = {
+        "status": "unknown",
+        "window_days": window_days,
+        "min_expected_points_per_representative_series": max(8, int(round(window_days * 4 * 0.75))),
+        "warnings": [],
+    }
+    if init_time is None:
+        summary["warnings"] = ["GEFS init time is missing; analysis-context coverage could not be checked."]
+        return summary
+
+    start_utc = init_time - dt.timedelta(days=window_days)
+    precip_end = init_time + dt.timedelta(hours=3, minutes=1)
+    soil_end = init_time + dt.timedelta(minutes=1)
+    min_expected = int(summary["min_expected_points_per_representative_series"])
+
+    context = payload.get("gefs_analysis_context")
+    if not isinstance(context, dict):
+        summary["status"] = "limited"
+        summary["warnings"] = ["GEFS analysis context is unavailable; forecast series are still shown."]
+        return summary
+
+    precip_series = _best_series_for_window(
+        context.get("precip_f003_proxy") or {},
+        start_utc=start_utc,
+        end_utc=precip_end,
+    )
+    soil_series = _best_series_for_window(
+        context.get("soil_f000") or {},
+        start_utc=start_utc,
+        end_utc=soil_end,
+    )
+
+    def coverage(points: Any, end_utc: dt.datetime) -> Dict[str, Any]:
+        windowed = _series_in_window(points, start_utc, end_utc)
+        ordered = sorted(windowed.values(), key=lambda item: item[0])
+        first = ordered[0][0].isoformat() if ordered else None
+        last = ordered[-1][0].isoformat() if ordered else None
+        return {"points": len(ordered), "first_utc": first, "last_utc": last}
+
+    precip_cov = coverage(precip_series, precip_end)
+    soil_cov = coverage(soil_series, soil_end)
+    summary["precip_representative_series"] = precip_cov
+    summary["soil_representative_series"] = soil_cov
+
+    warnings: List[str] = []
+    if int(precip_cov["points"]) < min_expected:
+        warnings.append("GEFS precipitation analysis context is limited; the current forecast is still shown.")
+    if int(soil_cov["points"]) < min_expected:
+        warnings.append("GEFS soil-moisture analysis context is limited; the current forecast is still shown.")
+
+    edge_tol = dt.timedelta(hours=9)
+    for label, cov, end_utc in (
+        ("precipitation", precip_cov, precip_end),
+        ("soil-moisture", soil_cov, soil_end),
+    ):
+        first = _parse_iso(cov.get("first_utc"))
+        last = _parse_iso(cov.get("last_utc"))
+        if first is None or first > (start_utc + edge_tol):
+            warnings.append(f"GEFS {label} context does not cover the start of the requested window.")
+        if last is None or last < (end_utc - edge_tol):
+            warnings.append(f"GEFS {label} context does not include the latest cycle context.")
+
+    summary["status"] = "limited" if warnings else "ok"
+    summary["warnings"] = warnings
+    return summary
+
+
 def _build_gefs_analysis_context_payload(
     current_payload: Dict[str, Any],
     prior_payload: Optional[Dict[str, Any]],
@@ -686,6 +759,11 @@ def main() -> int:
         observation_window_days=observation_window_days,
         history_payloads=history_payloads,
     )
+    context_summary = _analysis_context_summary(payload, observation_window_days)
+    payload["gefs_analysis_context_summary"] = context_summary
+    quality_warnings = context_summary.get("warnings") if isinstance(context_summary, dict) else []
+    if isinstance(quality_warnings, list) and quality_warnings:
+        payload["quality_warnings"] = quality_warnings
     payload["retrospective"] = _build_retrospective_payload(
         current_payload=payload,
         prior_payload=prior_payload,

@@ -14,7 +14,7 @@ RUN_QDESN="${RUN_QDESN:-0}"
 CLIMATE_TIMEOUT_SEC="${CLIMATE_TIMEOUT_SEC:-1800}"
 
 ALLOW_DIRTY="${ALLOW_DIRTY:-0}"
-ALLOW_STALE_ON_ERROR="${ALLOW_STALE_ON_ERROR:-1}"
+ALLOW_STALE_ON_ERROR="${ALLOW_STALE_ON_ERROR:-0}"
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 RSCRIPT_BIN="${RSCRIPT_BIN:-Rscript}"
@@ -92,6 +92,29 @@ if [[ "${RUN_QDESN}" == "1" ]]; then
     log "[WARN] QDESN update failed (see log). Continuing."
     overall_rc=1
   fi
+fi
+
+if [[ "${RUN_NWS}" == "1" && -f "${REPO_ROOT}/assets/data/forecasts/big_trees_latest.json" ]]; then
+  if ! "${PYTHON_BIN}" "${REPO_ROOT}/scripts/check_forecast_assets.py" \
+    --streamflow "${REPO_ROOT}/assets/data/forecasts/big_trees_latest.json" \
+    --max-age-hours 36 >>"${RUN_LOG}" 2>&1; then
+    log "[WARN] NWS/NWM forecast asset freshness check failed."
+    overall_rc=1
+  fi
+fi
+
+if [[ "${RUN_GEFS}" == "1" && -f "${REPO_ROOT}/assets/data/forecasts/gefs_big_trees_latest.json" ]]; then
+  if ! "${PYTHON_BIN}" "${REPO_ROOT}/scripts/check_forecast_assets.py" \
+    --gefs "${REPO_ROOT}/assets/data/forecasts/gefs_big_trees_latest.json" \
+    --max-age-hours 36 >>"${RUN_LOG}" 2>&1; then
+    log "[WARN] GEFS forecast asset freshness check failed."
+    overall_rc=1
+  fi
+fi
+
+if [[ "${overall_rc}" -ne 0 ]]; then
+  log "[ERROR] One or more update steps failed; refusing to commit a partial site data refresh."
+  exit "${overall_rc}"
 fi
 
 TRACKED=(
