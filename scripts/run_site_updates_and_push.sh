@@ -16,8 +16,36 @@ CLIMATE_TIMEOUT_SEC="${CLIMATE_TIMEOUT_SEC:-1800}"
 ALLOW_DIRTY="${ALLOW_DIRTY:-0}"
 ALLOW_STALE_ON_ERROR="${ALLOW_STALE_ON_ERROR:-0}"
 
-PYTHON_BIN="${PYTHON_BIN:-python3}"
 RSCRIPT_BIN="${RSCRIPT_BIN:-Rscript}"
+select_python_bin() {
+  local candidate resolved
+  for candidate in "${PYTHON_BIN:-}" python3.12 python3.11 python3.10 python3.9 /home/jaguir26/python39/bin/python3 python3 /usr/bin/python3; do
+    [[ -n "${candidate}" ]] || continue
+    if [[ "${candidate}" = /* ]]; then
+      [[ -x "${candidate}" ]] || continue
+      resolved="${candidate}"
+    else
+      resolved="$(command -v "${candidate}" 2>/dev/null || true)"
+      [[ -n "${resolved}" ]] || continue
+    fi
+    if "${resolved}" - <<'PY' >/dev/null 2>&1
+import sys
+if sys.version_info < (3, 9):
+    raise SystemExit(1)
+import pandas  # noqa: F401
+PY
+    then
+      printf '%s\n' "${resolved}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if ! PYTHON_BIN="$(select_python_bin)"; then
+  echo "[ERROR] No compatible Python >= 3.9 with pandas found for site updates."
+  exit 1
+fi
 export PYTHON_BIN
 
 mkdir -p "${LOG_DIR}"

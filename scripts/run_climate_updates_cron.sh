@@ -9,15 +9,39 @@ RUN_LOG="${LOG_DIR}/run_${RUN_STAMP}.log"
 RUN_LOCK="${LOG_DIR}/run.lock"
 STATUS_CSV="${ROOT_DIR}/climate_series_status.csv"
 COMBINED_CSV="${ROOT_DIR}/climate_daily_ppt_soil.csv"
-PYTHON_BIN_DEFAULT="python3"
-PYTHON_BIN="${PYTHON_BIN:-$PYTHON_BIN_DEFAULT}"
 BOOST_LIB_DIR_DEFAULT=""
 BOOST_LIB_DIR="${BOOST_LIB_DIR:-$BOOST_LIB_DIR_DEFAULT}"
 
 mkdir -p "${LOG_DIR}"
 
-if [[ ! -x "${PYTHON_BIN}" ]]; then
-  PYTHON_BIN="$(command -v python3)"
+select_python_bin() {
+  local candidate resolved
+  for candidate in "${PYTHON_BIN:-}" python3.12 python3.11 python3.10 python3.9 /home/jaguir26/python39/bin/python3 python3 /usr/bin/python3; do
+    [[ -n "${candidate}" ]] || continue
+    if [[ "${candidate}" = /* ]]; then
+      [[ -x "${candidate}" ]] || continue
+      resolved="${candidate}"
+    else
+      resolved="$(command -v "${candidate}" 2>/dev/null || true)"
+      [[ -n "${resolved}" ]] || continue
+    fi
+    if "${resolved}" - <<'PY' >/dev/null 2>&1
+import sys
+if sys.version_info < (3, 9):
+    raise SystemExit(1)
+import pandas  # noqa: F401
+PY
+    then
+      printf '%s\n' "${resolved}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if ! PYTHON_BIN="$(select_python_bin)"; then
+  echo "[ERROR] No compatible Python >= 3.9 with pandas found for climate updates."
+  exit 1
 fi
 export PYTHON_BIN
 

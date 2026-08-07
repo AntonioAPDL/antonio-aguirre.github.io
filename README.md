@@ -197,6 +197,7 @@ Behavior:
   - APCP band (`p10-p90`) + `p50` + mean
   - SOILW depth-level medians (`p50`) with optional uncertainty bands
 - Adds observed daily climate context plus retrospective context from prior GEFS cycles, shown over a fixed 20-day pre-forecast window
+- Loads the observed retrospective window from `climate_daily_ppt_soil.csv` when that CSV is fresher or more complete than the GEFS JSON payload
 - Displays metadata and freshness warning if stale
 - Displays a context-quality warning if the forecast is current but the rolling GEFS analysis context is incomplete
 - Degrades gracefully when JSON is missing/invalid
@@ -214,6 +215,7 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - `gefs_analysis_context_summary` and `quality_warnings` describe whether the rolling context is complete enough for display
 - Plot units are harmonized by panel logic (`APCP` in mm water-equivalent; `SOILW` in m3/m3)
 - Scheduled GEFS exports enable observed retrospective context by default from the latest `live-data` climate CSV, with a repository-root fallback
+- The browser also has `data-observed-csv-url` / `data-observed-fallback-csv-url` support so observed PRISM/ERA5/NWM context can be reconstructed from the combined CSV at render time
 - The exporter still supports GEFS-only context when run manually without `--include-observed-retrospective`
 - Exporter uses a history-scan guard: skips git-history backfill when prior 20-day GEFS context is already complete
 - GEFS cycle-history context may be limited after a stale period; observed daily context keeps the pre-forecast window populated while cycle context accumulates or is backfilled.
@@ -285,6 +287,8 @@ scripts/run_climate_updates_cron.sh
 ```
 
 Logs are written under `logs/climate_updates/` and `latest.log` points to the newest run log.
+
+The local climate and site-update runners select a compatible Python `>= 3.9` before calling the climate scripts. This matters on servers where cron's default `/usr/bin/python3` may be older than the interactive shell Python.
 
 NWM retrospective controls:
 

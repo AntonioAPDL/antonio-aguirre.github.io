@@ -58,6 +58,109 @@
     return { x, y };
   }
 
+  function parseDailyTimestamp(value) {
+    if (!value) return null;
+    const raw = String(value).trim();
+    if (!raw) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return parseDate(`${raw}T00:00:00Z`);
+    return parseDate(raw);
+  }
+
+  function parseSimpleCsv(text) {
+    if (typeof text !== 'string' || !text.trim()) return [];
+    const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
+    if (lines.length < 2) return [];
+
+    const headers = lines[0].split(',').map((value) => String(value || '').trim());
+    const idx = Object.create(null);
+    headers.forEach((name, i) => { idx[name] = i; });
+    if (idx.timestamp === undefined) return [];
+
+    const rows = [];
+    for (let i = 1; i < lines.length; i += 1) {
+      const cols = lines[i].split(',');
+      const timestamp = cols[idx.timestamp] ? String(cols[idx.timestamp]).trim() : '';
+      if (!timestamp) continue;
+      rows.push({
+        timestamp,
+        daily_avg_ppt: idx.daily_avg_ppt === undefined ? '' : (cols[idx.daily_avg_ppt] || '').trim(),
+        daily_avg_soil_ERA5: idx.daily_avg_soil_ERA5 === undefined ? '' : (cols[idx.daily_avg_soil_ERA5] || '').trim(),
+        daily_avg_soil_NWM_SOIL_M: idx.daily_avg_soil_NWM_SOIL_M === undefined ? '' : (cols[idx.daily_avg_soil_NWM_SOIL_M] || '').trim(),
+        daily_avg_soil_NWM_SOIL_W: idx.daily_avg_soil_NWM_SOIL_W === undefined ? '' : (cols[idx.daily_avg_soil_NWM_SOIL_W] || '').trim()
+      });
+    }
+    return rows;
+  }
+
+  function buildObservedRetrospectiveFromCsv(rows, initDate, observationWindowDays, sourceCsv) {
+    if (!Array.isArray(rows) || !initDate) return null;
+
+    const windowDays = Math.max(1, numberOrNull(observationWindowDays) || 20);
+    const startDate = new Date(initDate.getTime() - windowDays * 24 * 3600 * 1000);
+    const filtered = rows
+      .map((row) => {
+        const ts = parseDailyTimestamp(row.timestamp);
+        if (!ts) return null;
+        if (ts < startDate || ts >= initDate) return null;
+        return { ...row, _date: ts };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a._date - b._date);
+
+    if (!filtered.length) return null;
+
+    function toSeries(column) {
+      const series = [];
+      filtered.forEach((row) => {
+        const num = numberOrNull(row[column]);
+        if (num === null) return;
+        series.push({ t: row._date.toISOString(), v: num });
+      });
+      return series;
+    }
+
+    return {
+      window_days: windowDays,
+      start_utc: startDate.toISOString(),
+      end_utc: initDate.toISOString(),
+      source_csv: sourceCsv,
+      daily_avg_ppt: toSeries('daily_avg_ppt'),
+      daily_avg_soil_ERA5: toSeries('daily_avg_soil_ERA5'),
+      daily_avg_soil_NWM_SOIL_M: toSeries('daily_avg_soil_NWM_SOIL_M'),
+      daily_avg_soil_NWM_SOIL_W: toSeries('daily_avg_soil_NWM_SOIL_W')
+    };
+  }
+
+  function observedCoverage(observed) {
+    const out = { points: 0, latest: null };
+    if (!observed || typeof observed !== 'object') return out;
+    [
+      'daily_avg_ppt',
+      'daily_avg_soil_ERA5',
+      'daily_avg_soil_NWM_SOIL_M',
+      'daily_avg_soil_NWM_SOIL_W'
+    ].forEach((key) => {
+      const series = observed[key];
+      if (!Array.isArray(series)) return;
+      out.points += series.length;
+      series.forEach((point) => {
+        if (!point || !point.t) return;
+        const ts = parseDate(point.t);
+        if (ts && (!out.latest || ts > out.latest)) out.latest = ts;
+      });
+    });
+    return out;
+  }
+
+  function shouldUseObservedCandidate(existing, candidate) {
+    const current = observedCoverage(existing);
+    const proposed = observedCoverage(candidate);
+    if (proposed.points <= 0) return false;
+    if (current.points <= 0) return true;
+    if (proposed.latest && current.latest && proposed.latest > current.latest) return true;
+    return proposed.points > current.points;
+  }
+
   function hasSeries(points) {
     return Array.isArray(points) && points.length > 0;
   }
@@ -342,28 +445,6 @@
     return trace;
   }
 
-  function buildBarTrace(points, name, color, options) {
-    const series = seriesToXY(points);
-    if (!series.x.length) return null;
-
-    const opts = options || {};
-    const unitSuffix = opts.unit ? ` ${opts.unit}` : '';
-    const valueFormat = opts.valueFormat || '.2f';
-    const hoverLabel = opts.hoverLabel || name;
-
-    return {
-      x: series.x,
-      y: series.y,
-      type: 'bar',
-      name,
-      marker: { color },
-      legendgroup: opts.legendGroup || undefined,
-      opacity: opts.opacity === undefined ? 1 : opts.opacity,
-      hovertemplate: `%{x|%b %d, %Y}<br>${hoverLabel}: %{y:${valueFormat}}${unitSuffix}<extra></extra>`,
-      showlegend: opts.showlegend === undefined ? true : Boolean(opts.showlegend)
-    };
-  }
-
   function getThemeColors() {
     const styles = getComputedStyle(document.documentElement);
     return {
@@ -463,9 +544,6 @@
     if (Array.isArray(opts.xRange) && opts.xRange.length === 2) {
       chartLayout.xaxis.range = opts.xRange;
     }
-    if (opts.barmode) {
-      chartLayout.barmode = opts.barmode;
-    }
     if (opts.yTickFormat) {
       chartLayout.yaxis.tickformat = opts.yTickFormat;
     }
@@ -558,6 +636,47 @@
     return urls;
   }
 
+  async function attachObservedRetrospective(container, payload, warnings) {
+    if (!payload || typeof payload !== 'object') return payload;
+
+    const initDate = parseDate(payload.init_time_utc);
+    if (!initDate) return payload;
+
+    const observationWindowDays = Math.max(
+      1,
+      numberOrNull(container.dataset.observationWindowDays) ||
+        numberOrNull(payload.observation_window_days) ||
+        20
+    );
+    const observedUrls = uniqueUrls(
+      container.dataset.observedCsvUrl || '/climate_daily_ppt_soil.csv',
+      container.dataset.observedFallbackCsvUrl || ''
+    );
+
+    for (let i = 0; i < observedUrls.length; i += 1) {
+      const url = observedUrls[i];
+      try {
+        const response = await fetch(buildFetchUrl(url), { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const rows = parseSimpleCsv(await response.text());
+        const observed = buildObservedRetrospectiveFromCsv(rows, initDate, observationWindowDays, url);
+        if (!shouldUseObservedCandidate(null, observed)) {
+          continue;
+        }
+        if (shouldUseObservedCandidate(payload.observed_retrospective, observed)) {
+          payload.observed_retrospective = observed;
+        }
+        return payload;
+      } catch (err) {
+        console.warn('[gefs-forecast-panel] observed CSV fetch failed', url, err);
+      }
+    }
+
+    if (shouldUseObservedCandidate(null, payload.observed_retrospective)) return payload;
+    if (Array.isArray(warnings)) warnings.push('Observed precipitation and soil context is temporarily unavailable.');
+    return payload;
+  }
+
   function renderPrecipChart(precipEl, payload, initDate, observationWindowDays, colors, statusWarnings) {
     const precipLevels = payload.precip || {};
     const precipLevelName = precipLevels.surface ? 'surface' : Object.keys(precipLevels)[0];
@@ -605,14 +724,18 @@
     const traces = [];
 
     if (hasSeries(observedPrecip)) {
-      const observedTrace = buildBarTrace(
+      const observedTrace = buildLineTrace(
         observedPrecip,
-        'Observed daily precipitation',
-        'rgba(15,118,110,0.34)',
+        'Observed precipitation (PRISM)',
+        '#0f766e',
+        'solid',
         {
+          width: 2.1,
+          mode: observedPrecip.length <= 6 ? 'markers+lines' : 'lines+markers',
+          markerSize: 5.6,
           unit: 'mm',
           valueFormat: '.2f',
-          hoverLabel: 'Observed daily precipitation',
+          hoverLabel: 'Observed precipitation (PRISM)',
           legendGroup: 'precip_observed'
         }
       );
@@ -735,8 +858,7 @@
         initTime: initDate,
         yTickFormat: '.1f',
         yRangeMode: 'tozero',
-        showZeroLine: true,
-        barmode: 'overlay'
+        showZeroLine: true
       }),
       { responsive: true, displayModeBar: false }
     );
@@ -1027,9 +1149,11 @@
       inFlight = true;
       try {
         const result = await fetchPayload();
-        lastPayload = result.payload;
-        lastWarnings = result.warnings;
-        renderPanel(container, result.payload, result.warnings);
+        const warnings = Array.isArray(result.warnings) ? result.warnings.slice() : [];
+        const payload = await attachObservedRetrospective(container, result.payload, warnings);
+        lastPayload = payload;
+        lastWarnings = warnings;
+        renderPanel(container, payload, warnings);
       } catch (err) {
         if (lastPayload && typeof lastPayload === 'object') {
           lastWarnings = ['Live GEFS feed is temporarily unavailable; showing the most recent loaded forecast.'];
