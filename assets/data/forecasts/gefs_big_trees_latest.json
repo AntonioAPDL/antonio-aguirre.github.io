@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-08-07T08:21:59.436179+00:00",
+  "generated_at_utc": "2026-08-07T08:25:13.648413+00:00",
   "site_id": "11160500",
   "init_time_utc": "2026-08-07T00:00:00+00:00",
   "member_count": 31,
@@ -184,7 +184,7 @@
         "target_window_hours": 24,
         "complete_periods_only": true,
         "complete_period_count": 10,
-        "display_timestamp": "UTC date of 24-hour period end"
+        "display_timestamp": "UTC end of 24-hour accumulation window"
       },
       "units": "kg m**-2"
     }
