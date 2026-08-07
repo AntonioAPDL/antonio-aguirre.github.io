@@ -19,7 +19,7 @@ ALLOW_STALE_ON_ERROR="${ALLOW_STALE_ON_ERROR:-0}"
 RSCRIPT_BIN="${RSCRIPT_BIN:-Rscript}"
 select_python_bin() {
   local candidate resolved
-  for candidate in "${PYTHON_BIN:-}" python3.12 python3.11 python3.10 python3.9 /home/jaguir26/python39/bin/python3 python3 /usr/bin/python3; do
+  for candidate in "${PYTHON_BIN:-}" python3.12 python3.11 python3.10 python3.9 "${HOME}/python39/bin/python3" python3 /usr/bin/python3; do
     [[ -n "${candidate}" ]] || continue
     if [[ "${candidate}" = /* ]]; then
       [[ -x "${candidate}" ]] || continue
