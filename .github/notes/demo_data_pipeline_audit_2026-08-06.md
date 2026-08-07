@@ -36,6 +36,7 @@ This note records the diagnosis and repair plan for stale data on the demos page
 4. Treat GEFS retrospective context completeness as a warning, not a blocker, when current forecast series are valid.
 5. Add a publish-layer guard so `live-data` cannot be downgraded from a newer JSON to an older JSON.
 6. Add a reusable freshness validator for scheduled workflows and manual operations.
+7. Add explicit workflow timeouts so provider stalls are visible failures rather than long-running ambiguous jobs.
 
 ## Reproducible Checks
 

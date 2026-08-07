@@ -507,6 +507,14 @@ def _extract_all_rows(
     tasks = [(member, lead) for member in members for lead in leads]
     rows: List[Dict[str, Any]] = []
     bytes_by_file: Dict[str, int] = {}
+    total_tasks = len(tasks)
+    started = perf_counter()
+    LOG.info(
+        "Starting GEFS point extraction: %s member-lead tasks, %s fields, max_workers=%s",
+        total_tasks,
+        len(fields),
+        max(1, cfg.runtime.max_workers),
+    )
 
     with ThreadPoolExecutor(max_workers=max(1, cfg.runtime.max_workers)) as pool:
         future_map = {
@@ -522,7 +530,7 @@ def _extract_all_rows(
             ): (member, lead)
             for member, lead in tasks
         }
-        for future in as_completed(future_map):
+        for completed_tasks, future in enumerate(as_completed(future_map), start=1):
             member, lead = future_map[future]
             try:
                 task_rows, task_bytes = future.result()
@@ -558,6 +566,15 @@ def _extract_all_rows(
                             "error": f"task_failure:{exc}",
                         }
                     )
+            if completed_tasks == total_tasks or completed_tasks % 100 == 0:
+                elapsed = perf_counter() - started
+                rate = completed_tasks / elapsed if elapsed > 0 else 0.0
+                LOG.info(
+                    "GEFS extraction progress: %s/%s member-lead tasks complete (%.2f tasks/sec)",
+                    completed_tasks,
+                    total_tasks,
+                    rate,
+                )
     return rows, bytes_by_file
 
 

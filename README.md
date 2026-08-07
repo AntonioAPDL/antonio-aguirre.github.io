@@ -295,6 +295,7 @@ The repo supports fully hosted forecast and climate refresh on GitHub Actions wi
 
 - `.github/workflows/update_forecast.yml`
   - cadence: every 8 hours on the hour UTC (`0 */8 * * *`) plus manual `workflow_dispatch`
+  - bounded to 20 minutes so upstream API stalls fail clearly instead of consuming long runner time
   - publishes to `live-data`:
     - `assets/data/forecasts/big_trees_latest.json`
   - validates `generated_at_utc`, units, and core analysis/short-range series before publishing
@@ -318,6 +319,7 @@ The repo supports fully hosted forecast and climate refresh on GitHub Actions wi
 
 - `.github/workflows/update_gefs_forecast.yml`
   - cadence: `01:20`, `09:20`, `17:20` UTC (`20 1,9,17 * * *`)
+  - bounded to 120 minutes because full GEFS extraction is heavier than the streamflow refresh
   - publishes to `live-data`:
     - `assets/data/forecasts/gefs_big_trees_latest.json`
   - caches pip dependencies and performs a latest-cycle freshness precheck before the heavy full refresh
