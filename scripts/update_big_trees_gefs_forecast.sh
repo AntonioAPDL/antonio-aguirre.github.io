@@ -11,10 +11,14 @@ WEB_JSON="${REPO_ROOT}/data/_sandbox_gefs/web/gefs_big_trees_latest.json"
 ASSET_REL="assets/data/forecasts/gefs_big_trees_latest.json"
 ASSET_JSON="${REPO_ROOT}/${ASSET_REL}"
 PREVIOUS_LIVE_JSON="${REPO_ROOT}/data/_sandbox_gefs/web/gefs_big_trees_latest.previous_live.json"
+LIVE_CLIMATE_REL="climate_daily_ppt_soil.csv"
+LIVE_CLIMATE_CSV="${REPO_ROOT}/data/_sandbox_gefs/web/climate_daily_ppt_soil.live_data.csv"
 OBS_WINDOW_DAYS="${OBS_WINDOW_DAYS:-20}"
 ANALYSIS_HISTORY_MAX_COMMITS="${ANALYSIS_HISTORY_MAX_COMMITS:-240}"
 ALLOW_STALE_ON_ERROR="${GEFS_FORECAST_ALLOW_STALE_ON_ERROR:-0}"
 STALE_FALLBACK_IS_FAILURE="${GEFS_FORECAST_STALE_FALLBACK_IS_FAILURE:-1}"
+INCLUDE_OBSERVED_RETROSPECTIVE="${GEFS_FORECAST_INCLUDE_OBSERVED_RETROSPECTIVE:-1}"
+OBSERVED_RETROSPECTIVE_CSV="${GEFS_OBSERVED_RETROSPECTIVE_CSV:-${LIVE_CLIMATE_CSV}}"
 
 log_warn() { echo "[WARN] $*" >&2; }
 log_error() { echo "[ERROR] $*" >&2; }
@@ -31,6 +35,7 @@ gh_warn() {
 load_previous_live_asset() {
   mkdir -p "$(dirname "${PREVIOUS_LIVE_JSON}")"
   rm -f "${PREVIOUS_LIVE_JSON}"
+  rm -f "${LIVE_CLIMATE_CSV}"
 
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     return 0
@@ -51,6 +56,12 @@ load_previous_live_asset() {
     echo "[INFO] Loaded GEFS live-data baseline from origin/live-data."
   else
     rm -f "${PREVIOUS_LIVE_JSON}"
+  fi
+
+  if git show "origin/live-data:${LIVE_CLIMATE_REL}" > "${LIVE_CLIMATE_CSV}" 2>/dev/null; then
+    echo "[INFO] Loaded climate live-data baseline for observed GEFS context."
+  else
+    rm -f "${LIVE_CLIMATE_CSV}"
   fi
 }
 
@@ -117,6 +128,7 @@ precheck_existing_asset() {
     GEFS_PRECHECK_ASSET_PATH="${ASSET_JSON}" \
     GEFS_PRECHECK_CFG_PATH="${CFG}" \
     GEFS_PRECHECK_PIPELINE_DIR="${PIPELINE_DIR}" \
+    GEFS_PRECHECK_REQUIRE_OBSERVED="${INCLUDE_OBSERVED_RETROSPECTIVE}" \
     python - <<'PY'
 import datetime as dt
 import json
@@ -150,6 +162,7 @@ from src.cycle import discover_latest_complete_cycle
 
 asset_path = Path(os.environ["GEFS_PRECHECK_ASSET_PATH"])
 cfg_path = Path(os.environ["GEFS_PRECHECK_CFG_PATH"])
+require_observed = os.environ.get("GEFS_PRECHECK_REQUIRE_OBSERVED") == "1"
 
 try:
     asset = json.loads(asset_path.read_text(encoding="utf-8"))
@@ -166,6 +179,27 @@ cfg = load_pipeline_config(cfg_path)
 latest = discover_latest_complete_cycle(cfg, dt.datetime.now(dt.timezone.utc))
 print(f"[INFO] GEFS precheck latest_complete_init_utc={latest.init_time_utc.isoformat()}")
 print(f"[INFO] GEFS precheck existing_asset_init_utc={current_init.isoformat()}")
+
+if require_observed:
+    observed = asset.get("observed_retrospective") or {}
+    observed_ppt_n = 0
+    observed_soil_n = 0
+    if isinstance(observed, dict):
+        ppt = observed.get("daily_avg_ppt")
+        observed_ppt_n = len(ppt) if isinstance(ppt, list) else 0
+        for key in (
+            "daily_avg_soil_ERA5",
+            "daily_avg_soil_NWM_SOIL_M",
+            "daily_avg_soil_NWM_SOIL_W",
+        ):
+            series = observed.get(key)
+            if isinstance(series, list):
+                observed_soil_n = max(observed_soil_n, len(series))
+    print(f"[INFO] GEFS precheck observed_context_precip_points={observed_ppt_n}")
+    print(f"[INFO] GEFS precheck observed_context_soil_points={observed_soil_n}")
+    if observed_ppt_n <= 0 and observed_soil_n <= 0:
+        print("[INFO] GEFS precheck: observed retrospective context missing; refresh required.")
+        raise SystemExit(11)
 
 if current_init >= latest.init_time_utc:
     raise SystemExit(10)
@@ -226,10 +260,21 @@ if ! python "${RUNNER}" --gefs-config "${CFG}" --profile full --log-level INFO; 
   keep_stale_and_exit "GEFS runner failed."
 fi
 
-if ! python "${EXPORTER}" \
-  --gefs-config "${CFG}" \
-  --observation-window-days "${OBS_WINDOW_DAYS}" \
-  --analysis-history-max-commits "${ANALYSIS_HISTORY_MAX_COMMITS}"; then
+exporter_args=(
+  "${EXPORTER}"
+  --gefs-config "${CFG}"
+  --observation-window-days "${OBS_WINDOW_DAYS}"
+  --analysis-history-max-commits "${ANALYSIS_HISTORY_MAX_COMMITS}"
+)
+if [[ "${INCLUDE_OBSERVED_RETROSPECTIVE}" == "1" ]]; then
+  observed_csv="${OBSERVED_RETROSPECTIVE_CSV}"
+  if [[ ! -f "${observed_csv}" ]]; then
+    observed_csv="${REPO_ROOT}/climate_daily_ppt_soil.csv"
+  fi
+  exporter_args+=(--include-observed-retrospective --observed-retrospective-csv "${observed_csv}")
+fi
+
+if ! python "${exporter_args[@]}"; then
   keep_stale_and_exit "GEFS exporter failed."
 fi
 
@@ -237,13 +282,16 @@ if [[ ! -f "${WEB_JSON}" ]]; then
   keep_stale_and_exit "Expected web export not found: ${WEB_JSON}"
 fi
 
-if ! GEFS_VALIDATE_PATH="${WEB_JSON}" python - <<'PY'
+if ! GEFS_VALIDATE_PATH="${WEB_JSON}" \
+  GEFS_VALIDATE_REQUIRE_OBSERVED="${INCLUDE_OBSERVED_RETROSPECTIVE}" \
+  python - <<'PY'
 import json
 from datetime import datetime, timedelta, timezone
 import os
 from pathlib import Path
 
 path = Path(os.environ.get("GEFS_VALIDATE_PATH", "assets/data/forecasts/gefs_big_trees_latest.json"))
+require_observed = os.environ.get("GEFS_VALIDATE_REQUIRE_OBSERVED") == "1"
 data = json.loads(path.read_text(encoding="utf-8"))
 print("GEFS file:", path)
 print("generated_at_utc:", data.get("generated_at_utc"))
@@ -334,6 +382,24 @@ if precip_forecast_points <= 0:
     errors.append("precip forecast series are missing")
 if soil_forecast_points <= 0:
     errors.append("soil-moisture forecast series are missing")
+
+observed_ppt_points = 0
+observed_soil_points = 0
+if isinstance(obs, dict):
+    ppt = obs.get("daily_avg_ppt")
+    observed_ppt_points = len(ppt) if isinstance(ppt, list) else 0
+    for key in (
+        "daily_avg_soil_ERA5",
+        "daily_avg_soil_NWM_SOIL_M",
+        "daily_avg_soil_NWM_SOIL_W",
+    ):
+        series = obs.get(key)
+        if isinstance(series, list):
+            observed_soil_points = max(observed_soil_points, len(series))
+print("observed_precip_points:", observed_ppt_points)
+print("observed_soil_points:", observed_soil_points)
+if require_observed and observed_ppt_points <= 0 and observed_soil_points <= 0:
+    errors.append("observed retrospective precipitation or soil context is missing")
 
 init_time = parse_iso(data.get("init_time_utc"))
 if init_time is None:

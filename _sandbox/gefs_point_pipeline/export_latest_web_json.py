@@ -563,11 +563,14 @@ def _build_observed_retrospective_payload(
 ) -> Dict[str, Any]:
     start_time = init_time_utc - dt.timedelta(days=max(1, int(observation_window_days)))
     end_time = init_time_utc
+    source_name = climate_csv_path.name
+    if source_name == "climate_daily_ppt_soil.live_data.csv":
+        source_name = "climate_daily_ppt_soil.csv"
     payload: Dict[str, Any] = {
         "window_days": int(max(1, observation_window_days)),
         "start_utc": start_time.isoformat(),
         "end_utc": end_time.isoformat(),
-        "source_csv": str(climate_csv_path),
+        "source_csv": source_name,
         "daily_avg_ppt": [],
         "daily_avg_soil_ERA5": [],
         "daily_avg_soil_NWM_SOIL_M": [],
@@ -667,7 +670,15 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help=(
             "Include PRISM/ERA5/NWM observed retrospective payload from climate_daily_ppt_soil.csv. "
-            "Default is disabled for GEFS-only panel context."
+            "Manual exporter default is disabled for GEFS-only diagnostic runs."
+        ),
+    )
+    parser.add_argument(
+        "--observed-retrospective-csv",
+        default=None,
+        help=(
+            "Optional combined climate CSV for observed retrospective context. "
+            "Defaults to climate_daily_ppt_soil.csv at the repository root."
         ),
     )
     return parser.parse_args()
@@ -771,8 +782,13 @@ def main() -> int:
     )
     init_for_window = _parse_iso(payload.get("init_time_utc"))
     if args.include_observed_retrospective and init_for_window is not None:
+        observed_csv = (
+            Path(args.observed_retrospective_csv)
+            if args.observed_retrospective_csv
+            else (repo_root / "climate_daily_ppt_soil.csv")
+        )
         payload["observed_retrospective"] = _build_observed_retrospective_payload(
-            climate_csv_path=(repo_root / "climate_daily_ppt_soil.csv"),
+            climate_csv_path=observed_csv,
             init_time_utc=init_for_window,
             observation_window_days=observation_window_days,
         )

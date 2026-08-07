@@ -140,10 +140,30 @@ def test_observed_retrospective_from_combined_csv(tmp_path: Path) -> None:
     )
     assert payload["start_utc"] == "2026-02-04T00:00:00+00:00"
     assert payload["end_utc"] == "2026-02-24T00:00:00+00:00"
+    assert payload["source_csv"] == "climate_daily_ppt_soil.csv"
     assert [p["t"] for p in payload["daily_avg_ppt"]] == ["2026-02-15T00:00:00+00:00"]
     assert payload["daily_avg_soil_ERA5"][0]["v"] == 0.33
     assert payload["daily_avg_soil_NWM_SOIL_M"][0]["v"] == 0.44
     assert payload["daily_avg_soil_NWM_SOIL_W"][0]["v"] == 0.45
+
+
+def test_observed_retrospective_normalizes_live_data_source_label(tmp_path: Path) -> None:
+    csv_path = tmp_path / "climate_daily_ppt_soil.live_data.csv"
+    csv_path.write_text(
+        "\n".join(
+            [
+                "timestamp,daily_avg_ppt,daily_avg_soil_ERA5,daily_avg_soil_NWM_SOIL_M,daily_avg_soil_NWM_SOIL_W",
+                "2026-02-15,2.4,0.33,0.44,0.45",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    payload = _build_observed_retrospective_payload(
+        climate_csv_path=csv_path,
+        init_time_utc=dt.datetime(2026, 2, 24, 0, 0, tzinfo=dt.timezone.utc),
+        observation_window_days=20,
+    )
+    assert payload["source_csv"] == "climate_daily_ppt_soil.csv"
 
 
 def test_observed_retrospective_empty_when_missing_file(tmp_path: Path) -> None:

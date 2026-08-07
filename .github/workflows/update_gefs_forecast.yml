@@ -52,7 +52,8 @@ jobs:
         run: |
           python3 scripts/check_forecast_assets.py \
             --gefs assets/data/forecasts/gefs_big_trees_latest.json \
-            --max-age-hours 36
+            --max-age-hours 36 \
+            --require-observed-retrospective
 
       - name: Publish GEFS asset to live-data branch
         env:

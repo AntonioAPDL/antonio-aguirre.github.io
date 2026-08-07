@@ -196,7 +196,7 @@ Behavior:
 - Renders two Plotly charts:
   - APCP band (`p10-p90`) + `p50` + mean
   - SOILW depth-level medians (`p50`) with optional uncertainty bands
-- Adds retrospective context from prior GEFS cycles and shows a fixed 20-day pre-forecast window
+- Adds observed daily climate context plus retrospective context from prior GEFS cycles, shown over a fixed 20-day pre-forecast window
 - Displays metadata and freshness warning if stale
 - Displays a context-quality warning if the forecast is current but the rolling GEFS analysis context is incomplete
 - Degrades gracefully when JSON is missing/invalid
@@ -209,12 +209,14 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - `retrospective.soil_moisture.<level>.p50`
 - `gefs_analysis_context.precip_f003_proxy.<level>` (GEFS cycle-history analysis proxy, plotted)
 - `gefs_analysis_context.soil_f000.<level>` (GEFS cycle-history analysis, plotted)
+- `observed_retrospective.daily_avg_ppt` (observed daily precipitation, plotted)
+- `observed_retrospective.daily_avg_soil_ERA5` and available NWM soil fields (observed daily soil context, plotted)
 - `gefs_analysis_context_summary` and `quality_warnings` describe whether the rolling context is complete enough for display
 - Plot units are harmonized by panel logic (`APCP` in mm water-equivalent; `SOILW` in m3/m3)
-- PRISM/ERA5 observed overlays are intentionally disabled in the panel (GEFS-only context mode)
-- Exporter default is GEFS-only; observed payload is opt-in with `--include-observed-retrospective`
+- Scheduled GEFS exports enable observed retrospective context by default from the latest `live-data` climate CSV, with a repository-root fallback
+- The exporter still supports GEFS-only context when run manually without `--include-observed-retrospective`
 - Exporter uses a history-scan guard: skips git-history backfill when prior 20-day GEFS context is already complete
-- The standalone climate CSV automation is retained for archive/status refreshes, but its PRISM/ERA5/NWM products are not plotted on the GEFS panel unless observed retrospective export is explicitly re-enabled.
+- GEFS cycle-history context may be limited after a stale period; observed daily context keeps the pre-forecast window populated while cycle context accumulates or is backfilled.
 
 Background historical GEFS updater (no live monitoring):
 
@@ -242,7 +244,7 @@ The USGS discharge panel in `public/js/sanlorenzo_flow.js` supports optional ove
 
 ## Climate Data Automation (PRISM + ERA5 + NWM retro soil)
 
-This repo includes a cron-safe climate stack that keeps canonical point series and a merged table:
+This repo includes a cron-safe climate stack that keeps canonical point series and a merged table used as observed context for the GEFS demo:
 
 - `prism_precipitation_santa_cruz_1987_2023.csv`
 - `soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv`
@@ -306,7 +308,8 @@ The repo supports fully hosted forecast and climate refresh on GitHub Actions wi
     - publish helper refuses to replace a newer live-data JSON with an older candidate
 
 - `.github/workflows/update_climate_series.yml`
-  - cadence: weekly on Monday at `06:17` UTC (`17 6 * * 1`) plus manual `workflow_dispatch`
+  - cadence: daily at `06:17` UTC (`17 6 * * *`) plus manual `workflow_dispatch`
+  - bounded to 120 minutes because PRISM, ERA5, and NWM archive checks can be provider-lagged or slow
   - publishes to `live-data`:
     - `prism_precipitation_santa_cruz_1987_2023.csv`
     - `soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv`
@@ -315,7 +318,7 @@ The repo supports fully hosted forecast and climate refresh on GitHub Actions wi
     - `climate_series_status.csv`
     - `climate_daily_ppt_soil.csv`
   - incremental PRISM/ERA5 updaters probe backward to the latest available provider date instead of failing the whole run on a too-recent request
-  - weekly cadence is intentional because these provider-lagged archive files are not currently plotted on the public live panel
+  - routine climate refreshes are data-only `live-data` commits, so they should not trigger Netlify production deploys
 
 - `.github/workflows/update_gefs_forecast.yml`
   - cadence: `01:20`, `09:20`, `17:20` UTC (`20 1,9,17 * * *`)
@@ -326,6 +329,7 @@ The repo supports fully hosted forecast and climate refresh on GitHub Actions wi
   - fail-fast checks in `scripts/update_big_trees_gefs_forecast.sh` ensure:
     - latest init is not stale
     - current precipitation and soil-moisture forecast series exist
+    - observed retrospective precipitation or soil context is present
     - 20-day GEFS analysis context coverage is reported as `ok` or `limited`; limited context is a warning, not a blocker for publishing a current forecast
   - race guards:
     - hard sync to latest `origin/main` before processing

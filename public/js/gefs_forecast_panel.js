@@ -342,6 +342,28 @@
     return trace;
   }
 
+  function buildBarTrace(points, name, color, options) {
+    const series = seriesToXY(points);
+    if (!series.x.length) return null;
+
+    const opts = options || {};
+    const unitSuffix = opts.unit ? ` ${opts.unit}` : '';
+    const valueFormat = opts.valueFormat || '.2f';
+    const hoverLabel = opts.hoverLabel || name;
+
+    return {
+      x: series.x,
+      y: series.y,
+      type: 'bar',
+      name,
+      marker: { color },
+      legendgroup: opts.legendGroup || undefined,
+      opacity: opts.opacity === undefined ? 1 : opts.opacity,
+      hovertemplate: `%{x|%b %d, %Y}<br>${hoverLabel}: %{y:${valueFormat}}${unitSuffix}<extra></extra>`,
+      showlegend: opts.showlegend === undefined ? true : Boolean(opts.showlegend)
+    };
+  }
+
   function getThemeColors() {
     const styles = getComputedStyle(document.documentElement);
     return {
@@ -440,6 +462,9 @@
 
     if (Array.isArray(opts.xRange) && opts.xRange.length === 2) {
       chartLayout.xaxis.range = opts.xRange;
+    }
+    if (opts.barmode) {
+      chartLayout.barmode = opts.barmode;
     }
     if (opts.yTickFormat) {
       chartLayout.yaxis.tickformat = opts.yTickFormat;
@@ -574,8 +599,25 @@
 
     const analysisContext = payload.gefs_analysis_context || {};
     const analysis = scaleSeries(((analysisContext.precip_f003_proxy || {})[precipLevelName]) || [], precipFactor);
+    const observed = payload.observed_retrospective || {};
+    const observedPrecip = scaleSeries(observed.daily_avg_ppt || [], 1);
 
     const traces = [];
+
+    if (hasSeries(observedPrecip)) {
+      const observedTrace = buildBarTrace(
+        observedPrecip,
+        'Observed daily precipitation',
+        'rgba(15,118,110,0.34)',
+        {
+          unit: 'mm',
+          valueFormat: '.2f',
+          hoverLabel: 'Observed daily precipitation',
+          legendGroup: 'precip_observed'
+        }
+      );
+      if (observedTrace) traces.push(observedTrace);
+    }
 
     if (retro && (hasSeries(retro.p10) || hasSeries(retro.p50) || hasSeries(retro.p90))) {
       const retroBand = buildBandTrace(
@@ -672,7 +714,17 @@
     const xRange = buildXRange(
       initDate,
       observationWindowDays,
-      [analysis, forecast.p10, forecast.p50, forecast.p90, forecast.mean, retro && retro.p10, retro && retro.p50, retro && retro.p90]
+      [
+        observedPrecip,
+        analysis,
+        forecast.p10,
+        forecast.p50,
+        forecast.p90,
+        forecast.mean,
+        retro && retro.p10,
+        retro && retro.p50,
+        retro && retro.p90
+      ]
     );
 
     Plotly.react(
@@ -683,7 +735,8 @@
         initTime: initDate,
         yTickFormat: '.1f',
         yRangeMode: 'tozero',
-        showZeroLine: true
+        showZeroLine: true,
+        barmode: 'overlay'
       }),
       { responsive: true, displayModeBar: false }
     );
@@ -702,6 +755,52 @@
     const pointGroups = [];
     const analysisSoilBlock = (payload.gefs_analysis_context || {}).soil_f000 || {};
     const retrospective = payload.retrospective || {};
+    const observed = payload.observed_retrospective || {};
+    const observedEra5 = scaleSeries(observed.daily_avg_soil_ERA5 || [], 1);
+    const observedNwm = scaleSeries(observed.daily_avg_soil_NWM_SOIL_W || [], 1);
+
+    if (hasSeries(observedEra5)) {
+      const observedTrace = buildLineTrace(
+        observedEra5,
+        'Observed soil moisture (ERA5)',
+        '#0f766e',
+        'dot',
+        {
+          width: 2.0,
+          opacity: 0.9,
+          mode: observedEra5.length <= 6 ? 'markers+lines' : 'lines+markers',
+          markerSize: 6.2,
+          markerSymbol: 'diamond',
+          unit: 'm3/m3',
+          valueFormat: '.3f',
+          hoverLabel: 'Observed soil moisture (ERA5)',
+          legendGroup: 'soil_observed'
+        }
+      );
+      if (observedTrace) traces.push(observedTrace);
+      pointGroups.push(observedEra5);
+    }
+
+    if (hasSeries(observedNwm)) {
+      const observedNwmTrace = buildLineTrace(
+        observedNwm,
+        'Observed soil moisture (NWM)',
+        '#475569',
+        'dot',
+        {
+          width: 1.6,
+          opacity: 0.72,
+          mode: observedNwm.length <= 6 ? 'markers+lines' : 'lines',
+          markerSize: 5.4,
+          unit: 'm3/m3',
+          valueFormat: '.3f',
+          hoverLabel: 'Observed soil moisture (NWM)',
+          legendGroup: 'soil_observed_nwm'
+        }
+      );
+      if (observedNwmTrace) traces.push(observedNwmTrace);
+      pointGroups.push(observedNwm);
+    }
 
     levels.forEach((level, idx) => {
       const block = payload.soil_moisture[level];

@@ -111,7 +111,12 @@ def best_series_count(section: Any) -> int:
     return best
 
 
-def check_gefs(path: Path, max_age_hours: float, require_context: bool) -> int:
+def check_gefs(
+    path: Path,
+    max_age_hours: float,
+    require_context: bool,
+    require_observed: bool,
+) -> int:
     errors: list[str] = []
     data = load_json(path)
     generated = parse_time(data.get("generated_at_utc"))
@@ -130,6 +135,24 @@ def check_gefs(path: Path, max_age_hours: float, require_context: bool) -> int:
         errors.append(f"{path}: precipitation forecast series missing")
     if soil_n <= 0:
         errors.append(f"{path}: soil-moisture forecast series missing")
+
+    observed = data.get("observed_retrospective") or {}
+    observed_ppt_n = 0
+    observed_soil_n = 0
+    if isinstance(observed, dict):
+        ppt = observed.get("daily_avg_ppt")
+        observed_ppt_n = len(ppt) if isinstance(ppt, list) else 0
+        for key in (
+            "daily_avg_soil_ERA5",
+            "daily_avg_soil_NWM_SOIL_M",
+            "daily_avg_soil_NWM_SOIL_W",
+        ):
+            series = observed.get(key)
+            if isinstance(series, list):
+                observed_soil_n = max(observed_soil_n, len(series))
+    print(f"[INFO] GEFS observed context counts: precip={observed_ppt_n} soil={observed_soil_n}")
+    if require_observed and observed_ppt_n <= 0 and observed_soil_n <= 0:
+        errors.append(f"{path}: observed retrospective precipitation or soil series required")
 
     context_summary = data.get("gefs_analysis_context_summary") or {}
     context_status = context_summary.get("status") if isinstance(context_summary, dict) else None
@@ -165,6 +188,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-age-hours", type=positive_float, default=36.0)
     parser.add_argument("--require-extended-streamflow", action="store_true")
     parser.add_argument("--require-gefs-context", action="store_true")
+    parser.add_argument("--require-observed-retrospective", action="store_true")
     args = parser.parse_args()
     if not args.streamflow and not args.gefs:
         parser.error("provide --streamflow, --gefs, or both")
@@ -177,7 +201,12 @@ def main() -> int:
     if args.streamflow:
         rc |= check_streamflow(args.streamflow, args.max_age_hours, args.require_extended_streamflow)
     if args.gefs:
-        rc |= check_gefs(args.gefs, args.max_age_hours, args.require_gefs_context)
+        rc |= check_gefs(
+            args.gefs,
+            args.max_age_hours,
+            args.require_gefs_context,
+            args.require_observed_retrospective,
+        )
     return 1 if rc else 0
 
 
