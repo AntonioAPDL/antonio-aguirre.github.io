@@ -66,7 +66,7 @@ description: "Live research displays for observations, forecast guidance, and en
       GEFS Near Big Trees
     </h2>
     <div class="note-box">
-      <strong>Note:</strong> Updated automatically throughout the day. These charts combine observed daily climate context, recent GEFS cycle-history context when available, and the latest GEFS forecast range.
+      <strong>Note:</strong> Updated automatically throughout the day. These charts combine observed daily climate context with the latest GEFS forecast range. Forecast precipitation is shown as 24-hour totals.
     </div>
     <div class="gefs-forecast-panel"
          data-gefs-url="https://raw.githubusercontent.com/AntonioAPDL/antonio-aguirre.github.io/live-data/assets/data/forecasts/gefs_big_trees_latest.json"
@@ -82,8 +82,8 @@ description: "Live research displays for observations, forecast guidance, and en
       </div>
       <section class="gefs-chart-card">
         <div class="gefs-chart-card__head">
-          <h3>Precipitation Forecast</h3>
-          <p>Recent precipitation and the expected forecast range for the coming days.</p>
+          <h3>24-Hour Precipitation Forecast</h3>
+          <p>Observed daily PRISM totals and GEFS 24-hour forecast totals for the coming days.</p>
         </div>
         <div class="plot-stage plot-iframe" role="img" aria-label="GEFS precipitation forecast">
           <div class="gefs-forecast-precip"></div>
@@ -92,7 +92,7 @@ description: "Live research displays for observations, forecast guidance, and en
       <section class="gefs-chart-card">
         <div class="gefs-chart-card__head">
           <h3>Soil Moisture Forecast</h3>
-          <p>Recent soil moisture and forecast conditions by soil depth.</p>
+          <p>ERA5 near-surface daily context and GEFS 24-hour forecast means by soil depth.</p>
         </div>
         <div class="plot-stage plot-iframe" role="img" aria-label="GEFS soil moisture forecast">
           <div class="gefs-forecast-soil"></div>
@@ -105,8 +105,9 @@ description: "Live research displays for observations, forecast guidance, and en
         </p>
       </noscript>
       <div class="plot-caption">
-        Data source:
+        Data sources:
         <a href="https://registry.opendata.aws/noaa-gefs/" target="_blank" rel="noopener noreferrer">NOAA GEFS (AWS open data)</a>
+        with observed context from PRISM precipitation and ERA5-Land soil moisture.
       </div>
     </div>
   </div>

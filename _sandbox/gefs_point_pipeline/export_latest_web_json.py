@@ -40,6 +40,209 @@ def _quantile_payload(df: pd.DataFrame) -> Dict[str, List[Dict[str, float]]]:
     }
 
 
+def _empty_quantile_payload() -> Dict[str, List[Dict[str, float]]]:
+    return {"mean": [], "p10": [], "p50": [], "p90": []}
+
+
+def _precip_24h_total_payload(df: pd.DataFrame) -> Dict[str, Any]:
+    """Aggregate GEFS APCP to non-overlapping 24-hour totals.
+
+    GEFS APCP is a water-equivalent accumulation field. The native 3-hourly
+    lead grid includes overlapping 3-hour and 6-hour accumulations, so plotting
+    the raw values next to daily PRISM totals is not a like-for-like comparison.
+    This uses the non-overlapping 6-hour APCP windows and sums four windows per
+    member before computing ensemble summaries.
+    """
+    if df.empty:
+        payload: Dict[str, Any] = _empty_quantile_payload()
+        payload["time_support"] = "24-hour accumulation"
+        payload["aggregation"] = {
+            "method": "no_source_rows",
+            "source_window_hours": 6,
+            "target_window_hours": 24,
+            "complete_periods_only": True,
+        }
+        return payload
+
+    working = df.copy()
+    working["lead_hours"] = pd.to_numeric(working["lead_hours"], errors="coerce")
+    working["value"] = pd.to_numeric(working["value"], errors="coerce")
+    working["init_time_utc"] = pd.to_datetime(working["init_time_utc"], errors="coerce", utc=True)
+    working = working.dropna(subset=["lead_hours", "value", "init_time_utc", "member"])
+    if working.empty:
+        payload = _empty_quantile_payload()
+        payload["time_support"] = "24-hour accumulation"
+        payload["aggregation"] = {
+            "method": "no_valid_source_rows",
+            "source_window_hours": 6,
+            "target_window_hours": 24,
+            "complete_periods_only": True,
+        }
+        return payload
+
+    has_window_metadata = {"accum_start_hour", "accum_end_hour"}.issubset(working.columns)
+    if has_window_metadata:
+        working["accum_start_hour"] = pd.to_numeric(working["accum_start_hour"], errors="coerce")
+        working["accum_end_hour"] = pd.to_numeric(working["accum_end_hour"], errors="coerce")
+        metadata_rows = working["accum_start_hour"].notna() & working["accum_end_hour"].notna()
+        if metadata_rows.any():
+            working = working.loc[metadata_rows].copy()
+            working["source_window_hours"] = working["accum_end_hour"] - working["accum_start_hour"]
+            method = "grib_accumulation_metadata"
+        else:
+            has_window_metadata = False
+
+    if not has_window_metadata:
+        # GEFS APCP lead hours divisible by 6 are non-overlapping six-hour
+        # accumulation windows for this product. This fallback keeps older
+        # parquet outputs exportable while newer runs may carry GRIB metadata.
+        working["accum_end_hour"] = working["lead_hours"]
+        working["accum_start_hour"] = working["lead_hours"] - 6
+        working["source_window_hours"] = 6
+        method = "lead_hour_six_hour_fallback"
+
+    six_hour = working[
+        (working["accum_start_hour"] >= 0)
+        & (working["accum_end_hour"] > 0)
+        & ((working["accum_end_hour"] % 6) == 0)
+        & (working["source_window_hours"] == 6)
+    ].copy()
+    if six_hour.empty:
+        payload = _empty_quantile_payload()
+        payload["time_support"] = "24-hour accumulation"
+        payload["aggregation"] = {
+            "method": method,
+            "source_window_hours": 6,
+            "target_window_hours": 24,
+            "complete_periods_only": True,
+            "complete_period_count": 0,
+        }
+        return payload
+
+    six_hour["accum_start_hour"] = six_hour["accum_start_hour"].astype(int)
+    six_hour["accum_end_hour"] = six_hour["accum_end_hour"].astype(int)
+    six_hour["period_end_hour"] = ((six_hour["accum_end_hour"] - 1) // 24 + 1) * 24
+
+    rows: List[Dict[str, Any]] = []
+    for (member, period_end_hour), group in six_hour.groupby(["member", "period_end_hour"]):
+        period_end_hour = int(period_end_hour)
+        expected_pairs = {
+            (period_end_hour - 24, period_end_hour - 18),
+            (period_end_hour - 18, period_end_hour - 12),
+            (period_end_hour - 12, period_end_hour - 6),
+            (period_end_hour - 6, period_end_hour),
+        }
+        interval_values = (
+            group.groupby(["accum_start_hour", "accum_end_hour"], as_index=False)["value"]
+            .mean()
+            .dropna(subset=["value"])
+        )
+        actual_pairs = {
+            (int(row.accum_start_hour), int(row.accum_end_hour))
+            for row in interval_values.itertuples(index=False)
+        }
+        if not expected_pairs.issubset(actual_pairs):
+            continue
+
+        total = float(
+            interval_values[
+                interval_values.apply(
+                    lambda row: (int(row["accum_start_hour"]), int(row["accum_end_hour"])) in expected_pairs,
+                    axis=1,
+                )
+            ]["value"].sum()
+        )
+        init_time = pd.Timestamp(group["init_time_utc"].iloc[0])
+        period_end = init_time + pd.Timedelta(hours=period_end_hour)
+        rows.append({"valid_time_utc": period_end, "member": member, "value": total})
+
+    if not rows:
+        payload = _empty_quantile_payload()
+        complete_period_count = 0
+    else:
+        daily = pd.DataFrame(rows)
+        payload = _quantile_payload(daily)
+        complete_period_count = int(daily["valid_time_utc"].nunique())
+
+    payload["time_support"] = "24-hour accumulation"
+    payload["aggregation"] = {
+        "method": method,
+        "source_window_hours": 6,
+        "target_window_hours": 24,
+        "complete_periods_only": True,
+        "complete_period_count": complete_period_count,
+        "display_timestamp": "UTC end of 24-hour accumulation window",
+    }
+    return payload
+
+
+def _instantaneous_24h_mean_payload(df: pd.DataFrame) -> Dict[str, Any]:
+    """Aggregate instantaneous 3-hourly forecast fields to 24-hour means."""
+    if df.empty:
+        payload: Dict[str, Any] = _empty_quantile_payload()
+        payload["time_support"] = "24-hour mean"
+        payload["aggregation"] = {
+            "method": "no_source_rows",
+            "source_interval_hours": 3,
+            "target_window_hours": 24,
+            "complete_periods_only": True,
+        }
+        return payload
+
+    working = df.copy()
+    working["lead_hours"] = pd.to_numeric(working["lead_hours"], errors="coerce")
+    working["value"] = pd.to_numeric(working["value"], errors="coerce")
+    working["init_time_utc"] = pd.to_datetime(working["init_time_utc"], errors="coerce", utc=True)
+    working = working.dropna(subset=["lead_hours", "value", "init_time_utc", "member"])
+    working = working[working["lead_hours"] > 0].copy()
+    if working.empty:
+        payload = _empty_quantile_payload()
+        payload["time_support"] = "24-hour mean"
+        payload["aggregation"] = {
+            "method": "no_valid_source_rows",
+            "source_interval_hours": 3,
+            "target_window_hours": 24,
+            "complete_periods_only": True,
+        }
+        return payload
+
+    working["lead_hours"] = working["lead_hours"].astype(int)
+    working["period_end_hour"] = ((working["lead_hours"] - 1) // 24 + 1) * 24
+
+    rows: List[Dict[str, Any]] = []
+    for (member, period_end_hour), group in working.groupby(["member", "period_end_hour"]):
+        period_end_hour = int(period_end_hour)
+        expected_leads = set(range(period_end_hour - 21, period_end_hour + 1, 3))
+        lead_values = group.groupby("lead_hours", as_index=False)["value"].mean().dropna(subset=["value"])
+        actual_leads = {int(row.lead_hours) for row in lead_values.itertuples(index=False)}
+        if not expected_leads.issubset(actual_leads):
+            continue
+
+        period_values = lead_values[lead_values["lead_hours"].astype(int).isin(expected_leads)]["value"]
+        init_time = pd.Timestamp(group["init_time_utc"].iloc[0])
+        period_end = init_time + pd.Timedelta(hours=period_end_hour)
+        rows.append({"valid_time_utc": period_end, "member": member, "value": float(period_values.mean())})
+
+    if not rows:
+        payload = _empty_quantile_payload()
+        complete_period_count = 0
+    else:
+        daily = pd.DataFrame(rows)
+        payload = _quantile_payload(daily)
+        complete_period_count = int(daily["valid_time_utc"].nunique())
+
+    payload["time_support"] = "24-hour mean"
+    payload["aggregation"] = {
+        "method": "instantaneous_lead_mean",
+        "source_interval_hours": 3,
+        "target_window_hours": 24,
+        "complete_periods_only": True,
+        "complete_period_count": complete_period_count,
+        "display_timestamp": "UTC end of 24-hour mean window",
+    }
+    return payload
+
+
 def _parse_iso(value: Any) -> Optional[dt.datetime]:
     if value is None:
         return None
@@ -379,14 +582,11 @@ def _analysis_context_summary(
     summary["soil_representative_series"] = soil_cov
 
     warnings: List[str] = []
-    if int(precip_cov["points"]) < min_expected:
-        warnings.append("GEFS precipitation analysis context is limited; the current forecast is still shown.")
     if int(soil_cov["points"]) < min_expected:
         warnings.append("GEFS soil-moisture analysis context is limited; the current forecast is still shown.")
 
     edge_tol = dt.timedelta(hours=9)
     for label, cov, end_utc in (
-        ("precipitation", precip_cov, precip_end),
         ("soil-moisture", soil_cov, soil_end),
     ):
         first = _parse_iso(cov.get("first_utc"))
@@ -725,13 +925,13 @@ def main() -> int:
 
     precip = df[df["variable"] == "APCP"]
     for level, level_df in precip.groupby("level"):
-        section = _quantile_payload(level_df)
+        section = _precip_24h_total_payload(level_df)
         section["units"] = str(level_df["units"].dropna().iloc[0]) if not level_df["units"].dropna().empty else ""
         payload["precip"][str(level)] = section
 
     soil = df[df["variable"] == "SOILW"]
     for level, level_df in soil.groupby("level"):
-        section = _quantile_payload(level_df)
+        section = _instantaneous_24h_mean_payload(level_df)
         section["units"] = str(level_df["units"].dropna().iloc[0]) if not level_df["units"].dropna().empty else ""
         payload["soil_moisture"][str(level)] = section
 
@@ -772,9 +972,6 @@ def main() -> int:
     )
     context_summary = _analysis_context_summary(payload, observation_window_days)
     payload["gefs_analysis_context_summary"] = context_summary
-    quality_warnings = context_summary.get("warnings") if isinstance(context_summary, dict) else []
-    if isinstance(quality_warnings, list) and quality_warnings:
-        payload["quality_warnings"] = quality_warnings
     payload["retrospective"] = _build_retrospective_payload(
         current_payload=payload,
         prior_payload=prior_payload,

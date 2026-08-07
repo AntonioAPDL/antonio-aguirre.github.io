@@ -9,7 +9,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.inventory import ResolvedField  # noqa: E402
-from src.runner import _is_compatible_success_run, _normalize_xarray_result  # noqa: E402
+from src.runner import _grib_step_metadata, _is_compatible_success_run, _normalize_xarray_result  # noqa: E402
 
 
 def test_compatible_success_requires_matching_profile_and_scope() -> None:
@@ -48,3 +48,20 @@ def test_normalize_xarray_result_accepts_dataset_and_list() -> None:
     one = object()
     assert _normalize_xarray_result(one) == [one]
     assert _normalize_xarray_result([one, one]) == [one, one]
+
+
+class _FakeStepMessage:
+    stepType = "accum"
+
+    def __getitem__(self, key):
+        values = {"startStep": 18, "endStep": 24, "lengthOfTimeRange": 6}
+        return values[key]
+
+
+def test_grib_step_metadata_reads_accumulation_window() -> None:
+    assert _grib_step_metadata(_FakeStepMessage()) == {
+        "step_type": "accum",
+        "accum_start_hour": 18.0,
+        "accum_end_hour": 24.0,
+        "time_range_hours": 6.0,
+    }

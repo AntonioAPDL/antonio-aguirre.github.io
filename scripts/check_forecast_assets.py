@@ -111,6 +111,43 @@ def best_series_count(section: Any) -> int:
     return best
 
 
+def section_units(section: Any) -> list[str]:
+    units: list[str] = []
+    if not isinstance(section, dict):
+        return units
+    for level_block in section.values():
+        if not isinstance(level_block, dict):
+            continue
+        unit = str(level_block.get("units") or "").strip()
+        if unit:
+            units.append(unit)
+    return sorted(set(units))
+
+
+def precip_has_24h_support(section: Any) -> bool:
+    if not isinstance(section, dict):
+        return False
+    for level_block in section.values():
+        if not isinstance(level_block, dict):
+            continue
+        support = str(level_block.get("time_support") or "").lower()
+        if "24-hour" in support:
+            return True
+    return False
+
+
+def soil_has_24h_mean_support(section: Any) -> bool:
+    if not isinstance(section, dict):
+        return False
+    for level_block in section.values():
+        if not isinstance(level_block, dict):
+            continue
+        support = str(level_block.get("time_support") or "").lower()
+        if "24-hour mean" in support:
+            return True
+    return False
+
+
 def check_gefs(
     path: Path,
     max_age_hours: float,
@@ -131,6 +168,8 @@ def check_gefs(
     precip_n = best_series_count(data.get("precip"))
     soil_n = best_series_count(data.get("soil_moisture"))
     print(f"[INFO] GEFS forecast counts: precip={precip_n} soil={soil_n}")
+    print(f"[INFO] GEFS precip units: {section_units(data.get('precip'))}")
+    print(f"[INFO] GEFS soil units: {section_units(data.get('soil_moisture'))}")
     if precip_n <= 0:
         errors.append(f"{path}: precipitation forecast series missing")
     if soil_n <= 0:
@@ -153,6 +192,14 @@ def check_gefs(
     print(f"[INFO] GEFS observed context counts: precip={observed_ppt_n} soil={observed_soil_n}")
     if require_observed and observed_ppt_n <= 0 and observed_soil_n <= 0:
         errors.append(f"{path}: observed retrospective precipitation or soil series required")
+    if require_observed and observed_ppt_n > 0 and not precip_has_24h_support(data.get("precip")):
+        errors.append(
+            f"{path}: observed PRISM precipitation is daily, so GEFS precipitation must be exported as 24-hour totals"
+        )
+    if require_observed and observed_soil_n > 0 and not soil_has_24h_mean_support(data.get("soil_moisture")):
+        errors.append(
+            f"{path}: observed ERA5 soil moisture is daily, so GEFS soil moisture must be exported as 24-hour means"
+        )
 
     context_summary = data.get("gefs_analysis_context_summary") or {}
     context_status = context_summary.get("status") if isinstance(context_summary, dict) else None
@@ -161,7 +208,7 @@ def check_gefs(
         if require_context:
             errors.append(message)
         else:
-            print(f"[WARN] {message}; current forecast artifact accepted")
+            print(f"[INFO] {message}; analysis context is not required for the public chart")
     for warning in data.get("quality_warnings") or []:
         if isinstance(warning, str) and warning.strip():
             print(f"[WARN] {warning.strip()}")

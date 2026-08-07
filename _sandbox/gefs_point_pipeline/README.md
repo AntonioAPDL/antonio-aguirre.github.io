@@ -184,9 +184,22 @@ Default output:
 Payload includes:
 
 - metadata (`generated_at_utc`, `site_id`, `init_time_utc`, `member_count`, `schema_version`)
-- `precip` quantile/mean series by level
-- `soil_moisture` quantile/mean series by depth level
+- `precip` quantile/mean series by level, exported as complete 24-hour totals for the public chart
+- `soil_moisture` quantile/mean series by depth level, exported as complete 24-hour means
+- optional `observed_retrospective` context from `climate_daily_ppt_soil.csv`
 - `missing_levels`
+
+GEFS APCP arrives as water-equivalent accumulation windows in `kg m**-2`.
+For precipitation depth, `1 kg m**-2` equals `1 mm`, but the native lead grid
+contains overlapping 3-hour and 6-hour accumulation windows. The web exporter
+sums complete, non-overlapping 6-hour windows into 24-hour totals before
+plotting them next to daily PRISM totals.
+
+GEFS SOILW and ERA5-Land `swvl1` are both volumetric soil-water fractions. The
+web exporter averages GEFS instantaneous 3-hourly values into complete 24-hour
+means before plotting them next to daily ERA5-Land context. They remain
+different products with different layer definitions, so the public chart labels
+ERA5 as near-surface observed context and GEFS by its forecast depth layers.
 
 ## End-to-End Update Script
 

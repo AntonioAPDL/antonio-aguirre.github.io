@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -13,6 +15,8 @@ import datetime as dt
 from export_latest_web_json import (  # noqa: E402
     _build_gefs_analysis_context_payload,
     _build_observed_retrospective_payload,
+    _instantaneous_24h_mean_payload,
+    _precip_24h_total_payload,
     _build_retrospective_payload,
     _extract_cycle_analysis_points,
     _prior_context_sufficient_for_window,
@@ -21,6 +25,80 @@ from export_latest_web_json import (  # noqa: E402
 
 def _point(ts: str, value: float) -> dict:
     return {"t": ts, "v": value}
+
+
+def test_precip_24h_total_payload_uses_complete_non_overlapping_windows() -> None:
+    init = dt.datetime(2026, 8, 6, 18, 0, tzinfo=dt.timezone.utc)
+    rows = []
+    for member, values in {
+        "p01": {(0, 3): 99.0, (0, 6): 1.0, (6, 12): 2.0, (12, 18): 3.0, (18, 24): 4.0},
+        "p02": {(0, 3): 99.0, (0, 6): 2.0, (6, 12): 3.0, (12, 18): 4.0, (18, 24): 5.0},
+    }.items():
+        for (start, end), value in values.items():
+            rows.append(
+                {
+                    "init_time_utc": init,
+                    "valid_time_utc": init + dt.timedelta(hours=end),
+                    "lead_hours": end,
+                    "member": member,
+                    "value": value,
+                    "accum_start_hour": start,
+                    "accum_end_hour": end,
+                }
+            )
+
+    payload = _precip_24h_total_payload(pd.DataFrame(rows))
+
+    assert payload["time_support"] == "24-hour accumulation"
+    assert payload["aggregation"]["method"] == "grib_accumulation_metadata"
+    assert payload["aggregation"]["complete_period_count"] == 1
+    assert payload["mean"][0] == {"t": "2026-08-07T18:00:00+00:00", "v": 12.0}
+    assert payload["p50"][0]["v"] == 12.0
+
+
+def test_precip_24h_total_payload_drops_incomplete_periods() -> None:
+    init = dt.datetime(2026, 8, 6, 18, 0, tzinfo=dt.timezone.utc)
+    rows = [
+        {
+            "init_time_utc": init,
+            "valid_time_utc": init + dt.timedelta(hours=end),
+            "lead_hours": end,
+            "member": "p01",
+            "value": value,
+            "accum_start_hour": start,
+            "accum_end_hour": end,
+        }
+        for start, end, value in ((0, 6, 1.0), (6, 12, 2.0), (12, 18, 3.0))
+    ]
+
+    payload = _precip_24h_total_payload(pd.DataFrame(rows))
+
+    assert payload["aggregation"]["complete_period_count"] == 0
+    assert payload["p50"] == []
+
+
+def test_instantaneous_24h_mean_payload_uses_complete_three_hour_windows() -> None:
+    init = dt.datetime(2026, 8, 6, 18, 0, tzinfo=dt.timezone.utc)
+    rows = []
+    for member, offset in {"p01": 0.0, "p02": 0.08}.items():
+        for lead in range(3, 25, 3):
+            rows.append(
+                {
+                    "init_time_utc": init,
+                    "valid_time_utc": init + dt.timedelta(hours=lead),
+                    "lead_hours": lead,
+                    "member": member,
+                    "value": 0.10 + offset + lead / 1000.0,
+                }
+            )
+
+    payload = _instantaneous_24h_mean_payload(pd.DataFrame(rows))
+
+    assert payload["time_support"] == "24-hour mean"
+    assert payload["aggregation"]["complete_period_count"] == 1
+    assert payload["mean"][0]["t"] == "2026-08-07T18:00:00+00:00"
+    assert round(payload["mean"][0]["v"], 6) == 0.1535
+    assert round(payload["p50"][0]["v"], 6) == 0.1535
 
 
 def test_retrospective_merges_rollforward_and_forecast_points() -> None:

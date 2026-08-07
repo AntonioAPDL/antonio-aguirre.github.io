@@ -18,7 +18,7 @@ ANALYSIS_HISTORY_MAX_COMMITS="${ANALYSIS_HISTORY_MAX_COMMITS:-240}"
 ALLOW_STALE_ON_ERROR="${GEFS_FORECAST_ALLOW_STALE_ON_ERROR:-0}"
 STALE_FALLBACK_IS_FAILURE="${GEFS_FORECAST_STALE_FALLBACK_IS_FAILURE:-1}"
 INCLUDE_OBSERVED_RETROSPECTIVE="${GEFS_FORECAST_INCLUDE_OBSERVED_RETROSPECTIVE:-1}"
-OBSERVED_RETROSPECTIVE_CSV="${GEFS_OBSERVED_RETROSPECTIVE_CSV:-${LIVE_CLIMATE_CSV}}"
+OBSERVED_RETROSPECTIVE_CSV="${GEFS_OBSERVED_RETROSPECTIVE_CSV:-}"
 
 log_warn() { echo "[WARN] $*" >&2; }
 log_error() { echo "[ERROR] $*" >&2; }
@@ -83,6 +83,51 @@ print("[INFO] using existing GEFS asset:", path)
 print("[INFO] generated_at_utc:", data.get("generated_at_utc"))
 print("[INFO] init_time_utc:", data.get("init_time_utc"))
 print("[INFO] member_count:", data.get("member_count"))
+PY
+}
+
+choose_observed_retrospective_csv() {
+  local live_csv="${LIVE_CLIMATE_CSV}"
+  local tracked_csv="${REPO_ROOT}/climate_daily_ppt_soil.csv"
+  python - "${live_csv}" "${tracked_csv}" <<'PY'
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+columns = [
+    "daily_avg_ppt",
+    "daily_avg_soil_ERA5",
+    "daily_avg_soil_NWM_SOIL_M",
+    "daily_avg_soil_NWM_SOIL_W",
+]
+
+best = None
+for raw in sys.argv[1:]:
+    path = Path(raw)
+    if not path.exists():
+        continue
+    try:
+        df = pd.read_csv(path)
+    except Exception:
+        continue
+    if "timestamp" not in df.columns:
+        continue
+    ts = pd.to_datetime(df["timestamp"], errors="coerce", utc=True)
+    available_cols = [col for col in columns if col in df.columns]
+    if not available_cols:
+        continue
+    values = df[available_cols].apply(pd.to_numeric, errors="coerce")
+    valid = ts.notna() & values.notna().any(axis=1)
+    if not valid.any():
+        continue
+    latest = ts[valid].max()
+    score = (latest, int(valid.sum()))
+    if best is None or score > best[0]:
+        best = (score, path)
+
+if best is not None:
+    print(best[1])
 PY
 }
 
@@ -200,6 +245,26 @@ if require_observed:
     if observed_ppt_n <= 0 and observed_soil_n <= 0:
         print("[INFO] GEFS precheck: observed retrospective context missing; refresh required.")
         raise SystemExit(11)
+    precip = asset.get("precip") or {}
+    precip_support_ok = False
+    if isinstance(precip, dict):
+        for block in precip.values():
+            if isinstance(block, dict) and "24-hour" in str(block.get("time_support") or "").lower():
+                precip_support_ok = True
+                break
+    if observed_ppt_n > 0 and not precip_support_ok:
+        print("[INFO] GEFS precheck: observed PRISM context requires 24-hour GEFS precipitation totals; refresh required.")
+        raise SystemExit(12)
+    soil = asset.get("soil_moisture") or {}
+    soil_support_ok = False
+    if isinstance(soil, dict):
+        for block in soil.values():
+            if isinstance(block, dict) and "24-hour mean" in str(block.get("time_support") or "").lower():
+                soil_support_ok = True
+                break
+    if observed_soil_n > 0 and not soil_support_ok:
+        print("[INFO] GEFS precheck: observed ERA5 context requires 24-hour GEFS soil-moisture means; refresh required.")
+        raise SystemExit(13)
 
 if current_init >= latest.init_time_utc:
     raise SystemExit(10)
@@ -267,10 +332,15 @@ exporter_args=(
   --analysis-history-max-commits "${ANALYSIS_HISTORY_MAX_COMMITS}"
 )
 if [[ "${INCLUDE_OBSERVED_RETROSPECTIVE}" == "1" ]]; then
-  observed_csv="${OBSERVED_RETROSPECTIVE_CSV}"
-  if [[ ! -f "${observed_csv}" ]]; then
-    observed_csv="${REPO_ROOT}/climate_daily_ppt_soil.csv"
+  if [[ -n "${OBSERVED_RETROSPECTIVE_CSV}" ]]; then
+    observed_csv="${OBSERVED_RETROSPECTIVE_CSV}"
+  else
+    observed_csv="$(choose_observed_retrospective_csv)"
   fi
+  if [[ -z "${observed_csv}" || ! -f "${observed_csv}" ]]; then
+    keep_stale_and_exit "Observed retrospective CSV not found for GEFS export."
+  fi
+  echo "[INFO] Using observed retrospective CSV: ${observed_csv}"
   exporter_args+=(--include-observed-retrospective --observed-retrospective-csv "${observed_csv}")
 fi
 
@@ -292,6 +362,7 @@ from pathlib import Path
 
 path = Path(os.environ.get("GEFS_VALIDATE_PATH", "assets/data/forecasts/gefs_big_trees_latest.json"))
 require_observed = os.environ.get("GEFS_VALIDATE_REQUIRE_OBSERVED") == "1"
+require_context = os.environ.get("GEFS_VALIDATE_REQUIRE_CONTEXT") == "1"
 data = json.loads(path.read_text(encoding="utf-8"))
 print("GEFS file:", path)
 print("generated_at_utc:", data.get("generated_at_utc"))
@@ -400,6 +471,28 @@ print("observed_precip_points:", observed_ppt_points)
 print("observed_soil_points:", observed_soil_points)
 if require_observed and observed_ppt_points <= 0 and observed_soil_points <= 0:
     errors.append("observed retrospective precipitation or soil context is missing")
+if require_observed and observed_ppt_points > 0:
+    precip_support_ok = False
+    precip = data.get("precip") or {}
+    if isinstance(precip, dict):
+        for block in precip.values():
+            if isinstance(block, dict) and "24-hour" in str(block.get("time_support") or "").lower():
+                precip_support_ok = True
+                break
+    print("forecast_precip_24h_support:", precip_support_ok)
+    if not precip_support_ok:
+        errors.append("observed PRISM precipitation is daily, but GEFS precipitation is not exported as 24-hour totals")
+if require_observed and observed_soil_points > 0:
+    soil_support_ok = False
+    soil = data.get("soil_moisture") or {}
+    if isinstance(soil, dict):
+        for block in soil.values():
+            if isinstance(block, dict) and "24-hour mean" in str(block.get("time_support") or "").lower():
+                soil_support_ok = True
+                break
+    print("forecast_soil_24h_mean_support:", soil_support_ok)
+    if not soil_support_ok:
+        errors.append("observed ERA5 soil moisture is daily, but GEFS soil moisture is not exported as 24-hour means")
 
 init_time = parse_iso(data.get("init_time_utc"))
 if init_time is None:
@@ -429,17 +522,17 @@ else:
     print("analysis_soil_first_last:", s_first.isoformat() if s_first else None, s_last.isoformat() if s_last else None)
 
     edge_tol = timedelta(hours=9)
-    if p_count < min_expected:
+    if require_context and p_count < min_expected:
         warnings.append(f"precip analysis coverage too sparse ({p_count} < {min_expected})")
-    if s_count < min_expected:
+    if require_context and s_count < min_expected:
         warnings.append(f"soil analysis coverage too sparse ({s_count} < {min_expected})")
-    if p_first is None or p_first > (start + edge_tol):
+    if require_context and (p_first is None or p_first > (start + edge_tol)):
         warnings.append("precip analysis does not cover start of retrospective window")
-    if s_first is None or s_first > (start + edge_tol):
+    if require_context and (s_first is None or s_first > (start + edge_tol)):
         warnings.append("soil analysis does not cover start of retrospective window")
-    if p_last is None or p_last < (precip_end - edge_tol):
+    if require_context and (p_last is None or p_last < (precip_end - edge_tol)):
         warnings.append("precip analysis does not include recent cycle context")
-    if s_last is None or s_last < (soil_end - edge_tol):
+    if require_context and (s_last is None or s_last < (soil_end - edge_tol)):
         warnings.append("soil analysis does not include recent cycle context")
 
 quality_warnings = data.get("quality_warnings") or []

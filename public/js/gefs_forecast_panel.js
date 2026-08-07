@@ -705,28 +705,22 @@
       mean: scaleSeries(precipLevel.mean, precipFactor)
     };
 
-    const retrospective = payload.retrospective || {};
-    const retroRaw = ((retrospective.precip || {})[precipLevelName]) || null;
-    const retro = retroRaw
-      ? {
-        p10: scaleSeries(retroRaw.p10, precipFactor),
-        p50: scaleSeries(retroRaw.p50, precipFactor),
-        p90: scaleSeries(retroRaw.p90, precipFactor),
-        mean: scaleSeries(retroRaw.mean, precipFactor)
-      }
-      : null;
-
-    const analysisContext = payload.gefs_analysis_context || {};
-    const analysis = scaleSeries(((analysisContext.precip_f003_proxy || {})[precipLevelName]) || [], precipFactor);
     const observed = payload.observed_retrospective || {};
     const observedPrecip = scaleSeries(observed.daily_avg_ppt || [], 1);
+    const precipTimeSupport = String(precipLevel.time_support || '').toLowerCase();
+    const hasDailyForecastSupport = precipTimeSupport.includes('24-hour');
+    if (hasSeries(observedPrecip) && !hasDailyForecastSupport) {
+      statusWarnings.push(
+        'Observed PRISM precipitation is daily; the available GEFS precipitation fallback uses native accumulation windows.'
+      );
+    }
 
     const traces = [];
 
     if (hasSeries(observedPrecip)) {
       const observedTrace = buildLineTrace(
         observedPrecip,
-        'Observed precipitation (PRISM)',
+        'Observed daily precipitation (PRISM)',
         '#0f766e',
         'solid',
         {
@@ -735,64 +729,17 @@
           markerSize: 5.6,
           unit: 'mm',
           valueFormat: '.2f',
-          hoverLabel: 'Observed precipitation (PRISM)',
+          hoverLabel: 'Observed daily precipitation (PRISM)',
           legendGroup: 'precip_observed'
         }
       );
       if (observedTrace) traces.push(observedTrace);
     }
 
-    if (retro && (hasSeries(retro.p10) || hasSeries(retro.p50) || hasSeries(retro.p90))) {
-      const retroBand = buildBandTrace(
-        retro.p10,
-        retro.p90,
-        'Recent range (10-90%)',
-        'rgba(100,116,139,0.18)',
-        { showLegend: true, legendGroup: 'precip_retro' }
-      );
-      if (retroBand) traces.push(retroBand);
-
-      const retroP50 = buildLineTrace(
-        retro.p50,
-        'Recent median',
-        '#475569',
-        'dot',
-        {
-          width: 1.5,
-          unit: 'mm',
-          valueFormat: '.2f',
-          hoverLabel: 'Recent median',
-          legendGroup: 'precip_retro'
-        }
-      );
-      if (retroP50) traces.push(retroP50);
-    }
-
-    if (hasSeries(analysis)) {
-      const analysisTrace = buildLineTrace(
-        analysis,
-        'Recent cycle values',
-        '#334155',
-        'dot',
-        {
-          width: 1.8,
-          opacity: 0.92,
-          mode: analysis.length <= 6 ? 'markers+lines' : 'lines+markers',
-          markerSize: 6.8,
-          markerSymbol: 'diamond',
-          unit: 'mm',
-          valueFormat: '.2f',
-          hoverLabel: 'Recent cycle values',
-          legendGroup: 'precip_analysis'
-        }
-      );
-      if (analysisTrace) traces.push(analysisTrace);
-    }
-
     const band = buildBandTrace(
       forecast.p10,
       forecast.p90,
-      'Forecast range (10-90%)',
+      hasDailyForecastSupport ? 'Forecast 24h range (10-90%)' : 'Forecast range (10-90%)',
       'rgba(30,64,175,0.17)',
       { showLegend: true, legendGroup: 'precip_forecast' }
     );
@@ -800,14 +747,14 @@
 
     const meanTrace = buildLineTrace(
       forecast.mean,
-      'Forecast average',
+      hasDailyForecastSupport ? 'Forecast 24h average' : 'Forecast average',
       '#ea580c',
       'dash',
       {
         width: 1.85,
         unit: 'mm',
         valueFormat: '.2f',
-        hoverLabel: 'Forecast average',
+        hoverLabel: hasDailyForecastSupport ? 'Forecast 24h average' : 'Forecast average',
         legendGroup: 'precip_forecast'
       }
     );
@@ -815,14 +762,14 @@
 
     const p50Trace = buildLineTrace(
       forecast.p50,
-      'Forecast median',
+      hasDailyForecastSupport ? 'Forecast 24h median' : 'Forecast median',
       '#1d4ed8',
       'solid',
       {
         width: 2.6,
         unit: 'mm',
         valueFormat: '.2f',
-        hoverLabel: 'Forecast median',
+        hoverLabel: hasDailyForecastSupport ? 'Forecast 24h median' : 'Forecast median',
         legendGroup: 'precip_forecast'
       }
     );
@@ -839,21 +786,17 @@
       observationWindowDays,
       [
         observedPrecip,
-        analysis,
         forecast.p10,
         forecast.p50,
         forecast.p90,
-        forecast.mean,
-        retro && retro.p10,
-        retro && retro.p50,
-        retro && retro.p90
+        forecast.mean
       ]
     );
 
     Plotly.react(
       precipEl,
       traces,
-      layout('Precipitation (mm)', colors, {
+      layout(hasDailyForecastSupport ? 'Precipitation (24h mm)' : 'Precipitation (mm)', colors, {
         xRange,
         initTime: initDate,
         yTickFormat: '.1f',
@@ -875,8 +818,7 @@
     const palette = ['#1d4ed8', '#0284c7', '#16a34a', '#f59e0b'];
     const traces = [];
     const pointGroups = [];
-    const analysisSoilBlock = (payload.gefs_analysis_context || {}).soil_f000 || {};
-    const retrospective = payload.retrospective || {};
+    let soilHasDailyMeanSupport = false;
     const observed = payload.observed_retrospective || {};
     const observedEra5 = scaleSeries(observed.daily_avg_soil_ERA5 || [], 1);
     const observedNwm = scaleSeries(observed.daily_avg_soil_NWM_SOIL_W || [], 1);
@@ -884,7 +826,7 @@
     if (hasSeries(observedEra5)) {
       const observedTrace = buildLineTrace(
         observedEra5,
-        'Observed soil moisture (ERA5)',
+        'Observed near-surface soil (ERA5)',
         '#0f766e',
         'dot',
         {
@@ -895,7 +837,7 @@
           markerSymbol: 'diamond',
           unit: 'm3/m3',
           valueFormat: '.3f',
-          hoverLabel: 'Observed soil moisture (ERA5)',
+          hoverLabel: 'Observed near-surface soil (ERA5)',
           legendGroup: 'soil_observed'
         }
       );
@@ -942,55 +884,14 @@
         p50: scaleSeries(block.p50, factor),
         p90: scaleSeries(block.p90, factor)
       };
-
-      const analysis = scaleSeries((analysisSoilBlock[level]) || [], factor);
-      if (hasSeries(analysis)) {
-        const analysisTrace = buildLineTrace(
-          analysis,
-          idx === 0 ? 'Recent cycle values' : `Recent cycle · ${level}`,
-          levelColor,
-          'dot',
-          {
-            width: 1.25,
-            opacity: 0.9,
-            mode: analysis.length <= 6 ? 'markers+lines' : 'lines+markers',
-            markerSize: 5.6,
-            markerSymbol: 'circle',
-            showlegend: idx === 0,
-            unit: 'm3/m3',
-            valueFormat: '.3f',
-            hoverLabel: `Recent cycle · ${level}`,
-            legendGroup: 'soil_analysis'
-          }
-        );
-        if (analysisTrace) traces.push(analysisTrace);
-      }
-
-      const retroRaw = ((retrospective.soil_moisture || {})[level]) || null;
-      const retro = retroRaw ? scaleSeries(retroRaw.p50, factor) : [];
-      if (hasSeries(retro)) {
-        const retroTrace = buildLineTrace(
-          retro,
-          idx === 0 ? 'Recent median' : `Recent median · ${level}`,
-          '#64748b',
-          'dot',
-          {
-            width: 1.35,
-            opacity: 0.7,
-            showlegend: idx === 0,
-            unit: 'm3/m3',
-            valueFormat: '.3f',
-            hoverLabel: `Recent median · ${level}`,
-            legendGroup: 'soil_retro'
-          }
-        );
-        if (retroTrace) traces.push(retroTrace);
-      }
+      const soilTimeSupport = String(block.time_support || '').toLowerCase();
+      const hasDailyMeanSupport = soilTimeSupport.includes('24-hour mean');
+      if (hasDailyMeanSupport) soilHasDailyMeanSupport = true;
 
       const band = buildBandTrace(
         forecast.p10,
         forecast.p90,
-        `${level} p10-p90`,
+        hasDailyMeanSupport ? `${level} 24h p10-p90` : `${level} p10-p90`,
         `rgba(14,165,233,${0.07 + idx * 0.02})`,
         { showLegend: false, legendGroup: `soil_forecast_${idx}` }
       );
@@ -998,20 +899,20 @@
 
       const soilP50 = buildLineTrace(
         forecast.p50,
-        `Forecast median · ${level}`,
+        hasDailyMeanSupport ? `Forecast 24h mean · ${level}` : `Forecast median · ${level}`,
         levelColor,
         'solid',
         {
           width: 2.05,
           unit: 'm3/m3',
           valueFormat: '.3f',
-          hoverLabel: `Forecast median · ${level}`,
+          hoverLabel: hasDailyMeanSupport ? `Forecast 24h mean · ${level}` : `Forecast median · ${level}`,
           legendGroup: `soil_forecast_${idx}`
         }
       );
       if (soilP50) traces.push(soilP50);
 
-      pointGroups.push(analysis, retro, forecast.p10, forecast.p50, forecast.p90);
+      pointGroups.push(forecast.p10, forecast.p50, forecast.p90);
     });
 
     if (!traces.length) {
@@ -1024,7 +925,7 @@
     Plotly.react(
       soilEl,
       traces,
-      layout('Soil moisture (m3/m3)', colors, {
+      layout(soilHasDailyMeanSupport ? 'Soil moisture (24h mean m3/m3)' : 'Soil moisture (m3/m3)', colors, {
         xRange,
         initTime: initDate,
         yTickFormat: '.2f',

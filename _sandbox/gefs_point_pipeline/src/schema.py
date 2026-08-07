@@ -28,6 +28,13 @@ MEMBER_REQUIRED_COLUMNS: List[str] = [
     "schema_version",
 ]
 
+MEMBER_OPTIONAL_COLUMNS = {
+    "step_type": "",
+    "accum_start_hour": pd.NA,
+    "accum_end_hour": pd.NA,
+    "time_range_hours": pd.NA,
+}
+
 SUMMARY_REQUIRED_COLUMNS: List[str] = [
     "site_id",
     "init_time_utc",
@@ -54,6 +61,9 @@ def _require_columns(df: pd.DataFrame, required: Iterable[str], label: str) -> N
 def validate_member_schema(df: pd.DataFrame, schema_version: int) -> pd.DataFrame:
     out = df.copy()
     out["schema_version"] = int(schema_version)
+    for column, default in MEMBER_OPTIONAL_COLUMNS.items():
+        if column not in out.columns:
+            out[column] = default
     _require_columns(out, MEMBER_REQUIRED_COLUMNS, "member parquet")
     out["init_time_utc"] = pd.to_datetime(out["init_time_utc"], utc=True)
     out["valid_time_utc"] = pd.to_datetime(out["valid_time_utc"], utc=True)
@@ -62,6 +72,9 @@ def validate_member_schema(df: pd.DataFrame, schema_version: int) -> pd.DataFram
     out["grid_lat"] = pd.to_numeric(out["grid_lat"], errors="coerce")
     out["grid_lon"] = pd.to_numeric(out["grid_lon"], errors="coerce")
     out["distance_km"] = pd.to_numeric(out["distance_km"], errors="coerce")
+    for column in ("accum_start_hour", "accum_end_hour", "time_range_hours"):
+        out[column] = pd.to_numeric(out[column], errors="coerce")
+    out["step_type"] = out["step_type"].fillna("").astype(str)
     out["used_fallback_point"] = out["used_fallback_point"].astype(bool)
 
     non_null_cols = ["site_id", "member", "variable", "level", "product", "source"]

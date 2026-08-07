@@ -48,6 +48,10 @@ def test_validate_member_schema_accepts_valid_frame() -> None:
     out = validate_member_schema(_valid_member_df(), schema_version=1)
     assert "schema_version" in out.columns
     assert out["schema_version"].iloc[0] == 1
+    assert "step_type" in out.columns
+    assert "accum_start_hour" in out.columns
+    assert "accum_end_hour" in out.columns
+    assert "time_range_hours" in out.columns
 
 
 def test_validate_member_schema_rejects_missing_columns() -> None:

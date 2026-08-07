@@ -286,6 +286,32 @@ def _grib_depth_bounds_m(message: Any) -> Optional[Tuple[float, float]]:
     return lo, hi
 
 
+def _grib_numeric_key(message: Any, key: str) -> float:
+    try:
+        value = message[key]
+    except Exception:
+        return math.nan
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return math.nan
+
+
+def _grib_step_metadata(message: Any) -> Dict[str, Any]:
+    step_type = str(getattr(message, "stepType", "") or "")
+    start_hour = _grib_numeric_key(message, "startStep")
+    end_hour = _grib_numeric_key(message, "endStep")
+    time_range_hours = _grib_numeric_key(message, "lengthOfTimeRange")
+    if math.isnan(time_range_hours) and not math.isnan(start_hour) and not math.isnan(end_hour):
+        time_range_hours = end_hour - start_hour
+    return {
+        "step_type": step_type,
+        "accum_start_hour": start_hour,
+        "accum_end_hour": end_hour,
+        "time_range_hours": time_range_hours,
+    }
+
+
 def _message_matches_field(message: Any, field: ResolvedField) -> bool:
     canonical = field.canonical_name.upper()
     short_name = str(getattr(message, "shortName", "")).upper()
@@ -428,6 +454,7 @@ def _extract_member_lead(
                     target_lon=point.lon,
                     search_max_km=point.search_max_km,
                 )
+                step_metadata = _grib_step_metadata(matched_message)
                 product_rows.append(
                     {
                         "site_id": point.usgs_site,
@@ -447,6 +474,7 @@ def _extract_member_lead(
                         "source": "aws",
                         "search_string": field.search_string,
                         "descriptor": field.descriptor,
+                        **step_metadata,
                         "file_ref": subset_path,
                         "error": "",
                     }
@@ -473,6 +501,10 @@ def _extract_member_lead(
                         "source": "aws",
                         "search_string": field.search_string,
                         "descriptor": field.descriptor,
+                        "step_type": "",
+                        "accum_start_hour": math.nan,
+                        "accum_end_hour": math.nan,
+                        "time_range_hours": math.nan,
                         "file_ref": "",
                         "error": str(exc),
                     }
@@ -562,6 +594,10 @@ def _extract_all_rows(
                             "source": "aws",
                             "search_string": field.search_string,
                             "descriptor": field.descriptor,
+                            "step_type": "",
+                            "accum_start_hour": math.nan,
+                            "accum_end_hour": math.nan,
+                            "time_range_hours": math.nan,
                             "file_ref": "",
                             "error": f"task_failure:{exc}",
                         }
