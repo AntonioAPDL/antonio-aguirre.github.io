@@ -137,6 +137,8 @@ Supported attributes:
 - `data-period` (e.g., `P7D`, `P30D`, `P90D`)
 - `data-refresh-min` (poll interval in minutes)
 - `data-timeout-sec` (fetch timeout in seconds)
+- `data-observation-stale-hours` (warning threshold for delayed USGS observations; default `6`)
+- `data-forecast-stale-hours` (warning threshold for delayed forecast-overlay JSON; default `36`)
 - `data-log-y` (`true`/`false` to enable a log-scale y-axis)
 - `data-title` (optional label for accessibility)
 - `data-ylabel` (base Y-axis label; units are appended automatically when available)
@@ -157,6 +159,7 @@ The plot can overlay forecast guidance from a JSON artifact published by schedul
 - **Publish helper:** `scripts/publish_live_data_artifacts.sh`
 - **Included series:** JSON may include NWPS analysis/short deterministic plus NWM medium/long quantiles (`p10/p50/p90`). The medium range may fall back to `medium_range_blend` when the direct medium-range series is unavailable.
 - **Plot overlay behavior:** USGS observed discharge remains the base trace; the browser overlays available NWS short-range guidance and medium/long `p10-p90` bands when present.
+- **Browser guard:** live and fallback forecast JSON are fetched with cache-busting. The browser prefers a fresh usable overlay and warns when observations or forecast guidance are delayed instead of silently showing stale data.
 - **Unit harmonization:** the forecast JSON stores streamflow in `ft3/s` (cfs). The browser also normalizes `cfs`/`cms` labels and converts any forecast overlay to the observed USGS discharge axis before plotting.
 - **TODO:** HEFS ensembles once location_id lookup is resolved
 - **Fallback behavior:** if `_sandbox/nws_ensemble_point` is absent, updater builds JSON directly from NOAA NWPS APIs.
@@ -169,6 +172,8 @@ scripts/update_big_trees_forecast.sh
 python3 scripts/check_forecast_assets.py \
   --streamflow assets/data/forecasts/big_trees_latest.json \
   --max-age-hours 36
+python3 scripts/check_usgs_plot_health.py \
+  --forecast-json assets/data/forecasts/big_trees_latest.json
 ```
 
 If the live-data request fails, the page tries the bundled fallback. If both are missing, the plot still renders observations only and logs a console warning.
@@ -300,8 +305,8 @@ NWM retrospective controls:
 The repo supports fully hosted forecast and climate refresh on GitHub Actions without spending Netlify production-deploy credits. Scheduled data jobs publish artifacts to the `live-data` branch; `main` remains the website branch that Netlify deploys.
 
 - `.github/workflows/update_forecast.yml`
-  - cadence: every 8 hours on the hour UTC (`0 */8 * * *`) plus manual `workflow_dispatch`
-  - bounded to 20 minutes so upstream API stalls fail clearly instead of consuming long runner time
+  - cadence: every 4 hours at minute 20 UTC (`20 */4 * * *`) plus manual `workflow_dispatch`
+  - bounded to 30 minutes so upstream API stalls fail clearly instead of consuming long runner time
   - publishes to `live-data`:
     - `assets/data/forecasts/big_trees_latest.json`
   - validates `generated_at_utc`, units, and core analysis/short-range series before publishing
@@ -386,7 +391,7 @@ The last successful data payload is cached in `localStorage` and used on load if
 To clear the cache, open dev tools and remove keys starting with `usgs-iv:` or run:
 
 ```js
-localStorage.removeItem('usgs-iv:11160500:00065:P30D:v3');
+localStorage.removeItem('usgs-iv:11160500:00060:P20D:v4');
 ```
 
 ### Troubleshooting

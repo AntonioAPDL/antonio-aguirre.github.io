@@ -14,12 +14,14 @@
     logY: false,
     observationWindowDays: 20,
     futureHorizonHours: 240,
-    dailyAvgMinCoverage: 0.90
+    dailyAvgMinCoverage: 0.90,
+    observationStaleHours: 6,
+    forecastStaleHours: 36
   };
   const ENDPOINT_BASE = 'https://waterservices.usgs.gov/nwis/iv/';
   const MAX_BACKOFF_MS = 60 * 60 * 1000;
   const MIN_CACHE_AGE_MS = 30 * 60 * 1000;
-  const STORAGE_VERSION = 3;
+  const STORAGE_VERSION = 4;
   const CFS_TO_CMS = 0.0283168466;
   const CMS_TO_CFS = 1 / CFS_TO_CMS;
   const PLOT_LAYOUT_STYLE = {
@@ -81,6 +83,26 @@
     } catch (err) {
       return date.toISOString();
     }
+  }
+
+  function parseDateValue(value) {
+    if (!value) return null;
+    if (value instanceof Date) {
+      return Number.isNaN(value.getTime()) ? null : value;
+    }
+    let text = String(value).trim();
+    if (!text) return null;
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:/.test(text)) {
+      text = text.replace(' ', 'T');
+    }
+    const date = new Date(text);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function ageHoursSince(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+    const hours = (Date.now() - date.getTime()) / (1000 * 3600);
+    return Number.isFinite(hours) ? hours : null;
   }
 
   function normalizeUnits(unitCode) {
@@ -634,6 +656,17 @@
     return `${ENDPOINT_BASE}?${params.toString()}`;
   }
 
+  function cacheBustUrl(rawUrl) {
+    try {
+      const url = new URL(rawUrl, window.location.origin);
+      url.searchParams.set('_', String(Date.now()));
+      return url.toString();
+    } catch (err) {
+      const joiner = String(rawUrl).includes('?') ? '&' : '?';
+      return `${rawUrl}${joiner}_=${Date.now()}`;
+    }
+  }
+
   function extractSeries(json) {
     const series = json && json.value && Array.isArray(json.value.timeSeries)
       ? json.value.timeSeries[0]
@@ -757,6 +790,77 @@
       },
       hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>Observed (15-min): %{y:.2f}${unitLabel}<extra></extra>`
     };
+  }
+
+  function countPayloadSeries(payload, rangeName, key) {
+    const ranges = payload && payload.ranges && typeof payload.ranges === 'object'
+      ? payload.ranges
+      : {};
+    const block = ranges[rangeName] && typeof ranges[rangeName] === 'object'
+      ? ranges[rangeName]
+      : {};
+    const series = block[key];
+    return Array.isArray(series) ? series.length : 0;
+  }
+
+  function forecastReferenceDate(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+    const candidates = [
+      payload.generated_at_utc,
+      payload.generated_utc,
+      payload.init_time_utc
+    ];
+    const initTimes = payload.init_times && typeof payload.init_times === 'object'
+      ? payload.init_times
+      : {};
+    Object.keys(initTimes).forEach((key) => candidates.push(initTimes[key]));
+    const dates = candidates
+      .map(parseDateValue)
+      .filter((date) => date instanceof Date && !Number.isNaN(date.getTime()));
+    if (!dates.length) return null;
+    dates.sort((a, b) => b - a);
+    return dates[0];
+  }
+
+  function summarizeForecastPayload(payload, maxAgeHours) {
+    const analysis = countPayloadSeries(payload, 'analysis', 'deterministic');
+    const shortRange = countPayloadSeries(payload, 'short', 'deterministic');
+    const medium = countPayloadSeries(payload, 'medium_range', 'p50');
+    const longRange = countPayloadSeries(payload, 'long_range', 'p50');
+    const referenceDate = forecastReferenceDate(payload);
+    const ageHours = ageHoursSince(referenceDate);
+    const staleLimit = Number.isFinite(maxAgeHours) && maxAgeHours > 0
+      ? maxAgeHours
+      : DEFAULTS.forecastStaleHours;
+    return {
+      analysis,
+      shortRange,
+      medium,
+      longRange,
+      referenceDate,
+      ageHours,
+      hasAny: analysis + shortRange + medium + longRange > 0,
+      hasCore: analysis > 0 || shortRange > 0,
+      hasExtended: medium > 0 && longRange > 0,
+      isStale: Number.isFinite(ageHours) && ageHours > staleLimit
+    };
+  }
+
+  function chooseForecastCandidate(candidates) {
+    const usable = candidates.filter((candidate) => candidate.stats && candidate.stats.hasAny);
+    if (!usable.length) return null;
+
+    const fresh = usable.filter((candidate) => !candidate.stats.isStale);
+    const pool = fresh.length ? fresh : usable;
+    pool.sort((a, b) => {
+      if (a.stats.hasExtended !== b.stats.hasExtended) return a.stats.hasExtended ? -1 : 1;
+      if (a.stats.hasCore !== b.stats.hasCore) return a.stats.hasCore ? -1 : 1;
+      const aTime = a.stats.referenceDate ? a.stats.referenceDate.getTime() : 0;
+      const bTime = b.stats.referenceDate ? b.stats.referenceDate.getTime() : 0;
+      if (aTime !== bTime) return bTime - aTime;
+      return a.index - b.index;
+    });
+    return pool[0];
   }
 
   function buildThresholdShapes(config, colors, yRange) {
@@ -932,6 +1036,8 @@
       );
       const futureHorizonHoursRaw = parseOptionalNumber(dataset.futureHorizonHours);
       const dailyAvgMinCoverageRaw = parseNumber(dataset.dailyAvgMinCoverage, DEFAULTS.dailyAvgMinCoverage);
+      const observationStaleHoursRaw = parseNumber(dataset.observationStaleHours, DEFAULTS.observationStaleHours);
+      const forecastStaleHoursRaw = parseNumber(dataset.forecastStaleHours, DEFAULTS.forecastStaleHours);
       const modeRaw = (dataset.mode || DEFAULTS.mode).toLowerCase();
       const mode = modeRaw === 'stage' ? 'stage' : 'discharge';
       const logY = parseBoolean(dataset.logY, DEFAULTS.logY);
@@ -967,6 +1073,18 @@
         logY: logY,
         observationWindowDays: observationWindowDays,
         dailyAvgMinCoverage: clampNumber(dailyAvgMinCoverageRaw, 0.5, 1.0, DEFAULTS.dailyAvgMinCoverage),
+        observationStaleHours: clampNumber(
+          observationStaleHoursRaw,
+          0.25,
+          168,
+          DEFAULTS.observationStaleHours
+        ),
+        forecastStaleHours: clampNumber(
+          forecastStaleHoursRaw,
+          1,
+          168,
+          DEFAULTS.forecastStaleHours
+        ),
         futureHorizonHours: Number.isFinite(futureHorizonHoursRaw)
           ? clampNumber(futureHorizonHoursRaw, 0, 720, DEFAULTS.futureHorizonHours)
           : null
@@ -1429,10 +1547,13 @@
         .map((url) => (url || '').trim())
         .filter((url, index, all) => url && all.indexOf(url) === index);
 
+      const candidates = [];
+      let failedLive = false;
+
       for (let i = 0; i < urls.length; i += 1) {
         const url = urls[i];
         try {
-          const response = await fetch(url, {
+          const response = await fetch(cacheBustUrl(url), {
             cache: 'no-store',
             signal
           });
@@ -1443,19 +1564,41 @@
           if (!payload || typeof payload !== 'object') {
             throw new Error('Invalid JSON payload');
           }
-          return {
+          candidates.push({
+            index: i,
+            url,
             payload,
-            warning: i > 0 ? 'Live forecast guidance is temporarily unavailable; showing the bundled snapshot.' : null
-          };
+            stats: summarizeForecastPayload(payload, this.config.forecastStaleHours)
+          });
         } catch (err) {
           if (err && err.name === 'AbortError') {
             throw err;
           }
+          if (i === 0) failedLive = true;
           console.warn('[usgs-iv] forecast overlay fetch failed', url, err);
         }
       }
 
-      return { payload: null, warning: 'Forecast guidance is temporarily unavailable.' };
+      const selected = chooseForecastCandidate(candidates);
+      if (!selected) {
+        return { payload: null, warning: 'Forecast guidance is temporarily unavailable.' };
+      }
+
+      const warnings = [];
+      if (selected.index > 0 || failedLive) {
+        warnings.push('Live forecast guidance is temporarily unavailable; showing bundled snapshot.');
+      }
+      if (selected.stats.isStale) {
+        const age = Number.isFinite(selected.stats.ageHours)
+          ? ` (${selected.stats.ageHours.toFixed(1)} hours old)`
+          : '';
+        warnings.push(`Forecast guidance is delayed${age}.`);
+      }
+
+      return {
+        payload: selected.payload,
+        warning: warnings.length ? Array.from(new Set(warnings)).join(' • ') : null
+      };
     }
 
     async fetchQdesnPayload(signal) {
@@ -1464,7 +1607,7 @@
       }
 
       try {
-        const response = await fetch(this.config.qdesnUrl, {
+        const response = await fetch(cacheBustUrl(this.config.qdesnUrl), {
           cache: 'no-store',
           signal
         });
@@ -1524,6 +1667,10 @@
         const forecastResult = await this.fetchForecastPayload(controller.signal);
         const qdesnResult = await this.fetchQdesnPayload(controller.signal);
         const fetchWarnings = [forecastResult.warning, qdesnResult.warning].filter(Boolean);
+        const obsAgeHours = ageHoursSince(lastObs);
+        if (Number.isFinite(obsAgeHours) && obsAgeHours > this.config.observationStaleHours) {
+          fetchWarnings.push(`USGS observations appear delayed (${obsAgeHours.toFixed(1)} hours since last observation).`);
+        }
 
         this.renderPlot({
           points,
