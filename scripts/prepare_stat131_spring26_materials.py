@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Prepare curated STAT 131 Spring 2026 PDFs for the teaching page.
 
-The source material lives in Notability as .note packages. This script does not
-try to convert .note files. It expects PDFs exported from Notability, validates
-the approved subset, copies them into files/teaching/stat131-spring26, and
-updates _data/teaching.yml.
+The source material lives in Notability as .note packages. Notability packages
+can include embedded PDFs; when they do, this script extracts those PDFs,
+validates the approved subset, copies them into files/teaching/stat131-spring26,
+and updates _data/teaching.yml. Exported PDFs are also supported directly.
 """
 
 from __future__ import annotations
@@ -14,6 +14,8 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
@@ -188,8 +190,12 @@ def display_path(path: Path) -> str:
         return str(path)
 
 
-def iter_pdfs(source_dir: Path) -> list[Path]:
-    return sorted(path for path in source_dir.rglob("*.pdf") if path.is_file())
+def iter_sources(source_dir: Path) -> list[Path]:
+    return sorted(
+        path
+        for path in source_dir.rglob("*")
+        if path.is_file() and path.suffix.lower() in {".pdf", ".note"}
+    )
 
 
 def build_index(paths: Iterable[Path]) -> dict[str, list[Path]]:
@@ -206,7 +212,7 @@ def find_source(material: Material, index: dict[str, list[Path]]) -> Path | None
             return matches[0]
         if len(matches) > 1:
             names = ", ".join(str(path) for path in matches)
-            raise RuntimeError(f"ambiguous PDF candidates for {material.title}: {names}")
+            raise RuntimeError(f"ambiguous source candidates for {material.title}: {names}")
     return None
 
 
@@ -232,6 +238,92 @@ def pdf_page_count(path: Path) -> int:
     return int(match.group(1))
 
 
+def embedded_pdf_members(note_path: Path) -> list[zipfile.ZipInfo]:
+    if not zipfile.is_zipfile(note_path):
+        raise RuntimeError(f"{note_path} is not a readable Notability package")
+    with zipfile.ZipFile(note_path) as zf:
+        members = [
+            info
+            for info in zf.infolist()
+            if not info.is_dir()
+            and info.filename.lower().endswith(".pdf")
+            and "/pdfs/" in info.filename.lower()
+        ]
+        if members:
+            return members
+        return [
+            info
+            for info in zf.infolist()
+            if not info.is_dir() and info.filename.lower().endswith(".pdf")
+        ]
+
+
+def _write_embedded_pdfs(note_path: Path, output_dir: Path) -> list[Path]:
+    members = embedded_pdf_members(note_path)
+    if not members:
+        raise RuntimeError(f"{note_path.name} does not contain an embedded PDF")
+
+    extracted: list[Path] = []
+    with zipfile.ZipFile(note_path) as zf:
+        for index, member in enumerate(members, start=1):
+            payload = zf.read(member)
+            if not payload.startswith(b"%PDF"):
+                raise RuntimeError(f"{note_path.name}:{member.filename} is not a valid embedded PDF")
+            target = output_dir / f"embedded-{index:02d}.pdf"
+            target.write_bytes(payload)
+            pdf_page_count(target)
+            extracted.append(target)
+    return extracted
+
+
+def _merge_pdfs(pdfs: list[Path], output_path: Path) -> None:
+    if shutil.which("gs") is None:
+        names = ", ".join(path.name for path in pdfs)
+        raise RuntimeError(
+            "Notability package contains multiple embedded PDFs, but Ghostscript "
+            f"is not installed to merge them: {names}"
+        )
+
+    result = subprocess.run(
+        [
+            "gs",
+            "-q",
+            "-dBATCH",
+            "-dNOPAUSE",
+            "-sDEVICE=pdfwrite",
+            f"-sOutputFile={output_path}",
+            *[str(path) for path in pdfs],
+        ],
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Ghostscript failed while merging embedded PDFs: {result.stderr.strip()}")
+
+
+def extract_pdf_from_note(note_path: Path, output_path: Path) -> int:
+    with tempfile.TemporaryDirectory(prefix="stat131-note-") as tmp:
+        tmp_dir = Path(tmp)
+        extracted = _write_embedded_pdfs(note_path, tmp_dir)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        if len(extracted) == 1:
+            shutil.copy2(extracted[0], output_path)
+        else:
+            _merge_pdfs(extracted, output_path)
+        return pdf_page_count(output_path)
+
+
+def source_page_count(path: Path) -> int:
+    if path.suffix.lower() == ".pdf":
+        return pdf_page_count(path)
+    if path.suffix.lower() == ".note":
+        with tempfile.TemporaryDirectory(prefix="stat131-note-check-") as tmp:
+            return extract_pdf_from_note(path, Path(tmp) / "extracted.pdf")
+    raise RuntimeError(f"unsupported source type: {path}")
+
+
 def material_resource(material: Material) -> dict[str, str]:
     return {
         "title": material.title,
@@ -247,7 +339,7 @@ def build_course_entry(selected: list[Material]) -> dict[str, object]:
     for group_name in dict.fromkeys(material.group for material in selected):
         resources = [material_resource(material) for material in selected if material.group == group_name]
         groups.append({"title": group_name, "resources": resources})
-        flat_resources.extend(resources)
+        flat_resources.extend(dict(resource) for resource in resources)
 
     return {
         "id": COURSE_ID,
@@ -263,24 +355,104 @@ def build_course_entry(selected: list[Material]) -> dict[str, object]:
     }
 
 
+def yaml_quote(value: object) -> str:
+    text = str(value)
+    return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def render_course_entry(entry: dict[str, object]) -> str:
+    resources = entry.get("resources")
+    groups = entry.get("resource_groups")
+    if not isinstance(resources, list):
+        raise RuntimeError("course entry must define resources")
+    if not isinstance(groups, list):
+        raise RuntimeError("course entry must define resource_groups")
+
+    lines = [
+        f"- id: {entry['id']}",
+        f"  course: {yaml_quote(entry['course'])}",
+        f"  role: {yaml_quote(entry['role'])}",
+        f"  terms: {yaml_quote(entry['terms'])}",
+        f"  summary: {yaml_quote(entry['summary'])}",
+        "  resources:",
+    ]
+    for resource in resources:
+        if not isinstance(resource, dict):
+            raise RuntimeError("each teaching resource must be an object")
+        lines.extend(
+            [
+                f"    - title: {yaml_quote(resource['title'])}",
+                f"      type: {yaml_quote(resource['type'])}",
+                f"      term: {yaml_quote(resource['term'])}",
+                f"      file: {yaml_quote(resource['file'])}",
+            ]
+        )
+    lines.append("  resource_groups:")
+    for group in groups:
+        if not isinstance(group, dict) or not isinstance(group.get("resources"), list):
+            raise RuntimeError("each resource group must define resources")
+        lines.append(f"    - title: {yaml_quote(group['title'])}")
+        lines.append("      resources:")
+        for resource in group["resources"]:
+            if not isinstance(resource, dict):
+                raise RuntimeError("each teaching resource must be an object")
+            lines.extend(
+                [
+                    f"        - title: {yaml_quote(resource['title'])}",
+                    f"          type: {yaml_quote(resource['type'])}",
+                    f"          term: {yaml_quote(resource['term'])}",
+                    f"          file: {yaml_quote(resource['file'])}",
+                ]
+            )
+    return "\n".join(lines) + "\n"
+
+
+def top_level_course_id(line: str) -> str | None:
+    match = re.match(r"^- id:\s*['\"]?([^'\"\n]+)['\"]?\s*$", line)
+    return match.group(1) if match else None
+
+
+def remove_course_block(lines: list[str], course_id: str) -> list[str]:
+    output: list[str] = []
+    index = 0
+    while index < len(lines):
+        if top_level_course_id(lines[index].rstrip("\n")) == course_id:
+            index += 1
+            while index < len(lines) and top_level_course_id(lines[index].rstrip("\n")) is None:
+                index += 1
+            continue
+        output.append(lines[index])
+        index += 1
+    return output
+
+
+def insert_after_course(lines: list[str], after_course_id: str, block: str) -> list[str]:
+    insert_at = len(lines)
+    for index, line in enumerate(lines):
+        if top_level_course_id(line.rstrip("\n")) == after_course_id:
+            insert_at = index + 1
+            while insert_at < len(lines) and top_level_course_id(lines[insert_at].rstrip("\n")) is None:
+                insert_at += 1
+            break
+
+    block_lines = [line + "\n" for line in block.rstrip("\n").split("\n")]
+    return lines[:insert_at] + block_lines + lines[insert_at:]
+
+
 def update_teaching_yaml(path: Path, entry: dict[str, object]) -> None:
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or []
+    text = path.read_text(encoding="utf-8")
+    data = yaml.safe_load(text) or []
     if not isinstance(data, list):
         raise RuntimeError(f"{path} must contain a top-level list")
 
-    data = [course for course in data if not (isinstance(course, dict) and course.get("id") == COURSE_ID)]
-    insert_at = 1
-    for index, course in enumerate(data):
-        if isinstance(course, dict) and course.get("id") == "stat131":
-            insert_at = index + 1
-            break
-    data.insert(insert_at, entry)
-    path.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=False), encoding="utf-8")
+    lines = remove_course_block(text.splitlines(keepends=True), COURSE_ID)
+    lines = insert_after_course(lines, "stat131", render_course_entry(entry))
+    path.write_text("".join(lines), encoding="utf-8")
 
 
-def describe_unmatched(pdfs: list[Path], selected_paths: set[Path]) -> list[Path]:
+def describe_unmatched(sources: list[Path], selected_paths: set[Path]) -> list[Path]:
     unmatched = []
-    for path in pdfs:
+    for path in sources:
         if path in selected_paths:
             continue
         normalized = normalize(path.name)
@@ -292,9 +464,9 @@ def describe_unmatched(pdfs: list[Path], selected_paths: set[Path]) -> list[Path
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Validate and publish curated STAT 131 Spring 2026 PDFs exported from Notability.",
+        description="Validate and publish curated STAT 131 Spring 2026 PDFs from PDF exports or Notability .note packages.",
     )
-    parser.add_argument("--source-dir", required=True, type=Path, help="Directory containing PDF exports.")
+    parser.add_argument("--source-dir", required=True, type=Path, help="Directory containing PDF exports or .note packages.")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR, help="Public PDF output directory.")
     parser.add_argument("--teaching-yaml", type=Path, default=DEFAULT_TEACHING_YAML, help="Teaching data YAML.")
     parser.add_argument("--apply", action="store_true", help="Copy PDFs and update teaching YAML.")
@@ -320,15 +492,12 @@ def main() -> int:
         print(f"[ERROR] teaching YAML does not exist: {teaching_yaml}", file=sys.stderr)
         return 2
 
-    pdfs = iter_pdfs(source_dir)
-    if not pdfs:
-        note_count = sum(1 for path in source_dir.rglob("*.note") if path.is_file())
-        print(f"[ERROR] found no PDFs in {source_dir}", file=sys.stderr)
-        if note_count:
-            print(f"[ERROR] found {note_count} .note files; export them from Notability as PDF first.", file=sys.stderr)
+    sources = iter_sources(source_dir)
+    if not sources:
+        print(f"[ERROR] found no PDFs or Notability .note packages in {source_dir}", file=sys.stderr)
         return 2
 
-    index = build_index(pdfs)
+    index = build_index(sources)
     selected: list[tuple[Material, Path, int]] = []
     missing: list[Material] = []
     for material in PUBLIC_MATERIALS:
@@ -336,7 +505,7 @@ def main() -> int:
         if source is None:
             missing.append(material)
             continue
-        pages = pdf_page_count(source)
+        pages = source_page_count(source)
         selected.append((material, source, pages))
 
     if missing and not args.allow_missing:
@@ -350,10 +519,10 @@ def main() -> int:
         return 2
 
     selected_paths = {source for _, source, _ in selected}
-    unmatched = describe_unmatched(pdfs, selected_paths)
+    unmatched = describe_unmatched(sources, selected_paths)
 
-    print(f"[OK] source PDFs found: {len(pdfs)}")
-    print(f"[OK] curated PDFs matched: {len(selected)}")
+    print(f"[OK] source files found: {len(sources)}")
+    print(f"[OK] curated sources matched: {len(selected)}")
     for material, source, pages in selected:
         page_text = "unknown pages" if pages < 0 else f"{pages} pages"
         print(f"  - {material.target} <- {source.name} ({page_text})")
@@ -370,7 +539,13 @@ def main() -> int:
 
     output_dir.mkdir(parents=True, exist_ok=True)
     for material, source, _ in selected:
-        shutil.copy2(source, output_dir / material.target)
+        target = output_dir / material.target
+        if source.suffix.lower() == ".pdf":
+            shutil.copy2(source, target)
+        elif source.suffix.lower() == ".note":
+            extract_pdf_from_note(source, target)
+        else:
+            raise RuntimeError(f"unsupported source type: {source}")
 
     if not args.skip_yaml:
         entry = build_course_entry([material for material, _, _ in selected])

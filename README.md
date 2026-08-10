@@ -44,18 +44,19 @@ Notes:
 Teaching resources are driven by `_data/teaching.yml` and rendered by
 `teaching.html`. Public PDFs live under `files/teaching/`.
 
-The STAT 131 Spring 2026 Notability materials must be exported from Notability
-as PDFs before publication. Raw `.note` packages are not committed or linked
-from the public site.
+The STAT 131 Spring 2026 Notability materials may be staged either as exported
+PDFs or as raw `.note` packages that contain embedded PDFs. The publication
+script always writes public PDFs and never commits or links the raw `.note`
+packages.
 
 ```bash
-# 1. Export approved Notability notes as PDFs into a local staging folder.
+# 1. Stage approved Notability notes or exported PDFs locally.
 #    This folder is gitignored.
-mkdir -p local_teaching_exports/stat131-spring26-pdf
+mkdir -p local_teaching_exports/stat131-spring26-notes
 
 # 2. Validate, copy, and register the curated public subset.
 python3 scripts/prepare_stat131_spring26_materials.py \
-  --source-dir local_teaching_exports/stat131-spring26-pdf \
+  --source-dir local_teaching_exports/stat131-spring26-notes \
   --apply
 
 # 3. Verify before committing.

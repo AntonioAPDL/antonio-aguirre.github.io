@@ -17,16 +17,21 @@ as `application/x-zip`. The folder did not contain PDFs, native Google Slides,
 or PowerPoint files at audit time. Google Drive can download these raw packages,
 but it cannot export `.note` files to PDF.
 
+Follow-up validation showed that the Notability packages are ZIP archives and
+the selected packages contain embedded PDFs under their package `PDFs/`
+directories. The website publication path can therefore extract those embedded
+PDFs directly, validate them, and publish only browser-readable PDF files.
+
 The robust path is therefore:
 
-1. Export the approved Notability notes as PDFs from Notability.
-2. Place those PDFs in a local staging directory or a shared Drive PDF-export
-   folder.
+1. Download the approved Notability `.note` packages from Drive, or export them
+   from Notability as PDFs.
+2. Place those local sources in a gitignored staging directory.
 3. Run `scripts/prepare_stat131_spring26_materials.py`.
 4. Validate the site before committing.
 
 This avoids publishing proprietary `.note` files, avoids broken website links,
-and avoids relying on an unverified reverse-engineering converter.
+and keeps the conversion rule local, auditable, and repeatable.
 
 ## Conversion Constraint
 
@@ -39,8 +44,9 @@ Known local-conversion alternatives were rejected:
 
 - The available public converter route requires macOS plus the Notability app.
 - The website server is Linux and does not have Notability installed.
-- Reverse-engineering `.note` internals is not a reasonable publication path for
-  teaching materials.
+- Publishing raw `.note` internals is not appropriate for website delivery.
+- Extracting an embedded PDF from the package is acceptable because the public
+  artifact remains the PDF that Notability already stores inside the package.
 
 ## Public Curation Rules
 
@@ -81,11 +87,11 @@ The teaching page now supports optional grouped resources through
 
 ## Reproducible Intake Command
 
-After exporting PDFs from Notability:
+After staging approved `.note` packages or exported PDFs:
 
 ```bash
 python3 scripts/prepare_stat131_spring26_materials.py \
-  --source-dir local_teaching_exports/stat131-spring26-pdf \
+  --source-dir local_teaching_exports/stat131-spring26-notes \
   --apply
 
 python3 scripts/check_site_integrity.py
