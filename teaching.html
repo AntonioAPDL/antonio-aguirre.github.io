@@ -49,21 +49,44 @@ description: "Course materials, TA resources, and teaching support for Statistic
       </summary>
       <div class="teaching-item__body">
         <p class="intro-text teaching-intro">{{ course.summary }}</p>
-        <ul class="teaching-list">
-          {% for resource in course.resources %}
-            <li>
-              <a href="{{ resource.file | relative_url }}" class="teaching-link">
-                <i class="far fa-file-pdf" aria-hidden="true"></i>
-                <span>
-                  {{ resource.title }}
-                  <span class="teaching-resource-meta">
-                    {{ resource.type }}{% if resource.term %} · {{ resource.term }}{% endif %}
-                  </span>
-                </span>
-              </a>
-            </li>
+        {% if course.resource_groups %}
+          {% for group in course.resource_groups %}
+            <section class="teaching-resource-group" aria-label="{{ group.title }}">
+              <h2 class="teaching-subheading">{{ group.title }}</h2>
+              <ul class="teaching-list">
+                {% for resource in group.resources %}
+                  <li>
+                    <a href="{{ resource.file | relative_url }}" class="teaching-link">
+                      <i class="far fa-file-pdf" aria-hidden="true"></i>
+                      <span>
+                        {{ resource.title }}
+                        <span class="teaching-resource-meta">
+                          {{ resource.type }}{% if resource.term %} · {{ resource.term }}{% endif %}
+                        </span>
+                      </span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </section>
           {% endfor %}
-        </ul>
+        {% else %}
+          <ul class="teaching-list">
+            {% for resource in course.resources %}
+              <li>
+                <a href="{{ resource.file | relative_url }}" class="teaching-link">
+                  <i class="far fa-file-pdf" aria-hidden="true"></i>
+                  <span>
+                    {{ resource.title }}
+                    <span class="teaching-resource-meta">
+                      {{ resource.type }}{% if resource.term %} · {{ resource.term }}{% endif %}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
         {% if course.notebooks %}
           <div class="teaching-colab">
             <h2 class="teaching-subheading">Interactive Notebooks</h2>

@@ -2325,6 +2325,19 @@ body.dark-theme .plot-status__title {
   margin-top: 1rem;
 }
 
+.teaching-resource-group {
+  margin-top: 1rem;
+}
+
+.teaching-resource-group:first-of-type {
+  margin-top: 0.75rem;
+}
+
+.teaching-resource-group + .teaching-resource-group {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
 .teaching-subheading {
   font-size: var(--font-size-h3);
   color: var(--text-color);

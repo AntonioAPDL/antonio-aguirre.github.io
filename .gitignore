@@ -71,3 +71,7 @@ logs/site_updates/
 
 # Local-only review reports and external audit notes
 local_audit_reports/
+
+# Local-only Drive/Notability exports before public curation
+local_drive_downloads/
+local_teaching_exports/

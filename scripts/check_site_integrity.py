@@ -191,6 +191,28 @@ def check_teaching_data(errors: list[str]) -> None:
     except Exception:
         return
 
+    def validate_resources(course_id: object, resources: object, context: str) -> None:
+        if not isinstance(resources, list):
+            errors.append(f"_data/teaching.yml: course {course_id} {context} resources must be a list")
+            return
+        for resource_index, resource in enumerate(resources, start=1):
+            if not isinstance(resource, dict):
+                errors.append(
+                    f"_data/teaching.yml: course {course_id} {context} resource "
+                    f"{resource_index} must be an object"
+                )
+                continue
+            file_value = resource.get("file")
+            if not file_value:
+                errors.append(
+                    f"_data/teaching.yml: course {course_id} {context} resource "
+                    f"{resource_index} missing file"
+                )
+                continue
+            target = ROOT / str(file_value).lstrip("/")
+            if not target.exists():
+                errors.append(f"_data/teaching.yml: missing teaching resource {file_value}")
+
     path = ROOT / "_data" / "teaching.yml"
     if not path.exists():
         errors.append("missing YAML: _data/teaching.yml")
@@ -206,27 +228,36 @@ def check_teaching_data(errors: list[str]) -> None:
         for key in ("id", "course", "role", "resources"):
             if key not in course:
                 errors.append(f"_data/teaching.yml: course {course_index} missing {key!r}")
+        course_id = course.get("id", course_index)
         resources = course.get("resources", [])
-        if not isinstance(resources, list):
-            errors.append(f"_data/teaching.yml: course {course.get('id', course_index)} resources must be a list")
-            continue
-        for resource_index, resource in enumerate(resources, start=1):
-            if not isinstance(resource, dict):
-                errors.append(
-                    f"_data/teaching.yml: course {course.get('id', course_index)} resource "
-                    f"{resource_index} must be an object"
-                )
+        resource_groups = course.get("resource_groups", [])
+        if not resources and not resource_groups:
+            errors.append(f"_data/teaching.yml: course {course_id} must define resources or resource_groups")
+        validate_resources(course_id, resources, "flat")
+        if resource_groups:
+            if not isinstance(resource_groups, list):
+                errors.append(f"_data/teaching.yml: course {course_id} resource_groups must be a list")
                 continue
-            file_value = resource.get("file")
-            if not file_value:
-                errors.append(
-                    f"_data/teaching.yml: course {course.get('id', course_index)} resource "
-                    f"{resource_index} missing file"
-                )
-                continue
-            target = ROOT / str(file_value).lstrip("/")
-            if not target.exists():
-                errors.append(f"_data/teaching.yml: missing teaching resource {file_value}")
+            for group_index, group in enumerate(resource_groups, start=1):
+                if not isinstance(group, dict):
+                    errors.append(
+                        f"_data/teaching.yml: course {course_id} resource group "
+                        f"{group_index} must be an object"
+                    )
+                    continue
+                if not group.get("title"):
+                    errors.append(
+                        f"_data/teaching.yml: course {course_id} resource group "
+                        f"{group_index} missing title"
+                    )
+                group_resources = group.get("resources", [])
+                if not group_resources:
+                    errors.append(
+                        f"_data/teaching.yml: course {course_id} resource group "
+                        f"{group_index} has no resources"
+                    )
+                    continue
+                validate_resources(course_id, group_resources, f"group {group_index}")
 
 
 def check_local_asset_refs(errors: list[str]) -> None:

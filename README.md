@@ -39,6 +39,36 @@ Notes:
 - `public/`: theme assets and custom styles
 - `files/`: PDFs and images
 
+## Teaching materials
+
+Teaching resources are driven by `_data/teaching.yml` and rendered by
+`teaching.html`. Public PDFs live under `files/teaching/`.
+
+The STAT 131 Spring 2026 Notability materials must be exported from Notability
+as PDFs before publication. Raw `.note` packages are not committed or linked
+from the public site.
+
+```bash
+# 1. Export approved Notability notes as PDFs into a local staging folder.
+#    This folder is gitignored.
+mkdir -p local_teaching_exports/stat131-spring26-pdf
+
+# 2. Validate, copy, and register the curated public subset.
+python3 scripts/prepare_stat131_spring26_materials.py \
+  --source-dir local_teaching_exports/stat131-spring26-pdf \
+  --apply
+
+# 3. Verify before committing.
+python3 scripts/check_site_integrity.py
+bundle exec jekyll build --trace
+```
+
+The intake script creates a separate
+`STAT 131: Probability Theory - Spring 2026 Section Materials` entry instead of
+mixing these files into the broader STAT 131 archive. It excludes likely private
+or restricted files such as names, login notes, assessment solutions, templates,
+and textbook copies.
+
 ## CV source and PDF publishing
 
 The website CV is maintained from LaTeX source and published as a tracked PDF.
