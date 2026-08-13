@@ -9,6 +9,7 @@ description: "Public packages, research code, and selected implementation exampl
 {% assign exdqlm_published_label = exdqlm.published_label | default: "July 9, 2026" %}
 {% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
 {% assign rqr_arxiv_url = "https://arxiv.org/abs/2607.26098" %}
+{% assign correction_arxiv_url = "https://arxiv.org/abs/2608.11222" %}
 
 <div class="software-section">
   <header class="software-hero page-header">
@@ -108,6 +109,28 @@ description: "Public packages, research code, and selected implementation exampl
           <span>Article repository</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
+      </article>
+
+      <article class="software-project">
+        <div class="software-project__meta">
+          <span>arXiv preprint</span>
+          <span>R / TeX</span>
+        </div>
+        <h3>Forecast-Correction Article</h3>
+        <p>
+          Manuscript and reproducibility workspace for Bayesian quantile-based correction
+          and synthesis of environmental forecast products.
+        </p>
+        <div class="software-project__links">
+          <a href="https://github.com/AntonioAPDL/Evironmetrics---REVISED-DOC-Corrected-2" target="_blank" rel="noopener noreferrer">
+            <span>Article repository</span>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          </a>
+          <a href="{{ correction_arxiv_url }}" target="_blank" rel="noopener noreferrer">
+            <span>arXiv preprint</span>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          </a>
+        </div>
       </article>
 
       <article class="software-project">

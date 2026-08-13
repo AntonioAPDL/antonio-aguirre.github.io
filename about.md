@@ -8,6 +8,7 @@ description: "Background, research focus, teaching, service, and applied experie
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
 {% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
 {% assign rqr_arxiv_url = "https://arxiv.org/abs/2607.26098" %}
+{% assign correction_arxiv_url = "https://arxiv.org/abs/2608.11222" %}
 
 <div class="about-section">
   <!-- Introduction Section -->
@@ -56,8 +57,9 @@ description: "Background, research focus, teaching, service, and applied experie
         <em>Journal of Statistical Software</em>.
       </li>
       <li>
-        <strong>Forecast correction manuscript:</strong>
-        Bayesian quantile-based correction and synthesis of environmental forecast products for risk assessment, currently in revision at <em>Environmetrics</em>.
+        <strong>Forecast correction preprint:</strong>
+        <a href="{{ correction_arxiv_url }}" target="_blank" rel="noopener noreferrer">Bayesian quantile-based correction and synthesis</a>
+        of environmental forecast products for risk assessment; manuscript submitted to <em>Environmetrics</em>.
       </li>
       <li>
         <strong>Q-DESN forecasting:</strong>

@@ -8,6 +8,7 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
 {% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
 {% assign rqr_arxiv_url = "https://arxiv.org/abs/2607.26098" %}
+{% assign correction_arxiv_url = "https://arxiv.org/abs/2608.11222" %}
 
 <div class="research-section">
   <!-- Title and Introduction -->
@@ -23,7 +24,7 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
 
   <section class="research-area-grid" aria-label="Research areas">
     <article class="research-area">
-      <span>In revision</span>
+      <span>arXiv preprint</span>
       <h2>Forecast Correction for Environmental Data</h2>
       <p>
         Bayesian quantile methods for correcting observed and forecast environmental products, then combining
@@ -96,6 +97,10 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
           <i class="fas fa-download" aria-hidden="true"></i>
           <span>Download PDF</span>
         </a>
+        <a class="software-button software-button--secondary" href="{{ correction_arxiv_url }}" target="_blank" rel="noopener noreferrer">
+          <i class="far fa-file-alt" aria-hidden="true"></i>
+          <span>Open Preprint</span>
+        </a>
       </div>
     </div>
   </section>
@@ -115,12 +120,13 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
         </div>
       </li>
       <li class="research-output-item">
-        <span class="research-output__status">In revision / awards</span>
+        <span class="research-output__status">arXiv / Environmetrics</span>
         <div>
           De Leon, A., Prado, R., Sansó, B.
           <em>Bayesian Quantile-Based Correction and Synthesis of Hydrologic Products</em>.
-          Manuscript in revision at <em>Environmetrics</em>. Related work received the EnviBayes Student Paper
+          arXiv preprint; manuscript submitted to <em>Environmetrics</em>. Related work received the EnviBayes Student Paper
           Competition award and the ISBA 2026 Best Poster Prize.
+          <a href="{{ correction_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:2608.11222</a>.
           <a href="/files/posters/isba-2026-poster-aguirre.pdf" target="_blank" rel="noopener noreferrer">Poster PDF</a>.
         </div>
       </li>
