@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-08-17T04:46:04.269480+00:00",
-  "generated_at_utc": "2026-08-17T04:46:04.269480+00:00",
+  "generated_utc": "2026-08-17T08:43:51.439339+00:00",
+  "generated_at_utc": "2026-08-17T08:43:51.439339+00:00",
   "status": "partial",
   "availability": {
     "analysis_points": 120,
@@ -30,13 +30,12 @@
     "analysis": "2026-08-16 16:30:00+00:00",
     "long_range": null,
     "medium_range": null,
-    "short": "2026-08-17 01:00:00+00:00"
+    "short": "2026-08-17 06:00:00+00:00"
   },
   "notes": [
     "Reach streamflow analysis_assimilation unavailable (TimeoutError).",
     "Reach streamflow medium_range unavailable (TimeoutError).",
     "Reach streamflow long_range unavailable (TimeoutError).",
-    "Reach streamflow medium_range_blend unavailable (TimeoutError).",
     "Using NWPS observed stageflow as analysis fallback.",
     "NWM medium_range: no data available from reach streamflow endpoint.",
     "NWM medium_range_blend: no data available from reach streamflow endpoint.",
@@ -530,26 +529,6 @@
     "short": {
       "deterministic": [
         {
-          "t": "2026-08-17T02:00:00+00:00",
-          "v": 25.06999969482422
-        },
-        {
-          "t": "2026-08-17T03:00:00+00:00",
-          "v": 25.43000030517578
-        },
-        {
-          "t": "2026-08-17T04:00:00+00:00",
-          "v": 25.779998779296875
-        },
-        {
-          "t": "2026-08-17T05:00:00+00:00",
-          "v": 25.779998779296875
-        },
-        {
-          "t": "2026-08-17T06:00:00+00:00",
-          "v": 26.1299991607666
-        },
-        {
           "t": "2026-08-17T07:00:00+00:00",
           "v": 26.1299991607666
         },
@@ -599,6 +578,26 @@
         },
         {
           "t": "2026-08-17T19:00:00+00:00",
+          "v": 26.489999771118164
+        },
+        {
+          "t": "2026-08-17T20:00:00+00:00",
+          "v": 26.489999771118164
+        },
+        {
+          "t": "2026-08-17T21:00:00+00:00",
+          "v": 26.489999771118164
+        },
+        {
+          "t": "2026-08-17T22:00:00+00:00",
+          "v": 26.489999771118164
+        },
+        {
+          "t": "2026-08-17T23:00:00+00:00",
+          "v": 26.489999771118164
+        },
+        {
+          "t": "2026-08-18T00:00:00+00:00",
           "v": 26.489999771118164
         }
       ]
