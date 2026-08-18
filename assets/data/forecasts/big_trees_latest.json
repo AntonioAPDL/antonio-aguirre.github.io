@@ -1,9 +1,9 @@
 {
-  "generated_utc": "2026-08-18T04:40:32.397292+00:00",
-  "generated_at_utc": "2026-08-18T04:40:32.397292+00:00",
+  "generated_utc": "2026-08-18T08:42:00.135627+00:00",
+  "generated_at_utc": "2026-08-18T08:42:00.135627+00:00",
   "status": "partial",
   "availability": {
-    "analysis_points": 78,
+    "analysis_points": 82,
     "short_points": 18,
     "medium_range_points": 0,
     "long_range_points": 0,
@@ -27,14 +27,15 @@
     "ft3/s"
   ],
   "init_times": {
-    "analysis": "2026-08-18 00:00:00+00:00",
+    "analysis": "2026-08-18 04:00:00+00:00",
     "long_range": null,
     "medium_range": null,
-    "short": "2026-08-18 02:00:00+00:00"
+    "short": "2026-08-18 06:00:00+00:00"
   },
   "notes": [
     "Reach streamflow medium_range unavailable (TimeoutError).",
     "Reach streamflow long_range unavailable (TimeoutError).",
+    "Reach streamflow medium_range_blend unavailable (TimeoutError).",
     "NWM medium_range: no data available from reach streamflow endpoint.",
     "NWM medium_range_blend: no data available from reach streamflow endpoint.",
     "NWM long_range: no data available from reach streamflow endpoint."
@@ -353,30 +354,30 @@
         {
           "t": "2026-08-18T03:00:00+00:00",
           "v": 26.479999542236328
+        },
+        {
+          "t": "2026-08-18T04:00:00+00:00",
+          "v": 26.479999542236328
+        },
+        {
+          "t": "2026-08-18T05:00:00+00:00",
+          "v": 26.479999542236328
+        },
+        {
+          "t": "2026-08-18T06:00:00+00:00",
+          "v": 26.479999542236328
+        },
+        {
+          "t": "2026-08-18T07:00:00+00:00",
+          "v": 26.479999542236328
         }
       ]
     },
     "short": {
       "deterministic": [
         {
-          "t": "2026-08-18T03:00:00+00:00",
-          "v": 26.479999542236328
-        },
-        {
-          "t": "2026-08-18T04:00:00+00:00",
-          "v": 26.489999771118164
-        },
-        {
-          "t": "2026-08-18T05:00:00+00:00",
-          "v": 26.489999771118164
-        },
-        {
-          "t": "2026-08-18T06:00:00+00:00",
-          "v": 26.489999771118164
-        },
-        {
           "t": "2026-08-18T07:00:00+00:00",
-          "v": 26.489999771118164
+          "v": 26.479999542236328
         },
         {
           "t": "2026-08-18T08:00:00+00:00",
@@ -428,6 +429,22 @@
         },
         {
           "t": "2026-08-18T20:00:00+00:00",
+          "v": 26.489999771118164
+        },
+        {
+          "t": "2026-08-18T21:00:00+00:00",
+          "v": 26.489999771118164
+        },
+        {
+          "t": "2026-08-18T22:00:00+00:00",
+          "v": 26.489999771118164
+        },
+        {
+          "t": "2026-08-18T23:00:00+00:00",
+          "v": 26.489999771118164
+        },
+        {
+          "t": "2026-08-19T00:00:00+00:00",
           "v": 26.489999771118164
         }
       ]
