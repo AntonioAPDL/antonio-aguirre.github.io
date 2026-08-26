@@ -1,34 +1,39 @@
 ---
 layout: default
 title: Research
-description: "Research on Bayesian forecasting, quantile modeling, environmental applications, interval estimation, and statistical software."
+description: "Research on Bayesian forecasting, quantile modeling, environmental risk applications, interval estimation, and statistical software."
 ---
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
+{% assign outputs = site.data.research_outputs %}
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
-{% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
-{% assign rqr_arxiv_url = "https://arxiv.org/abs/2607.26098" %}
-{% assign correction_arxiv_url = "https://arxiv.org/abs/2608.11222" %}
+{% assign exdqlm_article = outputs.exdqlm_article %}
+{% assign exdqlm_arxiv_url = exdqlm_article.arxiv_url | default: exdqlm.arxiv_url %}
+{% assign rqr = outputs.rqr %}
+{% assign qdesn = outputs.qdesn %}
+{% assign correction = outputs.forecast_correction %}
+{% assign oecd = outputs.oecd_capital %}
 
 <div class="research-section">
   <!-- Title and Introduction -->
   <header class="research-hero page-header">
     <h1 class="page-title">Research</h1>
     <p class="page-lede">
-      I develop Bayesian methods for quantile forecasting, forecast correction, and interval estimation for climate and environmental data.
+      I develop Bayesian methods for forecasting, uncertainty quantification, and interval estimation in dynamic data.
     </p>
     <p class="page-lede">
-      My work combines state-space modeling, variational and simulation-based inference, forecast evaluation, and reproducible statistical software.
+      Current projects use climate, environmental, and energy data to study forecast correction, posterior synthesis,
+      temporal evaluation, and reproducible statistical software.
     </p>
   </header>
 
   <section class="research-area-grid" aria-label="Research areas">
     <article class="research-area">
       <span>arXiv preprint</span>
-      <h2>Forecast Correction for Environmental Data</h2>
+      <h2>Forecast Correction for Environmental Risk</h2>
       <p>
-        Bayesian quantile methods for correcting observed and forecast environmental products, then combining
-        corrected quantile forecasts into predictive distributions for risk assessment.
+        Bayesian quantile methods for aligning observations, retrospective products, and forecast products from
+        different systems, with evaluation tied to the information available at each forecast origin.
       </p>
     </article>
     <article class="research-area">
@@ -41,18 +46,18 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
     </article>
     <article class="research-area">
       <span>Working paper</span>
-      <h2>Q-DESN Quantile Forecasting</h2>
+      <h2>{{ qdesn.title }}</h2>
       <p>
-        Bayesian quantile readouts for fixed Deep Echo State Network features, with shrinkage priors,
-        single-quantile and multi-quantile reporting, and forecast validation.
+        Bayesian quantile forecasting with fixed nonlinear recurrent features, shrinkage priors,
+        simulation studies, multi-quantile reporting, and held-out forecast comparisons.
       </p>
     </article>
     <article class="research-area">
       <span>arXiv preprint</span>
-      <h2>Mean-Tilted RQR</h2>
+      <h2>Mean-Tilted Intervals</h2>
       <p>
-        Relaxed quantile regression for fixed-content interval targets, treated through
-        loss-based generalized posteriors and Gibbs computation.
+        Generalized-Bayes computation for fixed-content and tolerance intervals, separating
+        mean-preserving, tilted, equal-tailed, and shortest-contiguous interval targets.
       </p>
     </article>
   </section>
@@ -97,7 +102,7 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
           <i class="fas fa-download" aria-hidden="true"></i>
           <span>Download PDF</span>
         </a>
-        <a class="software-button software-button--secondary" href="{{ correction_arxiv_url }}" target="_blank" rel="noopener noreferrer">
+        <a class="software-button software-button--secondary" href="{{ correction.arxiv_url }}" target="_blank" rel="noopener noreferrer">
           <i class="far fa-file-alt" aria-hidden="true"></i>
           <span>Open Preprint</span>
         </a>
@@ -113,20 +118,20 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
         <span class="research-output__status">JSS / CRAN v{{ exdqlm_version }}</span>
         <div>
           De Leon, A., Barata, R., Prado, R., Sansó, B.
-          <em>exdqlm: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models</em>.
+          <em>{{ exdqlm_article.title }}</em>.
           Manuscript submitted to the <em>Journal of Statistical Software</em>; package on
           <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer">CRAN</a>;
-          <a href="{{ exdqlm_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv preprint</a>.
+          <a href="{{ exdqlm_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ exdqlm_article.arxiv_id }}</a>.
         </div>
       </li>
       <li class="research-output-item">
         <span class="research-output__status">arXiv / Environmetrics</span>
         <div>
           De Leon, A., Prado, R., Sansó, B.
-          <em>Bayesian Quantile-Based Correction and Synthesis of Hydrologic Products</em>.
+          <em>{{ correction.title }}</em>.
           arXiv preprint; manuscript submitted to <em>Environmetrics</em>. Related work received the EnviBayes Student Paper
           Competition award and the ISBA 2026 Best Poster Prize.
-          <a href="{{ correction_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:2608.11222</a>.
+          <a href="{{ correction.arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ correction.arxiv_id }}</a>.
           <a href="/files/posters/isba-2026-poster-aguirre.pdf" target="_blank" rel="noopener noreferrer">Poster PDF</a>.
         </div>
       </li>
@@ -134,26 +139,27 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
         <span class="research-output__status">Working paper</span>
         <div>
           De Leon, A., Prado, R., Sansó, B.
-          <em>Bayesian Quantile Readouts for Fixed Deep Echo State Networks</em>.
-          Working paper on fixed-reservoir quantile forecasting with Bayesian readouts.
+          <em>{{ qdesn.title }}</em>.
+          Working paper on Bayesian quantile forecasting with fixed nonlinear recurrent features, simulation studies,
+          and selected empirical applications.
         </div>
       </li>
       <li class="research-output-item">
         <span class="research-output__status">arXiv preprint</span>
         <div>
           De Leon, A., Prado, R., Sansó, B.
-          <em>Mean-Tilted Relaxed Quantile Regression: Fixed-Content Interval Functionals and Generalized-Bayes Computation</em>.
-          Preprint on interval-root functionals, fixed-content intervals, and generalized-Bayes computation.
-          <a href="{{ rqr_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:2607.26098</a>.
+          <em>{{ rqr.title }}</em>.
+          Preprint on fixed-content interval targets, tolerance actions, and generalized-Bayes computation.
+          <a href="{{ rqr.arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ rqr.arxiv_id }}</a>.
         </div>
       </li>
       <li class="research-output-item">
         <span class="research-output__status">Published</span>
         <div>
           De Leon, A., Lobato, I. N. (2024).
-          <em>Evidence of Non-Fundamentalness in OECD Capital Stocks</em>.
+          <em>{{ oecd.title }}</em>.
           <em>Empirical Economics</em>.
-          <a href="https://doi.org/10.1007/s00181-024-02564-5" target="_blank" rel="noopener noreferrer">DOI</a>.
+          <a href="{{ oecd.doi_url }}" target="_blank" rel="noopener noreferrer">DOI</a>.
         </div>
       </li>
     </ul>

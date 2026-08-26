@@ -5,11 +5,14 @@ description: "Public packages, research code, and selected implementation exampl
 ---
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
+{% assign outputs = site.data.research_outputs %}
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
 {% assign exdqlm_published_label = exdqlm.published_label | default: "July 9, 2026" %}
-{% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
-{% assign rqr_arxiv_url = "https://arxiv.org/abs/2607.26098" %}
-{% assign correction_arxiv_url = "https://arxiv.org/abs/2608.11222" %}
+{% assign exdqlm_article = outputs.exdqlm_article %}
+{% assign exdqlm_arxiv_url = exdqlm_article.arxiv_url | default: exdqlm.arxiv_url %}
+{% assign rqr = outputs.rqr %}
+{% assign qdesn = outputs.qdesn %}
+{% assign correction = outputs.forecast_correction %}
 
 <div class="software-section">
   <header class="software-hero page-header">
@@ -102,8 +105,8 @@ description: "Public packages, research code, and selected implementation exampl
         </div>
         <h3><code>exdqlm</code> JSS Article</h3>
         <p>
-          Article source, arXiv preprint materials, supplement files, reproducibility checks,
-          and manuscript-support examples for <code>exdqlm</code>.
+          Article source for <em>{{ exdqlm_article.title }}</em>, with arXiv preprint materials,
+          supplement files, reproducibility checks, and manuscript-support examples.
         </p>
         <a href="https://github.com/AntonioAPDL/exdqlm---Article" target="_blank" rel="noopener noreferrer">
           <span>Article repository</span>
@@ -126,7 +129,7 @@ description: "Public packages, research code, and selected implementation exampl
             <span>Article repository</span>
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           </a>
-          <a href="{{ correction_arxiv_url }}" target="_blank" rel="noopener noreferrer">
+          <a href="{{ correction.arxiv_url }}" target="_blank" rel="noopener noreferrer">
             <span>arXiv preprint</span>
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           </a>
@@ -138,12 +141,12 @@ description: "Public packages, research code, and selected implementation exampl
           <span>Working manuscript</span>
           <span>Q-DESN / TeX</span>
         </div>
-        <h3>Q-DESN Article</h3>
+        <h3>{{ qdesn.title }}</h3>
         <p>
-          Source and reproducibility materials for Bayesian quantile readouts using fixed Deep Echo
-          State Network features.
+          Source and reproducibility materials for Bayesian quantile forecasting with fixed nonlinear recurrent features,
+          simulation studies, and empirical forecast comparisons.
         </p>
-        <a href="https://github.com/AntonioAPDL/Article-Q-DESN---Version-2" target="_blank" rel="noopener noreferrer">
+        <a href="{{ qdesn.repository_url }}" target="_blank" rel="noopener noreferrer">
           <span>Article repository</span>
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
         </a>
@@ -156,15 +159,15 @@ description: "Public packages, research code, and selected implementation exampl
         </div>
         <h3>RQR-GIBBS</h3>
         <p>
-          Manuscript and computation workspace for mean-tilted relaxed quantile regression,
-          fixed-content interval functionals, and generalized Bayesian computation.
+          Manuscript and computation workspace for mean-tilted intervals, fixed-content and tolerance targets,
+          and generalized-Bayes computation.
         </p>
         <div class="software-project__links">
-          <a href="https://github.com/AntonioAPDL/RQR-GIBBS" target="_blank" rel="noopener noreferrer">
+          <a href="{{ rqr.repository_url }}" target="_blank" rel="noopener noreferrer">
             <span>Project repository</span>
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           </a>
-          <a href="{{ rqr_arxiv_url }}" target="_blank" rel="noopener noreferrer">
+          <a href="{{ rqr.arxiv_url }}" target="_blank" rel="noopener noreferrer">
             <span>arXiv preprint</span>
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           </a>

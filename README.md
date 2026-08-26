@@ -97,6 +97,8 @@ scripts/render_cv.sh --check
 
 The `exdqlm` version shown on the website is stored in `_data/cran_packages.yml` and read through Jekyll/Liquid. The same CRAN version is also reflected in the LaTeX CV source.
 
+Core paper titles, arXiv identifiers, DOI links, and public manuscript repository links are stored in `_data/research_outputs.yml`. Pages such as Home, About, Research, and Software read from that file so project titles and arXiv URLs stay consistent across the site.
+
 To refresh the metadata manually:
 
 ```bash

@@ -5,10 +5,13 @@ description: "Background, research focus, teaching, service, and applied experie
 ---
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
+{% assign outputs = site.data.research_outputs %}
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
-{% assign exdqlm_arxiv_url = exdqlm.arxiv_url | default: "https://arxiv.org/abs/2607.22760" %}
-{% assign rqr_arxiv_url = "https://arxiv.org/abs/2607.26098" %}
-{% assign correction_arxiv_url = "https://arxiv.org/abs/2608.11222" %}
+{% assign exdqlm_article = outputs.exdqlm_article %}
+{% assign exdqlm_arxiv_url = exdqlm_article.arxiv_url | default: exdqlm.arxiv_url %}
+{% assign rqr = outputs.rqr %}
+{% assign qdesn = outputs.qdesn %}
+{% assign correction = outputs.forecast_correction %}
 
 <div class="about-section">
   <!-- Introduction Section -->
@@ -20,10 +23,10 @@ description: "Background, research focus, teaching, service, and applied experie
       <a href="https://engineering.ucsc.edu/departments/statistics/" target="_blank" rel="noopener noreferrer">University of California, Santa Cruz</a>,
       advised by <a href="https://users.soe.ucsc.edu/~bruno/" target="_blank" rel="noopener noreferrer">Bruno Sansó</a> and
       <a href="https://raquel.soe.ucsc.edu/" target="_blank" rel="noopener noreferrer">Raquel Prado</a>.
-      I work on Bayesian forecasting and quantile methods for climate and environmental data, with emphasis on uncertainty
-      quantification, approximate and simulation-based inference, and reproducible R/Python software.
-      Current projects include forecast correction for environmental products, dynamic quantile state-space models, quantile readouts for fixed
-      Deep Echo State Network features, and interval methods based on relaxed quantile regression.
+      I work on Bayesian forecasting, quantile methods, and statistical software, with emphasis on uncertainty
+      quantification, approximate and simulation-based inference, and reproducible R/Python workflows.
+      Current projects include forecast correction for environmental products used in risk assessment, dynamic quantile
+      state-space models, {{ qdesn.title }}, and generalized-Bayes interval methods.
     </p>
   </div>
 
@@ -53,22 +56,21 @@ description: "Background, research focus, teaching, service, and applied experie
       <li>
         <strong><a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>:</strong>
         CRAN v{{ exdqlm_version }} R package for Bayesian quantile modeling, with a companion
-        <a href="{{ exdqlm_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv preprint</a> and a manuscript submitted to
+        <a href="{{ exdqlm_arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ exdqlm_article.arxiv_id }}</a> and a manuscript submitted to
         <em>Journal of Statistical Software</em>.
       </li>
       <li>
         <strong>Forecast correction preprint:</strong>
-        <a href="{{ correction_arxiv_url }}" target="_blank" rel="noopener noreferrer">Bayesian quantile-based correction and synthesis</a>
+        <a href="{{ correction.arxiv_url }}" target="_blank" rel="noopener noreferrer">Bayesian quantile-based correction and synthesis</a>
         of environmental forecast products for risk assessment; manuscript submitted to <em>Environmetrics</em>.
       </li>
       <li>
         <strong>Q-DESN forecasting:</strong>
-        Working paper on Bayesian quantile readouts for fixed Deep Echo State Network features.
+        Working paper on Bayesian quantile forecasting with fixed nonlinear recurrent features.
       </li>
       <li>
         <strong>RQR preprint:</strong>
-        <a href="{{ rqr_arxiv_url }}" target="_blank" rel="noopener noreferrer">Mean-tilted relaxed quantile regression</a>
-        for fixed-content interval functionals and generalized Bayesian computation.
+        <a href="{{ rqr.arxiv_url }}" target="_blank" rel="noopener noreferrer">{{ rqr.title }}</a>.
       </li>
     </ul>
   </div>
