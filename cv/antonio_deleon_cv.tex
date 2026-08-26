@@ -7,65 +7,67 @@
   \pdftrailerid{}
 \fi
 
-% -------------------- Packages --------------------
-\usepackage[margin=0.5in]{geometry}
+\usepackage[margin=0.6in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[scaled=0.93]{helvet}
+\IfFileExists{glyphtounicode.tex}{\input{glyphtounicode}\pdfgentounicode=1}{}
+\usepackage[scaled=0.94]{helvet}
 \renewcommand{\familydefault}{\sfdefault}
 \usepackage{microtype}
 \usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{titlesec}
-\usepackage{array}
-\usepackage{tabularx}
 \usepackage{needspace}
 
-% -------------------- Style --------------------
 \definecolor{navy}{HTML}{12304A}
 \definecolor{textgray}{HTML}{333333}
+
 \hypersetup{
   colorlinks=true,
   linkcolor=navy,
   urlcolor=navy,
   pdftitle={Antonio De Leon CV},
   pdfauthor={Antonio De Leon},
-  pdfsubject={Curriculum vitae}
+  pdfsubject={Statistics, Quantitative Research, and Data Science}
 }
 
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0pt}
-\setlist[itemize]{leftmargin=1.05em, itemsep=0pt, topsep=0pt, parsep=0pt, partopsep=0pt}
-\hyphenpenalty=10000
-\exhyphenpenalty=10000
+\setlist[itemize]{leftmargin=1.05em, itemsep=1pt, topsep=1pt, parsep=0pt, partopsep=0pt}
 \emergencystretch=2em
-\sloppy
+\raggedright
 
 \titleformat{\section}
   {\large\bfseries\color{navy}}
   {}{0pt}{}[\vspace{1pt}\titlerule]
-\titlespacing*{\section}{0pt}{5pt}{2pt}
+\titlespacing*{\section}{0pt}{6pt}{2pt}
 
 \newcommand{\cvsection}[1]{%
   \Needspace{4\baselineskip}%
   \section*{#1}%
 }
 
-\newcommand{\entry}[4]{%
+\newcommand{\entry}[3]{%
   \Needspace{5\baselineskip}%
   \textbf{#1} \hfill #2\\
-  \textit{#3} \hfill \textit{#4}\\[-2pt]
+  \textit{#3}\\[-2pt]
+}
+
+\newcommand{\projectentry}[3]{%
+  \Needspace{5\baselineskip}%
+  \textbf{#1} \hfill #2\\
+  \textit{#3}\\[-2pt]
 }
 
 \newcommand{\educationentry}[3]{%
-  \Needspace{3\baselineskip}%
+  \Needspace{2\baselineskip}%
   \textbf{#1} \hfill #2\\
   #3\\[-1pt]
 }
 
-\newcommand{\pubentry}[3]{%
+\newcommand{\publication}[3]{%
   \Needspace{3\baselineskip}%
   \textbf{#1}\\
   \textit{#2}\\
@@ -73,112 +75,98 @@
 }
 
 \newcommand{\contactsep}{\enspace\textbar\enspace}
+\newcommand{\tightspace}{\vspace{1pt}}
 
 \begin{document}
 \color{textgray}
 
-% -------------------- Header --------------------
 \begin{center}
   {\LARGE\bfseries\color{navy} Antonio De Leon}\\[4pt]
-  Santa Cruz, CA\contactsep \href{mailto:jaguir26@ucsc.edu}{jaguir26@ucsc.edu}\contactsep
+  Santa Cruz, CA\contactsep
+  \href{mailto:jaguir26@ucsc.edu}{jaguir26@ucsc.edu}\contactsep
   \href{https://antonio-de-leon.com}{antonio-de-leon.com}\contactsep
-  \href{https://github.com/antonioapdl}{github.com/antonioapdl}\contactsep
+  \href{https://github.com/AntonioAPDL}{github.com/AntonioAPDL}\contactsep
   \href{https://linkedin.com/in/antonioapdl}{linkedin.com/in/antonioapdl}
 \end{center}
 
-% -------------------- Summary --------------------
-\cvsection{Summary}
-Ph.D. candidate in Statistics building Bayesian forecasting, quantile-modeling, and interval-methods tools for climate, environmental, and financial data. I work across model development, R/Python software, diagnostics, and reproducible compute workflows.
+\cvsection{Professional Summary}
+Statistics Ph.D. candidate and applied quantitative researcher with experience in probabilistic forecasting, statistical learning, Bayesian computation, and reproducible model evaluation. Builds analytical workflows in Python, R, SQL, and C++ across financial, sensor, image, and environmental data, from data construction through diagnostics, software, and communication.
 
-% -------------------- Research Software --------------------
-\cvsection{Research Software}
-\textbf{\href{https://CRAN.R-project.org/package=exdqlm}{\texttt{exdqlm}}} \hfill CRAN v1.1.0; JSS software article submitted\\
-\textit{R package for dynamic and static Bayesian quantile models under the exAL family.}
-Co-author of software supporting dynamic exDQLMs, static exAL regression, MCMC, Laplace--delta variational Bayes, diagnostics, and posterior predictive synthesis.
-
-% -------------------- Education --------------------
 \cvsection{Education}
-\educationentry{Ph.D. in Statistics, University of California, Santa Cruz}{Expected Aug. 2026}{Research: Bayesian time series, quantile modeling, forecast correction and synthesis, scalable variational Bayes inference.}
-\educationentry{M.Sc. in Economics, Instituto Tecnol\'ogico Aut\'onomo de M\'exico (ITAM)}{2018--2020}{Mexico City, Mexico}
-\educationentry{B.Sc. in Applied Mathematics, Instituto Tecnol\'ogico Aut\'onomo de M\'exico (ITAM)}{2014--2018}{Mexico City, Mexico}
+\educationentry{Ph.D. in Statistics, University of California, Santa Cruz}{Expected December 2026}{GPA: 3.82/4.00; candidacy completed. Research: probabilistic forecasting, model evaluation, and statistical software.}
+\educationentry{M.Sc. in Economic Theory, ITAM}{2018--2020}{GPA: 96.7/100.}
+\educationentry{B.Sc. in Applied Mathematics, ITAM}{2014--2018}{GPA: 97.1/100.}
+\textit{Relevant coursework and training:} probability, statistical inference, regression, statistical learning, Bayesian inference, time series, stochastic processes, decision theory, causal inference, and impact evaluation.
 
-% -------------------- Experience --------------------
-\cvsection{Selected Professional Experience}
+\cvsection{Technical and Quantitative Skills}
+\textbf{Programming:} Python, R, SQL, C++, Bash, Git, LaTeX.\\
+\textbf{Statistical and machine-learning methods:} probability, regression, Bayesian inference, time-series and state-space models, statistical learning, Monte Carlo methods, variational inference, experimental design, causal inference and impact-evaluation training, model diagnostics, calibration, and proper scoring.\\
+\textbf{Systems and tools:} Linux, AWS (EC2, EMR, S3), Stan, Rcpp, CRAN, GitHub Actions, Tableau, DBeaver.\\
+\textbf{Languages:} Spanish, English, German.
 
-\entry{Delos Financial Technologies, San Rafael, CA (Remote)}{May 2025--Sep. 2025}{Quantitative Researcher (Contract)}{Python, Git, Bash, C++, AWS, Stan}
+\cvsection{Professional Experience}
+\entry{Delos Financial Technologies, San Rafael, CA (Remote)}{May 2025--Sep. 2025}{Quantitative Researcher (Contract); Python, Git, Bash, C++, AWS, Stan}
 \begin{itemize}
-  \item Built model-evaluation notebooks for residual checks, goodness-of-fit plots, cohort summaries, and backtest review.
-  \item Implemented baseline and extended forecasting variants, automated AWS experiment runs, and standardized versioned outputs for reproducible comparisons.
+  \item Built Python model-evaluation workflows for residual diagnostics, goodness-of-fit analysis, cohort summaries, and backtest review across financial-modeling experiments.
+  \item Implemented baseline and extended forecasting specifications, automated AWS experiment runs, and standardized versioned outputs for reproducible model comparison.
+\end{itemize}
+\tightspace
+
+\entry{UCSC Statistics Department, Santa Cruz, CA}{Feb. 2024--Present}{Computer Systems Coordinator; Linux, Bash, Python/R, Networking, User Support}
+\begin{itemize}
+  \item Administer Linux research infrastructure for faculty and graduate students, including software stacks, storage, upgrades, access, and incident response.
+  \item Write automation scripts and documentation for onboarding, resource usage, and reproducible computing; coordinate with central IT on research infrastructure planning.
+\end{itemize}
+\tightspace
+
+\entry{NeatLeaf Inc., Scotts Valley, CA}{May 2021--Sep. 2022}{Data Analyst; Python, SQL, Git, Bash, Linux, C++, DBeaver}
+\begin{itemize}
+  \item Built Python and SQL pipelines for greenhouse robot and sensor telemetry used in operational monitoring and downstream analysis.
+  \item Analyzed spatiotemporal microclimate anomalies and robot/sensor calibration logs to improve data-quality review and system reliability.
+\end{itemize}
+\tightspace
+
+\entry{Banco de M\'exico (BANXICO), Mexico City, Mexico}{Aug. 2018--Dec. 2019}{Data Analyst; Python, R, SQL, Git}
+\begin{itemize}
+  \item Built Python/R/SQL pipelines for banknote image and operational datasets used in monitoring, anomaly analysis, and model development.
+  \item Developed anomaly-classification diagnostics and financial-volume forecasting prototypes for operational planning and review.
 \end{itemize}
 
-\entry{UCSC Statistics Department, Santa Cruz, CA}{Feb. 2024--Present}{Computer Systems Coordinator}{Linux, Bash, Python/R, Networking, User Support}
+\cvsection{Selected Research and Software}
+\projectentry{\href{https://CRAN.R-project.org/package=exdqlm}{exdqlm} -- CRAN R package v1.1.0}{2026}{Software article submitted to the \textit{Journal of Statistical Software}}
 \begin{itemize}
-  \item Administer Linux research servers used by faculty and graduate students, including software stacks, storage, upgrades, and incident response.
-  \item Wrote automation scripts and documentation for onboarding, resource usage, and reproducible compute workflows; coordinate with central IT on infrastructure planning.
+  \item Co-developed a public package for Bayesian dynamic and static quantile models, including MCMC and variational inference, forecasting, diagnostics, tests, documentation, and reproducible examples.
+  \item Added evaluation utilities and selected C++ paths, with R reference implementations for validation and portability.
+\end{itemize}
+\tightspace
+
+\projectentry{Bayesian Quantile Deep Echo State Networks}{2024--Present}{Working paper on nonlinear time-series forecasting}
+\begin{itemize}
+  \item Developed probabilistic time-series models using fixed nonlinear recurrent features, regularization, MCMC, and variational inference.
+  \item Designed simulation and rolling held-out studies, including a selected-panel electricity-price forecasting comparison with 42 region/fold evaluations.
+\end{itemize}
+\tightspace
+
+\projectentry{Bayesian Quantile-Based Correction and Synthesis of Hydrologic Products}{2021--Present}{arXiv preprint; manuscript submitted to \textit{Environmetrics}}
+\begin{itemize}
+  \item Integrated USGS observations, retrospective products, ensemble forecasts, and covariates from multiple agencies into origin-specific, version-consistent datasets.
+  \item Evaluated probabilistic forecasts across five origins and seven fitted quantile levels using CRPS and quantile loss, keeping post-origin observations reserved for verification.
 \end{itemize}
 
-\entry{NeatLeaf Inc., Scotts Valley, CA}{May 2021--Sep. 2022}{Data Analyst}{Python, SQL, Git, Bash, Linux, C++, DBeaver}
-\begin{itemize}
-  \item Built Python/SQL pipelines for greenhouse robot and sensor telemetry used in monitoring and downstream analytics.
-  \item Modeled spatiotemporal microclimate anomalies and analyzed robot/sensor calibration logs to improve data quality and system reliability.
-\end{itemize}
+\cvsection{Selected Publications}
+\publication{De Leon, A., Barata, R., Prado, R., \& Sans\'o, B.}{\href{https://arxiv.org/abs/2607.22760}{\texttt{exdqlm}: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models}.}{Submitted to the \textit{Journal of Statistical Software}; CRAN R package v1.1.0; arXiv:2607.22760.}
 
-\entry{Banco de M\'exico (BANXICO), Mexico City, Mexico}{Aug. 2018--Dec. 2019}{Data Analyst}{Python, R, SQL, Git}
-\begin{itemize}
-  \item Built Python/R/SQL pipelines for banknote image datasets used in operational monitoring and model development.
-  \item Developed anomaly-classification diagnostics and financial-volume forecasting prototypes for operational planning.
-\end{itemize}
+\publication{De Leon, A., Prado, R., \& Sans\'o, B.}{Bayesian Quantile Deep Echo State Networks.}{Working paper on probabilistic time-series modeling with fixed reservoir features, MCMC, variational inference, and held-out forecast evaluation.}
 
-% -------------------- Publications & Presentations --------------------
-\cvsection{Selected Publications \& Presentations}
-\pubentry{De Leon, A., Barata, R., Prado, R., \& Sans\'o, B.}{\href{https://arxiv.org/abs/2607.22760}{\texttt{exdqlm}: An R Package for Estimation and Analysis of Flexible Dynamic Quantile Linear Models}.}{Software article submitted to the \textit{Journal of Statistical Software}; R package on CRAN v1.1.0; arXiv:2607.22760.}
+\publication{De Leon, A., Prado, R., \& Sans\'o, B.}{\href{https://arxiv.org/abs/2607.26098}{Mean-Tilted Intervals: A Generalized-Bayes Approach to Fixed-Content and Tolerance Intervals}.}{arXiv preprint on interval estimands, generalized-Bayes computation, and tolerance-interval actions; arXiv:2607.26098.}
 
-\pubentry{De Leon, A., Prado, R., \& Sans\'o, B.}{Bayesian Quantile Readouts for Fixed Deep Echo State Networks.}{Working paper in progress on Bayesian quantile forecasting with fixed reservoir features, shrinkage priors, MCMC, and VB--LD.}
+\publication{De Leon, A., Prado, R., \& Sans\'o, B.}{\href{https://arxiv.org/abs/2608.11222}{Bayesian Quantile-Based Correction and Synthesis of Hydrologic Products}.}{arXiv preprint; manuscript submitted to \textit{Environmetrics}; arXiv:2608.11222.}
 
-\pubentry{De Leon, A., Prado, R., \& Sans\'o, B.}{\href{https://arxiv.org/abs/2607.26098}{Mean-Tilted Relaxed Quantile Regression: Fixed-Content Interval Functionals and Generalized-Bayes Computation}.}{arXiv preprint on generalized-Bayes computation for fixed-content interval-root functionals; arXiv:2607.26098.}
+\publication{De Leon, A., \& Lobato, I. N.}{\href{https://doi.org/10.1007/s00181-024-02564-5}{Evidence of non-fundamentalness in OECD capital stocks}.}{\textit{Empirical Economics} 67, 761--772 (2024).}
 
-\pubentry{De Leon, A., Prado, R., \& Sans\'o, B.}{\href{https://arxiv.org/abs/2608.11222}{Bayesian Quantile-Based Correction and Synthesis of Hydrologic Products}.}{arXiv:2608.11222; manuscript submitted to \textit{Environmetrics}; related work received the ISBA 2026 Best Poster Prize and EnviBayes Student Paper Competition award.}
-
-\pubentry{De Leon, A., \& Lobato, I. N.}{Evidence of non-fundamentalness in OECD capital stocks.}{\textit{Empirical Economics} 67, 761--772 (2024). \href{https://doi.org/10.1007/s00181-024-02564-5}{doi:10.1007/s00181-024-02564-5}}
-
-\pubentry{ISBA World Meeting 2026, Nagoya, Japan}{Poster presentation: ``Bayesian Quantile-Based Correction and Synthesis of Climate Products.''}{Awarded Best Poster Prize; presented July 1, 2026.}
-
-\pubentry{LACSC-TIES-EnviBayes-EnvrASA 2026, Mexico City, Mexico}{Invited-session abstract submitted as a 2026 EnviBayes Student Paper Competition winner.}{EnviBayes competition-winners invited session.}
-
-% -------------------- Awards --------------------
-\cvsection{Awards, Fellowships \& Competitive Funding}
-\begin{itemize}
-  \item \textbf{Best Poster Prize}, ISBA 2026 World Meeting, International Society for Bayesian Analysis, 2026.
-  \item \textbf{ISBA 2026 Junior Researcher Travel Award}, International Society for Bayesian Analysis / National Science Foundation, 2026.
-  \item \textbf{EnviBayes Student Paper Competition Winner}, International Society for Bayesian Analysis, 2026.
-  \item \textbf{UCSC Statistics Department Conference Travel Award}, 2026; \textbf{UCSC Summer Research Fellowship}, 2024.
-  \item \textbf{UC Regents Fellowship}, UCSC Statistics, 2021.
-  \item \textbf{TLC Graduate Pedagogy Fellowship Certificate}, Center for Innovations in Teaching and Learning, 2023--2024.
-  \item \textbf{Baill\`eres Fellowship}, ITAM B.Sc. and M.Sc., 2014--2020.
-\end{itemize}
-
-% -------------------- Teaching --------------------
-\cvsection{Teaching \& Mentoring}
-\entry{University of California, Santa Cruz}{2021--Present}{Teaching Assistant / Graduate Student Instructor}{Statistics and Probability}
-\begin{itemize}
-  \item Graduate Student Instructor for \textit{Data Visualization (STAT 80B)}, Spring 2025.
-  \item Teaching Assistant for \textit{Probability Theory (STAT 131)}, \textit{Classical and Bayesian Inference (STAT 132)}, \textit{Statistics (STAT 5)}, and related courses.
-\end{itemize}
-
-\entry{ASA DataFest, Fresno, CA}{Apr. 2023}{Mentor}{R, Python}
-\begin{itemize}
-  \item Mentored student teams on statistical modeling, visualization, and technical communication.
-\end{itemize}
-
-% -------------------- Skills --------------------
-\cvsection{Technical Skills}
-\small
-\begin{tabularx}{\linewidth}{>{\bfseries}p{0.18\linewidth}X}
-Programming & R, Python, SQL, C/C++, Bash, Git, \LaTeX \\
-Methods & Bayesian inference, state-space models, time series forecasting, quantile modeling, variational inference, diagnostics, calibration \\
-Tools & Linux, AWS (EC2, EMR, S3), Stan, Rcpp, CRAN, GitHub Actions, Tableau \\
-Training & SISG, SISMID, causal inference with R \\
-Languages & English, Spanish, German \\
-\end{tabularx}
+\cvsection{Awards, Teaching, and Service}
+\textbf{Awards:} Best Poster Prize, ISBA 2026 World Meeting; EnviBayes Student Paper Competition Winner, 2026; ISBA 2026 Junior Researcher Travel Award; UC Regents Fellowship, UCSC Statistics, 2021; Baill\`eres Fellowship, ITAM, 2014--2020.\\[1pt]
+\textbf{Teaching and mentoring:} Graduate Student Instructor for \textit{Data Visualization}; Teaching Assistant for \textit{Probability Theory}, \textit{Classical and Bayesian Inference}, \textit{Statistics}, and related courses; ASA DataFest mentor for student teams in modeling, visualization, and presentation.\\[1pt]
+\textbf{Service and training:} TA Wiki maintainer and workshop contributor for Git, GitHub, collaborative documentation, and departmental teaching resources; contributed to an anonymous, IRB-exempt TA Wiki survey and follow-up resource improvements.
 
 \end{document}
