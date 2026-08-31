@@ -10,7 +10,8 @@ description: "Public packages, research code, and selected implementation exampl
 {% assign exdqlm_published_label = exdqlm.published_label | default: "July 9, 2026" %}
 {% assign exdqlm_article = outputs.exdqlm_article %}
 {% assign exdqlm_arxiv_url = exdqlm_article.arxiv_url | default: exdqlm.arxiv_url %}
-{% assign rqr = outputs.rqr %}
+{% assign mti_tolerance = outputs.mti_tolerance %}
+{% assign mti_regression = outputs.mti_regression %}
 {% assign qdesn = outputs.qdesn %}
 {% assign correction = outputs.forecast_correction %}
 
@@ -154,20 +155,20 @@ description: "Public packages, research code, and selected implementation exampl
 
       <article class="software-project">
         <div class="software-project__meta">
-          <span>arXiv preprint</span>
+          <span>arXiv preprint / manuscript</span>
           <span>R / C++ / TeX</span>
         </div>
-        <h3>RQR-GIBBS</h3>
+        <h3>Mean-Tilted Intervals</h3>
         <p>
-          Manuscript and computation workspace for mean-tilted intervals, fixed-content and tolerance targets,
-          and generalized-Bayes computation.
+          Manuscript and computation workspace for MTI fixed-content and tolerance intervals,
+          with <em>{{ mti_regression.title }}</em> listed as a submitted manuscript.
         </p>
         <div class="software-project__links">
-          <a href="{{ rqr.repository_url }}" target="_blank" rel="noopener noreferrer">
+          <a href="{{ mti_tolerance.repository_url }}" target="_blank" rel="noopener noreferrer">
             <span>Project repository</span>
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           </a>
-          <a href="{{ rqr.arxiv_url }}" target="_blank" rel="noopener noreferrer">
+          <a href="{{ mti_tolerance.arxiv_url }}" target="_blank" rel="noopener noreferrer">
             <span>arXiv preprint</span>
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           </a>

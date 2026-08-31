@@ -9,7 +9,8 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
 {% assign exdqlm_article = outputs.exdqlm_article %}
 {% assign exdqlm_arxiv_url = exdqlm_article.arxiv_url | default: exdqlm.arxiv_url %}
-{% assign rqr = outputs.rqr %}
+{% assign mti_tolerance = outputs.mti_tolerance %}
+{% assign mti_regression = outputs.mti_regression %}
 {% assign qdesn = outputs.qdesn %}
 {% assign correction = outputs.forecast_correction %}
 {% assign oecd = outputs.oecd_capital %}
@@ -53,11 +54,11 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
       </p>
     </article>
     <article class="research-area">
-      <span>arXiv preprint</span>
+      <span>arXiv preprint / submitted manuscript</span>
       <h2>Mean-Tilted Intervals</h2>
       <p>
-        Generalized-Bayes computation for fixed-content and tolerance intervals, separating
-        mean-preserving, tilted, equal-tailed, and shortest-contiguous interval targets.
+        MTI work separates fixed-content and tolerance-interval targets from regression and
+        dynamic-model extensions, with generalized-Bayes computation as the common thread.
       </p>
     </article>
   </section>
@@ -148,9 +149,17 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
         <span class="research-output__status">arXiv preprint</span>
         <div>
           De Leon, A., Prado, R., Sansó, B.
-          <em>{{ rqr.title }}</em>.
+          <em>{{ mti_tolerance.title }}</em>.
           Preprint on fixed-content interval targets, tolerance actions, and generalized-Bayes computation.
-          <a href="{{ rqr.arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ rqr.arxiv_id }}</a>.
+          <a href="{{ mti_tolerance.arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ mti_tolerance.arxiv_id }}</a>.
+        </div>
+      </li>
+      <li class="research-output-item">
+        <span class="research-output__status">{{ mti_regression.status_label }}</span>
+        <div>
+          De Leon, A., Prado, R., Sansó, B.
+          <em>{{ mti_regression.title }}</em>.
+          Manuscript on MTI regression and dynamic state-space extensions; public identifier pending.
         </div>
       </li>
       <li class="research-output-item">

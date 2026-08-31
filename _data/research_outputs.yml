@@ -20,12 +20,17 @@ qdesn:
   status_label: "Working paper"
   repository_url: "https://github.com/AntonioAPDL/Article-Q-DESN---Version-2"
 
-rqr:
+mti_tolerance:
   title: "Mean-Tilted Intervals: A Generalized-Bayes Approach to Fixed-Content and Tolerance Intervals"
   arxiv_id: "2607.26098"
   arxiv_url: "https://arxiv.org/abs/2607.26098"
   doi_url: "https://doi.org/10.48550/arXiv.2607.26098"
   status_label: "arXiv preprint"
+  repository_url: "https://github.com/AntonioAPDL/RQR-GIBBS"
+
+mti_regression:
+  title: "Mean-Tilted Intervals: Regression and Dynamic Models"
+  status_label: "Submitted manuscript"
   repository_url: "https://github.com/AntonioAPDL/RQR-GIBBS"
 
 oecd_capital:

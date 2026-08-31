@@ -9,7 +9,8 @@ description: "Background, research focus, teaching, service, and applied experie
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
 {% assign exdqlm_article = outputs.exdqlm_article %}
 {% assign exdqlm_arxiv_url = exdqlm_article.arxiv_url | default: exdqlm.arxiv_url %}
-{% assign rqr = outputs.rqr %}
+{% assign mti_tolerance = outputs.mti_tolerance %}
+{% assign mti_regression = outputs.mti_regression %}
 {% assign qdesn = outputs.qdesn %}
 {% assign correction = outputs.forecast_correction %}
 
@@ -26,7 +27,7 @@ description: "Background, research focus, teaching, service, and applied experie
       I work on Bayesian forecasting, quantile methods, and statistical software, with emphasis on uncertainty
       quantification, approximate and simulation-based inference, and reproducible R/Python workflows.
       Current projects include forecast correction for environmental products used in risk assessment, dynamic quantile
-      state-space models, {{ qdesn.title }}, and generalized-Bayes interval methods.
+      state-space models, {{ qdesn.title }}, and mean-tilted interval methods.
     </p>
   </div>
 
@@ -69,8 +70,12 @@ description: "Background, research focus, teaching, service, and applied experie
         Working paper on Bayesian quantile forecasting with fixed nonlinear recurrent features.
       </li>
       <li>
-        <strong>RQR preprint:</strong>
-        <a href="{{ rqr.arxiv_url }}" target="_blank" rel="noopener noreferrer">{{ rqr.title }}</a>.
+        <strong>MTI tolerance-interval preprint:</strong>
+        <a href="{{ mti_tolerance.arxiv_url }}" target="_blank" rel="noopener noreferrer">{{ mti_tolerance.title }}</a>.
+      </li>
+      <li>
+        <strong>MTI regression manuscript:</strong>
+        {{ mti_regression.title }}; submitted to arXiv; public identifier pending.
       </li>
     </ul>
   </div>

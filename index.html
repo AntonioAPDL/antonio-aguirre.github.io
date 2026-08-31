@@ -9,7 +9,8 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
 {% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
 {% assign exdqlm_article = outputs.exdqlm_article %}
 {% assign exdqlm_arxiv_url = exdqlm_article.arxiv_url | default: exdqlm.arxiv_url %}
-{% assign rqr = outputs.rqr %}
+{% assign mti_tolerance = outputs.mti_tolerance %}
+{% assign mti_regression = outputs.mti_regression %}
 {% assign qdesn = outputs.qdesn %}
 {% assign correction = outputs.forecast_correction %}
 
@@ -32,7 +33,7 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
     </p>
     <p class="intro-text">
       Current projects include Bayesian forecast correction and posterior synthesis, {{ qdesn.title }},
-      and generalized-Bayes methods for fixed-content and tolerance intervals.
+      and MTI work on fixed-content intervals, tolerance targets, regression, and dynamic models.
       I also co-develop and maintain
       <a href="https://CRAN.R-project.org/package=exdqlm" target="_blank" rel="noopener noreferrer"><code>exdqlm</code></a>,
       a CRAN package for dynamic and static Bayesian quantile models.
@@ -67,7 +68,7 @@ description: "Ph.D. candidate in Statistics at UC Santa Cruz working on Bayesian
     <article class="home-highlight-card">
       <span>arXiv preprint</span>
       <h2>Interval methods</h2>
-      <p>Generalized-Bayes computation for intervals that contain a fixed probability mass. <a href="{{ rqr.arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ rqr.arxiv_id }}</a>.</p>
+      <p>Mean-tilted interval methods for fixed-content and tolerance targets. <a href="{{ mti_tolerance.arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ mti_tolerance.arxiv_id }}</a>.</p>
     </article>
   </div>
 
