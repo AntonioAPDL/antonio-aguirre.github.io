@@ -223,6 +223,11 @@ def check_research_metadata(errors: list[str]) -> None:
         errors.append("_data/research_outputs.yml: qdesn must identify arXiv:2609.17579")
     if isinstance(qdesn, dict) and qdesn.get("status_label") != "arXiv preprint":
         errors.append("_data/research_outputs.yml: qdesn status must be 'arXiv preprint'")
+    if isinstance(qdesn, dict):
+        if qdesn.get("pdf_url") != "https://arxiv.org/pdf/2609.17579":
+            errors.append("_data/research_outputs.yml: qdesn PDF URL is not canonical")
+        if qdesn.get("html_url") != "https://arxiv.org/html/2609.17579v1":
+            errors.append("_data/research_outputs.yml: qdesn HTML URL is not the published v1")
 
 
 def check_teaching_data(errors: list[str]) -> None:

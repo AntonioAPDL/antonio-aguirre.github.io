@@ -143,7 +143,10 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
           <em>{{ qdesn.title }}</em>.
           Bayesian quantile regression with fixed deep-reservoir features, MCMC and variational inference,
           simulation studies, and retrospective streamflow and electricity-price comparisons.
-          <a href="{{ qdesn.arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ qdesn.arxiv_id }}</a>.
+          <a href="{{ qdesn.arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ qdesn.arxiv_id }}</a>
+          · <a href="{{ qdesn.pdf_url }}" target="_blank" rel="noopener noreferrer">PDF</a>
+          · <a href="{{ qdesn.html_url }}" target="_blank" rel="noopener noreferrer">HTML</a>
+          · <a href="{{ qdesn.doi_url }}" target="_blank" rel="noopener noreferrer">DOI</a>.
         </div>
       </li>
       <li class="research-output-item">

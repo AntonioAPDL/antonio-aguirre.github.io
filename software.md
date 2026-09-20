@@ -156,6 +156,10 @@ description: "Public packages, research code, and selected implementation exampl
             <span>arXiv preprint</span>
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           </a>
+          <a href="{{ qdesn.pdf_url }}" target="_blank" rel="noopener noreferrer">
+            <span>Read PDF</span>
+            <i class="fas fa-file-pdf" aria-hidden="true"></i>
+          </a>
         </div>
       </article>
 
