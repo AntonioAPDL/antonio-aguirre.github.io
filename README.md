@@ -405,7 +405,7 @@ The repo supports fully hosted forecast and climate refresh on GitHub Actions wi
   - ignores generated data-only changes so GitHub Actions does not spend build time on non-site edits
   - catches site-build regressions in GitHub Actions before Netlify production publishes stale pages
 
-Netlify is protected by `scripts/netlify-ignore-build.sh`, wired through `netlify.toml`. The script skips production builds when the only changed files are generated data artifacts. Website code/content/CV changes still build normally.
+Netlify is protected by `scripts/netlify-ignore-build.sh`, wired through `netlify.toml`. The script skips production builds when the only changed files are generated data artifacts. Website code/content/CV changes still build normally, including cacheless builds where Netlify reports the cached and current commit as the same revision.
 
 Required repository secrets for ERA5 updates:
 

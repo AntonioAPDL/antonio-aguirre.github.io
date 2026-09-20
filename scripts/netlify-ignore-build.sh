@@ -8,9 +8,12 @@ set -euo pipefail
 HEAD_REF="${COMMIT_REF:-HEAD}"
 BASE_REF="${CACHED_COMMIT_REF:-}"
 
-if [[ -z "${BASE_REF}" || "${BASE_REF}" =~ ^0+$ ]]; then
-  if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-    BASE_REF="HEAD^"
+# Netlify sets CACHED_COMMIT_REF equal to COMMIT_REF when a build has no cache.
+# In that case compare with the actual parent; comparing the commit to itself
+# would incorrectly classify every cacheless build as unchanged.
+if [[ -z "${BASE_REF}" || "${BASE_REF}" =~ ^0+$ || "${BASE_REF}" == "${HEAD_REF}" ]]; then
+  if git rev-parse --verify "${HEAD_REF}^" >/dev/null 2>&1; then
+    BASE_REF="${HEAD_REF}^"
   else
     echo "No previous commit is available; running build."
     exit 1
