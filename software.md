@@ -139,7 +139,7 @@ description: "Public packages, research code, and selected implementation exampl
 
       <article class="software-project">
         <div class="software-project__meta">
-          <span>Working manuscript</span>
+          <span>{{ qdesn.status_label }}</span>
           <span>Q-DESN / TeX</span>
         </div>
         <h3>{{ qdesn.title }}</h3>
@@ -147,10 +147,16 @@ description: "Public packages, research code, and selected implementation exampl
           Source and reproducibility materials for Bayesian quantile forecasting with fixed nonlinear recurrent features,
           simulation studies, and empirical forecast comparisons.
         </p>
-        <a href="{{ qdesn.repository_url }}" target="_blank" rel="noopener noreferrer">
-          <span>Article repository</span>
-          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-        </a>
+        <div class="software-project__links">
+          <a href="{{ qdesn.repository_url }}" target="_blank" rel="noopener noreferrer">
+            <span>Article repository</span>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          </a>
+          <a href="{{ qdesn.arxiv_url }}" target="_blank" rel="noopener noreferrer">
+            <span>arXiv preprint</span>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          </a>
+        </div>
       </article>
 
       <article class="software-project">

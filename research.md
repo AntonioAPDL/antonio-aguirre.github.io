@@ -46,7 +46,7 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
       </p>
     </article>
     <article class="research-area">
-      <span>Working paper</span>
+      <span>{{ qdesn.status_label }}</span>
       <h2>{{ qdesn.title }}</h2>
       <p>
         Bayesian quantile forecasting with fixed nonlinear recurrent features, shrinkage priors,
@@ -137,12 +137,13 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
         </div>
       </li>
       <li class="research-output-item">
-        <span class="research-output__status">Working paper</span>
+        <span class="research-output__status">{{ qdesn.status_label }}</span>
         <div>
           De Leon, A., Prado, R., Sansó, B.
           <em>{{ qdesn.title }}</em>.
-          Working paper on Bayesian quantile forecasting with fixed nonlinear recurrent features, simulation studies,
-          and selected empirical applications.
+          Bayesian quantile regression with fixed deep-reservoir features, MCMC and variational inference,
+          simulation studies, and retrospective streamflow and electricity-price comparisons.
+          <a href="{{ qdesn.arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ qdesn.arxiv_id }}</a>.
         </div>
       </li>
       <li class="research-output-item">

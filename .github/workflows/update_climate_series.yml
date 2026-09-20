@@ -70,9 +70,12 @@ jobs:
           } > "${HOME}/.cdsapirc"
           chmod 600 "${HOME}/.cdsapirc"
 
+      - name: Hydrate the latest published climate baseline
+        run: |
+          chmod +x scripts/hydrate_climate_from_live_data.sh
+          scripts/hydrate_climate_from_live_data.sh
+
       - name: Run climate update stack
-        id: climate
-        continue-on-error: true
         env:
           PYTHON_BIN: python3
           RSCRIPT_BIN: Rscript
@@ -81,8 +84,16 @@ jobs:
           chmod +x scripts/run_climate_updates_cron.sh
           scripts/run_climate_updates_cron.sh
 
+      - name: Validate climate freshness and recent coverage
+        run: |
+          python3 scripts/check_climate_assets.py \
+            --target-date "$(date -u +%Y-%m-%d)" \
+            --window-days 20 \
+            --max-ppt-lag-days 7 \
+            --max-soil-lag-days 10 \
+            --min-window-coverage 0.5
+
       - name: Publish climate data to live-data branch
-        if: always()
         env:
           LIVE_DATA_COMMIT_MESSAGE: "chore: update climate point series data"
         run: |
@@ -93,3 +104,12 @@ jobs:
             soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.meta.json \
             climate_series_status.csv \
             climate_daily_ppt_soil.csv
+
+      - name: Upload climate logs after failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: climate-update-logs-${{ github.run_id }}
+          path: logs/climate_updates/
+          if-no-files-found: ignore
+          retention-days: 14

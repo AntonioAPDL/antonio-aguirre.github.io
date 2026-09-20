@@ -185,6 +185,46 @@ def check_yaml(errors: list[str], warnings: list[str]) -> None:
             errors.append(f"{rel(path)}: invalid YAML ({exc})")
 
 
+def check_research_metadata(errors: list[str]) -> None:
+    try:
+        import yaml  # type: ignore
+    except Exception:
+        return
+
+    path = ROOT / "_data" / "research_outputs.yml"
+    if not path.exists():
+        errors.append("missing YAML: _data/research_outputs.yml")
+        return
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        errors.append("_data/research_outputs.yml: top-level value must be an object")
+        return
+
+    for key, output in data.items():
+        if not isinstance(output, dict):
+            errors.append(f"_data/research_outputs.yml: {key} must be an object")
+            continue
+        arxiv_id = str(output.get("arxiv_id") or "").strip()
+        if not arxiv_id:
+            continue
+        expected_arxiv = f"https://arxiv.org/abs/{arxiv_id}"
+        expected_doi = f"https://doi.org/10.48550/arXiv.{arxiv_id}"
+        if output.get("arxiv_url") != expected_arxiv:
+            errors.append(
+                f"_data/research_outputs.yml: {key}.arxiv_url must be {expected_arxiv}"
+            )
+        if output.get("doi_url") != expected_doi:
+            errors.append(
+                f"_data/research_outputs.yml: {key}.doi_url must be {expected_doi}"
+            )
+
+    qdesn = data.get("qdesn") or {}
+    if not isinstance(qdesn, dict) or qdesn.get("arxiv_id") != "2609.17579":
+        errors.append("_data/research_outputs.yml: qdesn must identify arXiv:2609.17579")
+    if isinstance(qdesn, dict) and qdesn.get("status_label") != "arXiv preprint":
+        errors.append("_data/research_outputs.yml: qdesn status must be 'arXiv preprint'")
+
+
 def check_teaching_data(errors: list[str]) -> None:
     try:
         import yaml  # type: ignore
@@ -351,6 +391,7 @@ def main() -> int:
     check_csvs(errors, warnings)
     check_json(errors)
     check_yaml(errors, warnings)
+    check_research_metadata(errors)
     check_teaching_data(errors)
     check_local_asset_refs(errors)
     check_canonical_cv(errors, warnings)

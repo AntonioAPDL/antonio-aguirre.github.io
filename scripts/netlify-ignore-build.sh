@@ -37,7 +37,6 @@ fi
 is_data_only_path() {
   case "$1" in
     assets/data/forecasts/*) return 0 ;;
-    climate_daily_ppt_soil.csv) return 0 ;;
     climate_series_status.csv) return 0 ;;
     prism_precipitation_santa_cruz_1987_2023.csv) return 0 ;;
     soil_moisture_data/*) return 0 ;;

@@ -16,8 +16,11 @@ forecast_correction:
   repository_url: "https://github.com/AntonioAPDL/Evironmetrics---REVISED-DOC-Corrected-2"
 
 qdesn:
-  title: "Bayesian Quantile Deep Echo State Networks"
-  status_label: "Working paper"
+  title: "Bayesian Quantile Deep Echo State Networks for Nonlinear Time Series"
+  arxiv_id: "2609.17579"
+  arxiv_url: "https://arxiv.org/abs/2609.17579"
+  doi_url: "https://doi.org/10.48550/arXiv.2609.17579"
+  status_label: "arXiv preprint"
   repository_url: "https://github.com/AntonioAPDL/Article-Q-DESN---Version-2"
 
 mti_tolerance:

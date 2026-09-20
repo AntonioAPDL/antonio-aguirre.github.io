@@ -242,8 +242,14 @@ if require_observed:
                 observed_soil_n = max(observed_soil_n, len(series))
     print(f"[INFO] GEFS precheck observed_context_precip_points={observed_ppt_n}")
     print(f"[INFO] GEFS precheck observed_context_soil_points={observed_soil_n}")
-    if observed_ppt_n <= 0 and observed_soil_n <= 0:
-        print("[INFO] GEFS precheck: observed retrospective context missing; refresh required.")
+    window_days = int(asset.get("observation_window_days") or 20)
+    min_observed_points = max(3, int((window_days * 0.5) + 0.999999))
+    if observed_ppt_n < min_observed_points or observed_soil_n < min_observed_points:
+        print(
+            "[INFO] GEFS precheck: observed retrospective context is incomplete "
+            f"(precip={observed_ppt_n}, soil={observed_soil_n}, required={min_observed_points}); "
+            "refresh required."
+        )
         raise SystemExit(11)
     precip = asset.get("precip") or {}
     precip_support_ok = False
@@ -469,8 +475,18 @@ if isinstance(obs, dict):
             observed_soil_points = max(observed_soil_points, len(series))
 print("observed_precip_points:", observed_ppt_points)
 print("observed_soil_points:", observed_soil_points)
-if require_observed and observed_ppt_points <= 0 and observed_soil_points <= 0:
-    errors.append("observed retrospective precipitation or soil context is missing")
+min_observed_points = max(3, int((max(1, window_days) * 0.5) + 0.999999))
+print("observed_min_required_points:", min_observed_points)
+if require_observed and observed_ppt_points < min_observed_points:
+    errors.append(
+        f"observed retrospective precipitation coverage is too sparse "
+        f"({observed_ppt_points} < {min_observed_points})"
+    )
+if require_observed and observed_soil_points < min_observed_points:
+    errors.append(
+        f"observed retrospective soil coverage is too sparse "
+        f"({observed_soil_points} < {min_observed_points})"
+    )
 if require_observed and observed_ppt_points > 0:
     precip_support_ok = False
     precip = data.get("precip") or {}

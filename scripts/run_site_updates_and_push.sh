@@ -16,6 +16,18 @@ CLIMATE_TIMEOUT_SEC="${CLIMATE_TIMEOUT_SEC:-1800}"
 ALLOW_DIRTY="${ALLOW_DIRTY:-0}"
 ALLOW_STALE_ON_ERROR="${ALLOW_STALE_ON_ERROR:-0}"
 
+TRACKED=(
+  "assets/data/forecasts/gefs_big_trees_latest.json"
+  "assets/data/forecasts/big_trees_latest.json"
+  "assets/data/forecasts/big_trees_qdesn_latest.json"
+  "prism_precipitation_santa_cruz_1987_2023.csv"
+  "soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv"
+  "soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv"
+  "soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.meta.json"
+  "climate_series_status.csv"
+  "climate_daily_ppt_soil.csv"
+)
+
 RSCRIPT_BIN="${RSCRIPT_BIN:-Rscript}"
 select_python_bin() {
   local candidate resolved
@@ -60,14 +72,39 @@ if ! flock -n 9; then
   exit 0
 fi
 
+PREFLIGHT_STASHED=0
 if [[ "${ALLOW_DIRTY}" != "1" ]]; then
-  if ! git diff --quiet || ! git diff --cached --quiet; then
-    log "[ERROR] Working tree is not clean. Set ALLOW_DIRTY=1 to override."
+  declare -A generated_paths=()
+  for path in "${TRACKED[@]}"; do
+    generated_paths["${path}"]=1
+  done
+
+  mapfile -t changed_paths < <(
+    {
+      git diff --name-only
+      git diff --cached --name-only
+      git ls-files --others --exclude-standard
+    } | sort -u
+  )
+  unrelated_paths=()
+  generated_dirty=0
+  for path in "${changed_paths[@]}"; do
+    [[ -n "${path}" ]] || continue
+    if [[ -v "generated_paths[${path}]" ]]; then
+      generated_dirty=1
+    else
+      unrelated_paths+=("${path}")
+    fi
+  done
+  if [[ "${#unrelated_paths[@]}" -gt 0 ]]; then
+    log "[ERROR] Working tree contains non-generated changes: ${unrelated_paths[*]}"
+    log "[ERROR] Commit or preserve them before automated updates, or set ALLOW_DIRTY=1."
     exit 1
   fi
-  if [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
-    log "[ERROR] Untracked files present. Clean them or set ALLOW_DIRTY=1."
-    exit 1
+  if [[ "${generated_dirty}" == "1" ]]; then
+    log "[INFO] Temporarily stashing generated data updates before rebasing."
+    git stash push -m "site-update generated-data preflight" -- "${TRACKED[@]}" >>"${RUN_LOG}" 2>&1
+    PREFLIGHT_STASHED=1
   fi
 fi
 
@@ -76,6 +113,13 @@ git fetch origin main >>"${RUN_LOG}" 2>&1 || true
 if ! git rebase origin/main >>"${RUN_LOG}" 2>&1; then
   log "[ERROR] Rebase failed. Check ${RUN_LOG}"
   exit 1
+fi
+
+if [[ "${PREFLIGHT_STASHED}" == "1" ]]; then
+  if ! git stash pop >>"${RUN_LOG}" 2>&1; then
+    log "[ERROR] Could not restore generated data after rebasing. Check ${RUN_LOG}"
+    exit 1
+  fi
 fi
 
 overall_rc=0
@@ -134,8 +178,21 @@ fi
 if [[ "${RUN_GEFS}" == "1" && -f "${REPO_ROOT}/assets/data/forecasts/gefs_big_trees_latest.json" ]]; then
   if ! "${PYTHON_BIN}" "${REPO_ROOT}/scripts/check_forecast_assets.py" \
     --gefs "${REPO_ROOT}/assets/data/forecasts/gefs_big_trees_latest.json" \
-    --max-age-hours 36 >>"${RUN_LOG}" 2>&1; then
+    --max-age-hours 36 \
+    --require-observed-retrospective >>"${RUN_LOG}" 2>&1; then
     log "[WARN] GEFS forecast asset freshness check failed."
+    overall_rc=1
+  fi
+fi
+
+if [[ "${RUN_CLIMATE}" == "1" ]]; then
+  if ! "${PYTHON_BIN}" "${REPO_ROOT}/scripts/check_climate_assets.py" \
+    --target-date "$(date -u +%Y-%m-%d)" \
+    --window-days 20 \
+    --max-ppt-lag-days 7 \
+    --max-soil-lag-days 10 \
+    --min-window-coverage 0.5 >>"${RUN_LOG}" 2>&1; then
+    log "[WARN] Climate asset freshness or coverage check failed."
     overall_rc=1
   fi
 fi
@@ -144,18 +201,6 @@ if [[ "${overall_rc}" -ne 0 ]]; then
   log "[ERROR] One or more update steps failed; refusing to commit a partial site data refresh."
   exit "${overall_rc}"
 fi
-
-TRACKED=(
-  "assets/data/forecasts/gefs_big_trees_latest.json"
-  "assets/data/forecasts/big_trees_latest.json"
-  "assets/data/forecasts/big_trees_qdesn_latest.json"
-  "prism_precipitation_santa_cruz_1987_2023.csv"
-  "soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv"
-  "soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv"
-  "soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.meta.json"
-  "climate_series_status.csv"
-  "climate_daily_ppt_soil.csv"
-)
 
 git add -- "${TRACKED[@]}" >>"${RUN_LOG}" 2>&1 || true
 

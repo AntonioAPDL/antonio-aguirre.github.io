@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARGET_END_DATE="${1:-$(date -u +%Y-%m-%d)}"
+REQUESTED_END_DATE="${TARGET_END_DATE}"
 CSV_PATH="${ROOT_DIR}/prism_precipitation_santa_cruz_1987_2023.csv"
 DOWNLOAD_DIR="${ROOT_DIR}/prism_data_work"
 TMP_OUT="${ROOT_DIR}/prism_data_work/.ppt_incremental_${TARGET_END_DATE}_$$.csv"
@@ -43,6 +44,36 @@ if not path.exists():
 
 df = pd.read_csv(path)
 print(len(df.index))
+PY
+}
+
+validate_incremental_chunk() {
+  "${PYTHON_BIN}" - <<'PY' "$1" "$2"
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+path = Path(sys.argv[1])
+expected_start = pd.Timestamp(sys.argv[2]).normalize()
+df = pd.read_csv(path)
+if not {"Date", "PRCP_mm"}.issubset(df.columns):
+    raise SystemExit("Incremental PRISM output is missing Date or PRCP_mm")
+dates = pd.to_datetime(df["Date"], errors="coerce").dt.normalize()
+values = pd.to_numeric(df["PRCP_mm"], errors="coerce")
+if dates.isna().any() or values.isna().any():
+    raise SystemExit("Incremental PRISM output contains invalid dates or values")
+if dates.duplicated().any():
+    raise SystemExit("Incremental PRISM output contains duplicate dates")
+dates = dates.sort_values().reset_index(drop=True)
+if dates.iloc[0] != expected_start:
+    raise SystemExit(
+        f"Incremental PRISM output starts at {dates.iloc[0].date()}, expected {expected_start.date()}"
+    )
+expected = pd.date_range(dates.iloc[0], dates.iloc[-1], freq="D")
+if len(dates) != len(expected) or not dates.equals(pd.Series(expected)):
+    raise SystemExit("Incremental PRISM output has gaps in daily coverage")
+print(dates.iloc[-1].date().isoformat())
 PY
 }
 
@@ -103,7 +134,11 @@ while [[ ! "${ATTEMPT_END_DATE}" < "${START_DATE}" ]]; do
 
   ROW_COUNT="$(count_csv_rows "${TMP_OUT}")"
   if [[ "${ROW_COUNT}" -gt 0 ]]; then
-    TARGET_END_DATE="${ATTEMPT_END_DATE}"
+    ACTUAL_END_DATE="$(validate_incremental_chunk "${TMP_OUT}" "${START_DATE}")"
+    TARGET_END_DATE="${ACTUAL_END_DATE}"
+    if [[ "${ACTUAL_END_DATE}" != "${ATTEMPT_END_DATE}" ]]; then
+      echo "[INFO] PRISM returned a partial window through ${ACTUAL_END_DATE}; using the actual endpoint."
+    fi
     FOUND_ROWS=1
     break
   fi
@@ -166,3 +201,8 @@ PY
 
 rm -f "${TMP_OUT}"
 echo "[OK] PPT incremental update complete."
+
+if [[ "${TARGET_END_DATE}" < "${REQUESTED_END_DATE}" ]]; then
+  echo "[INFO] Continuing PRISM update after partial progress through ${TARGET_END_DATE}."
+  bash "${BASH_SOURCE[0]}" "${REQUESTED_END_DATE}"
+fi

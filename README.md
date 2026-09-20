@@ -235,7 +235,8 @@ Behavior:
   - APCP band (`p10-p90`) + `p50` + mean
   - SOILW depth-level medians (`p50`) with optional uncertainty bands
 - Adds observed daily climate context plus retrospective context from prior GEFS cycles, shown over a fixed 20-day pre-forecast window
-- Loads the observed retrospective window from `climate_daily_ppt_soil.csv` when that CSV is fresher or more complete than the GEFS JSON payload
+- Merges observed precipitation and soil moisture independently by timestamp across the embedded JSON, live CSV, and deployed CSV fallback, so a healthy series cannot hide a sparse companion series
+- Warns explicitly when either observed series is stale or has less than half of the requested retrospective window
 - Displays metadata and freshness warning if stale
 - Displays a context-quality warning if the forecast is current but the rolling GEFS analysis context is incomplete
 - Degrades gracefully when JSON is missing/invalid
@@ -253,7 +254,7 @@ GEFS JSON includes optional retrospective metadata used by the panel:
 - `gefs_analysis_context_summary` and `quality_warnings` describe whether the rolling context is complete enough for display
 - Plot units are harmonized by panel logic (`APCP` in mm water-equivalent; `SOILW` in m3/m3)
 - Scheduled GEFS exports enable observed retrospective context by default from the latest `live-data` climate CSV, with a repository-root fallback
-- The browser also has `data-observed-csv-url` / `data-observed-fallback-csv-url` support so observed PRISM/ERA5/NWM context can be reconstructed from the combined CSV at render time
+- The browser also has `data-observed-csv-url` / `data-observed-fallback-csv-url` support so observed PRISM/ERA5/NWM context can be reconstructed from the combined CSV at render time. The fallback CSV is included in the built site.
 - The exporter still supports GEFS-only context when run manually without `--include-observed-retrospective`
 - Exporter uses a history-scan guard: skips git-history backfill when prior 20-day GEFS context is already complete
 - GEFS cycle-history context may be limited after a stale period; observed daily context keeps the pre-forecast window populated while cycle context accumulates or is backfilled.
@@ -324,6 +325,14 @@ Run one manual cycle:
 scripts/run_climate_updates_cron.sh
 ```
 
+Validate the canonical series and merged browser asset before publishing:
+
+```bash
+python3 scripts/check_climate_assets.py
+```
+
+The validator requires recent coverage for both precipitation and soil moisture and verifies that the merged CSV reaches the same endpoints as the canonical PRISM and ERA5 files. This prevents a successful workflow from publishing a technically valid but incomplete retrospective window.
+
 Logs are written under `logs/climate_updates/` and `latest.log` points to the newest run log.
 
 The local climate and site-update runners select a compatible Python `>= 3.9` before calling the climate scripts. This matters on servers where cron's default `/usr/bin/python3` may be older than the interactive shell Python.
@@ -359,7 +368,9 @@ The repo supports fully hosted forecast and climate refresh on GitHub Actions wi
     - `soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.meta.json`
     - `climate_series_status.csv`
     - `climate_daily_ppt_soil.csv`
+  - hydrates the workspace from the latest `live-data` artifacts before every incremental run, rather than restarting from the older snapshot on `main`
   - incremental PRISM/ERA5 updaters probe backward to the latest available provider date instead of failing the whole run on a too-recent request
+  - validates freshness, recent-window density, and canonical/merged endpoint agreement; failed or partial updates are not published
   - routine climate refreshes are data-only `live-data` commits, so they should not trigger Netlify production deploys
 
 - `.github/workflows/update_gefs_forecast.yml`
@@ -371,7 +382,7 @@ The repo supports fully hosted forecast and climate refresh on GitHub Actions wi
   - fail-fast checks in `scripts/update_big_trees_gefs_forecast.sh` ensure:
     - latest init is not stale
     - current precipitation and soil-moisture forecast series exist
-    - observed retrospective precipitation or soil context is present
+    - both observed retrospective precipitation and soil context have at least half of the 20-day window and are within their expected provider lags
     - 20-day GEFS analysis context coverage is reported as `ok` or `limited`; limited context is a warning, not a blocker for publishing a current forecast
   - race guards:
     - hard sync to latest `origin/main` before processing

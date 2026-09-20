@@ -7,7 +7,6 @@ on:
       - main
     paths-ignore:
       - "assets/data/forecasts/**"
-      - "climate_daily_ppt_soil.csv"
       - "climate_series_status.csv"
       - "prism_precipitation_santa_cruz_1987_2023.csv"
       - "soil_moisture_data/**"
@@ -31,10 +30,13 @@ jobs:
           bundler-cache: true
 
       - name: Install Python check dependencies
-        run: python3 -m pip install --upgrade pyyaml
+        run: python3 -m pip install --upgrade pandas pyyaml
 
       - name: Run site integrity checks
         run: python3 scripts/check_site_integrity.py
+
+      - name: Run climate asset regression tests
+        run: python3 -m unittest discover -s tests -p "test_*.py"
 
       - name: Run blog publication checks
         run: |

@@ -67,7 +67,8 @@ description: "Background, research focus, teaching, service, and applied experie
       </li>
       <li>
         <strong>Q-DESN forecasting:</strong>
-        Working paper on Bayesian quantile forecasting with fixed nonlinear recurrent features.
+        <a href="{{ qdesn.arxiv_url }}" target="_blank" rel="noopener noreferrer">{{ qdesn.title }}</a>,
+        an arXiv preprint on Bayesian quantile forecasting with fixed nonlinear recurrent features.
       </li>
       <li>
         <strong>MTI tolerance-interval preprint:</strong>

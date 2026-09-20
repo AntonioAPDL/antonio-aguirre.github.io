@@ -131,34 +131,64 @@
     };
   }
 
-  function observedCoverage(observed) {
-    const out = { points: 0, latest: null };
-    if (!observed || typeof observed !== 'object') return out;
-    [
-      'daily_avg_ppt',
-      'daily_avg_soil_ERA5',
-      'daily_avg_soil_NWM_SOIL_M',
-      'daily_avg_soil_NWM_SOIL_W'
-    ].forEach((key) => {
-      const series = observed[key];
+  const OBSERVED_SERIES_KEYS = [
+    'daily_avg_ppt',
+    'daily_avg_soil_ERA5',
+    'daily_avg_soil_NWM_SOIL_M',
+    'daily_avg_soil_NWM_SOIL_W'
+  ];
+
+  function mergeObservedSeries(existing, candidate) {
+    const byTimestamp = new Map();
+    [existing, candidate].forEach((series) => {
       if (!Array.isArray(series)) return;
-      out.points += series.length;
       series.forEach((point) => {
         if (!point || !point.t) return;
         const ts = parseDate(point.t);
-        if (ts && (!out.latest || ts > out.latest)) out.latest = ts;
+        const value = numberOrNull(point.v);
+        if (!ts || value === null) return;
+        byTimestamp.set(ts.toISOString(), { t: ts.toISOString(), v: value });
       });
     });
-    return out;
+    return Array.from(byTimestamp.values()).sort((a, b) => parseDate(a.t) - parseDate(b.t));
   }
 
-  function shouldUseObservedCandidate(existing, candidate) {
-    const current = observedCoverage(existing);
-    const proposed = observedCoverage(candidate);
-    if (proposed.points <= 0) return false;
-    if (current.points <= 0) return true;
-    if (proposed.latest && current.latest && proposed.latest > current.latest) return true;
-    return proposed.points > current.points;
+  function mergeObservedRetrospective(existing, candidate) {
+    const current = existing && typeof existing === 'object' ? existing : {};
+    const proposed = candidate && typeof candidate === 'object' ? candidate : {};
+    const merged = { ...current, ...proposed };
+    OBSERVED_SERIES_KEYS.forEach((key) => {
+      merged[key] = mergeObservedSeries(current[key], proposed[key]);
+    });
+    return merged;
+  }
+
+  function observedSeriesCoverage(series) {
+    const parsed = mergeObservedSeries([], series);
+    return {
+      points: parsed.length,
+      latest: parsed.length ? parseDate(parsed[parsed.length - 1].t) : null
+    };
+  }
+
+  function observedRetrospectiveWarnings(observed, initDate, windowDays) {
+    const warnings = [];
+    if (!initDate) return warnings;
+    const minPoints = Math.max(3, Math.ceil(Math.max(1, windowDays) * 0.5));
+    const precip = observedSeriesCoverage(observed && observed.daily_avg_ppt);
+    const soil = observedSeriesCoverage(observed && observed.daily_avg_soil_ERA5);
+
+    if (precip.points < minPoints) {
+      warnings.push(`Observed precipitation context is incomplete (${precip.points} of at least ${minPoints} expected days).`);
+    } else if (!precip.latest || (initDate - precip.latest) / 86400000 > 7) {
+      warnings.push('Observed precipitation context is more than 7 days behind the forecast start.');
+    }
+    if (soil.points < minPoints) {
+      warnings.push(`Observed soil-moisture context is incomplete (${soil.points} of at least ${minPoints} expected days).`);
+    } else if (!soil.latest || (initDate - soil.latest) / 86400000 > 10) {
+      warnings.push('Observed soil-moisture context is more than 10 days behind the forecast start.');
+    }
+    return warnings;
   }
 
   function hasSeries(points) {
@@ -583,7 +613,11 @@
     cleaned.forEach((msg) => {
       if (msg.startsWith('Update appears delayed')) {
         out.push(msg);
-      } else if (msg.indexOf('current forecast is still shown') !== -1 || msg.indexOf('analysis context is limited') !== -1) {
+      } else if (
+        msg.startsWith('Observed ') ||
+        msg.indexOf('current forecast is still shown') !== -1 ||
+        msg.indexOf('analysis context is limited') !== -1
+      ) {
         out.push(msg);
       } else {
         hasSeriesIssue = true;
@@ -653,6 +687,10 @@
       container.dataset.observedFallbackCsvUrl || ''
     );
 
+    let mergedObserved = payload.observed_retrospective && typeof payload.observed_retrospective === 'object'
+      ? payload.observed_retrospective
+      : {};
+
     for (let i = 0; i < observedUrls.length; i += 1) {
       const url = observedUrls[i];
       try {
@@ -660,20 +698,18 @@
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const rows = parseSimpleCsv(await response.text());
         const observed = buildObservedRetrospectiveFromCsv(rows, initDate, observationWindowDays, url);
-        if (!shouldUseObservedCandidate(null, observed)) {
-          continue;
-        }
-        if (shouldUseObservedCandidate(payload.observed_retrospective, observed)) {
-          payload.observed_retrospective = observed;
-        }
-        return payload;
+        mergedObserved = mergeObservedRetrospective(mergedObserved, observed);
+        if (!observedRetrospectiveWarnings(mergedObserved, initDate, observationWindowDays).length) break;
       } catch (err) {
         console.warn('[gefs-forecast-panel] observed CSV fetch failed', url, err);
       }
     }
 
-    if (shouldUseObservedCandidate(null, payload.observed_retrospective)) return payload;
-    if (Array.isArray(warnings)) warnings.push('Observed precipitation and soil context is temporarily unavailable.');
+    payload.observed_retrospective = mergedObserved;
+    if (Array.isArray(warnings)) {
+      observedRetrospectiveWarnings(mergedObserved, initDate, observationWindowDays)
+        .forEach((warning) => warnings.push(warning));
+    }
     return payload;
   }
 

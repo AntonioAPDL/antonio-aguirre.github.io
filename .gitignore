@@ -75,3 +75,6 @@ local_audit_reports/
 # Local-only Drive/Notability exports before public curation
 local_drive_downloads/
 local_teaching_exports/
+
+# Local job-specific CV variants
+/local_cv_variants/

@@ -148,6 +148,14 @@ def soil_has_24h_mean_support(section: Any) -> bool:
     return False
 
 
+def latest_series_time(series: Any) -> datetime | None:
+    if not isinstance(series, list):
+        return None
+    parsed = [parse_time(point.get("t")) for point in series if isinstance(point, dict)]
+    valid = [value for value in parsed if value is not None]
+    return max(valid) if valid else None
+
+
 def check_gefs(
     path: Path,
     max_age_hours: float,
@@ -177,9 +185,11 @@ def check_gefs(
 
     observed = data.get("observed_retrospective") or {}
     observed_ppt_n = 0
-    observed_soil_n = 0
+    observed_ppt: list[Any] = []
+    observed_soil_candidates: list[list[Any]] = []
     if isinstance(observed, dict):
         ppt = observed.get("daily_avg_ppt")
+        observed_ppt = ppt if isinstance(ppt, list) else []
         observed_ppt_n = len(ppt) if isinstance(ppt, list) else 0
         for key in (
             "daily_avg_soil_ERA5",
@@ -188,10 +198,34 @@ def check_gefs(
         ):
             series = observed.get(key)
             if isinstance(series, list):
-                observed_soil_n = max(observed_soil_n, len(series))
+                observed_soil_candidates.append(series)
+    observed_soil_n = max((len(series) for series in observed_soil_candidates), default=0)
     print(f"[INFO] GEFS observed context counts: precip={observed_ppt_n} soil={observed_soil_n}")
-    if require_observed and observed_ppt_n <= 0 and observed_soil_n <= 0:
-        errors.append(f"{path}: observed retrospective precipitation or soil series required")
+    window_days = int(data.get("observation_window_days") or 20)
+    min_observed_points = max(3, math.ceil(window_days * 0.5))
+    if require_observed and observed_ppt_n < min_observed_points:
+        errors.append(
+            f"{path}: observed precipitation coverage too sparse "
+            f"({observed_ppt_n} < {min_observed_points})"
+        )
+    if require_observed and observed_soil_n < min_observed_points:
+        errors.append(
+            f"{path}: observed soil coverage too sparse "
+            f"({observed_soil_n} < {min_observed_points})"
+        )
+    if require_observed and init_time is not None:
+        ppt_latest = latest_series_time(observed_ppt)
+        if ppt_latest is None or (init_time - ppt_latest).total_seconds() > 7 * 86400:
+            errors.append(f"{path}: observed precipitation endpoint is more than 7 days behind forecast init")
+        covered_soil = [
+            series for series in observed_soil_candidates if len(series) >= min_observed_points
+        ]
+        soil_is_fresh = any(
+            latest is not None and (init_time - latest).total_seconds() <= 10 * 86400
+            for latest in (latest_series_time(series) for series in covered_soil)
+        )
+        if not soil_is_fresh:
+            errors.append(f"{path}: observed soil endpoint is more than 10 days behind forecast init")
     if require_observed and observed_ppt_n > 0 and not precip_has_24h_support(data.get("precip")):
         errors.append(
             f"{path}: observed PRISM precipitation is daily, so GEFS precipitation must be exported as 24-hour totals"
