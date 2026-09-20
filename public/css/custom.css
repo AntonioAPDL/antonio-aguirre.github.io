@@ -2436,6 +2436,14 @@ body.dark-theme .plot-status__title {
   line-height: 1.45;
 }
 
+.teaching-resource-description {
+  display: block;
+  margin-top: 0.18rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .teaching-item__body {
   padding: 1rem 1.15rem 1.1rem;
   color: var(--text-muted);

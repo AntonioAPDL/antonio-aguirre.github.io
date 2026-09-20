@@ -236,10 +236,11 @@ def check_teaching_data(errors: list[str]) -> None:
     except Exception:
         return
 
-    def validate_resources(course_id: object, resources: object, context: str) -> None:
+    def validate_resources(course_id: object, resources: object, context: str) -> list[dict]:
         if not isinstance(resources, list):
             errors.append(f"_data/teaching.yml: course {course_id} {context} resources must be a list")
-            return
+            return []
+        valid_resources: list[dict] = []
         for resource_index, resource in enumerate(resources, start=1):
             if not isinstance(resource, dict):
                 errors.append(
@@ -247,16 +248,25 @@ def check_teaching_data(errors: list[str]) -> None:
                     f"{resource_index} must be an object"
                 )
                 continue
+            valid_resources.append(resource)
             file_value = resource.get("file")
-            if not file_value:
+            url_value = resource.get("url")
+            if bool(file_value) == bool(url_value):
                 errors.append(
                     f"_data/teaching.yml: course {course_id} {context} resource "
-                    f"{resource_index} missing file"
+                    f"{resource_index} must define exactly one of file or url"
                 )
                 continue
-            target = ROOT / str(file_value).lstrip("/")
-            if not target.exists():
-                errors.append(f"_data/teaching.yml: missing teaching resource {file_value}")
+            if file_value:
+                target = ROOT / str(file_value).lstrip("/")
+                if not target.exists():
+                    errors.append(f"_data/teaching.yml: missing teaching resource {file_value}")
+            elif not str(url_value).startswith("https://"):
+                errors.append(
+                    f"_data/teaching.yml: course {course_id} {context} resource "
+                    f"{resource_index} external URL must use HTTPS"
+                )
+        return valid_resources
 
     path = ROOT / "_data" / "teaching.yml"
     if not path.exists():
@@ -266,19 +276,26 @@ def check_teaching_data(errors: list[str]) -> None:
     if not isinstance(data, list):
         errors.append("_data/teaching.yml: top-level value must be a list")
         return
+    courses_by_id: dict[str, dict] = {}
+    course_resources: dict[str, list[dict]] = {}
     for course_index, course in enumerate(data, start=1):
         if not isinstance(course, dict):
             errors.append(f"_data/teaching.yml: course {course_index} must be an object")
             continue
-        for key in ("id", "course", "role", "resources"):
+        for key in ("id", "course", "role", "summary"):
             if key not in course:
                 errors.append(f"_data/teaching.yml: course {course_index} missing {key!r}")
         course_id = course.get("id", course_index)
+        course_id_string = str(course_id)
+        if course_id_string in courses_by_id:
+            errors.append(f"_data/teaching.yml: duplicate course id {course_id_string}")
+        courses_by_id[course_id_string] = course
+        flattened_resources: list[dict] = []
         resources = course.get("resources", [])
         resource_groups = course.get("resource_groups", [])
         if not resources and not resource_groups:
             errors.append(f"_data/teaching.yml: course {course_id} must define resources or resource_groups")
-        validate_resources(course_id, resources, "flat")
+        flattened_resources.extend(validate_resources(course_id, resources, "flat"))
         if resource_groups:
             if not isinstance(resource_groups, list):
                 errors.append(f"_data/teaching.yml: course {course_id} resource_groups must be a list")
@@ -302,7 +319,78 @@ def check_teaching_data(errors: list[str]) -> None:
                         f"{group_index} has no resources"
                     )
                     continue
-                validate_resources(course_id, group_resources, f"group {group_index}")
+                flattened_resources.extend(
+                    validate_resources(course_id, group_resources, f"group {group_index}")
+                )
+        course_resources[course_id_string] = flattened_resources
+
+        notebooks = course.get("notebooks", [])
+        if notebooks and not isinstance(notebooks, list):
+            errors.append(f"_data/teaching.yml: course {course_id} notebooks must be a list")
+        elif isinstance(notebooks, list):
+            for notebook_index, notebook in enumerate(notebooks, start=1):
+                if not isinstance(notebook, dict) or not notebook.get("title"):
+                    errors.append(
+                        f"_data/teaching.yml: course {course_id} notebook "
+                        f"{notebook_index} must have a title"
+                    )
+                elif not str(notebook.get("url", "")).startswith("https://"):
+                    errors.append(
+                        f"_data/teaching.yml: course {course_id} notebook "
+                        f"{notebook_index} URL must use HTTPS"
+                    )
+
+    cse_resources = course_resources.get("cse107-fall26", [])
+    cse_slide_files = {
+        str(resource.get("file"))
+        for resource in cse_resources
+        if resource.get("type") == "Lecture Slides"
+    }
+    expected_cse_slide_files = {
+        f"/files/teaching/cse107-fall26/cse107-m{module:02d}-lectures.pdf"
+        for module in range(11)
+    }
+    if cse_slide_files != expected_cse_slide_files:
+        errors.append(
+            "_data/teaching.yml: CSE 107 Fall 2026 must publish exactly the M00-M10 lecture decks"
+        )
+
+    stat7l_resources = course_resources.get("stat7l-summer26", [])
+    stat7l_urls = {str(resource.get("url")) for resource in stat7l_resources if resource.get("url")}
+    expected_stat7l_ids = {
+        "1MTuEYv2iDNzWFYeV-Lc01SU6YdBs9JxZ",
+        "1FRq4Zj7V9iJ_2VzDKr1nxRLOzSoMACejVnys2R85Dj4",
+        "119mNNHegWtAMfVzV_NIvQef1RjE3snJW",
+        "15mmcpcrkf4-H1DlpwcKenqsbliCrCDFq0BZENrckOYY",
+        "1b3wtfvlwJUorlQYPGTFlzn2ZGN4S-zWY",
+        "1EweZjPgqZi1UEARHcNeeJZkXmVKBu1YE6GORy1yxJjE",
+        "1p8-iljAje2Bc4WYdhEe0sN_JaqAdzXzB",
+        "10zJ13NwBqmXj43qIAywf3av4EvUjz8Lf9CQ5vyleMko",
+        "169Vxw6UHb8Fd8_JxPd-wB3Vv0dM1gzwW",
+        "16ThE_kRAcJRzBbWZPVy2wA-HB6eQbZqY6u9QfxvIBnI",
+        "1kh88qhkKvjLolKVB9ARzkx8ss5IRaQSB",
+        "10VREjbe31atHku7RAMxZCy-wj7PRIgps4QVuEx0TAwI",
+    }
+    found_stat7l_ids = {
+        match.group(1)
+        for url in stat7l_urls
+        if (match := re.search(r"/(?:d/|drive/)([A-Za-z0-9_-]+)", url))
+    }
+    if found_stat7l_ids != expected_stat7l_ids:
+        errors.append(
+            "_data/teaching.yml: STAT 7L Summer 2026 must link the six published Colabs "
+            "and six published report templates"
+        )
+
+    for course_id in ("cse107-fall26", "stat7l-summer26"):
+        for resource in course_resources.get(course_id, []):
+            published_reference = " ".join(
+                str(resource.get(key, "")) for key in ("file", "url")
+            ).lower()
+            if any(marker in published_reference for marker in ("private", "solution", "examination")):
+                errors.append(
+                    f"_data/teaching.yml: course {course_id} exposes a restricted resource"
+                )
 
 
 def check_local_asset_refs(errors: list[str]) -> None:

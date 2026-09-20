@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Teaching
-description: "Course materials, TA resources, and teaching support for Statistics at UC Santa Cruz."
+description: "Course materials, lecture slides, interactive notebooks, and teaching resources for statistics and probability at UC Santa Cruz."
 ---
 
 <!-- Page Header - Teaching -->
@@ -10,8 +10,8 @@ description: "Course materials, TA resources, and teaching support for Statistic
     Teaching
   </h1>
   <p class="page-lede">
-    I have taught and supported courses in statistics, probability, Bayesian inference, and data visualization at UC Santa Cruz.
-    This page collects selected public materials, course resources, and departmental TA guidance.
+    I teach and support courses in statistics, probability, statistical computing, Bayesian inference, and data visualization at UC Santa Cruz.
+    This page collects selected public course materials and departmental teaching resources.
   </p>
 </div>
 
@@ -56,13 +56,21 @@ description: "Course materials, TA resources, and teaching support for Statistic
               <ul class="teaching-list">
                 {% for resource in group.resources %}
                   <li>
-                    <a href="{{ resource.file | relative_url }}" class="teaching-link">
-                      <i class="far fa-file-pdf" aria-hidden="true"></i>
+                    {% if resource.url %}
+                      {% assign resource_href = resource.url %}
+                    {% else %}
+                      {% assign resource_href = resource.file | relative_url %}
+                    {% endif %}
+                    <a href="{{ resource_href }}"{% if resource.url %} target="_blank" rel="noopener noreferrer"{% endif %} class="teaching-link">
+                      <i class="{{ resource.icon | default: 'far fa-file-pdf' }}" aria-hidden="true"></i>
                       <span>
                         {{ resource.title }}
                         <span class="teaching-resource-meta">
                           {{ resource.type }}{% if resource.term %} · {{ resource.term }}{% endif %}
                         </span>
+                        {% if resource.description %}
+                          <span class="teaching-resource-description">{{ resource.description }}</span>
+                        {% endif %}
                       </span>
                     </a>
                   </li>
@@ -74,13 +82,21 @@ description: "Course materials, TA resources, and teaching support for Statistic
           <ul class="teaching-list">
             {% for resource in course.resources %}
               <li>
-                <a href="{{ resource.file | relative_url }}" class="teaching-link">
-                  <i class="far fa-file-pdf" aria-hidden="true"></i>
+                {% if resource.url %}
+                  {% assign resource_href = resource.url %}
+                {% else %}
+                  {% assign resource_href = resource.file | relative_url %}
+                {% endif %}
+                <a href="{{ resource_href }}"{% if resource.url %} target="_blank" rel="noopener noreferrer"{% endif %} class="teaching-link">
+                  <i class="{{ resource.icon | default: 'far fa-file-pdf' }}" aria-hidden="true"></i>
                   <span>
                     {{ resource.title }}
                     <span class="teaching-resource-meta">
                       {{ resource.type }}{% if resource.term %} · {{ resource.term }}{% endif %}
                     </span>
+                    {% if resource.description %}
+                      <span class="teaching-resource-description">{{ resource.description }}</span>
+                    {% endif %}
                   </span>
                 </a>
               </li>
