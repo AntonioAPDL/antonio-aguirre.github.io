@@ -6,7 +6,7 @@ description: "Background, research focus, teaching, service, and applied experie
 
 {% assign exdqlm = site.data.cran_packages.exdqlm %}
 {% assign outputs = site.data.research_outputs %}
-{% assign exdqlm_version = exdqlm.version | default: "1.1.0" %}
+{% assign exdqlm_version = exdqlm.version | default: "1.1.2" %}
 {% assign exdqlm_article = outputs.exdqlm_article %}
 {% assign exdqlm_arxiv_url = exdqlm_article.arxiv_url | default: exdqlm.arxiv_url %}
 {% assign mti_tolerance = outputs.mti_tolerance %}

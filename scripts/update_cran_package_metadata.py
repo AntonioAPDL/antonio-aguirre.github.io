@@ -87,13 +87,13 @@ def render_yaml(metadata: dict[str, str]) -> str:
 
 def update_cv_text(text: str, version: str) -> str:
     text, software_count = re.subn(
-        r"CRAN v\d+(?:\.\d+)*; JSS software article submitted",
-        f"CRAN v{version}; JSS software article submitted",
+        r"(\\projectentry\{\\href\{https://CRAN\.R-project\.org/package=exdqlm\}\{exdqlm\} -- CRAN R package v)\d+(?:\.\d+)*",
+        rf"\g<1>{version}",
         text,
     )
     text, publication_count = re.subn(
-        r"(?:companion R package released on CRAN, version \d+(?:\.\d+)*\.|R package on CRAN v\d+(?:\.\d+)*;)",
-        f"R package on CRAN v{version};",
+        r"(Submitted to the \\textit\{Journal of Statistical Software\}; CRAN R package v)\d+(?:\.\d+)*",
+        rf"\g<1>{version}",
         text,
     )
 
