@@ -32,6 +32,7 @@ description: "Live research displays for observations, forecast guidance, and en
          data-observation-stale-hours="6"
          data-forecast-stale-hours="36"
          data-future-horizon-hours="240"
+         data-discharge-scale="log1p"
          data-y-min="0"
          data-title="San Lorenzo River Discharge"
          data-ylabel="Discharge"
@@ -41,6 +42,13 @@ description: "Live research displays for observations, forecast guidance, and en
          data-flood-moderate-cfs=""
          data-flood-major-cfs="">
       <div class="plot-status" role="status" aria-live="polite">Loading river flow data...</div>
+      <div class="plot-controls" aria-label="Discharge display controls">
+        <span class="plot-controls__label">Scale</span>
+        <div class="plot-scale-control" role="group" aria-label="Discharge scale">
+          <button type="button" class="is-active" data-plot-scale="log1p" aria-pressed="true">log(x + 1)</button>
+          <button type="button" data-plot-scale="linear" aria-pressed="false">Original</button>
+        </div>
+      </div>
       <div class="plot-stage plot-iframe" role="img" aria-label="San Lorenzo River discharge plot">
         <div class="plot-skeleton" aria-hidden="true">
           <div class="plot-skeleton__spinner"></div>

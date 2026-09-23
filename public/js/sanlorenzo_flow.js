@@ -11,7 +11,7 @@
     refreshMin: 15,
     timeoutSec: 20,
     mode: 'discharge',
-    logY: false,
+    dischargeScale: 'log1p',
     observationWindowDays: 20,
     futureHorizonHours: 240,
     dailyAvgMinCoverage: 0.90,
@@ -22,6 +22,8 @@
   const MAX_BACKOFF_MS = 60 * 60 * 1000;
   const MIN_CACHE_AGE_MS = 30 * 60 * 1000;
   const STORAGE_VERSION = 4;
+  const DISCHARGE_SCALE_LINEAR = 'linear';
+  const DISCHARGE_SCALE_LOG1P = 'log1p';
   const CFS_TO_CMS = 0.0283168466;
   const CMS_TO_CFS = 1 / CFS_TO_CMS;
   const PLOT_LAYOUT_STYLE = {
@@ -61,14 +63,6 @@
     if (raw === undefined || raw === null || raw === '') return null;
     const parsed = Number(raw);
     return Number.isFinite(parsed) ? parsed : null;
-  }
-
-  function parseBoolean(raw, fallback) {
-    if (raw === undefined || raw === null || raw === '') return fallback;
-    const value = String(raw).toLowerCase();
-    if (value === 'true' || value === '1' || value === 'yes') return true;
-    if (value === 'false' || value === '0' || value === 'no') return false;
-    return fallback;
   }
 
   function formatDate(value) {
@@ -152,6 +146,62 @@
     return NaN;
   }
 
+  function normalizeDischargeScale(raw, fallback = DEFAULTS.dischargeScale) {
+    const value = String(raw || '').trim().toLowerCase();
+    if (value === DISCHARGE_SCALE_LINEAR || value === 'original' || value === 'raw') {
+      return DISCHARGE_SCALE_LINEAR;
+    }
+    if (value === DISCHARGE_SCALE_LOG1P || value === 'log1p' || value === 'log' || value === 'logx1') {
+      return DISCHARGE_SCALE_LOG1P;
+    }
+    return fallback === DISCHARGE_SCALE_LINEAR ? DISCHARGE_SCALE_LINEAR : DISCHARGE_SCALE_LOG1P;
+  }
+
+  function transformDischargeValue(value, scale) {
+    if (!Number.isFinite(value)) return NaN;
+    if (scale === DISCHARGE_SCALE_LOG1P) {
+      return value >= 0 ? Math.log1p(value) : NaN;
+    }
+    return value;
+  }
+
+  function transformDischargePoint(point, scale) {
+    if (!point || !(point.x instanceof Date) || Number.isNaN(point.x.getTime())) return null;
+    const rawY = Number.isFinite(point.rawY) ? point.rawY : Number(point.y);
+    if (!Number.isFinite(rawY)) return null;
+    const y = transformDischargeValue(rawY, scale);
+    if (!Number.isFinite(y)) return null;
+    return { x: point.x, y, rawY };
+  }
+
+  function transformDischargeSeries(points, scale) {
+    if (!Array.isArray(points)) return [];
+    return points
+      .map((point) => transformDischargePoint(point, scale))
+      .filter(Boolean)
+      .sort((a, b) => a.x - b.x);
+  }
+
+  function rawValue(point) {
+    if (point && Number.isFinite(point.rawY)) return point.rawY;
+    if (point && Number.isFinite(point.y)) return point.y;
+    return NaN;
+  }
+
+  function scaleValueLabel(units, scale) {
+    if (scale === DISCHARGE_SCALE_LOG1P) {
+      return units ? `log(x + 1), x in ${units}` : 'log(x + 1)';
+    }
+    return units || '';
+  }
+
+  function hoverTemplate(label, unitLabel, scale) {
+    if (scale === DISCHARGE_SCALE_LOG1P) {
+      return `%{x|%b %d, %Y %H:%M UTC}<br>${label}: %{customdata:.2f} ${unitLabel}<br>log(x + 1): %{y:.2f}<extra></extra>`;
+    }
+    return `%{x|%b %d, %Y %H:%M UTC}<br>${label}: %{y:.2f} ${unitLabel}<extra></extra>`;
+  }
+
   function colorWithAlpha(color, alpha) {
     if (typeof color !== 'string') return color;
     const hex = color.trim();
@@ -177,7 +227,7 @@
     return color;
   }
 
-  function parseFlowSeries(series, fromUnits, toUnits, logAxis) {
+  function parseFlowSeries(series, fromUnits, toUnits, scale) {
     if (!Array.isArray(series) || !series.length) return [];
     const out = [];
     series.forEach((row) => {
@@ -188,14 +238,15 @@
       if (!Number.isFinite(rawValue)) return;
       const converted = convertFlowUnits(rawValue, fromUnits, toUnits);
       if (!Number.isFinite(converted)) return;
-      if (logAxis && converted <= 0) return;
-      out.push({ x: timestamp, y: converted });
+      const y = transformDischargeValue(converted, scale);
+      if (!Number.isFinite(y)) return;
+      out.push({ x: timestamp, y, rawY: converted });
     });
     out.sort((a, b) => a.x - b.x);
     return out;
   }
 
-  function createBandTraces(p10Points, p90Points, p50Points, label, unitLabel, colorLine, colorBand, legendRank) {
+  function createBandTraces(p10Points, p90Points, p50Points, label, unitLabel, scale, colorLine, colorBand, legendRank) {
     const traces = [];
     const p10Ready = Array.isArray(p10Points) && p10Points.length;
     const p90Ready = Array.isArray(p90Points) && p90Points.length;
@@ -205,6 +256,7 @@
       traces.push({
         x: p90Points.map((p) => p.x),
         y: p90Points.map((p) => p.y),
+        customdata: p90Points.map((p) => rawValue(p)),
         type: 'scatter',
         mode: 'lines',
         line: { width: 0, color: colorBand },
@@ -215,6 +267,7 @@
       traces.push({
         x: p10Points.map((p) => p.x),
         y: p10Points.map((p) => p.y),
+        customdata: p10Points.map((p) => rawValue(p)),
         type: 'scatter',
         mode: 'lines',
         line: { width: 0, color: colorBand },
@@ -223,7 +276,7 @@
         name: `${label} p10-p90`,
         legendrank: legendRank,
         legendgroup: label,
-        hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>${label} p10-p90: %{y:.2f} ${unitLabel}<extra></extra>`
+        hovertemplate: hoverTemplate(`${label} p10-p90`, unitLabel, scale)
       });
     }
 
@@ -231,13 +284,14 @@
       traces.push({
         x: p50Points.map((p) => p.x),
         y: p50Points.map((p) => p.y),
+        customdata: p50Points.map((p) => rawValue(p)),
         type: 'scatter',
         mode: 'lines',
         name: `${label} p50`,
         legendrank: legendRank + 1,
         legendgroup: label,
         line: { color: colorLine, width: 2.0 },
-        hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>${label} p50: %{y:.2f} ${unitLabel}<extra></extra>`
+        hovertemplate: hoverTemplate(`${label} p50`, unitLabel, scale)
       });
     }
     return traces;
@@ -256,7 +310,7 @@
     });
   }
 
-  function buildDailyAverageOverlay(points, units, colors, logAxis, xRange, minCoverage) {
+  function buildDailyAverageOverlay(points, units, colors, scale, xRange, minCoverage) {
     const traces = [];
     const extentPoints = [];
     if (!Array.isArray(points) || points.length < 4) {
@@ -286,10 +340,11 @@
     const byDay = new Map();
     points.forEach((point) => {
       if (!point || !(point.x instanceof Date) || Number.isNaN(point.x.getTime())) return;
-      if (!Number.isFinite(point.y)) return;
+      const value = rawValue(point);
+      if (!Number.isFinite(value)) return;
       const dayKey = point.x.toISOString().slice(0, 10); // UTC day bucket.
       const rec = byDay.get(dayKey) || { sum: 0, count: 0 };
-      rec.sum += point.y;
+      rec.sum += value;
       rec.count += 1;
       byDay.set(dayKey, rec);
     });
@@ -302,9 +357,10 @@
       if (!rec || rec.count < minPoints) return;
       const avg = rec.sum / rec.count;
       if (!Number.isFinite(avg)) return;
-      if (logAxis && avg <= 0) return;
+      const y = transformDischargeValue(avg, scale);
+      if (!Number.isFinite(y)) return;
       // Noon UTC marker keeps the day-level series aligned and legible.
-      dailyPoints.push({ x: new Date(`${dayKey}T12:00:00Z`), y: avg });
+      dailyPoints.push({ x: new Date(`${dayKey}T12:00:00Z`), y, rawY: avg });
     });
 
     const dailyInRange = filterSeriesToXRange(dailyPoints, xRange);
@@ -316,6 +372,7 @@
     traces.push({
       x: dailyInRange.map((p) => p.x),
       y: dailyInRange.map((p) => p.y),
+      customdata: dailyInRange.map((p) => rawValue(p)),
       type: 'scatter',
       mode: 'lines+markers',
       name: 'Daily avg (derived)',
@@ -327,7 +384,9 @@
         symbol: 'circle-open',
         line: { color: lineColor, width: 1.2 }
       },
-      hovertemplate: `%{x|%b %d, %Y}<br>Daily avg (derived): %{y:.2f} ${units}<extra></extra>`
+      hovertemplate: scale === DISCHARGE_SCALE_LOG1P
+        ? `%{x|%b %d, %Y}<br>Daily avg (derived): %{customdata:.2f} ${units}<br>log(x + 1): %{y:.2f}<extra></extra>`
+        : `%{x|%b %d, %Y}<br>Daily avg (derived): %{y:.2f} ${units}<extra></extra>`
     });
 
     dailyInRange.forEach((point) => extentPoints.push(point));
@@ -381,22 +440,23 @@
     };
   }
 
-  function createForecastLineTrace(points, label, unitLabel, colorLine, dash, legendRank) {
+  function createForecastLineTrace(points, label, unitLabel, scale, colorLine, dash, legendRank) {
     if (!Array.isArray(points) || !points.length) return null;
     return {
       x: points.map((p) => p.x),
       y: points.map((p) => p.y),
+      customdata: points.map((p) => rawValue(p)),
       type: 'scatter',
       mode: 'lines+markers',
       name: label,
       legendrank: legendRank,
       line: { color: colorLine, width: 2.0, dash: dash || 'solid' },
       marker: { color: colorLine, size: 3.6 },
-      hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>${label}: %{y:.2f} ${unitLabel}<extra></extra>`
+      hovertemplate: hoverTemplate(label, unitLabel, scale)
     };
   }
 
-  function buildForecastOverlay(payload, observedUnits, logAxis) {
+  function buildForecastOverlay(payload, observedUnits, scale) {
     const traces = [];
     const extentPoints = [];
     const noteParts = [];
@@ -436,13 +496,13 @@
     const medium = ranges.medium_range && typeof ranges.medium_range === 'object' ? ranges.medium_range : {};
     const longRange = ranges.long_range && typeof ranges.long_range === 'object' ? ranges.long_range : {};
 
-    const shortSeries = parseFlowSeries(shortRange.deterministic, forecastUnits, observedFlowUnits, logAxis);
-    const mediumP10 = parseFlowSeries(medium.p10, forecastUnits, observedFlowUnits, logAxis);
-    const mediumP50 = parseFlowSeries(medium.p50, forecastUnits, observedFlowUnits, logAxis);
-    const mediumP90 = parseFlowSeries(medium.p90, forecastUnits, observedFlowUnits, logAxis);
-    const longP10 = parseFlowSeries(longRange.p10, forecastUnits, observedFlowUnits, logAxis);
-    const longP50 = parseFlowSeries(longRange.p50, forecastUnits, observedFlowUnits, logAxis);
-    const longP90 = parseFlowSeries(longRange.p90, forecastUnits, observedFlowUnits, logAxis);
+    const shortSeries = parseFlowSeries(shortRange.deterministic, forecastUnits, observedFlowUnits, scale);
+    const mediumP10 = parseFlowSeries(medium.p10, forecastUnits, observedFlowUnits, scale);
+    const mediumP50 = parseFlowSeries(medium.p50, forecastUnits, observedFlowUnits, scale);
+    const mediumP90 = parseFlowSeries(medium.p90, forecastUnits, observedFlowUnits, scale);
+    const longP10 = parseFlowSeries(longRange.p10, forecastUnits, observedFlowUnits, scale);
+    const longP50 = parseFlowSeries(longRange.p50, forecastUnits, observedFlowUnits, scale);
+    const longP90 = parseFlowSeries(longRange.p90, forecastUnits, observedFlowUnits, scale);
     const ensembleSeries = [shortSeries, mediumP10, mediumP50, mediumP90, longP10, longP50, longP90];
     let forecastStart = null;
     ensembleSeries.forEach((series) => {
@@ -458,6 +518,7 @@
       shortSeries,
       'NWS short',
       observedFlowUnits,
+      scale,
       '#1d4ed8',
       'solid',
       18
@@ -471,6 +532,7 @@
         mediumP50,
         'NWS medium',
         observedFlowUnits,
+        scale,
         '#5844c6',
         'rgba(88, 68, 198, 0.18)',
         20
@@ -481,6 +543,7 @@
         longP50,
         'NWS long',
         observedFlowUnits,
+        scale,
         '#6f2d91',
         'rgba(111, 45, 145, 0.16)',
         30
@@ -512,7 +575,7 @@
     };
   }
 
-  function buildQdesnOverlay(payload, observedUnits, logAxis, xRange) {
+  function buildQdesnOverlay(payload, observedUnits, scale, xRange) {
     const traces = [];
     const extentPoints = [];
     let warning = null;
@@ -551,15 +614,15 @@
     const hi95Raw = series.hi95 || series.upper95 || series.p975 || null;
 
     const q50 = filterSeriesToXRange(
-      parseFlowSeries(q50Raw, modelUnits, observedFlowUnits, logAxis),
+      parseFlowSeries(q50Raw, modelUnits, observedFlowUnits, scale),
       xRange
     );
     const lo95 = filterSeriesToXRange(
-      parseFlowSeries(lo95Raw, modelUnits, observedFlowUnits, logAxis),
+      parseFlowSeries(lo95Raw, modelUnits, observedFlowUnits, scale),
       xRange
     );
     const hi95 = filterSeriesToXRange(
-      parseFlowSeries(hi95Raw, modelUnits, observedFlowUnits, logAxis),
+      parseFlowSeries(hi95Raw, modelUnits, observedFlowUnits, scale),
       xRange
     );
 
@@ -567,6 +630,7 @@
       traces.push({
         x: hi95.map((p) => p.x),
         y: hi95.map((p) => p.y),
+        customdata: hi95.map((p) => rawValue(p)),
         type: 'scatter',
         mode: 'lines',
         line: { width: 0, color: 'rgba(15, 118, 110, 0.18)' },
@@ -577,6 +641,7 @@
       traces.push({
         x: lo95.map((p) => p.x),
         y: lo95.map((p) => p.y),
+        customdata: lo95.map((p) => rawValue(p)),
         type: 'scatter',
         mode: 'lines',
         line: { width: 0, color: 'rgba(15, 118, 110, 0.18)' },
@@ -585,7 +650,7 @@
         name: 'Q-DESN 95% interval',
         legendrank: 18,
         legendgroup: 'qdesn',
-        hovertemplate: `%{x|%b %d, %Y}<br>Q-DESN 95% interval: %{y:.2f} ${observedFlowUnits}<extra></extra>`
+        hovertemplate: hoverTemplate('Q-DESN 95% interval', observedFlowUnits, scale)
       });
     }
 
@@ -593,13 +658,14 @@
       traces.push({
         x: q50.map((p) => p.x),
         y: q50.map((p) => p.y),
+        customdata: q50.map((p) => rawValue(p)),
         type: 'scatter',
         mode: 'lines',
         name: 'Q-DESN median (q50)',
         legendrank: 19,
         legendgroup: 'qdesn',
         line: { color: '#0f766e', width: 2.4, dash: 'solid' },
-        hovertemplate: `%{x|%b %d, %Y}<br>Q-DESN p50: %{y:.2f} ${observedFlowUnits}<extra></extra>`
+        hovertemplate: hoverTemplate('Q-DESN p50', observedFlowUnits, scale)
       });
     }
 
@@ -636,11 +702,10 @@
     return error;
   }
 
-  function getDataExtent(points, logAxis) {
+  function getDataExtent(points) {
     const values = points
       .map((point) => point.y)
-      .filter((value) => Number.isFinite(value))
-      .filter((value) => !logAxis || value > 0);
+      .filter((value) => Number.isFinite(value));
     if (!values.length) return null;
     return {
       min: Math.min(...values),
@@ -702,7 +767,7 @@
     return { series, points };
   }
 
-  function buildLayout(yTitle, colors, yRange, shapes, logAxis, annotations, xRange) {
+  function buildLayout(yTitle, colors, yRange, shapes, annotations, xRange) {
     const yaxis = {
       title: yTitle,
       gridcolor: colors.grid,
@@ -710,17 +775,12 @@
       showline: true,
       linecolor: colors.grid,
       automargin: true,
-      type: logAxis ? 'log' : 'linear'
+      type: 'linear'
     };
 
     if (Array.isArray(yRange) && Number.isFinite(yRange[0]) && Number.isFinite(yRange[1])) {
-      if (logAxis && yRange[0] > 0 && yRange[1] > 0) {
-        yaxis.range = [Math.log10(yRange[0]), Math.log10(yRange[1])];
-        yaxis.autorange = false;
-      } else if (!logAxis) {
-        yaxis.range = yRange;
-        yaxis.autorange = false;
-      }
+      yaxis.range = yRange;
+      yaxis.autorange = false;
     }
 
     const xaxis = {
@@ -772,12 +832,13 @@
     };
   }
 
-  function buildTrace(points, units, colors) {
+  function buildTrace(points, units, colors, scale) {
     const unitLabel = units ? ` ${units}` : '';
     const observedColor = colorWithAlpha(colors.line, 0.45);
     return {
       x: points.map((p) => p.x),
       y: points.map((p) => p.y),
+      customdata: points.map((p) => rawValue(p)),
       type: 'scatter',
       mode: 'lines+markers',
       name: 'Observed (15-min)',
@@ -791,7 +852,7 @@
         symbol: 'circle',
         line: { width: 0 }
       },
-      hovertemplate: `%{x|%b %d, %Y %H:%M UTC}<br>Observed (15-min): %{y:.2f}${unitLabel}<extra></extra>`
+      hovertemplate: hoverTemplate('Observed (15-min)', unitLabel.trim(), scale)
     };
   }
 
@@ -866,21 +927,29 @@
     return pool[0];
   }
 
-  function buildThresholdShapes(config, colors, yRange) {
+  function buildThresholdShapes(config, colors, yRange, scale) {
     const shapes = [];
     const annotations = [];
-    const minor = config.thresholdMinor;
-    const moderate = config.thresholdModerate;
-    const major = config.thresholdMajor;
+    const minorRaw = config.thresholdMinor;
+    const moderateRaw = config.thresholdModerate;
+    const majorRaw = config.thresholdMajor;
 
-    if (!Number.isFinite(minor) || !Number.isFinite(major)) {
+    if (!Number.isFinite(minorRaw) || !Number.isFinite(majorRaw)) {
       return { shapes, annotations };
     }
 
-    if (Number.isFinite(moderate) && (moderate <= minor || major <= moderate)) {
+    if (Number.isFinite(moderateRaw) && (moderateRaw <= minorRaw || majorRaw <= moderateRaw)) {
       console.warn('[usgs-iv] Thresholds should be ordered minor < moderate < major.', config);
-    } else if (major <= minor) {
+    } else if (majorRaw <= minorRaw) {
       console.warn('[usgs-iv] Major threshold must exceed minor threshold.', config);
+      return { shapes, annotations };
+    }
+
+    const minor = transformDischargeValue(minorRaw, scale);
+    const moderate = Number.isFinite(moderateRaw) ? transformDischargeValue(moderateRaw, scale) : null;
+    const major = transformDischargeValue(majorRaw, scale);
+
+    if (!Number.isFinite(minor) || !Number.isFinite(major)) {
       return { shapes, annotations };
     }
 
@@ -960,7 +1029,6 @@
 
     const addLabel = (label, yValue, color) => {
       if (!Number.isFinite(yValue)) return;
-      if (config.logY && yValue <= 0) return;
       annotations.push({
         xref: 'paper',
         x: 0.02,
@@ -1014,6 +1082,10 @@
       this.stageEl = container.querySelector('.plot-stage');
       this.chartEl = container.querySelector('.usgs-iv-plot__chart');
       this.skeletonEl = container.querySelector('.plot-skeleton');
+      this.scaleButtons = Array.from(container.querySelectorAll('[data-plot-scale]'));
+      this.currentScale = this.config.mode === 'discharge'
+        ? this.config.dischargeScale
+        : DISCHARGE_SCALE_LINEAR;
 
       this.timerId = null;
       this.failCount = 0;
@@ -1043,7 +1115,7 @@
       const forecastStaleHoursRaw = parseNumber(dataset.forecastStaleHours, DEFAULTS.forecastStaleHours);
       const modeRaw = (dataset.mode || DEFAULTS.mode).toLowerCase();
       const mode = modeRaw === 'stage' ? 'stage' : 'discharge';
-      const logY = parseBoolean(dataset.logY, DEFAULTS.logY);
+      const dischargeScale = normalizeDischargeScale(dataset.dischargeScale || dataset.scale);
       const yMin = parseOptionalNumber(dataset.yMin);
       const yMax = parseOptionalNumber(dataset.yMax);
       const parameterCd = dataset.parameter || (mode === 'stage' ? '00065' : '00060');
@@ -1073,7 +1145,7 @@
         forecastUrl: forecastUrlRaw,
         forecastFallbackUrl: forecastFallbackUrlRaw,
         qdesnUrl: qdesnUrlRaw,
-        logY: logY,
+        dischargeScale: dischargeScale,
         observationWindowDays: observationWindowDays,
         dailyAvgMinCoverage: clampNumber(dailyAvgMinCoverageRaw, 0.5, 1.0, DEFAULTS.dailyAvgMinCoverage),
         observationStaleHours: clampNumber(
@@ -1099,6 +1171,47 @@
       return `usgs-iv:${siteId || 'unknown'}:${parameterCd || 'unknown'}:${period || 'P30D'}:v${STORAGE_VERSION}`;
     }
 
+    setupScaleControl() {
+      if (this.config.mode !== 'discharge' || !this.scaleButtons.length) {
+        return;
+      }
+
+      this.scaleButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const nextScale = normalizeDischargeScale(button.dataset.plotScale, this.currentScale);
+          if (nextScale === this.currentScale) {
+            this.updateScaleControl();
+            return;
+          }
+          this.currentScale = nextScale;
+          this.updateScaleControl();
+          this.rerenderForScale();
+        });
+      });
+      this.updateScaleControl();
+    }
+
+    updateScaleControl() {
+      if (!this.scaleButtons.length) return;
+      this.scaleButtons.forEach((button) => {
+        const scale = normalizeDischargeScale(button.dataset.plotScale, DISCHARGE_SCALE_LINEAR);
+        const active = scale === this.currentScale;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+    }
+
+    rerenderForScale() {
+      if (!this.lastRenderData || !Array.isArray(this.lastRenderData.points) || !this.lastRenderData.points.length) {
+        return;
+      }
+      try {
+        this.renderPlot(this.lastRenderData);
+      } catch (err) {
+        console.warn('[usgs-iv] Failed to rerender for scale update', err);
+      }
+    }
+
     validate() {
       let valid = true;
 
@@ -1110,10 +1223,6 @@
       if (Number.isFinite(this.config.yMin) && Number.isFinite(this.config.yMax) &&
           this.config.yMax <= this.config.yMin) {
         console.warn('[usgs-iv] data-y-max must exceed data-y-min.', this.container);
-      }
-
-      if (this.config.logY && Number.isFinite(this.config.yMin) && this.config.yMin <= 0) {
-        console.warn('[usgs-iv] data-y-min must be > 0 for log scale.', this.container);
       }
 
       if (Number.isFinite(this.config.thresholdMinor) && Number.isFinite(this.config.thresholdMajor) &&
@@ -1129,15 +1238,6 @@
           console.warn('[usgs-iv] data-threshold-moderate should sit between minor and major.', this.container);
         }
       }
-      if (this.config.logY) {
-        ['thresholdMinor', 'thresholdModerate', 'thresholdMajor'].forEach((key) => {
-          const value = this.config[key];
-          if (Number.isFinite(value) && value <= 0) {
-            console.warn('[usgs-iv] Thresholds must be > 0 for log scale.', this.container);
-          }
-        });
-      }
-
       if (!this.statusEl) {
         console.warn('[usgs-iv] Missing .plot-status element. Creating one.', this.container);
         this.statusEl = document.createElement('div');
@@ -1167,6 +1267,7 @@
         return;
       }
 
+      this.setupScaleControl();
       this.renderFromCache();
       this.requestRefresh('init');
     }
@@ -1268,10 +1369,10 @@
       }
 
       const colors = getThemeColors();
-      const logAxis = this.config.logY;
+      const scale = this.config.mode === 'discharge' ? this.currentScale : DISCHARGE_SCALE_LINEAR;
       const displayUnits = normalizeUnits(units);
-      const usablePoints = logAxis
-        ? points.filter((point) => Number.isFinite(point.y) && point.y > 0)
+      const usablePoints = this.config.mode === 'discharge'
+        ? transformDischargeSeries(points, scale)
         : points.slice();
 
       if (!usablePoints.length) {
@@ -1281,17 +1382,17 @@
 
       const xRange = this.resolveTimelineWindow(lastObs);
       const forecastOverlay = (this.config.mode === 'discharge')
-        ? buildForecastOverlay(forecastPayload, displayUnits, logAxis)
+        ? buildForecastOverlay(forecastPayload, displayUnits, scale)
         : { traces: [], extentPoints: [], note: null, warning: null };
       const qdesnOverlay = (this.config.mode === 'discharge')
-        ? buildQdesnOverlay(qdesnPayload, displayUnits, logAxis, xRange)
+        ? buildQdesnOverlay(qdesnPayload, displayUnits, scale, xRange)
         : { traces: [], extentPoints: [], note: null, warning: null };
       const dailyOverlay = (this.config.mode === 'discharge')
         ? buildDailyAverageOverlay(
           usablePoints,
           displayUnits,
           colors,
-          logAxis,
+          scale,
           xRange,
           this.config.dailyAvgMinCoverage
         )
@@ -1301,24 +1402,28 @@
         .concat(dailyOverlay.extentPoints || [])
         .concat(qdesnOverlay.extentPoints || [])
         .concat(forecastOverlay.extentPoints || []);
-      const extent = getDataExtent(extentCandidates, logAxis);
-      let yMin = Number.isFinite(this.config.yMin) ? this.config.yMin : extent && extent.min;
-      let yMax = Number.isFinite(this.config.yMax) ? this.config.yMax : extent && extent.max;
+      const extent = getDataExtent(extentCandidates);
+      let yMin = Number.isFinite(this.config.yMin)
+        ? transformDischargeValue(this.config.yMin, scale)
+        : extent && extent.min;
+      let yMax = Number.isFinite(this.config.yMax)
+        ? transformDischargeValue(this.config.yMax, scale)
+        : extent && extent.max;
 
-      if (logAxis && Number.isFinite(yMin) && yMin <= 0 && extent) {
-        yMin = extent.min;
-      }
       if (!Number.isFinite(yMin) || !Number.isFinite(yMax) || yMax <= yMin) {
         yMin = extent ? extent.min : null;
         yMax = extent ? extent.max : null;
       }
 
       const yRange = Number.isFinite(yMin) && Number.isFinite(yMax) ? [yMin, yMax] : null;
-      const yTitleBase = displayUnits ? `${this.config.yLabel} (${displayUnits})` : this.config.yLabel;
-      const yTitle = logAxis ? `${yTitleBase} (log scale)` : yTitleBase;
-      const threshold = buildThresholdShapes(this.config, colors, yRange);
+      const yTitle = this.config.mode === 'discharge'
+        ? (scale === DISCHARGE_SCALE_LOG1P
+          ? `${this.config.yLabel} (${scaleValueLabel(displayUnits, scale)})`
+          : (displayUnits ? `${this.config.yLabel} (${displayUnits})` : this.config.yLabel))
+        : (displayUnits ? `${this.config.yLabel} (${displayUnits})` : this.config.yLabel);
+      const threshold = buildThresholdShapes(this.config, colors, yRange, scale);
       const forecastStartMarker = buildForecastStartMarker(forecastOverlay.forecastStart, colors);
-      const baseTrace = buildTrace(usablePoints, displayUnits, colors);
+      const baseTrace = buildTrace(usablePoints, displayUnits, colors, scale);
       const traces = [baseTrace]
         .concat(dailyOverlay.traces || [])
         .concat(qdesnOverlay.traces || [])
@@ -1329,7 +1434,7 @@
       Plotly.react(
         this.chartEl,
         traces,
-        buildLayout(yTitle, colors, yRange, allShapes, logAxis, allAnnotations, xRange),
+        buildLayout(yTitle, colors, yRange, allShapes, allAnnotations, xRange),
         { responsive: true, displayModeBar: false }
       );
 
@@ -1340,7 +1445,7 @@
         lastRefresh
       };
       this.lastRenderData = {
-        points: usablePoints.map((point) => ({ x: point.x, y: point.y })),
+        points: points.map((point) => ({ x: point.x, y: point.y })),
         siteName,
         units: displayUnits,
         lastObs,

@@ -831,6 +831,64 @@ body.dark-theme .plot-status__title {
   background: var(--gefs-head-bg);
 }
 
+.plot-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.52rem 0.9rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-1);
+}
+
+.plot-controls__label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-subtle);
+  text-transform: uppercase;
+}
+
+.plot-scale-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  padding: 0.18rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--surface-1);
+}
+
+.plot-scale-control button {
+  min-height: 2rem;
+  padding: 0 0.72rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-subtle);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.plot-scale-control button:hover,
+.plot-scale-control button:focus-visible {
+  color: var(--accent-color);
+}
+
+.plot-scale-control button:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.plot-scale-control button.is-active {
+  background: var(--accent-color);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(17, 24, 39, 0.12);
+}
+
 .usgs-iv-plot .plot-stage {
   border-top: 0;
   background:
@@ -971,6 +1029,10 @@ body.dark-theme .plot-status__title {
   .gefs-forecast-panel .plot-iframe {
     height: 46vh;
     min-height: 230px;
+  }
+  .plot-controls {
+    align-items: flex-start;
+    flex-direction: column;
   }
   .home-highlights {
     grid-template-columns: 1fr;
