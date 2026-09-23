@@ -188,6 +188,32 @@
     return NaN;
   }
 
+  function firstFinite(...values) {
+    return values.find((value) => Number.isFinite(value));
+  }
+
+  function resolveYAxisLimit(config, scale, bound, fallback) {
+    const isMin = bound === 'min';
+    const sharedLimit = isMin ? config.yMin : config.yMax;
+
+    if (config.mode !== 'discharge') {
+      return Number.isFinite(sharedLimit) ? sharedLimit : fallback;
+    }
+
+    if (scale === DISCHARGE_SCALE_LINEAR) {
+      const linearLimit = isMin ? config.yMinLinear : config.yMaxLinear;
+      return firstFinite(linearLimit, sharedLimit, fallback);
+    }
+
+    if (scale === DISCHARGE_SCALE_LOG1P) {
+      const transformedLimit = isMin ? config.yMinLog1p : config.yMaxLog1p;
+      if (Number.isFinite(transformedLimit)) return transformedLimit;
+      if (Number.isFinite(sharedLimit)) return transformDischargeValue(sharedLimit, scale);
+    }
+
+    return fallback;
+  }
+
   function scaleValueLabel(units, scale) {
     if (scale === DISCHARGE_SCALE_LOG1P) {
       return units ? `log(x + 1), x in ${units}` : 'log(x + 1)';
@@ -1118,6 +1144,10 @@
       const dischargeScale = normalizeDischargeScale(dataset.dischargeScale || dataset.scale);
       const yMin = parseOptionalNumber(dataset.yMin);
       const yMax = parseOptionalNumber(dataset.yMax);
+      const yMinLinear = parseOptionalNumber(dataset.yMinLinear);
+      const yMaxLinear = parseOptionalNumber(dataset.yMaxLinear);
+      const yMinLog1p = parseOptionalNumber(dataset.yMinLog1p);
+      const yMaxLog1p = parseOptionalNumber(dataset.yMaxLog1p);
       const parameterCd = dataset.parameter || (mode === 'stage' ? '00065' : '00060');
       const defaultLabel = mode === 'stage' ? 'Stage' : 'Discharge';
       const floodMinor = parseOptionalNumber(dataset.floodMinorCfs || dataset.thresholdMinor);
@@ -1139,6 +1169,10 @@
         yLabel: dataset.ylabel || defaultLabel,
         yMin: yMin,
         yMax: yMax,
+        yMinLinear: yMinLinear,
+        yMaxLinear: yMaxLinear,
+        yMinLog1p: yMinLog1p,
+        yMaxLog1p: yMaxLog1p,
         thresholdMinor: floodMinor,
         thresholdModerate: floodModerate,
         thresholdMajor: floodMajor,
@@ -1223,6 +1257,26 @@
       if (Number.isFinite(this.config.yMin) && Number.isFinite(this.config.yMax) &&
           this.config.yMax <= this.config.yMin) {
         console.warn('[usgs-iv] data-y-max must exceed data-y-min.', this.container);
+      }
+
+      if (this.config.mode === 'discharge') {
+        const linearYMin = firstFinite(this.config.yMinLinear, this.config.yMin);
+        const linearYMax = firstFinite(this.config.yMaxLinear, this.config.yMax);
+        if (Number.isFinite(linearYMin) && Number.isFinite(linearYMax) && linearYMax <= linearYMin) {
+          console.warn('[usgs-iv] data-y-max-linear must exceed data-y-min-linear/data-y-min.', this.container);
+        }
+
+        const sharedLogYMin = Number.isFinite(this.config.yMin)
+          ? transformDischargeValue(this.config.yMin, DISCHARGE_SCALE_LOG1P)
+          : undefined;
+        const sharedLogYMax = Number.isFinite(this.config.yMax)
+          ? transformDischargeValue(this.config.yMax, DISCHARGE_SCALE_LOG1P)
+          : undefined;
+        const logYMin = firstFinite(this.config.yMinLog1p, sharedLogYMin);
+        const logYMax = firstFinite(this.config.yMaxLog1p, sharedLogYMax);
+        if (Number.isFinite(logYMin) && Number.isFinite(logYMax) && logYMax <= logYMin) {
+          console.warn('[usgs-iv] data-y-max-log1p must exceed data-y-min-log1p/data-y-min.', this.container);
+        }
       }
 
       if (Number.isFinite(this.config.thresholdMinor) && Number.isFinite(this.config.thresholdMajor) &&
@@ -1403,12 +1457,8 @@
         .concat(qdesnOverlay.extentPoints || [])
         .concat(forecastOverlay.extentPoints || []);
       const extent = getDataExtent(extentCandidates);
-      let yMin = Number.isFinite(this.config.yMin)
-        ? transformDischargeValue(this.config.yMin, scale)
-        : extent && extent.min;
-      let yMax = Number.isFinite(this.config.yMax)
-        ? transformDischargeValue(this.config.yMax, scale)
-        : extent && extent.max;
+      let yMin = resolveYAxisLimit(this.config, scale, 'min', extent && extent.min);
+      let yMax = resolveYAxisLimit(this.config, scale, 'max', extent && extent.max);
 
       if (!Number.isFinite(yMin) || !Number.isFinite(yMax) || yMax <= yMin) {
         yMin = extent ? extent.min : null;
