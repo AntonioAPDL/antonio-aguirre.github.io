@@ -492,11 +492,14 @@
     });
 
     if (traces.length) noteParts.unshift('Includes forecast guidance');
-    const availability = payload.availability && typeof payload.availability === 'object' ? payload.availability : {};
-    const extendedUnavailable = availability.extended_guidance_available === false
-      || (!mediumP50.length && !longP50.length);
-    if (traces.length && extendedUnavailable) {
-      warning = 'Medium/long NWS guidance is temporarily unavailable; showing available short-range guidance.';
+    const mediumAvailable = mediumP50.length > 0;
+    const longAvailable = longP50.length > 0;
+    if (traces.length && !mediumAvailable && !longAvailable) {
+      warning = 'Medium- and long-range NWS guidance is temporarily unavailable; showing available short-range guidance.';
+    } else if (traces.length && !mediumAvailable) {
+      warning = 'Medium-range NWS guidance is temporarily unavailable; showing available short- and long-range guidance.';
+    } else if (traces.length && !longAvailable) {
+      warning = 'Long-range NWS guidance is temporarily unavailable; showing available short- and medium-range guidance.';
     } else if (!traces.length) {
       warning = 'Forecast guidance is temporarily unavailable.';
     }

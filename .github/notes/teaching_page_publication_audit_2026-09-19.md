@@ -9,12 +9,22 @@ This update uses two authoritative Google Drive sources:
 
 The website stores stable local copies of the two course syllabi and all eleven CSE 107 lecture PDFs. The STAT 7L notebooks and report templates remain canonical Google links because they are interactive or collaboratively maintained Drive documents.
 
+### 2026-09-22 refresh
+
+The CSE 107 public PDFs were rechecked against the current `CSE107_Fall2026_Student_PDFs.zip` bundle in `02_Course_Materials`, modified in Drive on 2026-09-22. The public website copies now match the bundle for:
+
+- `CSE107_Syllabus.pdf`;
+- `CSE107_M00_Lectures.pdf` through `CSE107_M10_Lectures.pdf`.
+
+The refresh changed the syllabus and lecture decks M00--M02. Decks M03--M10 were already byte-identical to the Drive bundle. The bundle also contains notes, practice files, formula sheets, and answer-labeled materials; those were intentionally not added to the teaching page in this pass because the public page currently exposes only the syllabus and lecture decks for CSE 107.
+
 ## Published inventory
 
 ### CSE 107
 
-| Module | Topic | Pages |
+| Resource | Topic | Pages |
 | --- | --- | ---: |
+| Syllabus | Course policies, grading, schedule, and logistics | 10 |
 | 00 | Opening Week | 16 |
 | 01 | Counting and Conditioning | 36 |
 | 02 | Discrete Random Variables | 30 |
