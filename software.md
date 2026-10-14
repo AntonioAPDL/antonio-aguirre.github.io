@@ -165,13 +165,13 @@ description: "Public packages, research code, and selected implementation exampl
 
       <article class="software-project">
         <div class="software-project__meta">
-          <span>arXiv preprint / manuscript</span>
+          <span>arXiv preprints</span>
           <span>R / C++ / TeX</span>
         </div>
         <h3>Mean-Tilted Intervals</h3>
         <p>
           Manuscript and computation workspace for MTI fixed-content and tolerance intervals,
-          with <em>{{ mti_regression.title }}</em> listed as a submitted manuscript.
+          with regression and dynamic-model extensions described in <em>{{ mti_regression.title }}</em>.
         </p>
         <div class="software-project__links">
           <a href="{{ mti_tolerance.repository_url }}" target="_blank" rel="noopener noreferrer">
@@ -179,7 +179,11 @@ description: "Public packages, research code, and selected implementation exampl
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           </a>
           <a href="{{ mti_tolerance.arxiv_url }}" target="_blank" rel="noopener noreferrer">
-            <span>arXiv preprint</span>
+            <span>Fixed-content and tolerance preprint</span>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          </a>
+          <a href="{{ mti_regression.arxiv_url }}" target="_blank" rel="noopener noreferrer">
+            <span>Regression and dynamic models preprint</span>
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           </a>
         </div>

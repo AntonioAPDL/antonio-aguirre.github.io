@@ -75,8 +75,8 @@ description: "Background, research focus, teaching, service, and applied experie
         <a href="{{ mti_tolerance.arxiv_url }}" target="_blank" rel="noopener noreferrer">{{ mti_tolerance.title }}</a>.
       </li>
       <li>
-        <strong>MTI regression manuscript:</strong>
-        {{ mti_regression.title }}; submitted to arXiv; public identifier pending.
+        <strong>MTI regression preprint:</strong>
+        <a href="{{ mti_regression.arxiv_url }}" target="_blank" rel="noopener noreferrer">{{ mti_regression.title }}</a>.
       </li>
     </ul>
   </div>

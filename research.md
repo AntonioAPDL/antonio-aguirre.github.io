@@ -54,7 +54,7 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
       </p>
     </article>
     <article class="research-area">
-      <span>arXiv preprint / submitted manuscript</span>
+      <span>arXiv preprints</span>
       <h2>Mean-Tilted Intervals</h2>
       <p>
         MTI work separates fixed-content and tolerance-interval targets from regression and
@@ -163,7 +163,8 @@ description: "Research on Bayesian forecasting, quantile modeling, environmental
         <div>
           De Leon, A., Prado, R., Sansó, B.
           <em>{{ mti_regression.title }}</em>.
-          Manuscript on MTI regression and dynamic state-space extensions; public identifier pending.
+          Generalized-Bayes inference for interval endpoints in regression and dynamic state-space models.
+          <a href="{{ mti_regression.arxiv_url }}" target="_blank" rel="noopener noreferrer">arXiv:{{ mti_regression.arxiv_id }}</a>.
         </div>
       </li>
       <li class="research-output-item">
