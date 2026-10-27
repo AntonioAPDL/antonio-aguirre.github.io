@@ -54,6 +54,12 @@ The six research notes use owner-assigned editorial dates and retain October 27,
 2026 as their last update. See `.github/notes/blog_editorial_dates.md` for the
 date mapping and original-deployment record. Existing URLs have 301 redirects.
 
+For editorial revisions, use direct descriptions of the method, assumptions,
+results, and limitations. Replace generic emphasis with its specific statistical
+consequence; retain technical distinctions and uncertainty statements. Review
+prose in context rather than banning ordinary words. The collection-wide review
+and per-post findings are recorded in `.github/notes/blog_language_audit.md`.
+
 The first `exdqlm` tutorial has an executable runner that reads the article's R
 blocks directly. It requires the reference CRAN release, `exdqlm` 1.1.2. Use an
 isolated `R_LIBS` when a different version is installed by default.

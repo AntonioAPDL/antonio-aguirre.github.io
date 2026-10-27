@@ -7,14 +7,14 @@ updated: 2026-10-27
 last_modified_at: 2026-10-27
 theme: Interval targets
 tags: [intervals, uncertainty, mean-tilted-intervals, r]
-description: "Compare shortest, equal-tailed, and mean-preserving intervals under a known skewed distribution, and see why content alone does not determine placement."
+description: "Calculate shortest, equal-tailed, and mean-preserving intervals for an exponential distribution and compare their endpoints, widths, and retained means."
 excerpt: "An interval containing 80% of a distribution need not be central, shortest, or balanced around the mean. Those are different statistical targets."
 math: true
 ---
 
-An interval is often introduced by saying how much of a distribution it contains. That leaves an important question unanswered: **which part of the distribution should it contain?** Many intervals can have the same probability content and different locations, widths, and tail allocations.
+Probability content specifies the mass between an interval's endpoints, but does not determine their placement. Intervals containing the same population fraction can differ in location, width, and tail allocation. A statistical target must therefore specify a placement criterion as well as the requested probability content.
 
-For a symmetric unimodal distribution, familiar choices can coincide. A skewed distribution exposes the distinction. This note uses an exponential distribution, where every calculation can be checked directly, to compare three targets: the shortest interval, the equal-tailed interval, and the mean-preserving interval. These are population quantities. No data have yet been sampled, so there is no endpoint-estimation uncertainty or tolerance confidence to discuss.
+Some placement criteria coincide for symmetric unimodal distributions but differ under skewness. The exponential example below compares shortest, equal-tailed, and mean-preserving intervals using a known distribution. The calculations concern population functionals. Estimation uncertainty and tolerance confidence arise when intervals are constructed from samples, as discussed at the end.
 
 ## Describe the whole content class
 
@@ -57,7 +57,7 @@ $$
 =\frac{(a+1)e^{-a}-(b+1)e^{-b}}{c}.
 $$
 
-This expression makes the comparison more informative than just listing widths. The shortest window has a retained mean below the population mean because it omits the upper tail. Equal tails do not restore mean balance under skewness. Solving the retained-mean equation determines the mean-preserving member in this example.
+The expression quantifies the mean within each interval. The shortest exponential window has a retained mean below the population mean because it excludes the upper tail. Equal tail probabilities also need not preserve the mean under skewness. Solving the retained-mean equation selects the mean-preserving member of this fixed-content class.
 
 ```r
 actual_content <- pexp(intervals[, 2]) - pexp(intervals[, 1])
@@ -116,13 +116,13 @@ dev.off()
   <figcaption>All shaded regions have population content 0.8. The vertical dotted line is the population mean, not the retained mean of each shaded region. Identical axes make the placement differences visible.</figcaption>
 </figure>
 
-## Keep the target separate from its uncertainty
+## Estimation and tolerance confidence
 
 If the distribution were unknown, we would need to estimate the chosen interval from data. That introduces a new question: how variable are its endpoints? A posterior distribution or a sampling calculation can address endpoint uncertainty, but that uncertainty should not be confused with the probability mass between the endpoints.
 
-A tolerance interval asks something stronger and different: how often will the interval-construction procedure contain at least the requested population fraction over repeated samples? Neither a fitted 80% interval nor an endpoint credible band supplies that statement automatically. [The next note]({{ '/2026/07/09/tolerance-intervals/' | relative_url }}) makes the extra requirement explicit.
+A tolerance procedure must satisfy a repeated-sampling statement about containing at least the requested population fraction. Estimating a content-0.8 interval or reporting endpoint credible bands does not establish that statement. [The next note]({{ '/2026/07/09/tolerance-intervals/' | relative_url }}) describes the additional calibration requirement and a finite-sample construction.
 
-Before comparing interval procedures, name the target. Equal-tailed, shortest, and mean-preserving intervals answer different placement questions even when their content agrees. An evaluation that rewards one placement should not silently be presented as a neutral test of all the others.
+Identify the target before comparing interval procedures. Equal-tailed, shortest, and mean-preserving intervals impose different placement criteria even when their content agrees. Report the criterion rewarded by the evaluation so that differences in the target are not attributed to estimation accuracy alone.
 
 ## References
 

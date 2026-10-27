@@ -39,13 +39,13 @@ stopifnot(abs(range_confidence(30, content) -
   pbeta(content, 29, 2, lower.tail = FALSE)) < 1e-12)
 ```
 
-With thirty observations, this probability is about 0.816, below the requested 0.95. No clever choice of a shorter interval inside that range fixes the problem. This feasibility limitation concerns the specified class of finite sample-contained windows. It does not rule out intervals extending beyond the data under other assumptions or constructions.
+With thirty observations, this probability is about 0.816, below the requested 0.95. Every shorter window within the sample range has no greater population content, so selecting one cannot satisfy the requested guarantee. This limitation applies to finite sample-contained windows; other constructions may extend beyond the data under additional assumptions.
 
 ## A fixed window has a simple content distribution
 
 Sort the sample as $$Y_{(1)}<\cdots<Y_{(n)}$$. Consider a fixed indexed window $$[Y_{(i)},Y_{(i+d)}]$$. It contains $$d+1$$ observed points, while $$d$$ is the number of spacings between its endpoints. Under continuity, its unknown population content has a $$\operatorname{Beta}(d,n+1-d)$$ distribution. This follows by transforming the observations through their population CDF to uniform order statistics.
 
-The phrase *fixed indexed* matters. If we inspect all windows and choose the shortest one, its index is selected by the data. We cannot apply a single preselected window's Beta tail probability to the selected interval without accounting for that selection.
+The Beta calculation applies to an index fixed independently of the observed values. Choosing the shortest of all candidate windows makes the index data-dependent. A guarantee for the selected interval must account for this selection; the tail probability for a preselected window alone is insufficient.
 
 ## Calibrate the selection rule too
 
@@ -79,11 +79,11 @@ stopifnot(bound[d] >= confidence,
           all(bound[spacing < d] < confidence))
 ```
 
-This construction is deliberately conservative. It protects against any candidate failing, although the selected candidate might still succeed when another fails. It also does not use the dependence among overlapping windows. In my tolerance-interval paper, TCSP uses scan-specific calibration rather than this union-bound teaching example. The rules should not be treated as interchangeable implementations.
+The construction is conservative because it bounds the event that any candidate fails, even when the selected candidate succeeds. It does not exploit dependence among overlapping windows. TCSP in my tolerance-interval paper uses scan-specific calibration. The union-bound example here has a separate calibration rule and should not be interpreted as an implementation of TCSP.
 
 ## Simulate the complete procedure
 
-An exponential distribution makes the true content calculable after selecting each interval. The following experiment repeats the entire sample-and-select procedure, rather than checking only one favorable sample. The simulation is a diagnostic of the implementation; the mathematical bound supplies the guarantee.
+An exponential generating distribution allows the true content of every selected interval to be calculated from its CDF. The experiment repeats sampling and interval selection across 2,000 independent datasets. These results check the implementation under that distribution. The content-confidence guarantee follows from the analytic bound, not from the observed simulation success rate.
 
 ```r
 set.seed(51027)
@@ -129,11 +129,11 @@ dev.off()
   <figcaption>At n = 90, the rule fixes its spacing before sampling. The left dashed line marks confidence 0.95; the right dashed line marks population content 0.9. These are different quantities on different axes.</figcaption>
 </figure>
 
-## Know where the certificate stops
+## Scope of the tolerance guarantee
 
 The argument assumes iid continuous observations. Serial dependence, ties from discrete outcomes, regression-dependent populations, and changing distributions need additional treatment. Running the same code on a time series does not preserve the theorem. Nor does a posterior credible interval for estimated endpoints provide the frequentist content-confidence statement automatically.
 
-There are thus three separate decisions: the population interval target, the estimator or posterior used to describe it, and the calibration of the reported action. [Interval placement]({{ '/2026/03/18/same-content-different-intervals/' | relative_url }}) addresses the first. [Endpoint regression]({{ '/2026/10/13/interval-endpoint-regression/' | relative_url }}) concerns the second. Keeping the third explicit prevents an attractive interval estimate from being given a guarantee it has not earned.
+The population target, its estimator or posterior, and calibration of the reported action are separate specifications. [Interval placement]({{ '/2026/03/18/same-content-different-intervals/' | relative_url }}) addresses the target; [endpoint regression]({{ '/2026/10/13/interval-endpoint-regression/' | relative_url }}) concerns estimation. A tolerance claim additionally requires a content-confidence argument covering the actual construction, its selection rule, and the assumptions on the observations.
 
 ## References
 

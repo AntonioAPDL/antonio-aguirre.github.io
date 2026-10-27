@@ -8,13 +8,13 @@ last_modified_at: 2026-10-27
 theme: Statistical software
 tags: [quantile-regression, forecasting, exdqlm, r]
 description: "Fit a trend-plus-seasonal quantile model with fixed evolution, inspect its diagnostics, and check forecasts against a known simulation target."
-excerpt: "A fitted quantile curve and a forecast answer different questions. This example keeps the distinction explicit and checks an upper-quantile forecast against a simple baseline."
+excerpt: "Fit a seasonal upper quantile, distinguish smoothed estimates from forecasts, and evaluate predictions against held-out observations and baseline models."
 math: true
 ---
 
-A forecast of the mean describes the center of a distribution. If the question concerns unusually high values, an upper conditional quantile can be more useful. An 85th quantile is a threshold with 85% of the conditional distribution below it, assuming a continuous distribution. That interpretation provides a target to estimate and a property to check.
+A conditional mean summarizes the expected response. An upper conditional quantile estimates a threshold exceeded with a specified probability. For a continuous distribution, the 85th percentile has 85% of the conditional probability below it. Forecast evaluation can assess both the estimated threshold and the frequency of observations below it.
 
-The R package `exdqlm`, which I co-develop, fits quantile models with coefficients that evolve through time. This note simulates a changing seasonal series, fits its upper quantile using trend and seasonal components, and evaluates eighty forecasts made from the end of the training period. The example uses the asymmetric Laplace special case of the package. It is a starting point for understanding the workflow, rather than a demonstration of every feature.
+The R package `exdqlm`, which I co-develop, fits time-varying quantile models. The example below uses its asymmetric Laplace special case to estimate an upper quantile of a seasonal series and evaluate eighty forecasts from a fixed cutoff. It covers component specification, computational diagnostics, and held-out evaluation; the software article describes the package's other methods.
 
 ## A series with a known quantile
 
@@ -44,7 +44,7 @@ y_test <- y[test_index]
 
 The split comes before fitting. Ten complete cycles, observations 1 through 800, provide enough training data to estimate an upper quantile and seasonal coefficients with reasonable precision. Observations 801 through 880 are reserved for final evaluation. The period of 80 is treated as known, as a calendar period might be in an application; the seasonal amplitude and phase are estimated. The known quantile curve is excluded from fitting. Its role is to help interpret recovery after the fit.
 
-These data do not follow an asymmetric Laplace observation model. That is deliberate: the example uses it as a working likelihood for estimating a quantile. This does not make the rest of the fitted response distribution correct. Quantile accuracy, predictive-distribution accuracy, and uncertainty calibration need separate checks.
+The observations are Gaussian around the changing level, so the asymmetric Laplace distribution is a misspecified working likelihood. It is used to estimate the selected quantile. Accuracy at that quantile, accuracy of the full predictive distribution, and calibration of uncertainty summaries require separate assessments.
 
 ## Include both trend and seasonality
 
@@ -58,7 +58,7 @@ $$
 
 The quantity $$F^\top\theta_t$$ is the modeled quantile of the observation distribution conditional on the state. `polytrendMod(order = 2)` builds the trend block. A second, two-state Fourier block represents the known periodic component. Omitting it would force a local trend to extrapolate through seasonal turning points, even though the simulation explicitly contains a repeating cycle.
 
-The initial mean below centers the level on the empirical upper quantile of the first twenty training observations and sets the slope and seasonal states to zero. This is a training-informed initialization, not an independently elicited prior. The fitted quantile is the sum of the trend level and the active seasonal coordinate, not just the first state.
+The initial mean below centers the level on the empirical upper quantile of the first twenty training observations and sets the slope and seasonal states to zero. This initialization uses training data rather than an independently elicited prior mean. The fitted quantile combines the trend level and active seasonal coordinate through the full observation vector.
 
 ```r
 model <- polytrendMod(
@@ -84,7 +84,7 @@ fit <- exdqlmLDVB(
 
 `dim.df = 4` assigns all four states to one discount block. The discount factor controls evolution uncertainty. Values below one allow adaptation; one gives deterministic state evolution between observations while retaining uncertainty about the unknown states. The choice **one** matches this toy's fixed slope and seasonal coefficients. It is a structural choice for the stated simulation, not a discount selected to improve its test score.
 
-The quantile state still changes through its trend and seasonal rotation, but there are no additional random evolution shocks in this restricted example. A series with changing slope or seasonal amplitude would need a different specification. Choose such adaptivity inside training data, using enough forecast origins to assess stability; one or two validation windows can favor noise. A seasonal period not supplied by the task must likewise be learned without final test observations.
+The quantile state changes through its trend and seasonal rotation, with no additional random evolution shocks in this restricted example. Changing slopes or seasonal amplitudes would require a different specification. Select adaptivity within training data across enough origins to assess variation in validation scores. A seasonal period not supplied by the task must also be estimated without final test observations.
 
 `dqlm.ind = TRUE` fixes the extra shape parameter to zero, giving the asymmetric Laplace/DQLM special case. The scale is estimated: `sig.init` is an initial value, not a fixed scale, and is not the Gaussian standard deviation used to generate the data. The unrestricted exAL model is available without this restriction, but adds a shape parameter and more computation to inspect.
 
@@ -101,9 +101,9 @@ print(tail(trace[, c("iter", "elbo", "sigma",
 stopifnot(isTRUE(convergence$converged))
 ```
 
-The trace includes the evidence lower bound, scale, and changes in the quantities used for stopping. An iteration limit should prompt investigation rather than be silently reported as convergence. Likewise, a stable objective does not establish that a variational approximation has the right uncertainty. Comparisons with MCMC on small cases and repeated simulation studies answer questions that a stopping flag cannot.
+The trace records the evidence lower bound, scale, and changes used in the stopping criteria. Distinguish termination at an iteration limit from satisfaction of those criteria. Objective stability alone does not establish accuracy of variational uncertainty estimates; comparisons with MCMC and repeated simulations can assess those estimates on manageable cases.
 
-The historical state estimates stored in `fit$theta.out$sm` are **smoothed**: they use all 800 training observations. They can describe the training period, but they are not forecasts that could have been issued at each historical time. Even filtered states from a full-sample fit can use global parameters estimated with later observations. An honest historical forecasting study requires origin-specific fitting and preprocessing.
+The historical state estimates stored in `fit$theta.out$sm` are **smoothed**: they use all 800 training observations. They describe the training period, not forecasts available at each historical time. Even filtered states from a full-sample fit can depend on global parameters estimated with later observations. Historical forecast evaluation therefore requires fitting and preprocessing that respect each origin's information set.
 
 ## Forecast from the training cutoff
 
@@ -129,7 +129,7 @@ The field `ff` contains forecast means of the quantile state. `samp.fore` contai
   <figcaption>Simulated data: the final two training cycles and one full forecast cycle. Green shows smoothed training estimates; blue shows forecast quantile-state means. The dashed gold curve is the known simulation target. The figure has no response prediction band.</figcaption>
 </figure>
 
-The forecast now has a component capable of representing the cycle used in this toy problem. Its unknown amplitude, phase, trend, and scale are learned from training observations. The known target remains an evaluation reference, not a value substituted into the fitted forecast.
+The seasonal component propagates the fitted cycle through the forecast period. Its amplitude and phase, together with the trend and scale, are estimated from training observations. The known simulation target is used only to measure recovery after fitting.
 
 The following plotting block reproduces the figure. Its default output is a temporary directory; set `EXDQLM_BLOG_FIGURE_DIR` to choose another location.
 
@@ -173,7 +173,7 @@ $$
 
 Smaller average loss is better. At $$p=0.85$$, underpredicting by one unit costs 0.85, while overpredicting by one unit costs 0.15. This asymmetry is what makes the upper quantile, rather than the mean, the relevant target.
 
-The recent-cycle baseline holds the empirical 85th quantile of the last eighty training observations constant. Its window spans one complete cycle. A stronger baseline fits a linear trend plus sine and cosine terms by least squares, then adds the empirical 85th quantile of its training residuals. This is appropriate for the homoscedastic additive-noise simulation and requires only base R. All methods use the same cutoff and are scored on the same eighty observations.
+The recent-cycle baseline holds the empirical 85th quantile of the last eighty training observations constant over the forecast period. A second baseline fits a linear trend plus sine and cosine terms by least squares, then adds the empirical 85th quantile of the training residuals. This specification represents the simulation's fixed coefficients and additive homoscedastic noise. Both baselines use base R, and all methods use the same cutoff and eighty verification observations.
 
 ```r
 baseline <- rep(unname(quantile(tail(y_train, 80), p0)), length(y_test))
@@ -202,20 +202,20 @@ stopifnot(isTRUE(all.equal(scores$mean_check_loss[1],
                           forecast_checks$m1.check_loss)))
 ```
 
-Check loss measures errors against actual responses; target RMSE measures recovery of the known conditional quantile. A good upper-quantile estimate should follow that target, not pass through the noisy observations. The oracle fraction below its own quantile is also random in a finite verification sample. Exact empirical agreement with 0.85 should not be forced by changing the fitted forecasts after seeing test outcomes.
+Check loss evaluates predictions against realized responses. Target RMSE measures error relative to the known conditional quantile, which differs from the individual noisy observations. Even the known quantile has a random fraction of verification observations below it. Report this fraction without adjusting forecasts after examining test outcomes.
 
-The reference fit converges in 43 iterations. Forecast target RMSE is **0.0801**, compared with observation-noise standard deviation 0.8. The estimated quantile has **81.25%** of verification responses below it, versus **83.75%** for the known target in this sample. Mean check losses are **0.1882** for the seasonal model and **0.1842** for harmonic regression. The curve recovers the seasonal pattern, but finite-sample estimation and tail errors remain; those should be reported rather than adjusted away after verification.
+The reference fit converges in 43 iterations. Forecast target RMSE is **0.0801**, compared with observation-noise standard deviation 0.8. The estimated quantile has **81.25%** of verification responses below it, versus **83.75%** for the known target in this sample. Mean check losses are **0.1882** for the seasonal model and **0.1842** for harmonic regression. These results describe recovery of the seasonal pattern and the remaining estimation error in this simulation.
 
 
-The harmonic regression is a meaningful comparator, not a method the dynamic model must beat to validate this example. Constant coefficients are sufficient for the generating mechanism, so a static harmonic model can be competitive. This remains one series and one final forecast origin, not evidence of general superiority or calibrated posterior uncertainty. The errors share the same fitted model and origin. Assess repeated simulations, inspect performance by horizon, and quantify variability before drawing broader conclusions.
+Static harmonic regression represents the constant-coefficient generating mechanism, so it provides a relevant comparison for this example. Results from one series and one forecast origin do not establish general model rankings or calibrated posterior uncertainty. The forecast errors share a fitted model and origin; repeated simulations and horizon-specific results are needed to assess variability across forecasting settings.
 
-The package diagnostics also return a CRPS approximation computed from predictive draws using a finite grid of quantile scores. That assesses the working model's response distribution, not just the target quantile. Here the observation likelihood is deliberately misspecified, so the target-quantile check loss is the primary comparison. Neither a predictive score nor an exceedance count verifies posterior credible-interval coverage for the quantile curve.
+The package diagnostics also return a CRPS approximation computed from predictive draws using a finite grid of quantile scores. It assesses the working model's response distribution. Since that distribution is misspecified here, target-quantile check loss is the primary comparison. Predictive scores and exceedance counts do not assess posterior credible-interval coverage for the quantile curve.
 
 ## What to change for an application
 
 Start with a forecasting cutoff and the information available there. Choose trend, seasonal, or regression components for the question at hand. Any discount-factor selection, scaling, or covariate processing should occur inside the training period, using an inner validation period if necessary. For repeated forecasting, rebuild that information set at each origin.
 
-Then inspect computation and forecasting separately. Check stopping diagnostics, compare approximations on manageable cases, and retain simple baselines. If forecasts miss the upper tail, investigate the state dynamics, likelihood, scale, and relevant predictors rather than treating a successful numerical fit as the answer. Several separately fitted quantiles introduce additional issues, including crossings and predictive synthesis; those deserve their own example.
+Assess computational diagnostics and forecast performance separately. Compare approximations on manageable cases and include baseline forecasts. Systematic upper-tail errors require examination of the state dynamics, working likelihood, scale, and predictors. Fitting several quantile levels also requires checks for crossings and a specification of how the fitted quantiles will be combined into a predictive summary.
 
 The [companion software article](https://arxiv.org/abs/2607.22760) describes the broader package workflow and its methodological foundations. The [released source and manual](https://CRAN.R-project.org/package=exdqlm) document the interfaces used here. The complete calculation can also be rerun with the [example runner](https://github.com/AntonioAPDL/antonio-aguirre.github.io/blob/main/scripts/run_exdqlm_blog_example.R) from this website repository.
 

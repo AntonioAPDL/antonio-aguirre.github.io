@@ -3,18 +3,19 @@ layout: post
 published: true
 title: "A practical Slurm workflow on UCSC Hummingbird"
 date: 2025-02-16
-updated: 2026-07-29
+updated: 2026-10-27
+last_modified_at: 2026-10-27
 last_verified: 2026-07-29
 theme: Scientific computing
 tags: [slurm, hpc, reproducibility, ucsc]
-description: "A practical workflow for running statistical computing jobs on UCSC Hummingbird without hard-coding stale cluster details."
+description: "Run statistical computing jobs on UCSC Hummingbird using current allocation settings, reduced test jobs, controlled threading, and restartable Slurm batches."
 excerpt: "Use Hummingbird by discovering current partitions, testing small interactive jobs, controlling threads, and submitting reproducible Slurm batches."
 math: false
 ---
 
-This note is a practical starting point for running statistical computing work on UCSC Hummingbird. It focuses on habits that remain useful when partitions, modules, hardware, and allocation rules change. Do not copy resource requests blindly from an old tutorial. Discover the current system, start small, and scale only after the job has been measured.
+Running a statistical analysis on UCSC Hummingbird requires an allocation, a suitable software environment, and a script that can run without interactive input. Partition names, modules, hardware, and allocation rules can change. Check the current configuration, test a reduced analysis, and measure its resource use before submitting larger jobs.
 
-Hummingbird is a Slurm-managed cluster. The basic objects are login nodes, compute nodes, partitions, accounts or allocations, jobs, and job steps. The login node is for editing files, submitting jobs, moving modest amounts of data, and checking status. Real computation should run inside an interactive allocation or a batch job.
+Hummingbird is a Slurm-managed cluster. Its main components include login nodes, compute nodes, partitions, accounts or allocations, jobs, and job steps. Use the login node for editing files, submitting jobs, moving modest amounts of data, and checking status. Run analyses on compute nodes through an interactive allocation or a batch job.
 
 ## Connect and inspect the current system
 
@@ -29,7 +30,7 @@ scontrol show partition
 module avail
 ```
 
-These commands tell you what partitions exist, whether they are available, their limits, and what modules are currently installed. Treat this output as the source of truth for resource requests.
+These commands report available partitions, their status and limits, and installed modules. Use the output together with the policy for your allocation when specifying resource requests. Save the relevant configuration with the run record so later changes in the cluster environment can be identified.
 
 This discovery step should be repeated when a project is moved to a new allocation or when an old script is reused after a long break. Cluster administrators can change limits, add partitions, retire modules, or redirect specialized resources. A script that was reasonable last year may still run, but it may request resources poorly or rely on software that is no longer the default.
 
@@ -79,7 +80,7 @@ If your work uses user-level environments, create them in your home or project s
 
 ## Use conservative batch scripts
 
-A batch script should request only what the job can use. Over-requesting memory, CPUs, or wall time makes scheduling harder and can hide inefficient code.
+A batch script should request resources supported by measurements of the analysis. Unused memory, CPUs, or wall time can restrict scheduling without improving the calculation. Check that the code actually uses the requested parallelism and that memory requirements are measured at the intended problem size.
 
 ```bash
 #!/usr/bin/env bash
@@ -105,7 +106,7 @@ export VECLIB_MAXIMUM_THREADS=1
 Rscript --vanilla code/run_model.R --config config/base.yml --out results/run_${SLURM_JOB_ID}.rds
 ```
 
-The thread variables matter. Many R and Python numerical libraries use threaded BLAS or OpenMP. If a Slurm array starts many tasks and each task also starts many threads, the job can oversubscribe the allocated CPUs. Decide whether parallelism happens across processes or inside one process, then request resources accordingly.
+Many R and Python numerical libraries use threaded BLAS or OpenMP. When several processes each start multiple threads, their combined demand can exceed the allocated CPUs. Set thread counts explicitly and choose whether to parallelize across processes, within a process, or through a documented combination of both.
 
 ## Job arrays
 
@@ -141,7 +142,7 @@ Rscript --vanilla code/run_simulation.R \
   --out "results/sim_${SLURM_ARRAY_TASK_ID}.rds"
 ```
 
-Validate the array index inside the analysis script as well. A missing or out-of-range index should fail fast rather than overwrite a default output.
+Validate the array index inside the analysis script as well. Reject missing or out-of-range indices with an error before opening output files. Include the validated index in the result path and logs so separate tasks can be traced to their inputs.
 
 ## Monitor and size jobs empirically
 
@@ -186,7 +187,7 @@ sbatch --dependency=afterok:${first} code/fit_model.sh
 
 Do not hard-code private paths, module versions, GPU syntax, or partition names in public instructions. Put allocation-specific details in a local README or configuration file that can be updated independently.
 
-For statistical work, the most common failure is not that Slurm is complicated. It is that the analysis script assumes an interactive laptop environment. Batch jobs should not depend on the current working directory being guessed correctly, on a package being installed only in an interactive shell, or on a plot window opening. Write scripts so that all inputs, outputs, and configuration files are explicit. Then test the exact command inside a small allocation before scaling to an array or a long run.
+Batch scripts need explicit working directories, software environments, inputs, and output paths. An analysis that succeeds in an interactive session may depend on objects in memory, shell initialization, or a graphical display that is unavailable to a scheduled job. Test the exact submission command in a small allocation, with logs and noninteractive plotting enabled, before using an array or a long allocation.
 
 ## References
 

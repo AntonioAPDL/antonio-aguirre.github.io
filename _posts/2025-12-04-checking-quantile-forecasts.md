@@ -8,13 +8,13 @@ last_modified_at: 2026-10-27
 theme: Forecast evaluation
 tags: [forecasting, quantile-regression, calibration, scoring-rules]
 description: "Use check loss, calibration diagnostics, crossing checks, and horizon-specific comparisons to evaluate quantile forecasts."
-excerpt: "A forecast can have plausible overall coverage and still be wrong at particular horizons or in particular conditions."
+excerpt: "Evaluate quantile accuracy and calibration separately, with comparisons by probability level, forecast horizon, and data availability."
 math: true
 ---
 
-A model can produce a smooth set of quantile forecasts and still make poor predictions. Numerical convergence tells us whether a computation has settled according to its stopping rule. It does not tell us whether the forecast target is estimated accurately, whether the forecast uses only available information, or whether its uncertainty is calibrated.
+Numerical convergence and predictive accuracy require separate checks. A stopping rule assesses a computation under its numerical criteria. Forecast evaluation assesses target accuracy, calibration, and performance on observations excluded from fitting, using only information available when each prediction could have been issued.
 
-In comparing forecasting methods, I find it useful to keep three questions separate: What information was available? What object was predicted? How was that object evaluated? This note develops a small example for quantile forecasts. The calculations use known Gaussian distributions rather than fitted models, making the evaluation mechanics easier to inspect.
+For a forecast comparison, specify the information set, prediction object, and evaluation rule. The example below separates these choices using known Gaussian distributions. Because the distributions are specified rather than fitted, their correct quantiles are available for checking the evaluation code, and a shifted forecast provides a known error to diagnose.
 
 ## Define an evaluation row
 
@@ -54,7 +54,7 @@ bad <- score(biased)
 print(rbind(correct = good$coverage, biased = bad$coverage))
 ```
 
-Each simulated case is independent here. Increasing the horizon increases its standard deviation. The second forecast shifts every quantile upward by 0.6 standard deviations. Neither forecast has been trained, and the comparison is not a claim about any research model. It simply makes a known defect visible through the diagnostics.
+The simulated cases are independent, with response standard deviation increasing by horizon. The second forecast shifts every quantile upward by 0.6 standard deviations. Both distributions are specified without training. The resulting coverage and score differences illustrate the effect of this shift; they are not performance estimates for fitted research models.
 
 ## Coverage and accuracy answer different questions
 
@@ -100,7 +100,7 @@ stopifnot(identical(has_crossing, c(TRUE, FALSE)),
 
 Sorting is not joint Bayesian estimation. It does not create posterior dependence between independently fitted levels, repair an incorrect uncertainty calculation, or prove calibration. For irregular probability grids, an unweighted sort is not the corresponding probability-weighted rearrangement. A finite set of ordered quantiles also leaves interpolation and tail behavior unspecified.
 
-## Be precise about CRPS
+## Finite-grid scores and CRPS
 
 For a distribution with quantile function $$Q$$ and finite first moment,
 
@@ -108,7 +108,7 @@ $$
 \operatorname{CRPS}(F,y)=2\int_0^1\rho_p\{y-Q(p)\}\,dp.
 $$
 
-A prespecified positively weighted sum at a finite set of levels is a valid quantile-vector score. It is not automatically the full-distribution CRPS. A numerical approximation to this integral needs probability weights and adequate tail resolution. Here a dense midpoint grid can be checked against a standard-normal closed form.
+A prespecified positively weighted sum over selected levels scores a finite quantile vector. Approximating full-distribution CRPS additionally requires a probability-grid integration rule and adequate tail resolution. The dense midpoint-grid calculation below is checked against the standard-normal closed form, which supplies an independent numerical reference for the approximation.
 
 ```r
 grid <- (seq_len(20000L) - 0.5) / 20000L
@@ -127,9 +127,9 @@ print(c(approx_crps = approx_crps, exact_crps = exact_crps))
 example_verified <- TRUE
 ```
 
-Choose the levels, weights, horizon aggregation, and missing-data rule before inspecting the final comparison. Report horizon-specific differences when a pooled score would hide an important weakness. A small average improvement with substantial uncertainty should remain a small, uncertain improvement in the written conclusion.
+Specify the levels, weights, horizon aggregation, and missing-data rule before final evaluation. Report horizon-specific differences where averaging would obscure systematic errors. Interpret score differences alongside their uncertainty and the number of evaluated cases; a small estimated difference may provide insufficient evidence to distinguish the methods.
 
-Finally, marginal quantile scores do not validate a joint future trajectory. Two forecasts can have identical quantiles at every horizon and different temporal dependence. Path-dependent decisions require additional evaluation of the joint prediction object. The same principle applies throughout: validate the object actually used, rather than treating one favorable diagnostic as a general certificate.
+Marginal quantile scores do not assess the dependence structure of a future trajectory. Two forecasts can have identical quantiles at every horizon while assigning different probabilities to paths or events involving several times. If decisions depend on those features, evaluate the joint forecast as well as its horizon-specific marginals. State which predictive features each diagnostic assesses.
 
 ## References
 

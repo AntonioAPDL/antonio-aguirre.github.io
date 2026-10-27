@@ -8,13 +8,13 @@ last_modified_at: 2026-10-27
 theme: Prediction models
 tags: [quantile-regression, recurrent-features, forecasting, r]
 description: "Build fixed recurrent features, fit an upper-quantile readout, and evaluate rolling one-step predictions without using future observations."
-excerpt: "A recurrent network can supply a fixed representation of the past while a much smaller regression estimates the forecast target."
+excerpt: "Use fixed recurrent states as predictors in quantile regression, then evaluate one-step forecasts with training-only preprocessing."
 math: true
 ---
 
-A time series can depend on its past in ways that a straight line does not capture. The effect of yesterday's value may flatten, change direction, or interact with earlier observations. A recurrent feature map offers one way to represent that history. Quantile regression then lets us ask about an upper or lower part of the conditional distribution, rather than only its mean.
+A time series can depend nonlinearly on earlier observations. The effect of a lagged value may flatten, change direction, or depend on previous states. A recurrent feature map represents this history through a sequence of nonlinear states. Quantile regression can use those states to estimate selected parts of the conditional response distribution.
 
-The useful separation is between **constructing features** and **estimating the readout**. An echo state network fixes its recurrent weights and estimates an output model using the resulting states. In my Q-DESN research, the readout is Bayesian and the representation can contain several recurrent layers. Here I use one small layer and ordinary quantile regression so that the information flow is visible. This is an illustration of fixed recurrent features, not an implementation of the paper's Bayesian model.
+An echo state network separates **feature construction** from **readout estimation**. Its recurrent weights are fixed, and an output model is estimated using the resulting states. My Q-DESN research uses Bayesian readouts and can include several recurrent layers. The example here uses one layer and ordinary quantile regression to show how inputs become features and forecasts; it does not implement the paper's Bayesian model.
 
 ## Start with a target and a split
 
@@ -69,7 +69,7 @@ X <- cbind(1, (lagged - center) / scale, H)
 X_linear <- cbind(1, lagged)
 ```
 
-This construction is causal in the forecasting sense: row $$t$$ uses responses only through $$t-1$$. A direct check is to change later observations and confirm that earlier feature rows do not change. Fixing a random seed makes this particular representation reproducible; it does not establish that the representation is a good one.
+The feature recursion is causal in the forecasting sense: row $$t$$ uses responses only through $$t-1$$. Changing later observations must leave earlier feature rows unchanged. The code checks this property directly. A fixed random seed reproduces the feature map; its predictive adequacy is assessed through held-out evaluation.
 
 The spectral radius 0.7 and leak 0.4 are example settings, not a general proof that initialization is forgotten under every input sequence. Larger reservoirs, deeper layers, and stronger persistence introduce additional choices. Those choices need training or validation data, not repeated consultation of the final test scores.
 
@@ -81,7 +81,7 @@ $$
 \rho_p(u)=u\{p-\mathbf{1}(u<0)\}.
 $$
 
-The regression coefficients turn each feature row into an estimated conditional quantile. The readout includes the original lag as well as the recurrent features, so the nonlinear representation supplements rather than replaces the simplest predictor. A linear autoregression provides a baseline using the same training rows, lag information, and target level.
+The regression coefficients map each feature row to an estimated conditional quantile. The readout includes the original response lag alongside the recurrent states, allowing direct and nonlinear lag effects. A linear autoregression provides a baseline at the same target level, with identical training rows and available lag information.
 
 ```r
 fit <- rq.fit(X[train, ], y[train], tau = p, method = "fn")
@@ -107,9 +107,9 @@ stopifnot(max(abs(features(changed)[unchanged, ] - H[unchanged, ])) == 0,
 example_verified <- TRUE
 ```
 
-These are **rolling one-step predictions**. At time 1,602, observation 1,601 has already become available and can update the recurrent state. The coefficients remain fixed. This is not a four-hundred-step forecast issued once at time 1,600: that task would require a rule for propagating unknown future inputs. Confusing those two designs can make an evaluation appear substantially easier than the intended application.
+These are **rolling one-step predictions**. At time 1,602, observation 1,601 is available to update the recurrent state, while the coefficients remain fixed. A four-hundred-step forecast issued at time 1,600 would instead require a rule for unknown future inputs. Specify which task is being evaluated: sequentially observed response lags are unavailable for a trajectory issued at a single origin.
 
-## Look at errors as well as the score
+## Forecast diagnostics and target recovery
 
 ```r
 figure_dir <- Sys.getenv("RESEARCH_BLOG_FIGURE_DIR", tempdir())
@@ -140,16 +140,16 @@ dev.off()
 
 <figure>
   <a href="{{ '/public/images/blog/fixed-recurrent-quantile-features.png' | relative_url }}"><img src="{{ '/public/images/blog/fixed-recurrent-quantile-features.png' | relative_url }}" alt="Training quantile estimates and the first 100 rolling forecasts, alongside known-versus-estimated quantiles for all 400 held-out observations." width="1400" height="800" loading="lazy"></a>
-  <figcaption>Simulated data. Left: the final 40 training rows and first 100 one-step forecasts; the dotted line marks the cutoff. Right: target recovery on all 400 held-out rows. A good upper-quantile forecast follows the known quantile, not the individual response values.</figcaption>
+  <figcaption>Simulated data. Left: the final 40 training rows and first 100 one-step forecasts; the dotted line marks the cutoff. Right: estimated versus known conditional quantiles on all 400 held-out rows. The diagonal indicates exact target recovery.</figcaption>
 </figure>
 
-An aggregate score can conceal periods of poor fit. Inspect upper-tail misses, persistent errors, and instability alongside the mean loss. The recovery RMSE compares the estimates with the known conditional quantiles, while the check loss scores actual responses. Even the oracle quantile has a random realized fraction below it, so exact agreement with 0.9 is not a sensible requirement for one sample. One seed and one target level cannot establish a general advantage for either approach. A larger comparison would repeat the simulation and examine several forecast origins and horizons under a common protocol.
+Inspect upper-tail misses, error persistence, and variability over time alongside the mean loss. Recovery RMSE compares estimates with known conditional quantiles; check loss evaluates predictions against realized responses. Even the oracle quantile has a random fraction of observations below it in a finite sample. Results from one data seed and one level do not establish general performance differences. A broader comparison would repeat the simulation and evaluate several origins and horizons under a common protocol.
 
 The reference run has target RMSE **0.1392**. The fraction below the estimated 90th quantile is **0.9025**, compared with **0.8950** for the known target. Mean check loss is **0.1077**, versus **0.1176** for the linear readout. These numbers describe this simulated series, not an expected improvement on other data.
 
 ## Where the Bayesian model enters
 
-The research model places priors on the readout coefficients and uses posterior computation to describe uncertainty conditional on the chosen representation. Shrinkage matters when many recurrent features carry similar information. MCMC and variational inference also introduce diagnostic questions that the convex fit above does not answer.
+The research model places priors on the readout coefficients and computes posterior uncertainty conditional on the feature representation. Shrinkage regularizes coefficients when recurrent features are correlated or weakly informed by the data. MCMC and variational inference require additional convergence and approximation checks beyond those of the convex quantile-regression fit above.
 
 Posterior uncertainty conditional on one reservoir is not uncertainty over every possible reservoir or every tuning decision. Likewise, an asymmetric-Laplace working likelihood does not by itself validate the entire response distribution. Held-out quantile scores and calibration checks remain necessary. The next note, [checking quantile forecasts]({{ '/2025/12/04/checking-quantile-forecasts/' | relative_url }}), separates those checks across levels and horizons.
 

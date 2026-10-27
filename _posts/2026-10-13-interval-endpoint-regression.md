@@ -8,13 +8,13 @@ last_modified_at: 2026-10-27
 theme: Interval models
 tags: [regression, generalized-bayes, mean-tilted-intervals, time-series]
 description: "Build a small loss-based endpoint regression and distinguish interval content, posterior endpoint uncertainty, and dynamic-state computation."
-excerpt: "A model for interval endpoints need not be a model for the whole response distribution. That distinction controls what its uncertainty summaries mean."
+excerpt: "Estimate covariate-dependent interval endpoints under a specified loss, and interpret their generalized-posterior uncertainty."
 math: true
 ---
 
-An interval estimated for a whole population may be too crude when the response depends on predictors. We might want its location to change with a covariate, or its endpoints to evolve through time. Before choosing a regression model, we still need to specify what the interval represents: an equal-tailed region, a shortest region, or another fixed-content target.
+When a response depends on predictors, interval endpoints may also vary with those predictors or evolve through time. Specifying an endpoint-regression model first requires a choice of interval target, such as an equal-tailed region, a shortest region, or another fixed-content functional. The target determines which loss or probability model is appropriate.
 
-My work on mean-tilted intervals separates this target from the computation used to estimate it. This note introduces the endpoint-regression idea through a small, fully enumerated example. It does not reproduce the manuscript's continuous-parameter sampler. The aim is to make the loss, prior, and resulting uncertainty statements inspectable without hiding them inside a fitting function.
+The mean-tilted interval framework separates the target from the computation used to estimate it. The example below evaluates a discrete endpoint-regression model by enumerating its parameter grid. Its loss, prior masses, and generalized-posterior summaries are calculated directly. The continuous-parameter algorithms are described in the accompanying manuscript and are not implemented here.
 
 ## Use a loss for the interval target
 
@@ -50,7 +50,7 @@ log_prior <- dnorm(grid$intercept, 0, 1.5, log = TRUE) +
   dnorm(grid$half_width, 0, 1, log = TRUE)
 ```
 
-The prior assigns mass proportional to these positive weights on the 68,921 grid points. It is a proper discrete prior after normalization. Six hundred observations and a finer grid make endpoint recovery easier to assess than in a very small sample. This is the model itself, not a claim that this grid accurately approximates every feature of a continuous posterior. Its bounded coefficient support, constant-width restriction, and resolution are substantive limitations.
+The prior assigns mass proportional to these positive weights on 68,921 grid points and is proper after normalization. The fit uses 600 observations. The finite grid defines a discrete model with bounded coefficient support and constant interval width. Its summaries need not agree with those of a continuous-parameter model; the support and grid resolution are part of the specification.
 
 ## Update with the loss
 
@@ -84,7 +84,7 @@ stopifnot(abs(sum(weight) - 1) < 1e-12, all(is.finite(weight)),
           all(grid$half_width > 0), sum(weight[boundary]) < 0.05)
 ```
 
-Subtracting the largest log weight avoids unnecessary underflow. Reporting a second learning rate is a sensitivity check, not a calibration procedure. Small boundary mass is reassuring for this particular grid, but does not prove continuous-posterior accuracy. A serious analysis would examine grid refinement or use the manuscript's continuous-parameter methods with their numerical diagnostics.
+Subtracting the largest log weight stabilizes normalization. The second learning rate provides a sensitivity comparison, not a calibration procedure. Small posterior mass at the grid boundary indicates limited concentration at the truncation limits, but does not establish accuracy relative to a continuous posterior. Assess sensitivity to the parameter support and grid resolution before interpreting those comparisons.
 
 ## Summarize endpoint uncertainty, not response uncertainty
 
@@ -131,9 +131,9 @@ example_verified <- TRUE
 
 The blue curves below are posterior means of endpoint functions. The pale bands are pointwise 90% credible bands for those endpoints under this discrete generalized posterior. They are **not** 90% response prediction bands, simultaneous bands over the covariate range, or a tolerance certificate. The region between the two endpoint curves represents the estimated interval target; uncertainty about those curves is a separate object.
 
-The simulation also permits direct recovery checks: endpoint RMSE against the known target, content on 1,000 independent verification observations, and average population content calculated from the known Gaussian CDF. These checks are not used to select the learning rate, prior, or grid. An in-sample fraction alone would be much weaker evidence, and none of these checks establishes a tolerance guarantee or repeated-sampling coverage for the endpoint bands.
+Recovery is assessed through endpoint RMSE against the known target, content on 1,000 independent verification observations, and average population content calculated from the known Gaussian CDF. These results are excluded from selection of the learning rate, prior, and grid. They assess the fitted interval in this simulation, but do not establish a tolerance guarantee or repeated-sampling coverage for the endpoint bands.
 
-The reference endpoint RMSE is **0.0210**. Average population content is **0.7879**, and the independent sample fraction inside the estimated interval is **0.7780**, against a target of 0.8. The difference between the last two quantities reflects verification-sample variation; the difference from the target also includes endpoint-estimation error. The example reports both rather than shifting its fitted endpoints after verification.
+The reference endpoint RMSE is **0.0210**. Average population content is **0.7879**, and the independent sample fraction inside the estimated interval is **0.7780**, against a target of 0.8. The difference between the last two quantities reflects verification-sample variation; the difference from the target also includes endpoint-estimation error. The reported endpoints remain those estimated from the training observations.
 
 ```r
 figure_dir <- Sys.getenv("RESEARCH_BLOG_FIGURE_DIR", tempdir())
@@ -165,11 +165,11 @@ dev.off()
 
 ## Add tilt or dynamics without changing the interpretation
 
-A fixed retained-mean tilt adds $$-2c\delta(y-m)$$ to the per-observation loss. It changes the interval target; it is not another setting of the learning rate. This example keeps $$\delta=0$$. Nonzero tilt requires a justified target choice and suitable assumptions rather than a search for whichever interval happens to look best.
+A fixed retained-mean tilt adds $$-2c\delta(y-m)$$ to the per-observation loss and changes the interval target. It is distinct from the learning rate. This example keeps $$\delta=0$$. For nonzero tilt, specify the retained-mean offset and assumptions supporting that target before interpreting the resulting endpoint estimates.
 
 The manuscript allows more general root functions, including fixed nonlinear features and time-varying coefficients. Raw roots can exchange labels, so lower and upper endpoints must be obtained by sorting their values at each predictor, not by sorting regression coefficients. Our positive-half-width restriction avoids that ambiguity by construction.
 
-In dynamic models, Gaussian state priors do not make the joint observation problem linear Gaussian. Under the augmentation, one root trajectory can have a Gaussian conditional update while the other root and latent scales are held fixed. Jointly, the augmented observation kernel is quartic in the roots. Alternating root-specific smoothing steps exploit conditional structure, not a single ordinary Kalman-filter solution for everything.
+In dynamic models, the augmentation gives a Gaussian conditional update for one root trajectory when the other root and latent scales are held fixed. Jointly, the augmented observation kernel is quartic in the roots, despite the Gaussian state priors. Computation therefore alternates root-specific smoothing updates; the full joint problem is not an ordinary linear-Gaussian filtering problem.
 
 These models describe interval-root functionals. A predictive distribution for responses needs additional modeling, and a repeated-sampling tolerance guarantee needs separate calibration. The [tolerance note]({{ '/2026/07/09/tolerance-intervals/' | relative_url }}) gives an iid example of that extra step; its certificate does not automatically extend to regression or time series.
 

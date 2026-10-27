@@ -3,15 +3,16 @@ layout: post
 published: true
 title: "Energy scores for Gaussian forecasts: what is closed form and what is not"
 date: 2025-02-12
-updated: 2026-07-29
+updated: 2026-10-27
+last_modified_at: 2026-10-27
 theme: Probabilistic forecasting
 tags: [forecasting, scoring-rules, gaussian-models, r]
-description: "A corrected note on the Gaussian energy score, separating the spherical closed form from the general covariance case."
+description: "Compute Gaussian energy scores using the spherical closed form, a general-covariance integral, or Monte Carlo estimation."
 excerpt: "The standard noncentral-chi expression applies to spherical Gaussian covariance. General covariance requires a generalized quadratic-form calculation or simulation."
 math: true
 ---
 
-The energy score is a proper scoring rule for multivariate probabilistic forecasts. It is often described as the multivariate analogue of the continuous ranked probability score. That description is useful, but it can hide a technical point: a simple noncentral-chi closed form is available for spherical Gaussian covariance, not for an arbitrary positive-definite covariance matrix.
+The energy score extends continuous ranked probability scoring to multivariate distributions. For Gaussian forecasts, the calculation depends on the covariance structure: a noncentral-chi closed form applies under spherical covariance, while a general positive-definite covariance matrix requires a different calculation. The distinction concerns the distribution of the Euclidean norm in the score.
 
 For a forecast distribution $$P$$ on $$\mathbb R^d$$ and an observation $$y$$, the energy score with Euclidean distance is
 
@@ -39,7 +40,7 @@ The second term is another Gaussian norm because $$X-X' \sim N_d(0,2\Sigma)$$. T
 
 When $$\Sigma = \sigma^2 I_d$$, the scaled norm $$\|Z\|_2/\sigma$$ is noncentral chi. Standard formulas for the mean of a noncentral-chi random variable apply. When $$\Sigma$$ has unequal eigenvalues, $$Z^\top Z$$ is a generalized noncentral quadratic form. It is not a scaled standard noncentral chi-square variable. Treating it that way gives the wrong score.
 
-## A valid general-covariance route
+## Integral for general covariance
 
 For general positive-definite $$\Sigma$$, use the Laplace transform of
 
@@ -68,7 +69,7 @@ $$
 \{1-\mathcal L_Q(t)\}t^{-3/2}\,dt.
 $$
 
-This gives a one-dimensional numerical integral for each Gaussian norm expectation. It is not as compact as a closed form, but it is valid for arbitrary positive-definite covariance matrices.
+This representation reduces each Gaussian norm expectation to a one-dimensional numerical integral and applies to arbitrary positive-definite covariance matrices. It retains the full covariance structure through the determinant and quadratic term. Numerical evaluation requires checks near both integration boundaries and against cases with known answers.
 
 ## Base R implementation
 
@@ -124,11 +125,11 @@ energy_score_draws <- function(draws, y) {
 }
 ```
 
-The direct draw-based estimator is simple and useful for any forecast distribution that can be sampled. The quadrature route is useful when the forecast is Gaussian and the dimension is moderate. In high dimensions, direct simulation or specialized quadratic-form methods may be preferable.
+The draw-based estimator applies to forecast distributions from which independent samples can be obtained. The integral provides an alternative for Gaussian forecasts of moderate dimension. In higher dimensions, compare its numerical cost with direct simulation or methods designed for Gaussian quadratic forms, using the same covariance convention and response units.
 
-There are two implementation details worth making explicit. First, the covariance matrix should be symmetrized before numerical work, because small floating-point asymmetries can appear after matrix operations. Symmetrizing does not rescue a non-positive-definite matrix, but it avoids rejecting a matrix because of harmless numerical noise. Second, the quadrature formula evaluates a difference, $$1-\mathcal L_Q(t)$$, that is small near zero. The mapped integral remains integrable, but numerical tolerances should be checked against simulation on representative cases rather than trusted abstractly.
+Two numerical checks are needed. First, symmetrize the covariance matrix to remove small floating-point asymmetries, then check positive definiteness; symmetrization does not correct an invalid covariance matrix. Second, the quadrature formula contains the difference $$1-\mathcal L_Q(t)$$, which is small near zero. Check integration tolerances against simulation on representative cases, including covariance matrices with substantially different eigenvalues.
 
-Monte Carlo estimation is often the most robust baseline. It can be slower, and the pairwise term can be expensive if all pairs are used, but it is easy to reason about. A simulation check is also a useful way to catch scale errors. If the quadrature score and a large Monte Carlo estimate disagree beyond Monte Carlo error, the first suspects should be covariance scaling, dimension mismatch, or an incorrect interpretation of the forecast draws.
+Monte Carlo estimation provides an independent comparison for the integral. Account for simulation error when interpreting a difference between the two estimates. Computing all draw pairs can be expensive; the random-pair calculation above avoids that quadratic cost. If disagreement exceeds Monte Carlo uncertainty, check covariance scaling, vector dimensions, and whether the draws represent the intended response distribution.
 
 ## Checks
 
@@ -140,7 +141,7 @@ $$
 \sigma\left(\sqrt{\frac{2}{\pi}}-\frac{1}{\sqrt{\pi}}\right).
 $$
 
-This provides a small but important check.
+The identity checks both the scale and the factor of one half in the second energy-score term. It can be tested at several positive standard deviations, alongside the general-covariance simulation comparison, before applying the implementation to forecast outputs.
 
 ```r
 set.seed(1)
@@ -166,9 +167,9 @@ That result should be presented as a spherical-covariance formula. It should not
 
 The energy score is proper, but in higher dimensions it may be less sensitive to dependence misspecification than analysts expect. Forecasts with different covariance structures can have similar Euclidean-distance behavior. For multivariate forecasting problems where dependence matters, the energy score should often be paired with variogram scores, marginal calibration checks, rank histograms, event-specific scores, or summaries tied to the decision problem.
 
-This is the practical reason to be precise about the formula. The goal is not to make the energy score look less useful. The goal is to use it correctly. If a model produces full covariance forecasts, then the scoring calculation should respect that covariance. If the forecast is spherical or intentionally isotropic, the closed form is appropriate and efficient. If the forecast is general Gaussian, use a method that handles the full covariance. If the forecast is generated by simulation, the draw-based estimator may be the cleanest option.
+Choose the calculation from the forecast representation. For a spherical Gaussian forecast, the noncentral-chi expression applies. For a general Gaussian forecast, the calculation must retain the full covariance matrix. For a forecast supplied as independent response draws, use a draw-based estimator and report its simulation uncertainty. These choices concern numerical evaluation of the same scoring rule.
 
-In applied reports, I would state which estimator was used, the number of forecast draws if simulation was used, and any numerical tolerance used for quadrature. I would also report at least one check against a simpler case, such as the one-dimensional CRPS identity or a spherical covariance example. These checks are small, but they make the score calculation auditable.
+Report the estimator, covariance convention, number of simulation draws, and quadrature tolerances as applicable. Include a check against a known case, such as the one-dimensional CRPS identity or a spherical example. This information distinguishes changes in forecast quality from changes in the numerical procedure used to calculate the score.
 
 ## References
 

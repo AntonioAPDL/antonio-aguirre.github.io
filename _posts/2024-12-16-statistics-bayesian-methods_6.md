@@ -3,7 +3,8 @@ layout: post
 published: true
 title: "Iteration, stopping, and reporting"
 date: 2024-12-19
-updated: 2026-07-29
+updated: 2026-10-27
+last_modified_at: 2026-10-27
 theme: Bayesian workflow
 tags: [bayesian-statistics, reproducibility, reporting]
 series: "Bayesian workflow"
@@ -13,15 +14,15 @@ excerpt: "A model is ready to report when it answers the target with acceptable 
 math: true
 ---
 
-Bayesian workflow is iterative by design. Models are built, fit, checked, revised, compared, and sometimes simplified. That iteration is a strength because it lets the analysis respond to data structure and model failure. It is also a risk because repeated model search can blur the distinction between discovery, validation, and final reporting.
+Bayesian analyses commonly involve repeated model construction, fitting, checking, and revision. Each revision uses information from the data and previous results. The report should distinguish exploratory changes from the procedure used for final evaluation, particularly when the same observations informed both model selection and performance assessment.
 
-The final step of a workflow is therefore not only choosing a model. It is deciding whether the remaining uncertainty and model limitations are acceptable for the target. A workflow should stop because the analysis is adequate for its purpose, not because the model has become impossible to improve.
+Before reporting results, assess whether the remaining uncertainty and model limitations are acceptable for the target. This requires a defined precision or predictive requirement and a record of unresolved discrepancies. Further model development may be possible even when the current analysis meets those requirements.
 
 ## Different working modes
 
 Applied modeling often moves through several modes. In an exploratory mode, the analyst tries models to understand data structure, software behavior, and possible failures. Approximate computation and rough checks may be acceptable because the goal is learning. In a development mode, the analyst stabilizes the model, checks simulations, evaluates predictive behavior, and records decisions. In a reporting or deployment mode, the analysis should be reproducible, diagnostics should be complete, and the final evaluation should be protected from uncontrolled repeated tuning.
 
-Problems arise when these modes are mixed. A validation set used repeatedly during model development becomes part of the modeling process. A rough exploratory fit can be overinterpreted. A model selected from many unreported alternatives can appear more certain than it is. The workflow needs a point where the rules become stricter.
+A validation set consulted repeatedly during development contributes to model selection. Its results should not then be described as an untouched final evaluation. Similarly, an exploratory fit needs further computational checks before reporting, and selection from many alternatives should be disclosed. Specify the transition to final evaluation and which model choices are fixed at that stage.
 
 ## Practical stopping criteria
 
@@ -35,7 +36,7 @@ I consider a model ready to report when these conditions are met:
 - Conclusions are stable under plausible assumptions that the data cannot resolve.
 - Additional complexity gives little practical improvement relative to cost and interpretability.
 
-This is not a proof that the model is true. It is a practical standard for using a model responsibly. Statistical reports should avoid implying more certainty than the workflow supports.
+These criteria concern adequacy for a specified task, not the truth of the complete model. Record the tolerance used for numerical error, the predictive failures considered unacceptable, and the assumptions examined in sensitivity analysis. Readers can then assess the basis for stopping and the scope of the conclusions.
 
 ## Repeated search and validation
 
@@ -50,15 +51,15 @@ Several practices reduce the problem:
 - avoid claiming confirmatory evidence from a test that guided model construction;
 - reserve a final holdout or future-data evaluation for high-stakes predictive claims.
 
-In many research settings, a perfect split between exploration and confirmation is not possible. The honest solution is to describe the workflow and state which conclusions are exploratory, predictive, mechanistic, or decision-oriented.
+When exploration and confirmation cannot be separated, describe how the data informed successive choices. State which conclusions are exploratory and which have independent predictive or confirmatory support. A transparent account of data reuse is necessary to interpret the reported evidence and any limitations of the final evaluation.
 
 ## Reporting the workflow
 
-A good report does not need to list every failed model, but it should include enough information for a reader to understand why the final model is credible. I try to report:
+A report should describe the revisions that affected the target, model assumptions, computation, or interpretation. Minor exploratory variations need not all receive equal attention, but readers need enough information to reconstruct the main decisions. I include:
 
 1. The target quantity or prediction task.
 2. The data source, preprocessing, exclusions, and timing.
-3. The model structure and important assumptions.
+3. The model structure and assumptions governing the reported inference.
 4. Prior or regularization choices and their observable implications.
 5. Computational method, diagnostics, and remaining numerical limitations.
 6. Simulation checks, posterior predictive checks, or calibration checks.
@@ -66,13 +67,13 @@ A good report does not need to list every failed model, but it should include en
 8. Sensitivity analyses for assumptions not identified by the data.
 9. The final limitations and what would change the conclusion.
 
-This structure is useful for papers, technical notes, internal model-review documents, and research software vignettes. It also makes later revision easier because the assumptions are visible.
+The same information can support a paper, technical note, model-review document, or software vignette. Organizing it consistently allows a later revision to identify which assumptions, inputs, and checks have changed, and which earlier results remain applicable.
 
 ## Versioning and reproducibility
 
 Model results should be connected to code, data, and environment versions. At minimum, record a repository commit, data snapshot, random seeds, software versions, and the command or configuration used to generate results. For long-running jobs, save logs and intermediate artifacts. For public work, separate generated outputs from source code and document how the outputs were produced.
 
-This is not only about replication by others. It protects the analyst. When a result changes six months later, a recorded workflow makes it possible to determine whether the change came from data, code, dependencies, or the model itself.
+When a result changes, the run record should distinguish changes in data, code, dependencies, configuration, and model specification. Keep enough provenance to rerun the earlier calculation as well as the revised one, subject to any restrictions on the underlying data.
 
 ## Final audit
 
@@ -86,7 +87,7 @@ Before releasing a model-based analysis, I use a final audit:
 - Are model weights, posterior probabilities, and score differences interpreted correctly?
 - Are unresolved failures either fixed or disclosed?
 
-The purpose of iteration is not to make a model immune to criticism. It is to make the criticism specific, documented, and useful. A clear stopping rule and a careful report turn an exploratory sequence into work that can be evaluated.
+Document the stopping criteria, diagnostic results, and limitations alongside the final model specification. This record allows readers to assess which revisions were supported by evidence, whether unresolved discrepancies affect the target, and what additional observations or checks would be needed to extend the conclusions.
 
 ## References
 
