@@ -9,6 +9,7 @@ on:
       - "_posts/2026-10-27-tolerance-intervals.md"
       - "_posts/2026-10-27-interval-endpoint-regression.md"
       - "scripts/run_research_blog_examples.R"
+      - "scripts/audit_blog_fit_recovery.R"
       - ".github/workflows/verify_research_blog.yml"
   push:
     branches: [main]
@@ -19,6 +20,7 @@ on:
       - "_posts/2026-10-27-tolerance-intervals.md"
       - "_posts/2026-10-27-interval-endpoint-regression.md"
       - "scripts/run_research_blog_examples.R"
+      - "scripts/audit_blog_fit_recovery.R"
       - ".github/workflows/verify_research_blog.yml"
   workflow_dispatch: {}
 
@@ -45,3 +47,5 @@ jobs:
           install-quarto: false
       - name: Execute published R blocks and reference checks
         run: Rscript --vanilla scripts/run_research_blog_examples.R
+      - name: Check recovery across fixed simulation seeds
+        run: Rscript --vanilla scripts/audit_blog_fit_recovery.R

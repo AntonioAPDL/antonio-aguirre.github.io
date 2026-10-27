@@ -2,6 +2,10 @@
 
 Investigation and teaching plan, October 27, 2026.
 
+The original small-sample reference results below are historical. Current
+sample sizes, lag-augmented design, and recovery checks are documented in
+`blog_fit_recovery_recheck.md`.
+
 ## Evidence and decisions
 
 Read the reservoir construction and evaluation sections of the local

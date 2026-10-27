@@ -30,14 +30,14 @@ Midpoint and half-width coordinates make ordering easy: $$a(x)=m(x)-h(x)$$ and $
 
 ```r
 set.seed(61027)
-n <- 80L
+n <- 600L
 x <- seq(-1, 1, length.out = n)
 y <- 0.5 + 0.8 * x + rnorm(n, sd = 0.55)
 content <- 0.8
 grid <- expand.grid(
-  intercept = seq(-0.3, 1.3, length.out = 21),
-  slope = seq(0.1, 1.5, length.out = 21),
-  half_width = seq(0.35, 1.5, length.out = 21)
+  intercept = seq(-0.3, 1.3, length.out = 41),
+  slope = seq(0.1, 1.5, length.out = 41),
+  half_width = seq(0.35, 1.5, length.out = 41)
 )
 check <- function(u, c) u * (c - (u < 0))
 loss <- vapply(seq_len(nrow(grid)), function(j) {
@@ -49,7 +49,7 @@ log_prior <- dnorm(grid$intercept, 0, 1.5, log = TRUE) +
   dnorm(grid$half_width, 0, 1, log = TRUE)
 ```
 
-The prior assigns mass proportional to these positive weights on the 9,261 grid points. It is a proper discrete prior after normalization. This is the model itself, not a claim that this grid accurately approximates every feature of a continuous posterior. Its bounded coefficient support, constant-width restriction, and resolution are substantive limitations.
+The prior assigns mass proportional to these positive weights on the 68,921 grid points. It is a proper discrete prior after normalization. Six hundred observations and a finer grid make endpoint recovery easier to assess than in a very small sample. This is the model itself, not a claim that this grid accurately approximates every feature of a continuous posterior. Its bounded coefficient support, constant-width restriction, and resolution are substantive limitations.
 
 ## Update with the loss
 
@@ -103,6 +103,22 @@ summarize <- function(z, sign) {
 }
 lower <- vapply(xx, summarize, numeric(3), sign = -1)
 upper <- vapply(xx, summarize, numeric(3), sign = 1)
+known_half_width <- qnorm(0.9) * 0.55
+target_lower <- 0.5 + 0.8 * xx - known_half_width
+target_upper <- 0.5 + 0.8 * xx + known_half_width
+endpoint_RMSE <- sqrt(mean(c(lower[1, ] - target_lower,
+                            upper[1, ] - target_upper)^2))
+set.seed(61028) # Independent verification observations, never used in fitting.
+x_test <- seq(-1, 1, length.out = 1000)
+y_test <- 0.5 + 0.8 * x_test + rnorm(length(x_test), sd = 0.55)
+estimate <- colSums(grid * weight)
+lower_test <- estimate[1] + estimate[2] * x_test - estimate[3]
+upper_test <- estimate[1] + estimate[2] * x_test + estimate[3]
+heldout_content <- mean(y_test >= lower_test & y_test <= upper_test)
+population_content <- mean(pnorm((upper_test - 0.5 - 0.8 * x_test) / 0.55) -
+                           pnorm((lower_test - 0.5 - 0.8 * x_test) / 0.55))
+print(c(endpoint_RMSE = endpoint_RMSE, heldout_content = heldout_content,
+        population_content = population_content))
 a <- 0.1
 b <- 1.2
 stopifnot(all(lower[1, ] < upper[1, ]),
@@ -114,12 +130,16 @@ example_verified <- TRUE
 
 The blue curves below are posterior means of endpoint functions. The pale bands are pointwise 90% credible bands for those endpoints under this discrete generalized posterior. They are **not** 90% response prediction bands, simultaneous bands over the covariate range, or a tolerance certificate. The region between the two endpoint curves represents the estimated interval target; uncertainty about those curves is a separate object.
 
+The simulation also permits direct recovery checks: endpoint RMSE against the known target, content on 1,000 independent verification observations, and average population content calculated from the known Gaussian CDF. These checks are not used to select the learning rate, prior, or grid. An in-sample fraction alone would be much weaker evidence, and none of these checks establishes a tolerance guarantee or repeated-sampling coverage for the endpoint bands.
+
+The reference endpoint RMSE is **0.0210**. Average population content is **0.7879**, and the independent sample fraction inside the estimated interval is **0.7780**, against a target of 0.8. The difference between the last two quantities reflects verification-sample variation; the difference from the target also includes endpoint-estimation error. The example reports both rather than shifting its fitted endpoints after verification.
+
 ```r
 figure_dir <- Sys.getenv("RESEARCH_BLOG_FIGURE_DIR", tempdir())
 png(file.path(figure_dir, "interval-endpoint-regression.png"),
     width = 1400, height = 800, res = 150)
 par(mar = c(4, 4, 2, 1))
-plot(x, y, pch = 16, cex = 0.6, col = "#65737E",
+plot(x, y, pch = 16, cex = 0.4, col = adjustcolor("#65737E", 0.45),
      xlab = "Predictor", ylab = "Simulated response",
      ylim = range(y, lower, upper))
 for (curve in list(lower, upper)) {
@@ -127,7 +147,6 @@ for (curve in list(lower, upper)) {
           col = adjustcolor("#176A94", 0.2), border = NA)
   lines(xx, curve[1, ], col = "#176A94", lwd = 2)
 }
-known_half_width <- qnorm(0.9) * 0.55
 for (sign in c(-1, 1)) {
   lines(xx, 0.5 + 0.8 * xx + sign * known_half_width,
         col = "#25734A", lty = 2, lwd = 2)

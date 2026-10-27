@@ -2,6 +2,10 @@
 
 Investigation and implementation plan, October 27, 2026.
 
+The original local-trend-only calculation below is historical. The current
+fixed-evolution seasonal example replaces that calculation;
+see `blog_fit_recovery_recheck.md` for the diagnosis and current checks.
+
 ## Sources and scope
 
 - Public package: CRAN exdqlm 1.1.2, published September 16, 2026.

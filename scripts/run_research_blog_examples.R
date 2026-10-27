@@ -41,9 +41,11 @@ for (slug in selected) {
     "fixed-recurrent-quantile-features" = {
       stopifnot(max(env$train) < min(env$test),
                 identical(as.numeric(env$center), mean(env$y[1:env$n_train])),
-                identical(dim(env$H), c(320L, 12L)),
-                abs(env$scores[1] - 0.1273208) < 1e-5,
-                abs(env$scores[2] - 0.1343470) < 1e-5)
+                identical(dim(env$H), c(2000L, 12L)),
+                abs(env$scores[1] - 0.1077158) < 1e-5,
+                abs(env$scores[2] - 0.1176063) < 1e-5,
+                env$recovery["target_RMSE"] < 0.25,
+                abs(env$recovery["fraction_below"] - env$p) < 0.06)
     },
     "checking-quantile-forecasts" = {
       stopifnot(max(abs(env$good$coverage - c(0.1025, 0.5064583333, 0.90125))) < 1e-9,
@@ -58,9 +60,12 @@ for (slug in selected) {
                 abs(env$success - 0.994) < 1e-12)
     },
     "interval-endpoint-regression" = {
-      stopifnot(nrow(env$grid) == 9261L,
-                abs(sum(env$weight * env$grid$intercept) - 0.6017088) < 1e-6,
-                abs(sum(env$weight[env$boundary]) - 0.002284933) < 1e-8)
+      stopifnot(nrow(env$grid) == 68921L,
+                abs(sum(env$weight * env$grid$intercept) - 0.5088470) < 1e-6,
+                sum(env$weight[env$boundary]) < 1e-6,
+                env$endpoint_RMSE < 0.08,
+                abs(env$heldout_content - env$content) < 0.06,
+                abs(env$population_content - env$content) < 0.04)
     }
   )
   cat(sprintf("PASS: %s; %d R blocks and embedded numerical checks.\n", slug, count))

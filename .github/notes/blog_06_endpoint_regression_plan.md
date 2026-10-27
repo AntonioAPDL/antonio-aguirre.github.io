@@ -2,6 +2,10 @@
 
 Investigation and teaching plan, October 27, 2026.
 
+The original 80-observation, 9,261-point calculation below is historical.
+The current larger-sample example, finer grid, and independent verification
+are documented in `blog_fit_recovery_recheck.md`.
+
 ## Evidence and scope
 
 Read Sections 2--6 of local MTI-EXTENSIONS/main.tex and compare with the

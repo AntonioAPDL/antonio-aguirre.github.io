@@ -37,7 +37,10 @@ for (line in lines) {
 stopifnot(!in_r, count == 6L)
 stopifnot(length(env$fit$y) == env$n_train,
           identical(as.numeric(env$fit$y), as.numeric(env$y_train)),
-          identical(dim(env$fit$theta.out$sm), c(2L, 160L)),
+          identical(dim(env$fit$theta.out$sm), c(4L, 800L)),
+          env$discount == 1,
+          max(abs(env$smoothed_quantile -
+            drop(t(env$model$FF) %*% env$fit$theta.out$sm))) < 1e-12,
           all(is.finite(env$forecast$ff)),
           all(is.finite(env$forecast$samp.fore)))
 
@@ -45,8 +48,8 @@ stopifnot(length(env$fit$y) == env$n_train,
 u <- env$y_test - env$forecast$ff
 independent <- mean(ifelse(u >= 0, env$p0 * u, (1 - env$p0) * -u))
 stopifnot(isTRUE(all.equal(independent, env$scores$mean_check_loss[1])),
-          abs(env$scores$mean_check_loss[1] - 0.3955137) < 1e-5,
-          abs(env$scores$mean_check_loss[2] - 0.6600739) < 1e-5,
-          sum(env$y_test <= env$forecast$ff) == 10L)
+          env$forecast_rmse < 0.25,
+          abs(env$forecast_rmse - 0.08005434) < 1e-6,
+          abs(env$scores$fraction_below[1] - env$p0) < 0.12)
 cat(sprintf("PASS: %d article R blocks executed; dimensions, training split, scores, and reference results verified.\n", count))
 cat("R:", R.version.string, "\nexdqlm:", as.character(packageVersion("exdqlm")), "\n")

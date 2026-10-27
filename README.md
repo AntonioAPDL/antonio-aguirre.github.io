@@ -73,6 +73,7 @@ needed. By default figures are written to R's temporary directory.
 
 ```bash
 Rscript --vanilla scripts/run_research_blog_examples.R
+Rscript --vanilla scripts/audit_blog_fit_recovery.R
 # Run one article and intentionally regenerate its public figure:
 Rscript --vanilla scripts/run_research_blog_examples.R \
   fixed-recurrent-quantile-features --figure-dir=public/images/blog
@@ -88,6 +89,13 @@ investigations, teaching plans, and execution results are recorded in
 The path-scoped `verify_research_blog.yml` workflow reruns all five examples
 when their source or runner changes. It fixes R 4.5.3, installs CRAN `quantreg`,
 and records its installed version; reference assertions expose numerical drift.
+
+The recovery audit uses ten fixed data seeds for the recurrent-feature and
+endpoint-regression examples, reporting every run rather than choosing a
+favorable seed. Add `--include-exdqlm` to repeat the fixed-evolution seasonal
+fit and forecast on three additional data seeds
+(requires the reference exdqlm library). See
+`.github/notes/blog_fit_recovery_recheck.md` for the recheck and current results.
 
 ## Teaching materials
 
