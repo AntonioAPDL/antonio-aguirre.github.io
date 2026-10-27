@@ -34,10 +34,35 @@ Notes:
 ## Structure
 
 - `index.html`, `about.md`, `research.md`, `teaching.html`, `software.md`, `demos.html`, `cv.html`, `contact.md`: main public pages
-- `blog.html`, `_posts/`: unpublished technical notes under review
+- `blog.html`, `_posts/`: published technical notes and worked research examples
 - `_layouts/`, `_includes/`: shared templates
 - `public/`: theme assets and custom styles
 - `files/`: PDFs and images
+
+## Research blog examples
+
+Blog posts live in `_posts/` and use `_layouts/post.html`. Keep publication dates
+accurate, cite primary sources, and run both publication checks before adding a
+post:
+
+```bash
+python3 scripts/check_blog_quality.py
+python3 scripts/check_blog_code_blocks.py
+```
+
+The first `exdqlm` tutorial has an executable runner that reads the article's R
+blocks directly. It requires the reference CRAN release, `exdqlm` 1.1.2. Use an
+isolated `R_LIBS` when a different version is installed by default.
+
+```bash
+Rscript --vanilla scripts/run_exdqlm_blog_example.R
+# Regenerate the published figure only when intentionally updating the example:
+Rscript --vanilla scripts/run_exdqlm_blog_example.R --figure-dir=public/images/blog
+```
+
+The runner checks the training split, output dimensions, score agreement, and
+reported numerical results. The investigation and teaching plan is recorded in
+`.github/notes/blog_01_exdqlm_plan.md`.
 
 ## Teaching materials
 

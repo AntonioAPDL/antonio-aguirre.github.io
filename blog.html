@@ -28,6 +28,8 @@ description: "Technical notes on Bayesian workflow, probabilistic forecasting, s
 
     <ol class="blog-series-list">
       {% for post in workflow_posts %}
+        {% assign published_day = post.date | date: "%Y-%m-%d" %}
+        {% assign updated_day = post.updated | date: "%Y-%m-%d" %}
         {% assign words = post.content | number_of_words %}
         {% assign minutes = words | divided_by: 220 %}
         {% if minutes < 1 %}{% assign minutes = 1 %}{% endif %}
@@ -38,7 +40,7 @@ description: "Technical notes on Bayesian workflow, probabilistic forecasting, s
               <span class="blog-series-item__title">{{ post.title }}</span>
               <span class="blog-series-item__meta">
                 {{ post.date | date: "%b %-d, %Y" }}
-                {% if post.updated %}<span aria-hidden="true"> · </span>Updated {{ post.updated | date: "%b %-d, %Y" }}{% endif %}
+                {% if post.updated and updated_day != published_day %}<span aria-hidden="true"> · </span>Updated {{ post.updated | date: "%b %-d, %Y" }}{% endif %}
                 <span aria-hidden="true"> · </span>{{ minutes }} min read
               </span>
               <span class="blog-series-item__excerpt">{{ post.excerpt | strip_html }}</span>
@@ -59,6 +61,8 @@ description: "Technical notes on Bayesian workflow, probabilistic forecasting, s
     <div class="blog-card-grid">
       {% for post in site.posts %}
         {% unless post.series %}
+          {% assign published_day = post.date | date: "%Y-%m-%d" %}
+          {% assign updated_day = post.updated | date: "%Y-%m-%d" %}
           {% assign words = post.content | number_of_words %}
           {% assign minutes = words | divided_by: 220 %}
           {% if minutes < 1 %}{% assign minutes = 1 %}{% endif %}
@@ -71,7 +75,7 @@ description: "Technical notes on Bayesian workflow, probabilistic forecasting, s
             <p>{{ post.excerpt | strip_html }}</p>
             <p class="blog-card__date">
               <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%B %-d, %Y" }}</time>
-              {% if post.updated %}
+              {% if post.updated and updated_day != published_day %}
                 <span aria-hidden="true"> · </span>Updated <time datetime="{{ post.updated | date_to_xmlschema }}">{{ post.updated | date: "%B %-d, %Y" }}</time>
               {% endif %}
             </p>

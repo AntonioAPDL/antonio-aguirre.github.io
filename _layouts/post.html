@@ -6,6 +6,8 @@ layout: default
 {% assign minutes = words | divided_by: 220 %}
 {% if minutes < 1 %}{% assign minutes = 1 %}{% endif %}
 {% assign series_posts = site.posts | where: "series", page.series | sort: "series_order" %}
+{% assign published_day = page.date | date: "%Y-%m-%d" %}
+{% assign updated_day = page.updated | date: "%Y-%m-%d" %}
 
 <article class="post-article" itemscope itemtype="https://schema.org/BlogPosting">
   <nav class="post-breadcrumb" aria-label="Breadcrumb">
@@ -34,7 +36,7 @@ layout: default
           {{ page.date | date: "%B %-d, %Y" }}
         </time>
       </span>
-      {% if page.updated %}
+      {% if page.updated and updated_day != published_day %}
         <span>
           Updated
           <time datetime="{{ page.updated | date_to_xmlschema }}" itemprop="dateModified">

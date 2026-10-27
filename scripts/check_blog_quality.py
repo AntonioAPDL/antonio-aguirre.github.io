@@ -110,7 +110,7 @@ def check_post(path: Path) -> tuple[dict[str, object], int]:
         fail(f"{path}: published must be true")
     if not isinstance(data.get("tags"), list) or len(data["tags"]) < 2:
         fail(f"{path}: tags must contain at least two entries")
-    if re.search(r"^# ", body, flags=re.MULTILINE):
+    if re.search(r"^# ", strip_code_blocks(body), flags=re.MULTILINE):
         fail(f"{path}: raw H1 heading found; layout owns the page H1")
     if "<li>" in body and "<ul>" not in body and "<ol>" not in body:
         fail(f"{path}: possible malformed standalone <li> markup")
@@ -132,8 +132,8 @@ def check_post(path: Path) -> tuple[dict[str, object], int]:
 
 def main() -> None:
     paths = sorted(POSTS_DIR.glob("*.md"))
-    if len(paths) != MIN_POSTS:
-        fail(f"expected {MIN_POSTS} posts, found {len(paths)}")
+    if len(paths) < MIN_POSTS:
+        fail(f"expected at least {MIN_POSTS} posts, found {len(paths)}")
 
     titles: set[str] = set()
     series_orders: list[int] = []
