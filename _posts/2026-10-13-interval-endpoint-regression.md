@@ -2,8 +2,9 @@
 layout: post
 published: true
 title: "Modeling interval endpoints in regression and time series"
-date: 2026-10-27
+date: 2026-10-13
 updated: 2026-10-27
+last_modified_at: 2026-10-27
 theme: Interval models
 tags: [regression, generalized-bayes, mean-tilted-intervals, time-series]
 description: "Build a small loss-based endpoint regression and distinguish interval content, posterior endpoint uncertainty, and dynamic-state computation."
@@ -170,7 +171,7 @@ The manuscript allows more general root functions, including fixed nonlinear fea
 
 In dynamic models, Gaussian state priors do not make the joint observation problem linear Gaussian. Under the augmentation, one root trajectory can have a Gaussian conditional update while the other root and latent scales are held fixed. Jointly, the augmented observation kernel is quartic in the roots. Alternating root-specific smoothing steps exploit conditional structure, not a single ordinary Kalman-filter solution for everything.
 
-These models describe interval-root functionals. A predictive distribution for responses needs additional modeling, and a repeated-sampling tolerance guarantee needs separate calibration. The [tolerance note]({{ '/2026/10/27/tolerance-intervals/' | relative_url }}) gives an iid example of that extra step; its certificate does not automatically extend to regression or time series.
+These models describe interval-root functionals. A predictive distribution for responses needs additional modeling, and a repeated-sampling tolerance guarantee needs separate calibration. The [tolerance note]({{ '/2026/07/09/tolerance-intervals/' | relative_url }}) gives an iid example of that extra step; its certificate does not automatically extend to regression or time series.
 
 ## References
 

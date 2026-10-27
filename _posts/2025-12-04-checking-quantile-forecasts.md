@@ -2,8 +2,9 @@
 layout: post
 published: true
 title: "Checking quantile forecasts across levels and horizons"
-date: 2026-10-27
+date: 2025-12-04
 updated: 2026-10-27
+last_modified_at: 2026-10-27
 theme: Forecast evaluation
 tags: [forecasting, quantile-regression, calibration, scoring-rules]
 description: "Use check loss, calibration diagnostics, crossing checks, and horizon-specific comparisons to evaluate quantile forecasts."
@@ -19,7 +20,7 @@ In comparing forecasting methods, I find it useful to keep three questions separ
 
 A row should identify a forecast origin, a horizon, a verifying observation, and the predictions being compared. All methods should be scored on the same eligible rows. If a source is missing on some dates, either restrict the comparison to common support or report the different support explicitly. Otherwise a difference attributed to the method may be a difference in which cases were evaluated.
 
-For a time series, random train-test shuffling usually does not reproduce the prediction task. Scaling, feature selection, tuning, and coefficient estimation must respect the information available at each origin. Rolling evaluation can incorporate newly observed responses, but that update rule must be the same one the application would permit. [The fixed-feature example]({{ '/2026/10/27/fixed-recurrent-quantile-features/' | relative_url }}) illustrates rolling one-step prediction, not a long forecast from a single origin.
+For a time series, random train-test shuffling usually does not reproduce the prediction task. Scaling, feature selection, tuning, and coefficient estimation must respect the information available at each origin. Rolling evaluation can incorporate newly observed responses, but that update rule must be the same one the application would permit. [The fixed-feature example]({{ '/2025/09/09/fixed-recurrent-quantile-features/' | relative_url }}) illustrates rolling one-step prediction, not a long forecast from a single origin.
 
 ## Use a score that matches the target
 

@@ -2,8 +2,9 @@
 layout: post
 published: true
 title: "Intervals with the same coverage can look very different"
-date: 2026-10-27
+date: 2026-03-18
 updated: 2026-10-27
+last_modified_at: 2026-10-27
 theme: Interval targets
 tags: [intervals, uncertainty, mean-tilted-intervals, r]
 description: "Compare shortest, equal-tailed, and mean-preserving intervals under a known skewed distribution, and see why content alone does not determine placement."
@@ -119,7 +120,7 @@ dev.off()
 
 If the distribution were unknown, we would need to estimate the chosen interval from data. That introduces a new question: how variable are its endpoints? A posterior distribution or a sampling calculation can address endpoint uncertainty, but that uncertainty should not be confused with the probability mass between the endpoints.
 
-A tolerance interval asks something stronger and different: how often will the interval-construction procedure contain at least the requested population fraction over repeated samples? Neither a fitted 80% interval nor an endpoint credible band supplies that statement automatically. [The next note]({{ '/2026/10/27/tolerance-intervals/' | relative_url }}) makes the extra requirement explicit.
+A tolerance interval asks something stronger and different: how often will the interval-construction procedure contain at least the requested population fraction over repeated samples? Neither a fitted 80% interval nor an endpoint credible band supplies that statement automatically. [The next note]({{ '/2026/07/09/tolerance-intervals/' | relative_url }}) makes the extra requirement explicit.
 
 Before comparing interval procedures, name the target. Equal-tailed, shortest, and mean-preserving intervals answer different placement questions even when their content agrees. An evaluation that rewards one placement should not silently be presented as a neutral test of all the others.
 

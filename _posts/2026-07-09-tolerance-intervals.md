@@ -2,8 +2,9 @@
 layout: post
 published: true
 title: "What makes an interval a tolerance interval?"
-date: 2026-10-27
+date: 2026-07-09
 updated: 2026-10-27
+last_modified_at: 2026-10-27
 theme: Interval inference
 tags: [tolerance-intervals, uncertainty, order-statistics, r]
 description: "Separate population content from repeated-sampling confidence, then construct a conservative shortest-window tolerance rule with order statistics."
@@ -132,7 +133,7 @@ dev.off()
 
 The argument assumes iid continuous observations. Serial dependence, ties from discrete outcomes, regression-dependent populations, and changing distributions need additional treatment. Running the same code on a time series does not preserve the theorem. Nor does a posterior credible interval for estimated endpoints provide the frequentist content-confidence statement automatically.
 
-There are thus three separate decisions: the population interval target, the estimator or posterior used to describe it, and the calibration of the reported action. [Interval placement]({{ '/2026/10/27/same-content-different-intervals/' | relative_url }}) addresses the first. [Endpoint regression]({{ '/2026/10/27/interval-endpoint-regression/' | relative_url }}) concerns the second. Keeping the third explicit prevents an attractive interval estimate from being given a guarantee it has not earned.
+There are thus three separate decisions: the population interval target, the estimator or posterior used to describe it, and the calibration of the reported action. [Interval placement]({{ '/2026/03/18/same-content-different-intervals/' | relative_url }}) addresses the first. [Endpoint regression]({{ '/2026/10/13/interval-endpoint-regression/' | relative_url }}) concerns the second. Keeping the third explicit prevents an attractive interval estimate from being given a guarantee it has not earned.
 
 ## References
 

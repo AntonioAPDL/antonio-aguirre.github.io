@@ -21,7 +21,13 @@ class BlogPublicationGateTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.posts = Path(self.tmp.name)
-        legacy = sorted(p for p in (ROOT / "_posts").glob("*.md") if p.name < "2026-")
+        legacy = sorted(
+            p for p in (ROOT / "_posts").glob("*.md")
+            if p.name.startswith("2024-") or p.name in {
+                "2025-02-12-Multivariate_CRPS.md", "2025-02-16-HB-Tutorial.md",
+                "2025-03-21-VBLD.md",
+            }
+        )
         self.assertEqual(len(legacy), 9)
         for source in legacy:
             shutil.copyfile(source, self.posts / source.name)

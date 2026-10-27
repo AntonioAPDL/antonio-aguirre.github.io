@@ -7,7 +7,9 @@ if (length(args) > 1L || (length(args) && args != "--include-exdqlm")) {
 file_arg <- grep("^--file=", commandArgs(), value = TRUE)
 root <- dirname(dirname(normalizePath(sub("^--file=", "", file_arg[[1L]]))))
 run_article <- function(slug, data_seed, seed) {
-  lines <- readLines(file.path(root, "_posts", paste0("2026-10-27-", slug, ".md")))
+  post <- Sys.glob(file.path(root, "_posts", paste0("*-", slug, ".md")))
+  if (length(post) != 1L) stop("Expected exactly one article for ", slug)
+  lines <- readLines(post)
   env <- new.env(parent = globalenv())
   env$set.seed <- function(value, ...) {
     if (value == data_seed) value <- seed

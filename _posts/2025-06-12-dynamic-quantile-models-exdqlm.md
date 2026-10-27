@@ -2,8 +2,9 @@
 layout: post
 published: true
 title: "Fitting and checking dynamic quantile models in R"
-date: 2026-10-27
+date: 2025-06-12
 updated: 2026-10-27
+last_modified_at: 2026-10-27
 theme: Statistical software
 tags: [quantile-regression, forecasting, exdqlm, r]
 description: "Fit a trend-plus-seasonal quantile model with fixed evolution, inspect its diagnostics, and check forecasts against a known simulation target."

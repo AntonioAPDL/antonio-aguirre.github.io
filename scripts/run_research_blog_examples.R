@@ -18,7 +18,8 @@ if (length(figure_arg)) {
 }
 if (!length(selected)) selected <- slugs
 for (slug in selected) {
-  post <- file.path(root, "_posts", paste0("2026-10-27-", slug, ".md"))
+  post <- Sys.glob(file.path(root, "_posts", paste0("*-", slug, ".md")))
+  if (length(post) != 1L) stop("Expected exactly one article for ", slug)
   lines <- readLines(post, warn = FALSE)
   env <- new.env(parent = globalenv())
   in_r <- FALSE

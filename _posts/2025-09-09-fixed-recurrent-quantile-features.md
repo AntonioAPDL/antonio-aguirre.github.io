@@ -2,8 +2,9 @@
 layout: post
 published: true
 title: "Quantile forecasting with fixed recurrent features"
-date: 2026-10-27
+date: 2025-09-09
 updated: 2026-10-27
+last_modified_at: 2026-10-27
 theme: Prediction models
 tags: [quantile-regression, recurrent-features, forecasting, r]
 description: "Build fixed recurrent features, fit an upper-quantile readout, and evaluate rolling one-step predictions without using future observations."
@@ -150,7 +151,7 @@ The reference run has target RMSE **0.1392**. The fraction below the estimated 9
 
 The research model places priors on the readout coefficients and uses posterior computation to describe uncertainty conditional on the chosen representation. Shrinkage matters when many recurrent features carry similar information. MCMC and variational inference also introduce diagnostic questions that the convex fit above does not answer.
 
-Posterior uncertainty conditional on one reservoir is not uncertainty over every possible reservoir or every tuning decision. Likewise, an asymmetric-Laplace working likelihood does not by itself validate the entire response distribution. Held-out quantile scores and calibration checks remain necessary. The next note, [checking quantile forecasts]({{ '/2026/10/27/checking-quantile-forecasts/' | relative_url }}), separates those checks across levels and horizons.
+Posterior uncertainty conditional on one reservoir is not uncertainty over every possible reservoir or every tuning decision. Likewise, an asymmetric-Laplace working likelihood does not by itself validate the entire response distribution. Held-out quantile scores and calibration checks remain necessary. The next note, [checking quantile forecasts]({{ '/2025/12/04/checking-quantile-forecasts/' | relative_url }}), separates those checks across levels and horizons.
 
 ## References
 

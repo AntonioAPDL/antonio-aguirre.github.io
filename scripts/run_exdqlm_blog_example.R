@@ -4,7 +4,8 @@ args <- commandArgs(trailingOnly = TRUE)
 file_arg <- grep("^--file=", commandArgs(), value = TRUE)
 script <- normalizePath(sub("^--file=", "", file_arg[[1L]]))
 root <- dirname(dirname(script))
-post <- file.path(root, "_posts", "2026-10-27-dynamic-quantile-models-exdqlm.md")
+post <- Sys.glob(file.path(root, "_posts", "*-dynamic-quantile-models-exdqlm.md"))
+if (length(post) != 1L) stop("Expected exactly one exdqlm tutorial.")
 if (length(args) > 1L || (length(args) && !startsWith(args, "--figure-dir="))) {
   stop("Usage: Rscript scripts/run_exdqlm_blog_example.R [--figure-dir=PATH]")
 }

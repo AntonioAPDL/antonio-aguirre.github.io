@@ -50,6 +50,10 @@ python3 scripts/check_blog_quality.py
 python3 scripts/check_blog_code_blocks.py
 ```
 
+The six research notes use owner-assigned editorial dates and retain October 27,
+2026 as their last update. See `.github/notes/blog_editorial_dates.md` for the
+date mapping and original-deployment record. Existing URLs have 301 redirects.
+
 The first `exdqlm` tutorial has an executable runner that reads the article's R
 blocks directly. It requires the reference CRAN release, `exdqlm` 1.1.2. Use an
 isolated `R_LIBS` when a different version is installed by default.

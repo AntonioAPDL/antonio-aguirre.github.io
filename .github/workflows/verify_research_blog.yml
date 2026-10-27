@@ -3,22 +3,22 @@ name: Verify research blog examples
 on:
   pull_request:
     paths:
-      - "_posts/2026-10-27-fixed-recurrent-quantile-features.md"
-      - "_posts/2026-10-27-checking-quantile-forecasts.md"
-      - "_posts/2026-10-27-same-content-different-intervals.md"
-      - "_posts/2026-10-27-tolerance-intervals.md"
-      - "_posts/2026-10-27-interval-endpoint-regression.md"
+      - "_posts/*-fixed-recurrent-quantile-features.md"
+      - "_posts/*-checking-quantile-forecasts.md"
+      - "_posts/*-same-content-different-intervals.md"
+      - "_posts/*-tolerance-intervals.md"
+      - "_posts/*-interval-endpoint-regression.md"
       - "scripts/run_research_blog_examples.R"
       - "scripts/audit_blog_fit_recovery.R"
       - ".github/workflows/verify_research_blog.yml"
   push:
     branches: [main]
     paths:
-      - "_posts/2026-10-27-fixed-recurrent-quantile-features.md"
-      - "_posts/2026-10-27-checking-quantile-forecasts.md"
-      - "_posts/2026-10-27-same-content-different-intervals.md"
-      - "_posts/2026-10-27-tolerance-intervals.md"
-      - "_posts/2026-10-27-interval-endpoint-regression.md"
+      - "_posts/*-fixed-recurrent-quantile-features.md"
+      - "_posts/*-checking-quantile-forecasts.md"
+      - "_posts/*-same-content-different-intervals.md"
+      - "_posts/*-tolerance-intervals.md"
+      - "_posts/*-interval-endpoint-regression.md"
       - "scripts/run_research_blog_examples.R"
       - "scripts/audit_blog_fit_recovery.R"
       - ".github/workflows/verify_research_blog.yml"
