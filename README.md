@@ -64,6 +64,31 @@ The runner checks the training split, output dimensions, score agreement, and
 reported numerical results. The investigation and teaching plan is recorded in
 `.github/notes/blog_01_exdqlm_plan.md`.
 
+Five further worked notes cover recurrent quantile features, forecast checks,
+interval placement, tolerance confidence, and endpoint regression. Their runner
+also executes the published fences directly, in separate environments, and
+checks reference results. It uses R 4.5.3 and `quantreg` 6.1; the other four
+examples use only base R. No research repositories or private datasets are
+needed. By default figures are written to R's temporary directory.
+
+```bash
+Rscript --vanilla scripts/run_research_blog_examples.R
+# Run one article and intentionally regenerate its public figure:
+Rscript --vanilla scripts/run_research_blog_examples.R \
+  fixed-recurrent-quantile-features --figure-dir=public/images/blog
+```
+
+Article slugs accepted by the runner are `fixed-recurrent-quantile-features`,
+`checking-quantile-forecasts`, `same-content-different-intervals`,
+`tolerance-intervals`, and `interval-endpoint-regression`. Individual source
+investigations, teaching plans, and execution results are recorded in
+`.github/notes/blog_02_qdesn_plan.md` through
+`.github/notes/blog_06_endpoint_regression_plan.md`.
+
+The path-scoped `verify_research_blog.yml` workflow reruns all five examples
+when their source or runner changes. It fixes R 4.5.3, installs CRAN `quantreg`,
+and records its installed version; reference assertions expose numerical drift.
+
 ## Teaching materials
 
 Teaching resources are driven by `_data/teaching.yml` and rendered by

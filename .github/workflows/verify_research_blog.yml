@@ -1,0 +1,47 @@
+name: Verify research blog examples
+
+on:
+  pull_request:
+    paths:
+      - "_posts/2026-10-27-fixed-recurrent-quantile-features.md"
+      - "_posts/2026-10-27-checking-quantile-forecasts.md"
+      - "_posts/2026-10-27-same-content-different-intervals.md"
+      - "_posts/2026-10-27-tolerance-intervals.md"
+      - "_posts/2026-10-27-interval-endpoint-regression.md"
+      - "scripts/run_research_blog_examples.R"
+      - ".github/workflows/verify_research_blog.yml"
+  push:
+    branches: [main]
+    paths:
+      - "_posts/2026-10-27-fixed-recurrent-quantile-features.md"
+      - "_posts/2026-10-27-checking-quantile-forecasts.md"
+      - "_posts/2026-10-27-same-content-different-intervals.md"
+      - "_posts/2026-10-27-tolerance-intervals.md"
+      - "_posts/2026-10-27-interval-endpoint-regression.md"
+      - "scripts/run_research_blog_examples.R"
+      - ".github/workflows/verify_research_blog.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    env:
+      OPENBLAS_NUM_THREADS: 1
+      OMP_NUM_THREADS: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.5.3'
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: any::quantreg, any::sessioninfo
+          dependencies: '"hard"'
+          install-pandoc: false
+          install-quarto: false
+      - name: Execute published R blocks and reference checks
+        run: Rscript --vanilla scripts/run_research_blog_examples.R
