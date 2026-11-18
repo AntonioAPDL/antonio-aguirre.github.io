@@ -1,5 +1,5 @@
 variable,csv_path,rows,min_date,max_date,target_date,target_reached,lag_days,value_column,latest_value,updated_at_utc
-ppt,prism_precipitation_santa_cruz_1987_2023.csv,14565,1987-01-01,2026-11-16,2026-11-17,NO,1,PRCP_mm,30.559700,2026-11-17T16:24:58Z
-soil,soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv,14560,1987-01-01,2026-11-11,2026-11-17,NO,6,Daily_Avg_Soil_Moisture,0.201599,2026-11-17T16:24:58Z
-soil_nwm_soil_m,soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv,13181,1987-01-01,2023-02-01,2026-11-17,NO,1385,NWM_SOIL_M,0.470000,2026-11-17T16:24:58Z
-soil_nwm_soil_w,soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv,13181,1987-01-01,2023-02-01,2026-11-17,NO,1385,NWM_SOIL_W,0.470000,2026-11-17T16:24:58Z
+ppt,prism_precipitation_santa_cruz_1987_2023.csv,14566,1987-01-01,2026-11-17,2026-11-18,NO,1,PRCP_mm,6.347100,2026-11-18T15:58:29Z
+soil,soil_moisture_data/soil_moisture_big_trees_daily_avg_1987_2023.csv,14561,1987-01-01,2026-11-12,2026-11-18,NO,6,Daily_Avg_Soil_Moisture,0.196060,2026-11-18T15:58:29Z
+soil_nwm_soil_m,soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv,13181,1987-01-01,2023-02-01,2026-11-18,NO,1386,NWM_SOIL_M,0.470000,2026-11-18T15:58:29Z
+soil_nwm_soil_w,soil_moisture_data/nwm_soil_moisture_big_trees_daily_1987_present.csv,13181,1987-01-01,2023-02-01,2026-11-18,NO,1386,NWM_SOIL_W,0.470000,2026-11-18T15:58:29Z
