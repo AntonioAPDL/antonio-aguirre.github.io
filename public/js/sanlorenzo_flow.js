@@ -30,14 +30,13 @@
     margin: { l: 60, r: 20, t: 24, b: 52 },
     legend: {
       orientation: 'h',
-      y: 1.18,
+      y: 1.02,
       x: 0,
       xanchor: 'left',
       fontSize: 11
     }
   };
   const FORECAST_START_MARKER_STYLE = {
-    color: '#111827',
     width: 1.4,
     dash: 'dash',
     label: 'Forecast start'
@@ -192,7 +191,7 @@
     return values.find((value) => Number.isFinite(value));
   }
 
-  function resolveYAxisLimit(config, scale, bound, fallback) {
+  function resolveYAxisAnchor(config, scale, bound, fallback) {
     const isMin = bound === 'min';
     const sharedLimit = isMin ? config.yMin : config.yMax;
 
@@ -438,7 +437,7 @@
           y0: 0,
           y1: 1,
           line: {
-            color: FORECAST_START_MARKER_STYLE.color,
+            color: colors.text,
             width: FORECAST_START_MARKER_STYLE.width,
             dash: FORECAST_START_MARKER_STYLE.dash
           }
@@ -450,15 +449,17 @@
           x: forecastStart,
           yref: 'paper',
           y: 1,
-          xanchor: 'left',
-          yanchor: 'bottom',
+          xanchor: 'right',
+          yanchor: 'top',
+          xshift: -4,
+          yshift: -4,
           text: FORECAST_START_MARKER_STYLE.label,
           showarrow: false,
           font: {
             size: 11,
-            color: FORECAST_START_MARKER_STYLE.color
+            color: colors.text
           },
-          bgcolor: 'rgba(255, 255, 255, 0.6)',
+          bgcolor: colors.surface,
           bordercolor: 'rgba(255, 255, 255, 0.0)',
           borderpad: 2
         }
@@ -793,7 +794,7 @@
     return { series, points };
   }
 
-  function buildLayout(yTitle, colors, yRange, shapes, annotations, xRange) {
+  function buildLayout(yTitle, colors, yOptions, shapes, annotations, xRange) {
     const yaxis = {
       title: yTitle,
       gridcolor: colors.grid,
@@ -801,13 +802,9 @@
       showline: true,
       linecolor: colors.grid,
       automargin: true,
-      type: 'linear'
+      type: 'linear',
+      ...yOptions
     };
-
-    if (Array.isArray(yRange) && Number.isFinite(yRange[0]) && Number.isFinite(yRange[1])) {
-      yaxis.range = yRange;
-      yaxis.autorange = false;
-    }
 
     const xaxis = {
       title: 'Date (UTC)',
@@ -847,6 +844,7 @@
       legend: {
         orientation: PLOT_LAYOUT_STYLE.legend.orientation,
         y: PLOT_LAYOUT_STYLE.legend.y,
+        yanchor: 'bottom',
         x: PLOT_LAYOUT_STYLE.legend.x,
         xanchor: PLOT_LAYOUT_STYLE.legend.xanchor,
         font: { size: PLOT_LAYOUT_STYLE.legend.fontSize, color: colors.text },
@@ -1254,31 +1252,6 @@
         valid = false;
       }
 
-      if (Number.isFinite(this.config.yMin) && Number.isFinite(this.config.yMax) &&
-          this.config.yMax <= this.config.yMin) {
-        console.warn('[usgs-iv] data-y-max must exceed data-y-min.', this.container);
-      }
-
-      if (this.config.mode === 'discharge') {
-        const linearYMin = firstFinite(this.config.yMinLinear, this.config.yMin);
-        const linearYMax = firstFinite(this.config.yMaxLinear, this.config.yMax);
-        if (Number.isFinite(linearYMin) && Number.isFinite(linearYMax) && linearYMax <= linearYMin) {
-          console.warn('[usgs-iv] data-y-max-linear must exceed data-y-min-linear/data-y-min.', this.container);
-        }
-
-        const sharedLogYMin = Number.isFinite(this.config.yMin)
-          ? transformDischargeValue(this.config.yMin, DISCHARGE_SCALE_LOG1P)
-          : undefined;
-        const sharedLogYMax = Number.isFinite(this.config.yMax)
-          ? transformDischargeValue(this.config.yMax, DISCHARGE_SCALE_LOG1P)
-          : undefined;
-        const logYMin = firstFinite(this.config.yMinLog1p, sharedLogYMin);
-        const logYMax = firstFinite(this.config.yMaxLog1p, sharedLogYMax);
-        if (Number.isFinite(logYMin) && Number.isFinite(logYMax) && logYMax <= logYMin) {
-          console.warn('[usgs-iv] data-y-max-log1p must exceed data-y-min-log1p/data-y-min.', this.container);
-        }
-      }
-
       if (Number.isFinite(this.config.thresholdMinor) && Number.isFinite(this.config.thresholdMajor) &&
           this.config.thresholdMajor <= this.config.thresholdMinor) {
         console.warn('[usgs-iv] data-threshold-major should exceed data-threshold-minor.', this.container);
@@ -1457,15 +1430,22 @@
         .concat(qdesnOverlay.extentPoints || [])
         .concat(forecastOverlay.extentPoints || []);
       const extent = getDataExtent(extentCandidates);
-      let yMin = resolveYAxisLimit(this.config, scale, 'min', extent && extent.min);
-      let yMax = resolveYAxisLimit(this.config, scale, 'max', extent && extent.max);
-
-      if (!Number.isFinite(yMin) || !Number.isFinite(yMax) || yMax <= yMin) {
-        yMin = extent ? extent.min : null;
-        yMax = extent ? extent.max : null;
+      const yRange = extent ? [extent.min, extent.max] : null;
+      // Fit all visible traces, including interval boundaries, with Plotly's padding.
+      // Optional configured bounds extend the view; they must never clip the data.
+      const yOptions = {
+        autorange: true,
+        rangemode: this.config.mode === 'discharge'
+          ? (scale === DISCHARGE_SCALE_LINEAR ? 'tozero' : 'nonnegative')
+          : 'normal'
+      };
+      const yAnchors = [
+        resolveYAxisAnchor(this.config, scale, 'min', null),
+        resolveYAxisAnchor(this.config, scale, 'max', null)
+      ].filter(Number.isFinite);
+      if (yAnchors.length) {
+        yOptions.autorangeoptions = { include: yAnchors };
       }
-
-      const yRange = Number.isFinite(yMin) && Number.isFinite(yMax) ? [yMin, yMax] : null;
       const yTitle = this.config.mode === 'discharge'
         ? (scale === DISCHARGE_SCALE_LOG1P
           ? `${this.config.yLabel} (${scaleValueLabel(displayUnits, scale)})`
@@ -1484,7 +1464,7 @@
       Plotly.react(
         this.chartEl,
         traces,
-        buildLayout(yTitle, colors, yRange, allShapes, allAnnotations, xRange),
+        buildLayout(yTitle, colors, yOptions, allShapes, allAnnotations, xRange),
         { responsive: true, displayModeBar: false }
       );
 

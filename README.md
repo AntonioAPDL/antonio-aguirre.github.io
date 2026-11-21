@@ -209,7 +209,7 @@ Stage mode (authoritative NOAA thresholds, exact stage values):
 </div>
 ```
 
-Discharge mode (thresholds must be rating-derived; log axis optional):
+Discharge mode (thresholds must be rating-derived; natural-log transform is the default):
 
 ```html
 <div class="usgs-iv-plot"
@@ -218,9 +218,7 @@ Discharge mode (thresholds must be rating-derived; log axis optional):
      data-period="P30D"
      data-refresh-min="15"
      data-timeout-sec="20"
-     data-log-y="true"
-     data-y-min="10"
-     data-y-max="50000"
+     data-discharge-scale="log1p"
      data-threshold-minor="REPLACE_WITH_CFS"
      data-threshold-moderate="REPLACE_WITH_CFS"
      data-threshold-major="REPLACE_WITH_CFS"
@@ -240,15 +238,65 @@ Supported attributes:
 - `data-timeout-sec` (fetch timeout in seconds)
 - `data-observation-stale-hours` (warning threshold for delayed USGS observations; default `6`)
 - `data-forecast-stale-hours` (warning threshold for delayed forecast-overlay JSON; default `36`)
-- `data-log-y` (`true`/`false` to enable a log-scale y-axis)
+- `data-discharge-scale` (`log1p`, the default, or `linear`; `log1p` plots the natural logarithm of discharge plus one on a linear axis)
 - `data-title` (optional label for accessibility)
 - `data-ylabel` (base Y-axis label; units are appended automatically when available)
-- `data-y-min`, `data-y-max` (optional fixed Y-axis range)
+- `data-y-min`, `data-y-max` (optional raw-unit reference bounds; extend the automatic range without clipping data)
+- `data-y-min-linear`, `data-y-max-linear` (optional original-scale reference bounds, overriding shared bounds)
+- `data-y-min-log1p`, `data-y-max-log1p` (optional already-transformed reference bounds, overriding shared bounds)
 - `data-threshold-minor`, `data-threshold-moderate`, `data-threshold-major` (horizontal threshold lines + shaded regions)
 - `data-forecast-url` (optional forecast overlay JSON; the site uses the `live-data` branch raw URL in production)
 - `data-forecast-fallback-url` (optional bundled JSON fallback if the live-data request fails)
 - `data-qdesn-url` (optional QDESN overlay JSON; currently disabled on the site; omit to keep it off)
 - `data-flood-minor-cfs`, `data-flood-moderate-cfs`, `data-flood-major-cfs` (discharge-only thresholds; optional)
+
+### Automatic vertical scaling
+
+All three demo charts use Plotly's padded autorange over visible traces,
+including observations, forecast lines, and the full displayed uncertainty
+bands. No percentile trimming or hard upper limits are applied. Flow is still
+shown as `log(x + 1)` by default; switching to Original recomputes the range
+from the untransformed data, with zero included. Precipitation also includes
+zero; soil moisture uses a tighter range to preserve differences between depths.
+Climate tick labels use four significant digits rather than fixed decimal
+places, so small variations remain distinguishable. Legends sit above the
+plotting area, including when they wrap on mobile; forecast-start labels sit
+inside the chart to avoid clipping at the right edge. Forecast-start markers
+and label backgrounds follow the light/dark theme.
+
+The former discharge ceilings of 30 cfs and 6 transformed units are removed.
+A fixed transformed range of 2 to 10 corresponds to approximately 6.39 to
+22,025.47 cfs, which can hide low flows and compress modest changes. Dynamic
+scaling is therefore the default. To request that reference window without
+cutting off values outside it, add `data-y-min-log1p="2"` and
+`data-y-max-log1p="10"`; these are soft inclusions, not limits.
+
+Refreshing data, switching scale or theme, and toggling legend groups all use
+automatic ranges. A deliberate manual zoom can still narrow the view;
+double-click the chart to reset it. Autorange covers the full visible traces,
+not just the horizontally zoomed interval, preserving vertical context during
+time-axis exploration. Units, transformations, upstream data, and refresh
+schedules are unchanged.
+
+Regression checks (Node.js 18 or newer):
+
+```bash
+node --test tests/demo_plot_axes.test.cjs
+```
+
+Browser checks exercise the pinned Plotly build, both flow scales, observation
+and forecast extrema, uncertainty bands, dry/constant/missing series, legend
+toggles, and desktop/mobile light/dark layouts:
+
+```bash
+DEMO_BASE_URL=http://127.0.0.1:4012 \
+  node tests/browser/demo_plot_axes.cjs
+```
+
+The browser check requires Playwright and Chromium. `PLAYWRIGHT_MODULE`,
+`CHROMIUM_PATH`, and `DEMO_QA_DIR` optionally select the installed module,
+browser executable, and screenshot directory. Screenshots default to a
+temporary directory, not a public asset path.
 
 ### Forecast overlay (NWS/NWM)
 

@@ -50,6 +50,9 @@ jobs:
             node --check "$file"
           done
 
+      - name: Run demo axis regression tests
+        run: node --test tests/demo_plot_axes.test.cjs
+
       - name: Build Jekyll site
         env:
           JEKYLL_ENV: production

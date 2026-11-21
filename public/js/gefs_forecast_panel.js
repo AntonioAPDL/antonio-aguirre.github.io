@@ -7,14 +7,13 @@
     margin: { l: 60, r: 20, t: 24, b: 52 },
     legend: {
       orientation: 'h',
-      y: 1.18,
+      y: 1.02,
       x: 0,
       xanchor: 'left',
       fontSize: 11
     }
   };
   const FORECAST_START_MARKER_STYLE = {
-    color: '#111827',
     width: 1.4,
     dash: 'dash',
     label: 'Forecast start'
@@ -486,7 +485,7 @@
     };
   }
 
-  function buildForecastStartMarker(initTime) {
+  function buildForecastStartMarker(initTime, colors) {
     if (!initTime) return { shapes: [], annotations: [] };
     return {
       shapes: [
@@ -499,7 +498,7 @@
           y0: 0,
           y1: 1,
           line: {
-            color: FORECAST_START_MARKER_STYLE.color,
+            color: colors.text,
             width: FORECAST_START_MARKER_STYLE.width,
             dash: FORECAST_START_MARKER_STYLE.dash
           }
@@ -513,10 +512,12 @@
           y: 1,
           text: FORECAST_START_MARKER_STYLE.label,
           showarrow: false,
-          font: { size: 11, color: FORECAST_START_MARKER_STYLE.color },
-          xanchor: 'left',
-          yanchor: 'bottom',
-          bgcolor: 'rgba(255, 255, 255, 0.6)',
+          font: { size: 11, color: colors.text },
+          xanchor: 'right',
+          yanchor: 'top',
+          xshift: -4,
+          yshift: -4,
+          bgcolor: colors.surface,
           bordercolor: 'rgba(255, 255, 255, 0.0)',
           borderpad: 2
         }
@@ -558,11 +559,13 @@
         showline: true,
         linecolor: colors.grid,
         automargin: true,
+        autorange: true,
         rangemode: opts.yRangeMode || 'normal'
       },
       legend: {
         orientation: PLOT_LAYOUT_STYLE.legend.orientation,
         y: opts.legendY === undefined ? PLOT_LAYOUT_STYLE.legend.y : opts.legendY,
+        yanchor: 'bottom',
         x: PLOT_LAYOUT_STYLE.legend.x,
         xanchor: PLOT_LAYOUT_STYLE.legend.xanchor,
         font: { size: PLOT_LAYOUT_STYLE.legend.fontSize, color: colors.text },
@@ -578,7 +581,7 @@
       chartLayout.yaxis.tickformat = opts.yTickFormat;
     }
     if (opts.initTime) {
-      const marker = buildForecastStartMarker(opts.initTime);
+      const marker = buildForecastStartMarker(opts.initTime, colors);
       chartLayout.shapes = marker.shapes;
       chartLayout.annotations = marker.annotations;
     }
@@ -835,7 +838,7 @@
       layout(hasDailyForecastSupport ? 'Precipitation (24h mm)' : 'Precipitation (mm)', colors, {
         xRange,
         initTime: initDate,
-        yTickFormat: '.1f',
+        yTickFormat: '.4~g',
         yRangeMode: 'tozero',
         showZeroLine: true
       }),
@@ -964,7 +967,7 @@
       layout(soilHasDailyMeanSupport ? 'Soil moisture (24h mean m3/m3)' : 'Soil moisture (m3/m3)', colors, {
         xRange,
         initTime: initDate,
-        yTickFormat: '.2f',
+        yTickFormat: '.4~g',
         showZeroLine: false
       }),
       { responsive: true, displayModeBar: false }
